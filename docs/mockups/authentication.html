@@ -1,0 +1,1499 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Diabetes Diary — Authentication UX Prototype</title>
+  <style>
+    :root {
+      --canvas: #eef0f4;
+      --canvas-grid: rgba(17, 24, 39, 0.035);
+      --bg: #f9fafb;
+      --card: #ffffff;
+      --header: rgba(255, 255, 255, 0.96);
+      --text: #111827;
+      --muted: #6b7280;
+      --muted-2: #9ca3af;
+      --border: #e5e7eb;
+      --input: #f3f4f6;
+      --input-focus: #ffffff;
+      --primary: #ea580c;
+      --primary-hover: #c2410c;
+      --primary-soft: #fff7ed;
+      --primary-border: #fed7aa;
+      --primary-text: #9a3412;
+      --success: #15803d;
+      --success-soft: #ecfdf5;
+      --success-border: #bbf7d0;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --danger-border: #fecaca;
+      --shadow: 0 18px 55px rgba(17, 24, 39, 0.13);
+      --shadow-soft: 0 8px 24px rgba(17, 24, 39, 0.08);
+      --phone-frame: #171717;
+      --radius: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --phone-width: 390px;
+    }
+
+    html[data-theme="dark"] {
+      --canvas: #07081c;
+      --canvas-grid: rgba(255, 255, 255, 0.045);
+      --bg: #0a092b;
+      --card: #191932;
+      --header: rgba(25, 25, 50, 0.96);
+      --text: #f5f7fa;
+      --muted: #959bb2;
+      --muted-2: #6f7693;
+      --border: #303854;
+      --input: #20203e;
+      --input-focus: #191932;
+      --primary: #f97316;
+      --primary-hover: #ea580c;
+      --primary-soft: rgba(234, 88, 12, 0.14);
+      --primary-border: rgba(249, 115, 22, 0.4);
+      --primary-text: #fdba74;
+      --success: #22c55e;
+      --success-soft: rgba(22, 163, 74, 0.14);
+      --success-border: rgba(34, 197, 94, 0.4);
+      --danger: #ef4444;
+      --danger-soft: rgba(220, 38, 38, 0.14);
+      --danger-border: rgba(239, 68, 68, 0.4);
+      --shadow: 0 20px 65px rgba(0, 0, 0, 0.46);
+      --shadow-soft: 0 10px 28px rgba(0, 0, 0, 0.28);
+      --phone-frame: #02030b;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(234, 88, 12, 0.1), transparent 28rem),
+        radial-gradient(circle at 90% 30%, rgba(59, 130, 246, 0.07), transparent 30rem),
+        var(--canvas);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+      transition: background-color 180ms ease, color 180ms ease;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; }
+
+    .prototype-shell {
+      width: min(1320px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .prototype-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 18px;
+    }
+
+    .prototype-title {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 36px);
+      line-height: 1.15;
+      letter-spacing: -0.035em;
+    }
+
+    .prototype-lead {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .prototype-badge {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1px solid var(--primary-border);
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary-text);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .prototype-badge::before {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      content: "";
+      box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.12);
+    }
+
+    .control-deck {
+      position: sticky;
+      z-index: 50;
+      top: 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(235px, 0.72fr) minmax(180px, 0.5fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .control-panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: color-mix(in srgb, var(--card) 92%, transparent);
+      box-shadow: var(--shadow-soft);
+      padding: 14px;
+      backdrop-filter: blur(18px);
+    }
+
+    .control-panel__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .control-panel__title {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: 0.01em;
+    }
+
+    .segmented {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .segment {
+      min-height: 37px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--card);
+      color: var(--text);
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 750;
+      transition: 150ms ease;
+    }
+
+    .segment:hover { border-color: var(--primary-border); background: var(--primary-soft); }
+
+    .segment.is-active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 7px 18px rgba(234, 88, 12, 0.21);
+    }
+
+    .stage {
+      min-height: 800px;
+      display: grid;
+      place-items: start center;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(color-mix(in srgb, var(--card) 54%, transparent), color-mix(in srgb, var(--card) 54%, transparent)),
+        repeating-linear-gradient(0deg, transparent, transparent 31px, var(--canvas-grid) 32px),
+        repeating-linear-gradient(90deg, transparent, transparent 31px, var(--canvas-grid) 32px);
+      padding: 30px 18px 42px;
+      overflow: hidden;
+    }
+
+    .phone {
+      width: min(var(--phone-width), 100%);
+      min-height: 760px;
+      position: relative;
+      overflow: hidden;
+      border: 10px solid var(--phone-frame);
+      border-radius: 42px;
+      background: var(--bg);
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255, 255, 255, 0.16) inset;
+    }
+
+    .phone::before {
+      position: absolute;
+      z-index: 20;
+      top: 8px;
+      left: 50%;
+      width: 104px;
+      height: 26px;
+      border-radius: 999px;
+      background: var(--phone-frame);
+      content: "";
+      transform: translateX(-50%);
+    }
+
+    .phone__screen {
+      min-height: 740px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    .status-bar {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 18px 0;
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .status-icons { display: flex; align-items: center; gap: 5px; }
+    .signal { display: flex; align-items: flex-end; gap: 1px; height: 10px; }
+    .signal span { width: 2px; border-radius: 2px; background: currentColor; }
+    .signal span:nth-child(1) { height: 4px; }
+    .signal span:nth-child(2) { height: 6px; }
+    .signal span:nth-child(3) { height: 8px; }
+    .signal span:nth-child(4) { height: 10px; }
+
+    .battery {
+      width: 18px;
+      height: 9px;
+      position: relative;
+      border: 1.5px solid currentColor;
+      border-radius: 3px;
+    }
+
+    .battery::before {
+      position: absolute;
+      inset: 1.5px;
+      border-radius: 1px;
+      background: currentColor;
+      content: "";
+    }
+
+    .battery::after {
+      position: absolute;
+      top: 2px;
+      right: -3px;
+      width: 2px;
+      height: 4px;
+      border-radius: 0 2px 2px 0;
+      background: currentColor;
+      content: "";
+    }
+
+    .app-viewport {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 702px;
+    }
+
+    .auth-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 18px 22px 26px;
+      animation: screen-in 210ms ease;
+    }
+
+    @keyframes screen-in {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin: 10px 0 18px;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      border-radius: 21px;
+      background: linear-gradient(145deg, #fb923c, #ea580c);
+      box-shadow: 0 14px 30px rgba(234, 88, 12, 0.25);
+    }
+
+    .logo svg { width: 39px; height: 39px; }
+
+    .brand-name {
+      margin: 11px 0 0;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .screen-heading { margin-bottom: 17px; }
+
+    .screen-title {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.2;
+      letter-spacing: -0.035em;
+    }
+
+    .screen-copy {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .form-stack { display: grid; gap: 13px; }
+    .field { display: grid; gap: 6px; }
+
+    .field__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .label { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .input-wrap { position: relative; }
+
+    .input {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      outline: none;
+      background: var(--input);
+      color: var(--text);
+      padding: 0 14px;
+      font-size: 14px;
+      transition: 150ms ease;
+    }
+
+    .input::placeholder { color: var(--muted-2); }
+    .input:hover { border-color: var(--muted-2); }
+
+    .input:focus {
+      border-color: var(--primary);
+      background: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.13);
+    }
+
+    .input.has-trailing { padding-right: 48px; }
+
+    .input.is-invalid {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .icon-control {
+      width: 38px;
+      height: 38px;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .icon-control:hover { background: var(--border); color: var(--text); }
+    .icon-control svg { width: 18px; height: 18px; }
+
+    .field-error { color: var(--danger); font-size: 11px; font-weight: 650; }
+
+    .inline-link {
+      border: 0;
+      background: transparent;
+      color: var(--primary);
+      padding: 0;
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .inline-link:hover { color: var(--primary-hover); text-decoration: underline; }
+
+    .button {
+      width: 100%;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border: 1px solid transparent;
+      border-radius: 13px;
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: 800;
+      transition: 150ms ease;
+    }
+
+    .button svg { width: 18px; height: 18px; }
+
+    .button--primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 10px 20px rgba(234, 88, 12, 0.18);
+    }
+
+    .button--primary:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-1px); }
+
+    .button--secondary {
+      border-color: var(--border);
+      background: var(--card);
+      color: var(--text);
+    }
+
+    .button--secondary:hover:not(:disabled) { border-color: var(--muted-2); background: var(--input); }
+    .button--ghost { background: transparent; color: var(--text); }
+    .button--ghost:hover:not(:disabled) { background: var(--input); }
+    .button--danger-ghost { background: transparent; color: var(--danger); }
+    .button--danger-ghost:hover:not(:disabled) { background: var(--danger-soft); }
+    .button:disabled { opacity: 0.58; }
+
+    .spinner {
+      width: 17px;
+      height: 17px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spin 650ms linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .divider {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      margin: 3px 0;
+      color: var(--muted-2);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+    }
+
+    .divider::before, .divider::after { height: 1px; background: var(--border); content: ""; }
+
+    .google-mark {
+      width: 20px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: conic-gradient(from -45deg, #4285f4 0 25%, #34a853 0 50%, #fbbc05 0 75%, #ea4335 0);
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
+      box-shadow: 0 0 0 3px #fff inset;
+    }
+
+    .auth-footer {
+      margin-top: auto;
+      padding-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      border: 1px solid;
+      border-radius: 13px;
+      padding: 11px 12px;
+      font-size: 12px;
+    }
+
+    .message svg { width: 18px; height: 18px; flex: 0 0 auto; margin-top: 1px; }
+    .message p { margin: 0; }
+    .message strong { display: block; margin-bottom: 2px; }
+    .message--error { border-color: var(--danger-border); background: var(--danger-soft); color: var(--danger); }
+    .message--success { border-color: var(--success-border); background: var(--success-soft); color: var(--success); }
+    .message--info { border-color: var(--primary-border); background: var(--primary-soft); color: var(--primary-text); }
+
+    .verify-illustration {
+      width: 118px;
+      height: 98px;
+      position: relative;
+      margin: 10px auto 19px;
+    }
+
+    .envelope {
+      width: 104px;
+      height: 70px;
+      position: absolute;
+      left: 7px;
+      bottom: 0;
+      overflow: hidden;
+      border: 2px solid var(--primary-border);
+      border-radius: 18px;
+      background: var(--primary-soft);
+      box-shadow: 0 16px 30px rgba(234, 88, 12, 0.14);
+    }
+
+    .envelope::before {
+      position: absolute;
+      top: -18px;
+      left: 14px;
+      width: 70px;
+      height: 70px;
+      border: 2px solid var(--primary-border);
+      background: color-mix(in srgb, var(--primary-soft) 70%, var(--card));
+      content: "";
+      transform: rotate(45deg);
+    }
+
+    .envelope::after {
+      position: absolute;
+      right: 10px;
+      bottom: 9px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 0 5px var(--primary-soft);
+      content: "";
+    }
+
+    .check-badge {
+      width: 36px;
+      height: 36px;
+      position: absolute;
+      z-index: 3;
+      top: 0;
+      right: 2px;
+      display: grid;
+      place-items: center;
+      border: 5px solid var(--bg);
+      border-radius: 50%;
+      background: var(--success);
+      color: white;
+    }
+
+    .check-badge svg { width: 18px; height: 18px; }
+
+    .email-chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin: 11px 0 18px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .email-chip svg { width: 16px; height: 16px; color: var(--primary); }
+    .verification-actions { display: grid; gap: 9px; }
+
+    .app-shell {
+      flex: 1;
+      min-height: 702px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      animation: screen-in 210ms ease;
+    }
+
+    .app-header {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--header);
+      padding: 0 14px 0 18px;
+    }
+
+    .app-header__left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
+    .app-header__title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.025em;
+    }
+
+    .menu-button, .back-button {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text);
+    }
+
+    .menu-button { font-size: 23px; line-height: 1; }
+    .menu-button:hover, .back-button:hover { background: var(--input); }
+    .back-button svg { width: 20px; height: 20px; }
+
+    .app-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px;
+    }
+
+    .state-card {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--card);
+      box-shadow: 0 8px 20px rgba(17, 24, 39, 0.05);
+      padding: 18px;
+    }
+
+    .state-card + .state-card { margin-top: 12px; }
+
+    .state-icon {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 17px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+
+    .state-icon svg { width: 26px; height: 26px; }
+    .state-title { margin: 0; font-size: 19px; letter-spacing: -0.02em; }
+    .state-copy { margin: 7px 0 0; color: var(--muted); font-size: 13px; }
+    .state-actions { display: grid; gap: 9px; margin-top: 16px; }
+
+    .data-list {
+      display: grid;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+      overflow: hidden;
+    }
+
+    .data-row {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 12px;
+      padding: 14px;
+      font-size: 13px;
+    }
+
+    .data-row + .data-row { border-top: 1px solid var(--border); }
+    .data-label { color: var(--muted); }
+    .data-value { font-weight: 750; overflow-wrap: anywhere; }
+
+    .role-pill {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary-text);
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .profile-actions { display: grid; gap: 9px; margin-top: 14px; }
+
+    .utility-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .mini-action {
+      width: auto;
+      min-height: 38px;
+      border: 1px solid var(--primary-border);
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary-text);
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: none;
+    }
+
+    .mini-action:hover { transform: translateY(-1px); border-color: var(--primary); }
+    .mini-action svg { width: 15px; height: 15px; }
+
+    .bottom-tabs {
+      min-height: 68px;
+      display: grid;
+      border-top: 1px solid var(--border);
+      background: var(--header);
+      padding: 7px 8px 9px;
+    }
+
+    .bottom-tabs.cols-1 { grid-template-columns: 1fr; }
+    .bottom-tabs.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .bottom-tabs.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+    .tab-button {
+      display: grid;
+      place-items: center;
+      gap: 3px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--muted);
+      padding: 4px;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .tab-button svg { width: 21px; height: 21px; }
+    .tab-button:not(:disabled):hover { background: var(--input); }
+    .tab-button.is-active { color: var(--primary); }
+    .tab-button:disabled { opacity: 0.58; }
+
+    .toast {
+      position: fixed;
+      z-index: 100;
+      right: 22px;
+      bottom: 22px;
+      max-width: min(360px, calc(100vw - 44px));
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: var(--text);
+      color: var(--bg);
+      box-shadow: var(--shadow);
+      padding: 12px 14px;
+      font-size: 12px;
+      transform: translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 190ms ease;
+    }
+
+    .toast.is-visible { transform: translateY(0); opacity: 1; }
+    .toast svg { width: 17px; height: 17px; flex: 0 0 auto; }
+
+    @media (max-width: 980px) {
+      .control-deck { position: static; grid-template-columns: 1fr; }
+      .stage { min-height: auto; }
+    }
+
+    @media (max-width: 640px) {
+      .prototype-shell { padding: 14px; }
+      .prototype-header { display: block; }
+      .prototype-badge { margin-top: 12px; }
+      .control-panel { border-radius: 18px; }
+      .segment { flex: 1 1 auto; }
+      .stage { border: 0; border-radius: 24px; padding: 14px 0 24px; background: transparent; }
+      .phone { width: 100%; min-height: 720px; border-width: 6px; border-radius: 34px; }
+      .phone__screen, .app-shell { min-height: 708px; }
+      .toast { right: 14px; bottom: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="prototype-shell">
+    <header class="prototype-header">
+      <div>
+        <h1 class="prototype-title">Authentication prototype</h1>
+        <p class="prototype-lead">Test states, roles, and themes.</p>
+      </div>
+      <div class="prototype-badge">UX prototype</div>
+    </header>
+
+    <section class="control-deck" aria-label="Prototype controls">
+      <div class="control-panel">
+        <div class="control-panel__head">
+          <h2 class="control-panel__title">Screen</h2>
+        </div>
+        <div class="segmented" id="screen-controls">
+          <button class="segment is-active" type="button" data-screen="sign-in">Sign in</button>
+          <button class="segment" type="button" data-screen="registration">Register</button>
+          <button class="segment" type="button" data-screen="reset">Reset password</button>
+          <button class="segment" type="button" data-screen="verification">Verify email</button>
+          <button class="segment" type="button" data-screen="access">Access</button>
+          <button class="segment" type="button" data-screen="profile">Profile</button>
+          <button class="segment" type="button" data-screen="change-email">Change email</button>
+          <button class="segment" type="button" data-screen="change-password">Change password</button>
+        </div>
+      </div>
+
+      <div class="control-panel">
+        <div class="control-panel__head">
+          <h2 class="control-panel__title">Role</h2>
+        </div>
+        <div class="segmented" id="role-controls">
+          <button class="segment is-active" type="button" data-role="null">No role</button>
+          <button class="segment" type="button" data-role="user">User</button>
+          <button class="segment" type="button" data-role="follower">Follower</button>
+        </div>
+      </div>
+
+      <div class="control-panel">
+        <div class="control-panel__head">
+          <h2 class="control-panel__title">Theme</h2>
+        </div>
+        <div class="segmented" id="theme-controls">
+          <button class="segment is-active" type="button" data-theme-value="light">Light</button>
+          <button class="segment" type="button" data-theme-value="dark">Dark</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage">
+      <div class="phone" aria-label="Mobile application screen">
+        <div class="phone__screen">
+          <div class="status-bar" aria-hidden="true">
+            <span>09:41</span>
+            <span class="status-icons">
+              <span class="signal"><span></span><span></span><span></span><span></span></span>
+              <span>5G</span>
+              <span class="battery"></span>
+            </span>
+          </div>
+          <div class="app-viewport" id="app-viewport"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const icons = {
+      eye: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>`,
+      eyeOff: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 3 18 18"/><path d="M10.6 6.2A11.7 11.7 0 0 1 12 6c6.5 0 10 6 10 6a17.8 17.8 0 0 1-2.1 2.8M6.2 6.2C3.5 8 2 12 2 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>`,
+      info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>`,
+      check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>`,
+      mail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>`,
+      lock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>`,
+      clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`,
+      diary: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H7a2 2 0 0 1-2-2V4Z"/><path d="M5 17h11M9 8h6M9 12h6"/></svg>`,
+      cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 18h11a4 4 0 0 0 .5-8A6 6 0 0 0 7.3 8.2 4.5 4.5 0 0 0 7 18Z"/></svg>`,
+      profile: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>`,
+      pending: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`,
+      download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 19h16"/></svg>`,
+      edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m4 20 4.2-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/><path d="m13.8 7.2 3 3"/></svg>`,
+      arrowLeft: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>`,
+      dots: `<span aria-hidden="true">⋮</span>`
+    };
+
+    const state = {
+      screen: 'sign-in',
+      role: 'null',
+      theme: 'light',
+      verificationSent: false,
+      activeTab: 'pending',
+      profile: {
+        nickname: 'Andrei',
+        email: 'andrei@example.com'
+      },
+      busy: false,
+      toastTimer: null
+    };
+
+    const roleMeta = {
+      null: {
+        label: 'No role',
+        display: 'Access not granted',
+        initialTab: 'pending',
+        tabs: [
+          { id: 'pending', label: 'Pending', icon: icons.pending, enabled: true },
+          { id: 'profile', label: 'Profile', icon: icons.profile, enabled: true }
+        ]
+      },
+      user: {
+        label: 'User',
+        display: 'User',
+        initialTab: 'profile',
+        tabs: [
+          { id: 'diary', label: 'Diary', icon: icons.diary, enabled: false },
+          { id: 'cloud', label: 'Cloud', icon: icons.cloud, enabled: false },
+          { id: 'profile', label: 'Profile', icon: icons.profile, enabled: true }
+        ]
+      },
+      follower: {
+        label: 'Follower',
+        display: 'Follower',
+        initialTab: 'profile',
+        tabs: [
+          { id: 'diary', label: 'Diary', icon: icons.diary, enabled: false },
+          { id: 'profile', label: 'Profile', icon: icons.profile, enabled: true }
+        ]
+      }
+    };
+
+    const viewport = document.getElementById('app-viewport');
+    const toast = document.getElementById('toast');
+
+    function logoMarkup() {
+      return `
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M24 4C18 13 11 20 11 29a13 13 0 0 0 26 0C37 20 30 13 24 4Z" fill="white" fill-opacity=".96"/>
+            <path d="M18 29h4l2-5 3 10 2-5h4" stroke="#EA580C" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>`;
+    }
+
+    function authBrand() {
+      return `<div class="auth-brand">${logoMarkup()}<div class="brand-name">Diabetes Diary</div></div>`;
+    }
+
+    function message(type, title, text = '') {
+      return `<div class="message message--${type}" role="status">${type === 'success' ? icons.check : icons.info}<p><strong>${title}</strong>${text}</p></div>`;
+    }
+
+    function passwordField(id, label, autocomplete, placeholder = 'At least 6 characters') {
+      return `
+        <label class="field">
+          <span class="label">${label}</span>
+          <span class="input-wrap">
+            <input class="input has-trailing" id="${id}" name="${id}" type="password" autocomplete="${autocomplete}" placeholder="${placeholder}" />
+            <button class="icon-control" type="button" data-action="toggle-password" data-target="${id}" aria-label="Show password">${icons.eye}</button>
+          </span>
+          <span class="field-error" data-error-for="${id}"></span>
+        </label>`;
+    }
+
+    function signInTemplate() {
+      return `
+        <section class="auth-page">
+          ${authBrand()}
+          <div class="screen-heading"><h2 class="screen-title">Sign in</h2></div>
+          <form class="form-stack" id="sign-in-form" novalidate>
+            <label class="field">
+              <span class="label">Email</span>
+              <input class="input" id="sign-in-email" name="email" type="email" autocomplete="email" placeholder="name@example.com" value="${escapeHtml(state.profile.email)}" />
+              <span class="field-error" data-error-for="sign-in-email"></span>
+            </label>
+            <div class="field">
+              <div class="field__head">
+                <label class="label" for="sign-in-password">Password</label>
+                <button class="inline-link" type="button" data-action="go" data-screen="reset">Forgot password?</button>
+              </div>
+              <div class="input-wrap">
+                <input class="input has-trailing" id="sign-in-password" name="password" type="password" autocomplete="current-password" placeholder="Password" value="123456" />
+                <button class="icon-control" type="button" data-action="toggle-password" data-target="sign-in-password" aria-label="Show password">${icons.eye}</button>
+              </div>
+              <span class="field-error" data-error-for="sign-in-password"></span>
+            </div>
+            <button class="button button--primary" type="submit">Sign in</button>
+            <div class="divider">or</div>
+            <button class="button button--secondary" type="button" data-action="google-sign-in"><span class="google-mark">G</span>Sign in with Google</button>
+          </form>
+          <div class="auth-footer">No account? <button class="inline-link" type="button" data-action="go" data-screen="registration">Register</button></div>
+        </section>`;
+    }
+
+    function registrationTemplate() {
+      return `
+        <section class="auth-page">
+          ${authBrand()}
+          <div class="screen-heading"><h2 class="screen-title">Registration</h2></div>
+          <form class="form-stack" id="registration-form" novalidate>
+            <label class="field">
+              <span class="label">Nickname</span>
+              <input class="input" id="registration-nickname" name="nickname" type="text" maxlength="255" placeholder="Nickname" value="${escapeHtml(state.profile.nickname)}" />
+              <span class="field-error" data-error-for="registration-nickname"></span>
+            </label>
+            <label class="field">
+              <span class="label">Email</span>
+              <input class="input" id="registration-email" name="email" type="email" autocomplete="email" placeholder="name@example.com" value="${escapeHtml(state.profile.email)}" />
+              <span class="field-error" data-error-for="registration-email"></span>
+            </label>
+            ${passwordField('registration-password', 'Password', 'new-password')}
+            ${passwordField('registration-repeat', 'Repeat password', 'new-password')}
+            <button class="button button--primary" type="submit">Register</button>
+          </form>
+          <div class="auth-footer">Already registered? <button class="inline-link" type="button" data-action="go" data-screen="sign-in">Sign in</button></div>
+        </section>`;
+    }
+
+    function resetTemplate() {
+      return `
+        <section class="auth-page">
+          ${authBrand()}
+          <div class="screen-heading">
+            <h2 class="screen-title">Reset password</h2>
+            <p class="screen-copy">Enter your account email.</p>
+          </div>
+          <form class="form-stack" id="reset-form" novalidate>
+            <label class="field">
+              <span class="label">Email</span>
+              <input class="input" id="reset-email" name="email" type="email" autocomplete="email" placeholder="name@example.com" value="${escapeHtml(state.profile.email)}" />
+              <span class="field-error" data-error-for="reset-email"></span>
+            </label>
+            <div id="reset-general"></div>
+            <button class="button button--primary" type="submit">Send link</button>
+            <button class="button button--ghost" type="button" data-action="go" data-screen="sign-in">Back to sign in</button>
+          </form>
+        </section>`;
+    }
+
+    function verificationTemplate() {
+      const sent = state.verificationSent;
+      return `
+        <section class="auth-page">
+          <div class="verify-illustration" aria-hidden="true">
+            <div class="envelope"></div>
+            ${sent ? `<div class="check-badge">${icons.check}</div>` : ''}
+          </div>
+          <div class="screen-heading" style="text-align:center">
+            <h2 class="screen-title">Verify email</h2>
+            <p class="screen-copy">${sent ? 'Open the link in your email.' : 'Verification is required.'}</p>
+          </div>
+          <div class="email-chip">${icons.mail}<span>${escapeHtml(state.profile.email)}</span></div>
+          <div class="form-stack">
+            ${sent ? message('success', 'Verification email sent') : ''}
+            <div class="verification-actions">
+              ${sent
+                ? `<button class="button button--primary" type="button" data-action="check-verification">Check verification</button>
+                   <button class="button button--secondary" type="button" data-action="send-verification">Send again</button>`
+                : `<button class="button button--primary" type="button" data-action="send-verification">Send verification link</button>`}
+              <button class="button button--danger-ghost" type="button" data-action="sign-out">Sign out</button>
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function appHeader(title, backScreen = null) {
+      return `
+        <header class="app-header">
+          <div class="app-header__left">
+            ${backScreen ? `<button class="back-button" type="button" data-action="go" data-screen="${backScreen}" aria-label="Back">${icons.arrowLeft}</button>` : ''}
+            <h2 class="app-header__title">${title}</h2>
+          </div>
+          ${backScreen ? '<span></span>' : `<button class="menu-button" type="button" aria-label="Menu">${icons.dots}</button>`}
+        </header>`;
+    }
+
+    function accessTemplate() {
+      if (state.role === 'null') {
+        state.activeTab = 'pending';
+        return tabShell('Access pending', pendingContent());
+      }
+
+      const role = roleMeta[state.role].display;
+      return `
+        <section class="app-shell">
+          ${appHeader('Access')}
+          <div class="app-content">
+            <div class="state-card">
+              <div class="state-icon">${icons.check}</div>
+              <h3 class="state-title">Access granted</h3>
+              <p class="state-copy">Role: ${role}</p>
+              <div class="state-actions">
+                <button class="button button--primary" type="button" data-action="go" data-screen="profile">Open profile</button>
+              </div>
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function pendingContent() {
+      return `
+        <div class="state-card">
+          <div class="state-icon">${icons.clock}</div>
+          <h3 class="state-title">Access pending</h3>
+          <p class="state-copy">A role has not been assigned yet.</p>
+        </div>`;
+    }
+
+    function profileContent() {
+      const meta = roleMeta[state.role];
+      return `
+        <div class="data-list">
+          <div class="data-row"><span class="data-label">Nickname</span><span class="data-value">${escapeHtml(state.profile.nickname)}</span></div>
+          <div class="data-row"><span class="data-label">Email</span><span class="data-value">${escapeHtml(state.profile.email)}</span></div>
+          <div class="data-row"><span class="data-label">Role</span><span class="data-value"><span class="role-pill">${meta.display}</span></span></div>
+        </div>
+        <div class="profile-actions">
+          <button class="button button--secondary" type="button" data-action="go" data-screen="change-email">${icons.edit}Change email</button>
+          <button class="button button--secondary" type="button" data-action="go" data-screen="change-password">${icons.lock}Change password</button>
+        </div>
+        ${state.role === 'user' ? `<div class="utility-row"><button class="button mini-action" type="button" data-action="import-export">${icons.download}Import & export</button></div>` : ''}
+        <div class="profile-actions">
+          <button class="button button--danger-ghost" type="button" data-action="sign-out">Sign out</button>
+        </div>`;
+    }
+
+    function tabsForRole() {
+      return roleMeta[state.role].tabs;
+    }
+
+    function tabShell(title, content) {
+      const tabs = tabsForRole();
+      return `
+        <section class="app-shell">
+          ${appHeader(title)}
+          <div class="app-content">${content}</div>
+          <nav class="bottom-tabs cols-${tabs.length}" aria-label="Main tabs">
+            ${tabs.map(tab => `
+              <button class="tab-button ${tab.id === state.activeTab ? 'is-active' : ''}" type="button"
+                ${tab.enabled ? `data-action="tab" data-tab="${tab.id}"` : 'disabled aria-disabled="true"'}>
+                ${tab.icon}<span>${tab.label}</span>
+              </button>`).join('')}
+          </nav>
+        </section>`;
+    }
+
+    function profileTemplate() {
+      state.activeTab = 'profile';
+      return tabShell('Profile', profileContent());
+    }
+
+    function changeEmailTemplate() {
+      return `
+        <section class="app-shell">
+          ${appHeader('Change email', 'profile')}
+          <div class="app-content">
+            <form class="form-stack" id="change-email-form" novalidate>
+              <label class="field">
+                <span class="label">New email</span>
+                <input class="input" id="new-email" name="newEmail" type="email" autocomplete="email" placeholder="name@example.com" />
+                <span class="field-error" data-error-for="new-email"></span>
+              </label>
+              ${passwordField('email-current-password', 'Current password', 'current-password', 'Current password')}
+              <p class="screen-copy">The new address must be verified.</p>
+              <button class="button button--primary" type="submit">Change email</button>
+              <button class="button button--ghost" type="button" data-action="go" data-screen="profile">Cancel</button>
+            </form>
+          </div>
+        </section>`;
+    }
+
+    function changePasswordTemplate() {
+      return `
+        <section class="app-shell">
+          ${appHeader('Change password', 'profile')}
+          <div class="app-content">
+            <form class="form-stack" id="change-password-form" novalidate>
+              ${passwordField('password-current', 'Current password', 'current-password', 'Current password')}
+              ${passwordField('password-new', 'New password', 'new-password')}
+              ${passwordField('password-repeat', 'Repeat new password', 'new-password')}
+              <button class="button button--primary" type="submit">Save password</button>
+              <button class="button button--ghost" type="button" data-action="go" data-screen="profile">Cancel</button>
+            </form>
+          </div>
+        </section>`;
+    }
+
+    function setScreen(screen) {
+      state.screen = screen;
+      if (screen === 'access') state.activeTab = roleMeta[state.role].initialTab;
+      if (screen === 'profile') state.activeTab = 'profile';
+      render();
+    }
+
+    function setRole(role) {
+      state.role = role;
+      state.activeTab = roleMeta[role].initialTab;
+      render();
+      showToast(`Role: ${roleMeta[role].label}`);
+    }
+
+    function setTheme(theme) {
+      state.theme = theme;
+      document.documentElement.dataset.theme = theme;
+      renderControls();
+    }
+
+    function render() {
+      renderControls();
+      if (state.screen === 'sign-in') viewport.innerHTML = signInTemplate();
+      if (state.screen === 'registration') viewport.innerHTML = registrationTemplate();
+      if (state.screen === 'reset') viewport.innerHTML = resetTemplate();
+      if (state.screen === 'verification') viewport.innerHTML = verificationTemplate();
+      if (state.screen === 'access') viewport.innerHTML = accessTemplate();
+      if (state.screen === 'profile') viewport.innerHTML = profileTemplate();
+      if (state.screen === 'change-email') viewport.innerHTML = changeEmailTemplate();
+      if (state.screen === 'change-password') viewport.innerHTML = changePasswordTemplate();
+    }
+
+    function renderControls() {
+      document.querySelectorAll('#screen-controls [data-screen]').forEach(button => {
+        button.classList.toggle('is-active', button.dataset.screen === state.screen);
+      });
+      document.querySelectorAll('#role-controls [data-role]').forEach(button => {
+        button.classList.toggle('is-active', button.dataset.role === state.role);
+      });
+      document.querySelectorAll('#theme-controls [data-theme-value]').forEach(button => {
+        button.classList.toggle('is-active', button.dataset.themeValue === state.theme);
+      });
+    }
+
+    function clearErrors(form) {
+      form.querySelectorAll('.input').forEach(input => input.classList.remove('is-invalid'));
+      form.querySelectorAll('[data-error-for]').forEach(error => { error.textContent = ''; });
+    }
+
+    function setFieldError(form, id, text) {
+      const input = form.querySelector(`#${CSS.escape(id)}`);
+      const error = form.querySelector(`[data-error-for="${id}"]`);
+      if (input) input.classList.add('is-invalid');
+      if (error) error.textContent = text;
+    }
+
+    function isValidEmail(value) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    }
+
+    function setButtonBusy(button, busy, label) {
+      if (!button) return;
+      button.disabled = busy;
+      if (busy) {
+        button.dataset.original = button.innerHTML;
+        button.innerHTML = `<span class="spinner"></span>${label}`;
+      } else if (button.dataset.original) {
+        button.innerHTML = button.dataset.original;
+        delete button.dataset.original;
+      }
+    }
+
+    function simulate(button, label, callback, delay = 650) {
+      if (state.busy) return;
+      state.busy = true;
+      setButtonBusy(button, true, label);
+      window.setTimeout(() => {
+        state.busy = false;
+        callback();
+      }, delay);
+    }
+
+    function routeAfterAuthentication() {
+      state.activeTab = roleMeta[state.role].initialTab;
+      setScreen('access');
+      showToast('Signed in');
+    }
+
+    function showToast(text) {
+      window.clearTimeout(state.toastTimer);
+      toast.innerHTML = `${icons.check}<span>${escapeHtml(text)}</span>`;
+      toast.classList.add('is-visible');
+      state.toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 2400);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    document.addEventListener('click', event => {
+      const button = event.target.closest('button');
+      if (!button) return;
+
+      if (button.closest('#screen-controls') && button.dataset.screen) {
+        setScreen(button.dataset.screen);
+        return;
+      }
+
+      if (button.closest('#role-controls') && button.dataset.role) {
+        setRole(button.dataset.role);
+        return;
+      }
+
+      if (button.closest('#theme-controls') && button.dataset.themeValue) {
+        setTheme(button.dataset.themeValue);
+        return;
+      }
+
+      const action = button.dataset.action;
+      if (!action) return;
+
+      if (action === 'go') setScreen(button.dataset.screen);
+
+      if (action === 'toggle-password') {
+        const input = document.getElementById(button.dataset.target);
+        if (!input) return;
+        const reveal = input.type === 'password';
+        input.type = reveal ? 'text' : 'password';
+        button.innerHTML = reveal ? icons.eyeOff : icons.eye;
+        button.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+      }
+
+      if (action === 'google-sign-in') simulate(button, 'Signing in…', routeAfterAuthentication, 800);
+
+      if (action === 'send-verification') {
+        simulate(button, 'Sending…', () => {
+          state.verificationSent = true;
+          render();
+          showToast('Verification email sent');
+        });
+      }
+
+      if (action === 'check-verification') simulate(button, 'Checking…', routeAfterAuthentication, 800);
+
+      if (action === 'sign-out') {
+        state.verificationSent = false;
+        setScreen('sign-in');
+        showToast('Signed out');
+      }
+
+      if (action === 'tab') {
+        state.activeTab = button.dataset.tab;
+        state.screen = button.dataset.tab === 'profile' ? 'profile' : 'access';
+        render();
+      }
+
+      if (action === 'import-export') showToast('Import & export is outside this prototype');
+    });
+
+    document.addEventListener('submit', event => {
+      event.preventDefault();
+      const form = event.target;
+
+      if (form.id === 'sign-in-form') {
+        clearErrors(form);
+        const email = form.email.value.trim();
+        const password = form.password.value;
+        let valid = true;
+        if (!isValidEmail(email)) {
+          setFieldError(form, 'sign-in-email', 'Enter a valid email.');
+          valid = false;
+        }
+        if (password.length < 6) {
+          setFieldError(form, 'sign-in-password', 'Use at least 6 characters.');
+          valid = false;
+        }
+        if (!valid) return;
+        state.profile.email = email;
+        simulate(form.querySelector('[type="submit"]'), 'Signing in…', routeAfterAuthentication, 760);
+      }
+
+      if (form.id === 'registration-form') {
+        clearErrors(form);
+        const nickname = form.nickname.value.trim();
+        const email = form.email.value.trim();
+        const password = form['registration-password'].value;
+        const repeat = form['registration-repeat'].value;
+        let valid = true;
+
+        if (!nickname) {
+          setFieldError(form, 'registration-nickname', 'Nickname is required.');
+          valid = false;
+        }
+        if (!isValidEmail(email)) {
+          setFieldError(form, 'registration-email', 'Enter a valid email.');
+          valid = false;
+        }
+        if (password.length < 6) {
+          setFieldError(form, 'registration-password', 'Use at least 6 characters.');
+          valid = false;
+        }
+        if (repeat !== password) {
+          setFieldError(form, 'registration-repeat', 'Passwords do not match.');
+          valid = false;
+        }
+        if (!valid) return;
+
+        state.profile.nickname = nickname;
+        state.profile.email = email;
+        state.verificationSent = false;
+        simulate(form.querySelector('[type="submit"]'), 'Creating…', () => {
+          setScreen('verification');
+          showToast('Account created');
+        }, 850);
+      }
+
+      if (form.id === 'reset-form') {
+        clearErrors(form);
+        const email = form.email.value.trim();
+        if (!isValidEmail(email)) {
+          setFieldError(form, 'reset-email', 'Enter a valid email.');
+          return;
+        }
+        const submit = form.querySelector('[type="submit"]');
+        simulate(submit, 'Sending…', () => {
+          const container = document.getElementById('reset-general');
+          if (container) container.innerHTML = message('success', 'Reset link sent');
+          setButtonBusy(submit, false);
+          showToast('Reset link sent');
+        });
+      }
+
+      if (form.id === 'change-email-form') {
+        clearErrors(form);
+        const email = form.newEmail.value.trim();
+        const password = form['email-current-password'].value;
+        let valid = true;
+        if (!isValidEmail(email)) {
+          setFieldError(form, 'new-email', 'Enter a valid email.');
+          valid = false;
+        }
+        if (email === state.profile.email) {
+          setFieldError(form, 'new-email', 'Enter a different email.');
+          valid = false;
+        }
+        if (password.length < 6) {
+          setFieldError(form, 'email-current-password', 'Enter your current password.');
+          valid = false;
+        }
+        if (!valid) return;
+
+        simulate(form.querySelector('[type="submit"]'), 'Saving…', () => {
+          state.profile.email = email;
+          state.verificationSent = false;
+          setScreen('verification');
+          showToast('Email changed');
+        }, 800);
+      }
+
+      if (form.id === 'change-password-form') {
+        clearErrors(form);
+        const current = form['password-current'].value;
+        const next = form['password-new'].value;
+        const repeat = form['password-repeat'].value;
+        let valid = true;
+
+        if (current.length < 6) {
+          setFieldError(form, 'password-current', 'Enter your current password.');
+          valid = false;
+        }
+        if (next.length < 6) {
+          setFieldError(form, 'password-new', 'Use at least 6 characters.');
+          valid = false;
+        }
+        if (next === current && next) {
+          setFieldError(form, 'password-new', 'Use a different password.');
+          valid = false;
+        }
+        if (repeat !== next) {
+          setFieldError(form, 'password-repeat', 'Passwords do not match.');
+          valid = false;
+        }
+        if (!valid) return;
+
+        simulate(form.querySelector('[type="submit"]'), 'Saving…', () => {
+          setScreen('profile');
+          showToast('Password changed');
+        }, 800);
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>

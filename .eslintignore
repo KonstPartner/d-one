@@ -1,0 +1,8 @@
+# Configs
+tailwind.config.js
+metro.config.js
+babel.config.js
+
+expo-env.d.ts
+
+dist/
