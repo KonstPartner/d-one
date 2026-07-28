@@ -2,6 +2,7 @@
   "common": {
     "language": "Язык",
     "cancel": "Отмена",
+    "send": "Отправить",
     "close": "Закрыть",
     "validation": {
       "required": "Это поле обязательно.",

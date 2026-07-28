@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import { LoginUserFormValues } from '@features/auth/model';
-import { validateInput } from '@features/shared/model';
 
 const useLoginForm = ({
   onSubmit,
@@ -11,21 +10,8 @@ const useLoginForm = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const [isActiveInvalidMessageText, setIsActiveInvalidMessageText] =
-    useState(false);
-
   const handleSubmit = async () => {
-    setIsActiveInvalidMessageText(true);
-
-    const isEmailValid = validateInput('email', email, {
-      sendErrorNotification: true,
-    });
-
-    const isPasswordValid = validateInput('password', password, {
-      sendErrorNotification: true,
-    });
-
-    if (!isEmailValid || !isPasswordValid) {
+    if (!email || !password) {
       return;
     }
 
@@ -36,7 +22,6 @@ const useLoginForm = ({
 
     if (succeeded) {
       setPassword('');
-      setIsActiveInvalidMessageText(false);
     }
   };
 
@@ -45,7 +30,6 @@ const useLoginForm = ({
     setEmail,
     password,
     setPassword,
-    isActiveInvalidMessageText,
     handleSubmit,
   };
 };

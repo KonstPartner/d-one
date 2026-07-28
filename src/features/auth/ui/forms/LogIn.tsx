@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, Input, PasswordInput } from '@entities/shared/ui';
 import { LoginUserFormValues, useLoginForm } from '@features/auth/model';
 import * as styles from '@features/auth/styles/forms/AuthForm';
+import ResetPasswordModal from '@features/auth/ui/ResetPasswordModal';
 
 type LogInFormProps = {
   onSubmit: (data: LoginUserFormValues) => Promise<boolean>;
@@ -16,14 +17,9 @@ const LogInForm = ({ onSubmit, isSending, onSignUpPress }: LogInFormProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
-  const {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    isActiveInvalidMessageText,
-    handleSubmit,
-  } = useLoginForm({ onSubmit });
+  const { email, setEmail, password, setPassword, handleSubmit } = useLoginForm(
+    { onSubmit }
+  );
 
   return (
     <View style={styles.Form(theme)}>
@@ -35,8 +31,6 @@ const LogInForm = ({ onSubmit, isSending, onSignUpPress }: LogInFormProps) => {
         autoCapitalize="none"
         autoCorrect={false}
         field="email"
-        enableInvalidMessageText
-        isActiveInvalidMessageText={isActiveInvalidMessageText}
         withLabel
         labelPlaceholder={t('auth.forms.labels.email')}
         style={styles.Input(theme)}
@@ -49,8 +43,6 @@ const LogInForm = ({ onSubmit, isSending, onSignUpPress }: LogInFormProps) => {
         onChangeText={setPassword}
         placeholder={t('auth.forms.placeholders.enterPassword')}
         field="password"
-        enableInvalidMessageText
-        isActiveInvalidMessageText={isActiveInvalidMessageText}
         withLabel
         labelPlaceholder={t('auth.forms.labels.password')}
         style={styles.Input(theme)}
@@ -58,6 +50,8 @@ const LogInForm = ({ onSubmit, isSending, onSignUpPress }: LogInFormProps) => {
         returnKeyType="done"
         onSubmitEditing={handleSubmit}
       />
+
+      <ResetPasswordModal />
 
       <Button
         style={styles.SubmitButton(theme, isSending)}

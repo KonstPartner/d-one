@@ -24,7 +24,8 @@
         "noAccount": "Нет аккаунта?",
         "signUp": "Регистрация",
         "haveAccount": "Уже есть аккаунт?",
-        "logIn": "Войти"
+        "logIn": "Войти",
+        "forgotPassword": "Забыли пароль?"
       }
     },
     "notifications": {
@@ -51,6 +52,13 @@
     },
     "buttons": {
       "logout": "Выйти"
+    },
+    "forgotPassword": {
+      "title": "Сброс пароля",
+      "description": "Введите email, указанный при регистрации. Мы отправим ссылку для создания нового пароля.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Введите email",
+      "successText": "Ссылка для сброса пароля отправлена на ваш email."
     }
   }
 }

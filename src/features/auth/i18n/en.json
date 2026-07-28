@@ -24,7 +24,8 @@
         "noAccount": "Don't have an account?",
         "signUp": "Register",
         "haveAccount": "Already have an account?",
-        "logIn": "Sign in"
+        "logIn": "Sign in",
+        "forgotPassword": "Forgot password?"
       }
     },
     "notifications": {
@@ -51,6 +52,13 @@
     },
     "buttons": {
       "logout": "Sign out"
+    },
+    "forgotPassword": {
+      "title": "Reset password",
+      "description": "Enter the email address used during registration. We will send you a link to create a new password.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter email",
+      "successText": "A password reset link has been sent to your email."
     }
   }
 }

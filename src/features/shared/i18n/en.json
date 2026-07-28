@@ -2,6 +2,7 @@
   "common": {
     "language": "Language",
     "cancel": "Cancel",
+    "send": "Send",
     "close": "Close",
     "validation": {
       "required": "This field is required.",
