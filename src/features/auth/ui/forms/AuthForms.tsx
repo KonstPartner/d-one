@@ -1,7 +1,6 @@
 import { useAuthForm } from '@features/auth/model/hooks';
-
-import LogInForm from './LogIn';
-import SignUpForm from './SignUp';
+import LogInForm from '@features/auth/ui/forms/LogIn';
+import SignUpForm from '@features/auth/ui/forms/SignUp';
 
 const AuthForms = () => {
   const {

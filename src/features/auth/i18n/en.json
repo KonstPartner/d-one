@@ -31,7 +31,26 @@
       "loginSuccess": "You have signed in successfully.",
       "registerSuccess": "Your account has been created.",
       "passwordMismatch": "Passwords do not match.",
-      "alreadyLoggedIn": "You are already signed in."
+      "alreadyLoggedIn": "You are already signed in.",
+      "email": {
+        "verificationMessageSent": "Verification email sent.",
+        "notVerified": "The email has not been verified yet.",
+        "verifiedSuccess": "Email verified successfully.",
+        "logoutSuccess": "You have signed out successfully."
+      }
+    },
+    "verifyEmail": {
+      "title": "Verify email",
+      "description": "Email verification is required to access the application.",
+      "sentDescription": "Open the verification link sent to your email.",
+      "sentMessage": "Verification email sent.",
+      "buttons": {
+        "send": "Send verification link",
+        "check": "Check verification"
+      }
+    },
+    "buttons": {
+      "logout": "Sign out"
     }
   }
 }

@@ -18,7 +18,7 @@ type SpinnerProps = {
 };
 
 const Spinner = ({
-  name = 'aperture-outline',
+  name = 'aperture',
   size = 18,
   color,
   className,

@@ -7,23 +7,24 @@ import { useAuth } from '@features/auth/model';
 const useAuthData = () => {
   const { authUser, isAuthReady } = useAuth();
 
-  const query = useQuery({
-    ...authApi.getUserDataOptions(authUser),
-    enabled: isAuthReady && Boolean(authUser),
-  });
-
-  const authMutating =
+  const isAuthMutating =
     useIsMutating({
       mutationKey: userQueryKeys.mutations,
     }) > 0;
 
+  const query = useQuery({
+    ...authApi.getUserDataOptions(authUser),
+
+    enabled: isAuthReady && Boolean(authUser) && !isAuthMutating,
+  });
+
   const isAuthLoading =
-    !isAuthReady || (Boolean(authUser) && (query.isPending || authMutating));
+    !isAuthReady || (Boolean(authUser) && (isAuthMutating || query.isPending));
 
   return {
     authData: query.data,
     isAuthLoading,
-    authMutating,
+    isAuthMutating,
     ...query,
   };
 };

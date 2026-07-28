@@ -10,4 +10,6 @@ export const userQueryKeys = {
   login: ['auth', 'mutation', 'login'] as const,
 
   register: ['auth', 'mutation', 'register'] as const,
+
+  logout: ['auth', 'mutation', 'logout'] as const,
 };

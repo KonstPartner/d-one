@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import { PageWrapper } from '@entities/layout/ui';
 import { Loader, LoadingView } from '@entities/shared/ui';
 import { useAuthData } from '@features/auth/api';
+import { LogoutButton } from '@features/auth/ui';
 
 const Profile = () => {
   const { isAuthLoading } = useAuthData();
@@ -13,6 +14,7 @@ const Profile = () => {
         <Loader errorType="api">
           <View>
             <Text>Profile</Text>
+            <LogoutButton />
           </View>
         </Loader>
       </LoadingView>

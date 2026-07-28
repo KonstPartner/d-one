@@ -7,7 +7,6 @@ export type UserData = {
   uid: string;
   email: string;
   nickname: string;
-  emailVerified: boolean;
   role: UserRole | null;
   followerUserIds: string[];
   followedUserId: string | null;

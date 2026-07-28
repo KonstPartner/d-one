@@ -31,7 +31,26 @@
       "loginSuccess": "Вход выполнен успешно.",
       "registerSuccess": "Аккаунт успешно создан.",
       "passwordMismatch": "Пароли не совпадают.",
-      "alreadyLoggedIn": "Вы уже вошли в аккаунт."
+      "alreadyLoggedIn": "Вы уже вошли в аккаунт.",
+      "email": {
+        "verificationMessageSent": "Письмо для подтверждения отправлено.",
+        "notVerified": "Email пока не подтверждён.",
+        "verifiedSuccess": "Email успешно подтверждён.",
+        "logoutSuccess": "Вы успешно вышли из аккаунта."
+      }
+    },
+    "verifyEmail": {
+      "title": "Подтверждение email",
+      "description": "Для доступа к приложению необходимо подтвердить email.",
+      "sentDescription": "Откройте ссылку для подтверждения, отправленную на ваш email.",
+      "sentMessage": "Письмо для подтверждения отправлено.",
+      "buttons": {
+        "send": "Отправить ссылку",
+        "check": "Проверить подтверждение"
+      }
+    },
+    "buttons": {
+      "logout": "Выйти"
     }
   }
 }

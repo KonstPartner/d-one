@@ -5,6 +5,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Host } from 'react-native-portalize';
 
+import AppGuard from '@entities/layout/ui/AppGuard';
 import Routs from '@entities/layout/ui/Routs';
 import { AuthProvider } from '@features/auth/model';
 import { HeaderMenuProvider } from '@features/header/model';
@@ -13,8 +14,6 @@ import { queryClient } from '@features/shared/api';
 import { PlatformOS } from '@features/shared/model';
 import { Notification } from '@features/shared/ui';
 import { AppThemeProvider } from '@features/theme/model';
-
-import AppGuard from './AppGuard';
 
 const RootLayout = () => {
   WebBrowser.maybeCompleteAuthSession();

@@ -12,7 +12,7 @@ const AppGuard = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const theme = useTheme();
 
-  const { authUser } = useAuth();
+  const { authUser, emailVerified } = useAuth();
 
   const { authData, isAuthLoading, isError: isAuthDataError } = useAuthData();
 
@@ -27,7 +27,7 @@ const AppGuard = ({ children }: { children: ReactNode }) => {
     ? getGuardRedirectPath({
         pathname,
         hasAuthUser,
-        emailVerified: authUser?.emailVerified ?? false,
+        emailVerified,
         authRole: authData?.role ?? null,
       })
     : null;

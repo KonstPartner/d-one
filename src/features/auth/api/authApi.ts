@@ -3,39 +3,42 @@ import { User } from 'firebase/auth';
 
 import { userQueryKeys } from '@features/auth/api/constants';
 import {
-  getOrCreateUserProfile,
   loginAuthUser,
   registerAuthUser,
 } from '@features/auth/api/firebase/services';
+import { createUserProfile } from '@features/auth/api/firebase/services/createUserProfile';
+import { getUserProfile } from '@features/auth/api/firebase/services/getUserProfile';
 import {
   LoginUserFormValues,
   RegisterUserPayload,
   UserData,
 } from '@features/auth/model';
-import { FORCE_CACHE } from '@features/shared/api';
 
 export const authApi = {
   baseKey: 'auth',
 
   getUserDataOptions: (authUser: User | null) =>
-    queryOptions<UserData>({
-      queryKey: userQueryKeys.userData(authUser?.uid ?? 'anonymous'),
+    queryOptions({
+      queryKey: authUser
+        ? userQueryKeys.userData(authUser.uid)
+        : userQueryKeys.userDataRoot,
 
-      queryFn: async () => {
+      queryFn: () => {
         if (!authUser) {
-          throw new Error('custom/not-authenticated');
+          throw new Error('custom/no-user-is-currently-logged-in');
         }
 
-        return getOrCreateUserProfile(authUser);
+        return getUserProfile(authUser.uid);
       },
 
-      ...FORCE_CACHE,
+      enabled: Boolean(authUser),
+      staleTime: Infinity,
     }),
 
   loginWithEmail: async (payload: LoginUserFormValues): Promise<UserData> => {
     const user = await loginAuthUser(payload);
 
-    return getOrCreateUserProfile(user);
+    return getUserProfile(user.uid);
   },
 
   registerWithEmail: async (
@@ -43,6 +46,6 @@ export const authApi = {
   ): Promise<UserData> => {
     const user = await registerAuthUser(payload);
 
-    return getOrCreateUserProfile(user, payload.nickname);
+    return createUserProfile(user, payload.nickname);
   },
 };
