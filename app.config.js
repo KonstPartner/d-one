@@ -7,7 +7,7 @@ export default {
     name: 'DOne',
     slug: 'd-one',
     version: '1.0.0',
-    scheme: 'd-one',
+    scheme: 'done',
 
     orientation: 'portrait',
     userInterfaceStyle: 'automatic',

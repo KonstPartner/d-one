@@ -14,6 +14,8 @@ import { PlatformOS } from '@features/shared/model';
 import { Notification } from '@features/shared/ui';
 import { AppThemeProvider } from '@features/theme/model';
 
+import AppGuard from './AppGuard';
+
 const RootLayout = () => {
   WebBrowser.maybeCompleteAuthSession();
 
@@ -34,8 +36,12 @@ const RootLayout = () => {
           <AuthProvider>
             <Host>
               <HeaderMenuProvider>
-                <Routs />
-                {PlatformOS.WEB && <ReactQueryDevtools initialIsOpen={false} />}
+                <AppGuard>
+                  <Routs />
+                  {PlatformOS.WEB && (
+                    <ReactQueryDevtools initialIsOpen={false} />
+                  )}
+                </AppGuard>
               </HeaderMenuProvider>
             </Host>
           </AuthProvider>

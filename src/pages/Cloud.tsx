@@ -4,7 +4,7 @@ import { PageWrapper } from '@entities/layout/ui';
 import { Loader, LoadingView } from '@entities/shared/ui';
 import { useAuthData } from '@features/auth/api';
 
-const Home = () => {
+const Cloud = () => {
   const { isAuthLoading } = useAuthData();
 
   return (
@@ -12,7 +12,7 @@ const Home = () => {
       <LoadingView loading={isAuthLoading}>
         <Loader errorType="api">
           <View>
-            <Text>Home</Text>
+            <Text>Cloud</Text>
           </View>
         </Loader>
       </LoadingView>
@@ -20,4 +20,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Cloud;

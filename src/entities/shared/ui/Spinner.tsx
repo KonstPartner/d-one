@@ -18,7 +18,7 @@ type SpinnerProps = {
 };
 
 const Spinner = ({
-  name = 'hourglass-outline',
+  name = 'aperture-outline',
   size = 18,
   color,
   className,

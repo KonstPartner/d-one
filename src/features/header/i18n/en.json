@@ -1,0 +1,15 @@
+{
+  "header": {
+    "open": "Open",
+    "menu": {
+      "settings": "Settings"
+    },
+    "settings": {
+      "title": "Settings",
+      "themeTitle": "Theme",
+      "themeSubtitle": "Change the app appearance and theme.",
+      "languageTitle": "Language",
+      "languageSubtitle": "Change the app language."
+    }
+  }
+}

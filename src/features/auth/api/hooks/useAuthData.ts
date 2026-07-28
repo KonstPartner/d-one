@@ -4,26 +4,37 @@ import { authApi } from '@features/auth/api/authApi';
 import { userQueryKeys } from '@features/auth/api/constants';
 import { useAuth } from '@features/auth/model/context/AuthContext';
 
+const EMPTY_UID = 'anonymous';
+
 const useAuthData = () => {
   const { authUser, isAuthReady } = useAuth();
 
+  const uid = authUser?.uid ?? EMPTY_UID;
+  const hasAuthUser = Boolean(authUser);
+
   const query = useQuery({
-    ...authApi.getUserDataOptions(),
-    enabled: isAuthReady && !!authUser,
+    ...authApi.getUserDataOptions(uid),
+    enabled: isAuthReady && hasAuthUser,
   });
 
   const authMutating =
-    useIsMutating({ mutationKey: userQueryKeys.userData }) > 0;
+    useIsMutating({
+      mutationKey: userQueryKeys.userData(uid),
+    }) > 0;
 
   const isAuthLoading =
-    !isAuthReady ||
-    (isAuthReady && !!authUser && (query.isLoading || authMutating));
+    !isAuthReady || (hasAuthUser && (query.isPending || authMutating));
+
+  const isAuthDataUnavailable =
+    isAuthReady && hasAuthUser && query.isSuccess && query.data === null;
 
   return {
-    authData: query.data,
+    authData: query.data ?? null,
     isAuthLoading,
-    ...query,
+    isAuthDataUnavailable,
     authMutating,
+
+    ...query,
   };
 };
 
