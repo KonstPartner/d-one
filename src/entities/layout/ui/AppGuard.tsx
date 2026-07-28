@@ -14,21 +14,23 @@ const AppGuard = ({ children }: { children: ReactNode }) => {
 
   const { authUser } = useAuth();
 
-  const { authData, isAuthLoading, isAuthDataUnavailable } = useAuthData();
+  const { authData, isAuthLoading, isError: isAuthDataError } = useAuthData();
 
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const hasAuthUser = Boolean(authUser);
 
-  const redirectPath =
-    isAuthLoading || isAuthDataUnavailable
-      ? null
-      : getGuardRedirectPath({
-          pathname,
-          hasAuthUser,
-          emailVerified: authUser?.emailVerified ?? false,
-          authRole: authData?.role ?? null,
-        });
+  const canResolveRoute =
+    !isAuthLoading && !isAuthDataError && (!hasAuthUser || Boolean(authData));
+
+  const redirectPath = canResolveRoute
+    ? getGuardRedirectPath({
+        pathname,
+        hasAuthUser,
+        emailVerified: authUser?.emailVerified ?? false,
+        authRole: authData?.role ?? null,
+      })
+    : null;
 
   useEffect(() => {
     if (!redirectPath || isSamePath(redirectPath, pathname)) {
@@ -58,12 +60,12 @@ const AppGuard = ({ children }: { children: ReactNode }) => {
       >
         <View style={{ display: 'none' }}>{children}</View>
 
-        <LoadingView />
+        <LoadingView loading />
       </View>
     );
   }
 
-  if (isAuthDataUnavailable) {
+  if (isAuthDataError) {
     return (
       <View
         style={{
@@ -71,7 +73,7 @@ const AppGuard = ({ children }: { children: ReactNode }) => {
           backgroundColor: theme.colors.bg,
         }}
       >
-        <LoadingView />
+        <LoadingView loading />
       </View>
     );
   }
@@ -86,7 +88,7 @@ const AppGuard = ({ children }: { children: ReactNode }) => {
       >
         <View style={{ display: 'none' }}>{children}</View>
 
-        <LoadingView />
+        <LoadingView loading />
       </View>
     );
   }

@@ -1,0 +1,37 @@
+{
+  "auth": {
+    "brand": "Дневник диабета",
+    "forms": {
+      "signInTitle": "Вход",
+      "signUpTitle": "Регистрация",
+      "labels": {
+        "nickname": "Никнейм",
+        "email": "Email",
+        "password": "Пароль",
+        "repeatPassword": "Повторите пароль"
+      },
+      "placeholders": {
+        "enterNickname": "Введите никнейм",
+        "enterEmail": "Введите email",
+        "enterPassword": "Введите пароль",
+        "confirmPassword": "Повторите пароль"
+      },
+      "buttons": {
+        "logIn": "Войти",
+        "signUp": "Зарегистрироваться"
+      },
+      "links": {
+        "noAccount": "Нет аккаунта?",
+        "signUp": "Регистрация",
+        "haveAccount": "Уже есть аккаунт?",
+        "logIn": "Войти"
+      }
+    },
+    "notifications": {
+      "loginSuccess": "Вход выполнен успешно.",
+      "registerSuccess": "Аккаунт успешно создан.",
+      "passwordMismatch": "Пароли не совпадают.",
+      "alreadyLoggedIn": "Вы уже вошли в аккаунт."
+    }
+  }
+}

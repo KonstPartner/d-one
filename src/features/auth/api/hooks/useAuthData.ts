@@ -2,38 +2,28 @@ import { useIsMutating, useQuery } from '@tanstack/react-query';
 
 import { authApi } from '@features/auth/api/authApi';
 import { userQueryKeys } from '@features/auth/api/constants';
-import { useAuth } from '@features/auth/model/context/AuthContext';
-
-const EMPTY_UID = 'anonymous';
+import { useAuth } from '@features/auth/model';
 
 const useAuthData = () => {
   const { authUser, isAuthReady } = useAuth();
 
-  const uid = authUser?.uid ?? EMPTY_UID;
-  const hasAuthUser = Boolean(authUser);
-
   const query = useQuery({
-    ...authApi.getUserDataOptions(uid),
-    enabled: isAuthReady && hasAuthUser,
+    ...authApi.getUserDataOptions(authUser),
+    enabled: isAuthReady && Boolean(authUser),
   });
 
   const authMutating =
     useIsMutating({
-      mutationKey: userQueryKeys.userData(uid),
+      mutationKey: userQueryKeys.mutations,
     }) > 0;
 
   const isAuthLoading =
-    !isAuthReady || (hasAuthUser && (query.isPending || authMutating));
-
-  const isAuthDataUnavailable =
-    isAuthReady && hasAuthUser && query.isSuccess && query.data === null;
+    !isAuthReady || (Boolean(authUser) && (query.isPending || authMutating));
 
   return {
-    authData: query.data ?? null,
+    authData: query.data,
     isAuthLoading,
-    isAuthDataUnavailable,
     authMutating,
-
     ...query,
   };
 };

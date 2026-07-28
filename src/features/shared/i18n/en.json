@@ -2,6 +2,12 @@
   "common": {
     "language": "Language",
     "cancel": "Cancel",
-    "close": "Close"
+    "close": "Close",
+    "validation": {
+      "required": "This field is required.",
+      "email": "Enter a valid email address.",
+      "password": "The password must contain at least 8 characters, including an uppercase letter, a lowercase letter, and a number.",
+      "nickname": "Nickname must contain from 1 to 255 characters."
+    }
   }
 }

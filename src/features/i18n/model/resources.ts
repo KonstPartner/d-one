@@ -1,3 +1,4 @@
+import { authTranslations } from '@features/auth/i18n';
 import { headerTranslations } from '@features/header/i18n';
 import { layoutTranslations } from '@features/layout/i18n';
 import { commonTranslations } from '@features/shared/i18n';
@@ -11,6 +12,7 @@ export const resources = {
     translation: merge(
       headerTranslations.en,
       commonTranslations.en,
+      authTranslations.en,
       layoutTranslations.en
     ),
   },
@@ -18,6 +20,7 @@ export const resources = {
     translation: merge(
       headerTranslations.ru,
       commonTranslations.ru,
+      authTranslations.ru,
       layoutTranslations.ru
     ),
   },
