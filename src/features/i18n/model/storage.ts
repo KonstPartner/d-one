@@ -7,7 +7,7 @@ const KEY = 'app_language';
 export const getSavedLanguage = async (): Promise<AppLanguage | null> => {
   const v = await AsyncStorage.getItem(KEY);
 
-  return v === 'en' ? v : null;
+  return v === 'en' || v === 'ru' ? v : null;
 };
 
 export const saveLanguage = async (lng: AppLanguage) => {

@@ -1,12 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initializeApp } from 'firebase/app';
-import { getAuth, initializeAuth, Persistence } from 'firebase/auth';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { Auth, getAuth, initializeAuth, Persistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 import { PlatformOS } from '@features/shared/model/constants';
 
 const { getReactNativePersistence } = require('firebase/auth') as {
-  getReactNativePersistence: (s: typeof AsyncStorage) => Persistence;
+  getReactNativePersistence: (storage: typeof AsyncStorage) => Persistence;
 };
 
 const firebaseConfig = {
@@ -19,14 +19,26 @@ const firebaseConfig = {
   measurementId: 'G-R925MN691H',
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+const getNativeAuth = (): Auth => {
+  try {
+    return initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  } catch (error) {
+    const errorCode = (error as { code?: string }).code;
+
+    if (errorCode === 'auth/already-initialized') {
+      return getAuth(app);
+    }
+
+    throw error;
+  }
+};
+
+const auth = PlatformOS.WEB ? getAuth(app) : getNativeAuth();
 
 const db = getFirestore(app);
 
-const auth = PlatformOS.WEB
-  ? getAuth(app)
-  : initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
-    });
-
-export { auth, db };
+export { app, auth, db };

@@ -1,0 +1,15 @@
+{
+  "header": {
+    "open": "Открыть",
+    "menu": {
+      "settings": "Настройки"
+    },
+    "settings": {
+      "title": "Настройки",
+      "themeTitle": "Тема",
+      "themeSubtitle": "Измените оформление и тему приложения.",
+      "languageTitle": "Язык",
+      "languageSubtitle": "Измените язык приложения."
+    }
+  }
+}

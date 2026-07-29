@@ -19,6 +19,11 @@ const validateRules = (type: ValidateInputType) => {
       regexStr = '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$';
       break;
 
+    case 'nickname':
+      key = 'common.validation.nickname';
+      regexStr = '^.{1,255}$';
+      break;
+
     default:
       return true;
   }

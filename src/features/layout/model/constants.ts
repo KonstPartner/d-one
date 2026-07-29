@@ -6,6 +6,24 @@ import { ExtendedStackNavigationOptions } from 'expo-router/build/layouts/StackC
 
 import { PlatformOS } from '@features/shared/model';
 
+export const AUTH_PATH = '/auth';
+export const AUTH_CALLBACK_PATH = '/auth-callback';
+
+export const DIARY_PATH = '/diary';
+export const CLOUD_PATH = '/cloud';
+export const PENDING_PATH = '/pending';
+export const PROFILE_PATH = '/profile';
+
+export const GUEST_PATHS = [AUTH_PATH, AUTH_CALLBACK_PATH] as const;
+
+export const UNVERIFIED_PATHS = [AUTH_PATH, AUTH_CALLBACK_PATH] as const;
+
+export const PENDING_PATHS = [PENDING_PATH, PROFILE_PATH] as const;
+
+export const USER_PATHS = [DIARY_PATH, CLOUD_PATH, PROFILE_PATH] as const;
+
+export const FOLLOWER_PATHS = [DIARY_PATH, PROFILE_PATH] as const;
+
 export const headerScreen = ({
   title,
   theme,

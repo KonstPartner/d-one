@@ -14,7 +14,7 @@ import * as globalStyles from '@features/shared/styles/global';
 
 type Option = { value: AppLanguage; label: string };
 
-const SUPPORTED: AppLanguage[] = ['en'];
+const SUPPORTED: AppLanguage[] = ['en', 'ru'];
 
 const normalizeLanguage = (lng?: string): AppLanguage => {
   const base = (lng ?? '').split('-')[0] as AppLanguage;
@@ -27,7 +27,10 @@ const LanguageSelect = () => {
   const { t } = useTranslation();
 
   const options: Option[] = useMemo(
-    () => [{ value: 'en', label: 'English' }],
+    () => [
+      { value: 'en', label: 'English' },
+      { value: 'ru', label: 'Русский' },
+    ],
     []
   );
 
