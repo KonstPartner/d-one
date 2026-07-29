@@ -46,6 +46,8 @@ const firebaseErrorDict: Dict = {
   'common.errors.googleRedirectUriMissing': 'custom/no-google-redirect-uri',
 
   'common.errors.invalidGoogleIdToken': 'custom/invalid-google-id-token',
+
+  'common.errors.currentUserEmailMissing': 'custom/no-current-user-email',
 };
 
 const apiErrorDict: Dict = {};

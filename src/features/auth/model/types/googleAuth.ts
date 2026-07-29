@@ -1,4 +1,4 @@
-import { RegisterUserFormValues } from './auth';
+import { RegisterUserFormValues } from '@features/auth/model/types';
 
 export type GoogleIdTokenPayload = {
   email?: string;

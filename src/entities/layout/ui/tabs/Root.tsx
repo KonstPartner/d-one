@@ -1,4 +1,5 @@
 import { useTheme } from '@emotion/react';
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -20,13 +21,23 @@ const TabsRoot = () => {
 
   return (
     <Tabs
-      screenOptions={headerTabs({ theme, headerRight: () => <HeaderMenu /> })}
+      screenOptions={headerTabs({
+        theme,
+        headerRight: () => <HeaderMenu />,
+      })}
     >
       <Tabs.Screen
         name="diary"
         options={{
           title: t('layout.tabs.diary'),
           href: isUser || isFollower ? undefined : null,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? 'book' : 'book-outline'}
+              size={size}
+              color={color}
+            />
+          ),
         }}
       />
 
@@ -35,6 +46,13 @@ const TabsRoot = () => {
         options={{
           title: t('layout.tabs.cloud'),
           href: isUser ? undefined : null,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? 'cloud' : 'cloud-outline'}
+              size={size}
+              color={color}
+            />
+          ),
         }}
       />
 
@@ -43,6 +61,13 @@ const TabsRoot = () => {
         options={{
           title: t('layout.tabs.pending'),
           href: isPending ? undefined : null,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? 'hourglass' : 'hourglass-outline'}
+              size={size}
+              color={color}
+            />
+          ),
         }}
       />
 
@@ -50,6 +75,13 @@ const TabsRoot = () => {
         name="profile"
         options={{
           title: t('layout.tabs.profile'),
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? 'person' : 'person-outline'}
+              size={size}
+              color={color}
+            />
+          ),
         }}
       />
     </Tabs>

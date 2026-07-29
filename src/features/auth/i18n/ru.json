@@ -40,7 +40,23 @@
         "verificationMessageSent": "Письмо для подтверждения отправлено.",
         "notVerified": "Email пока не подтверждён.",
         "verifiedSuccess": "Email успешно подтверждён.",
-        "logoutSuccess": "Вы успешно вышли из аккаунта."
+        "logoutSuccess": "Вы успешно вышли из аккаунта.",
+        "same": "Новый email совпадает с текущим",
+        "verificationSentToNew": "Письмо для подтверждения отправлено на новый email",
+        "notVerifiedYet": "Новый email ещё не подтверждён",
+        "verifiedRelogin": "Email изменён. Войдите в аккаунт повторно"
+      },
+      "notAuthenticated": "Пользователь не авторизован",
+      "password": {
+        "newMismatch": "Новые пароли не совпадают",
+        "changedSuccess": "Пароль успешно изменён"
+      },
+      "nickname": "Никнейм",
+      "role": "Роль",
+      "roles": {
+        "user": "Пользователь",
+        "follower": "Подписчик",
+        "pending": "Доступ не предоставлен"
       }
     },
     "verifyEmail": {
@@ -62,6 +78,28 @@
       "emailLabel": "Email",
       "emailPlaceholder": "Введите email",
       "successText": "Ссылка для сброса пароля отправлена на ваш email."
+    },
+    "profile": {
+      "title": "Профиль",
+      "changePasswordTitle": "Изменение пароля",
+      "email": {
+        "title": "Email",
+        "warningRelogin": "После изменения email потребуется повторно войти в аккаунт",
+        "sentTo": "Письмо для подтверждения отправлено на:"
+      },
+      "placeholders": {
+        "enterNewEmail": "Введите новый email",
+        "currentPassword": "Текущий пароль",
+        "newPassword": "Новый пароль",
+        "confirmNewPassword": "Повторите новый пароль"
+      },
+      "buttons": {
+        "changeEmail": "Изменить email",
+        "sendVerification": "Отправить подтверждение",
+        "confirmDone": "Я подтвердил email",
+        "changePassword": "Изменить пароль",
+        "cancel": "Отмена"
+      }
     }
   }
 }

@@ -24,7 +24,8 @@
       "googleEmailMissing": "Failed to retrieve the email from the Google account",
       "googleRedirectUriMissing": "The Google authorization redirect URI is not configured",
       "invalidGoogleIdToken": "Google returned an invalid authorization token",
-      "unknown": "An unknown error occurred"
+      "unknown": "An unknown error occurred",
+      "currentUserEmailMissing": "The current user does not have an email address"
     },
     "notifications": {
       "type": {

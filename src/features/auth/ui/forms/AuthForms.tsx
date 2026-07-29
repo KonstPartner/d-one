@@ -7,8 +7,7 @@ import { appIcon } from '@entities/shared/constants';
 import { GoogleRegisterPrefill, useAuthForm } from '@features/auth/model';
 import * as styles from '@features/auth/styles/forms/AuthForm';
 import LogInForm from '@features/auth/ui/forms/LogIn';
-
-import SignUpForm from './SignUp';
+import SignUpForm from '@features/auth/ui/forms/SignUp';
 
 const AuthForms = () => {
   const theme = useTheme();

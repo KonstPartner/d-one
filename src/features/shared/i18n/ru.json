@@ -24,7 +24,8 @@
       "googleEmailMissing": "Не удалось получить email из аккаунта Google",
       "googleRedirectUriMissing": "Не настроен адрес возврата после авторизации Google",
       "invalidGoogleIdToken": "Google вернул некорректный токен авторизации",
-      "unknown": "Произошла неизвестная ошибка"
+      "unknown": "Произошла неизвестная ошибка",
+      "currentUserEmailMissing": "У текущего пользователя отсутствует email"
     },
     "notifications": {
       "type": {

@@ -9,9 +9,8 @@ import {
   useLoginForm,
 } from '@features/auth/model';
 import * as styles from '@features/auth/styles/forms/AuthForm';
+import GoogleSignInButton from '@features/auth/ui/forms/GoogleSignIn';
 import ResetPasswordModal from '@features/auth/ui/ResetPasswordModal';
-
-import GoogleSignInButton from './GoogleSignIn';
 
 type LogInFormProps = {
   onSubmit: (data: LoginUserFormValues) => Promise<boolean>;
