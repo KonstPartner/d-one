@@ -36,7 +36,7 @@ const VerificationGuard = ({
     );
   }
 
-  if (authData && authData.emailVerified) {
+  if (authData && authUser?.emailVerified) {
     return <LoadingView loading={isAuthLoading}>{children}</LoadingView>;
   }
 

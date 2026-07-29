@@ -63,7 +63,7 @@ const TabsRoot = () => {
           href: isPending ? undefined : null,
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
-              name={focused ? 'hourglass' : 'hourglass-outline'}
+              name={focused ? 'time' : 'time-outline'}
               size={size}
               color={color}
             />

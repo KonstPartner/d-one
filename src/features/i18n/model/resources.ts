@@ -1,4 +1,5 @@
 import { authTranslations } from '@features/auth/i18n';
+import { diaryTranslations } from '@features/diary/i18n';
 import { headerTranslations } from '@features/header/i18n';
 import { layoutTranslations } from '@features/layout/i18n';
 import { commonTranslations } from '@features/shared/i18n';
@@ -13,7 +14,8 @@ export const resources = {
       headerTranslations.en,
       commonTranslations.en,
       authTranslations.en,
-      layoutTranslations.en
+      layoutTranslations.en,
+      diaryTranslations.en
     ),
   },
   ru: {
@@ -21,7 +23,8 @@ export const resources = {
       headerTranslations.ru,
       commonTranslations.ru,
       authTranslations.ru,
-      layoutTranslations.ru
+      layoutTranslations.ru,
+      diaryTranslations.ru
     ),
   },
 } as const;

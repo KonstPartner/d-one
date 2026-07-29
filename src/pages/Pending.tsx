@@ -1,21 +1,10 @@
-import { Text, View } from 'react-native';
-
+import { AccessPending } from '@entities/diary/ui';
 import { PageWrapper } from '@entities/layout/ui';
-import { Loader, LoadingView } from '@entities/shared/ui';
-import { useAuthData } from '@features/auth/api';
 
 const Pending = () => {
-  const { isAuthLoading } = useAuthData();
-
   return (
     <PageWrapper>
-      <LoadingView loading={isAuthLoading}>
-        <Loader errorType="api">
-          <View>
-            <Text>Pending</Text>
-          </View>
-        </Loader>
-      </LoadingView>
+      <AccessPending />
     </PageWrapper>
   );
 };
