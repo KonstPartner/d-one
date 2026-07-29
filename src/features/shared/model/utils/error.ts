@@ -12,15 +12,40 @@ const firebaseErrorDict: Dict = {
     'auth/wrong-password',
     'auth/invalid-email',
   ],
-  'common.errors.emailAlreadyExists': 'email-already-in-use',
-  'common.errors.alreadyLoggedIn': 'custom/already-logged-in!',
+
+  'common.errors.emailAlreadyExists': [
+    'email-already-in-use',
+    'auth/email-already-in-use',
+  ],
+
+  'common.errors.alreadyLoggedIn': [
+    'custom/already-logged-in!',
+    'custom/already-logged-in',
+  ],
+
   'common.errors.notLoggedInYet': 'custom/no-user-is-currently-logged-in',
+
   'common.errors.wrongCurrentPassword': [
     'custom/invalid-credential-password',
     'auth/missing-password',
   ],
-  'common.errors.loginAgainToChangeEmail': 'requires-recent-login',
+
+  'common.errors.loginAgainToChangeEmail': [
+    'requires-recent-login',
+    'auth/requires-recent-login',
+  ],
+
   'common.errors.tooManyRequests': 'auth/too-many-requests',
+
+  'common.errors.googleAuthorizationFailed': 'custom/no-google-auth',
+
+  'common.errors.googleIdTokenMissing': 'custom/no-google-id-token',
+
+  'common.errors.googleEmailMissing': 'custom/no-google-email',
+
+  'common.errors.googleRedirectUriMissing': 'custom/no-google-redirect-uri',
+
+  'common.errors.invalidGoogleIdToken': 'custom/invalid-google-id-token',
 };
 
 const apiErrorDict: Dict = {};

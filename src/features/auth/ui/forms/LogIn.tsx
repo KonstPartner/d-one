@@ -3,55 +3,78 @@ import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Input, PasswordInput } from '@entities/shared/ui';
-import { LoginUserFormValues, useLoginForm } from '@features/auth/model';
+import {
+  GoogleRegisterPrefill,
+  LoginUserFormValues,
+  useLoginForm,
+} from '@features/auth/model';
 import * as styles from '@features/auth/styles/forms/AuthForm';
 import ResetPasswordModal from '@features/auth/ui/ResetPasswordModal';
 
+import GoogleSignInButton from './GoogleSignIn';
+
 type LogInFormProps = {
   onSubmit: (data: LoginUserFormValues) => Promise<boolean>;
+
   isSending: boolean;
+
   onSignUpPress: () => void;
+
+  onGoogleRegister: (prefill: GoogleRegisterPrefill) => void;
 };
 
-const LogInForm = ({ onSubmit, isSending, onSignUpPress }: LogInFormProps) => {
+const LogInForm = ({
+  onSubmit,
+  isSending,
+  onSignUpPress,
+  onGoogleRegister,
+}: LogInFormProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
   const { email, setEmail, password, setPassword, handleSubmit } = useLoginForm(
-    { onSubmit }
+    {
+      onSubmit,
+    }
   );
 
   return (
     <View style={styles.Form(theme)}>
-      <Input
-        value={email}
-        onChangeText={setEmail}
-        placeholder={t('auth.forms.placeholders.enterEmail')}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-        field="email"
-        withLabel
-        labelPlaceholder={t('auth.forms.labels.email')}
-        style={styles.Input(theme)}
-        editable={!isSending}
-        returnKeyType="next"
-      />
+      <View>
+        <Input
+          value={email}
+          onChangeText={setEmail}
+          placeholder={t('auth.forms.placeholders.enterEmail')}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          field="email"
+          withLabel
+          labelPlaceholder={t('auth.forms.labels.email')}
+          style={styles.Input(theme)}
+          editable={!isSending}
+          returnKeyType="next"
+        />
+      </View>
 
-      <PasswordInput
-        value={password}
-        onChangeText={setPassword}
-        placeholder={t('auth.forms.placeholders.enterPassword')}
-        field="password"
-        withLabel
-        labelPlaceholder={t('auth.forms.labels.password')}
-        style={styles.Input(theme)}
-        editable={!isSending}
-        returnKeyType="done"
-        onSubmitEditing={handleSubmit}
-      />
+      <View>
+        <PasswordInput
+          value={password}
+          onChangeText={setPassword}
+          placeholder={t('auth.forms.placeholders.enterPassword')}
+          field="password"
+          withLabel
+          labelPlaceholder={t('auth.forms.labels.password')}
+          style={styles.Input(theme)}
+          editable={!isSending}
+          returnKeyType="done"
+          onSubmitEditing={handleSubmit}
+        />
+      </View>
 
-      <ResetPasswordModal />
+      <View style={styles.ForgotPasswordRow}>
+        <ResetPasswordModal />
+      </View>
 
       <Button
         style={styles.SubmitButton(theme, isSending)}
@@ -63,6 +86,16 @@ const LogInForm = ({ onSubmit, isSending, onSignUpPress }: LogInFormProps) => {
           {t('auth.forms.buttons.logIn')}
         </Text>
       </Button>
+
+      <View style={styles.Divider(theme)}>
+        <View style={styles.DividerLine(theme)} />
+
+        <Text style={styles.DividerText(theme)}>{t('auth.forms.or')}</Text>
+
+        <View style={styles.DividerLine(theme)} />
+      </View>
+
+      <GoogleSignInButton onRegister={onGoogleRegister} />
 
       {!isSending && (
         <View style={styles.SwitchFormRow(theme)}>

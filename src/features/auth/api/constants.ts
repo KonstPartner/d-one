@@ -1,15 +1,20 @@
+const AUTH_QUERY_KEY = ['auth'] as const;
+const AUTH_MUTATION_KEY = ['auth', 'mutation'] as const;
+
 export const userQueryKeys = {
-  all: ['auth'] as const,
+  all: AUTH_QUERY_KEY,
 
-  userDataRoot: ['auth', 'user-data'] as const,
+  userDataRoot: [...AUTH_QUERY_KEY, 'user-data'] as const,
 
-  userData: (uid: string) => [...userQueryKeys.userDataRoot, uid] as const,
+  userData: (uid: string) => [...AUTH_QUERY_KEY, 'user-data', uid] as const,
 
-  mutations: ['auth', 'mutation'] as const,
+  mutations: AUTH_MUTATION_KEY,
 
-  login: ['auth', 'mutation', 'login'] as const,
+  login: [...AUTH_MUTATION_KEY, 'login'] as const,
 
-  register: ['auth', 'mutation', 'register'] as const,
+  register: [...AUTH_MUTATION_KEY, 'register'] as const,
 
-  logout: ['auth', 'mutation', 'logout'] as const,
+  googleLogin: [...AUTH_MUTATION_KEY, 'google-login'] as const,
+
+  logout: [...AUTH_MUTATION_KEY, 'logout'] as const,
 };

@@ -7,7 +7,7 @@ import {
   AuthFormMode,
   LoginUserFormValues,
   RegisterUserFormValues,
-} from '@features/auth/model/types';
+} from '@features/auth/model/types/auth';
 import { showNotification } from '@features/shared/ui';
 
 const useAuthForm = () => {

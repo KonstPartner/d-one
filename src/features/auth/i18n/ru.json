@@ -4,6 +4,7 @@
     "forms": {
       "signInTitle": "Вход",
       "signUpTitle": "Регистрация",
+      "or": "или",
       "labels": {
         "nickname": "Никнейм",
         "email": "Email",
@@ -18,7 +19,8 @@
       },
       "buttons": {
         "logIn": "Войти",
-        "signUp": "Зарегистрироваться"
+        "signUp": "Зарегистрироваться",
+        "googleSignIn": "Войти через Google"
       },
       "links": {
         "noAccount": "Нет аккаунта?",
@@ -33,6 +35,7 @@
       "registerSuccess": "Аккаунт успешно создан.",
       "passwordMismatch": "Пароли не совпадают.",
       "alreadyLoggedIn": "Вы уже вошли в аккаунт.",
+      "logoutSuccess": "Вы успешно вышли из аккаунта.",
       "email": {
         "verificationMessageSent": "Письмо для подтверждения отправлено.",
         "notVerified": "Email пока не подтверждён.",

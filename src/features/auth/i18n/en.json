@@ -4,6 +4,7 @@
     "forms": {
       "signInTitle": "Sign in",
       "signUpTitle": "Registration",
+      "or": "or",
       "labels": {
         "nickname": "Nickname",
         "email": "Email",
@@ -18,7 +19,8 @@
       },
       "buttons": {
         "logIn": "Sign in",
-        "signUp": "Register"
+        "signUp": "Register",
+        "googleSignIn": "Sign in with Google"
       },
       "links": {
         "noAccount": "Don't have an account?",
@@ -33,6 +35,7 @@
       "registerSuccess": "Your account has been created.",
       "passwordMismatch": "Passwords do not match.",
       "alreadyLoggedIn": "You are already signed in.",
+      "logoutSuccess": "You have successfully signed out.",
       "email": {
         "verificationMessageSent": "Verification email sent.",
         "notVerified": "The email has not been verified yet.",
