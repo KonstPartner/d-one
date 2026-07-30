@@ -4,74 +4,78 @@ import {
   getLocalUserProfile,
   removeLocalUserProfile,
   saveLocalUserProfile,
-} from '@features/auth/model/context/localProfileStorage';
+} from '../context/localProfileStorage';
+import type { UserData } from '../types';
 
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
-);
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+  },
+}));
 
-const userProfile = {
+const mockedGetItem = jest.mocked(AsyncStorage.getItem);
+const mockedSetItem = jest.mocked(AsyncStorage.setItem);
+const mockedRemoveItem = jest.mocked(AsyncStorage.removeItem);
+
+const profile: UserData = {
   uid: 'user-1',
   email: 'user@example.com',
   nickname: 'User',
   role: 'user',
   followerUserIds: [],
   followedUserId: null,
-} as Parameters<typeof saveLocalUserProfile>[0];
+};
 
 describe('localProfileStorage', () => {
-  beforeEach(async () => {
-    await AsyncStorage.clear();
+  beforeEach(() => {
     jest.clearAllMocks();
+
+    mockedSetItem.mockResolvedValue(undefined);
+    mockedRemoveItem.mockResolvedValue(undefined);
   });
 
-  it('saves and returns the local profile', async () => {
-    await saveLocalUserProfile(userProfile);
+  it('saves user profile', async () => {
+    await saveLocalUserProfile(profile);
 
-    const result = await getLocalUserProfile(userProfile.uid);
-
-    expect(result).toEqual(userProfile);
+    expect(mockedSetItem).toHaveBeenCalledTimes(1);
+    expect(mockedSetItem).toHaveBeenCalledWith(
+      'auth.profile',
+      JSON.stringify(profile)
+    );
   });
 
-  it('does not return a profile belonging to another user', async () => {
-    await saveLocalUserProfile(userProfile);
+  it('returns stored profile when uid matches', async () => {
+    mockedGetItem.mockResolvedValue(JSON.stringify(profile));
 
-    const result = await getLocalUserProfile('user-2');
+    const result = await getLocalUserProfile(profile.uid);
+
+    expect(result).toEqual(profile);
+    expect(mockedGetItem).toHaveBeenCalledWith('auth.profile');
+  });
+
+  it('returns null when stored uid does not match expected uid', async () => {
+    mockedGetItem.mockResolvedValue(JSON.stringify(profile));
+
+    const result = await getLocalUserProfile('another-user');
 
     expect(result).toBeNull();
   });
 
-  it('returns null when the local profile does not exist', async () => {
-    const result = await getLocalUserProfile(userProfile.uid);
+  it('returns null when profile is not stored', async () => {
+    mockedGetItem.mockResolvedValue(null);
+
+    const result = await getLocalUserProfile(profile.uid);
 
     expect(result).toBeNull();
   });
 
-  it('removes the local profile', async () => {
-    await saveLocalUserProfile(userProfile);
+  it('removes stored profile', async () => {
     await removeLocalUserProfile();
 
-    const result = await getLocalUserProfile(userProfile.uid);
-
-    expect(result).toBeNull();
-  });
-
-  it('replaces the previously stored profile', async () => {
-    const secondProfile = {
-      ...userProfile,
-      uid: 'user-2',
-      email: 'second@example.com',
-      nickname: 'Second user',
-    };
-
-    await saveLocalUserProfile(userProfile);
-    await saveLocalUserProfile(secondProfile);
-
-    const firstResult = await getLocalUserProfile(userProfile.uid);
-
-    const secondResult = await getLocalUserProfile(secondProfile.uid);
-
-    expect(firstResult).toBeNull();
-    expect(secondResult).toEqual(secondProfile);
+    expect(mockedRemoveItem).toHaveBeenCalledTimes(1);
+    expect(mockedRemoveItem).toHaveBeenCalledWith('auth.profile');
   });
 });

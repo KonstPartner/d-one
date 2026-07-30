@@ -6,9 +6,10 @@ import { Portal } from 'react-native-portalize';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AvoidKeyboardView, Button } from '@entities/shared/ui';
-import { PlatformOS } from '@features/shared/model';
-import * as globalStyles from '@features/shared/styles/global';
-import * as styles from '@features/shared/styles/PortalModal';
+
+import { PlatformOS } from '../model';
+import * as globalStyles from '../styles/global';
+import * as styles from '../styles/PortalModal';
 
 const useAndroidBackToClose = (visible: boolean, onClose: () => void) => {
   useEffect(() => {

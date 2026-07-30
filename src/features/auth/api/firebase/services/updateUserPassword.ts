@@ -4,8 +4,9 @@ import {
   updatePassword,
 } from 'firebase/auth';
 
-import { auth } from '@features/auth/api/firebase/config';
 import { handleError } from '@features/shared/model';
+
+import { auth } from '../config';
 
 export const updateUserPassword = async (
   currentPassword: string,

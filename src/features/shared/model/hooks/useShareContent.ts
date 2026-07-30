@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Share as NativeShare } from 'react-native';
 
-import { PlatformOS } from '@features/shared/model/constants';
+import { PlatformOS } from '../constants';
 
 type ShareFileUri = string | null | undefined;
 

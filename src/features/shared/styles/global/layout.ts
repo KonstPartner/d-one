@@ -2,13 +2,9 @@ import { StyleProp, ViewStyle } from 'react-native';
 import { css } from '@emotion/native';
 import { Theme } from '@emotion/react';
 
-import {
-  FlexAlign,
-  FlexDirection,
-  FlexJustify,
-  ThemeSpacing,
-} from '@features/shared/styles/global/types';
 import { toPX } from '@features/theme/model';
+
+import { FlexAlign, FlexDirection, FlexJustify, ThemeSpacing } from './types';
 
 const normalizeFlex = (value?: string) => {
   if (!value || value === 'start') {

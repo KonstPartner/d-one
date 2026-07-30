@@ -1,3 +1,3 @@
-import { createDateKit } from '@features/shared/model/utils/date';
+import { createDateKit } from '../utils/date';
 
 export const dateKit = createDateKit();

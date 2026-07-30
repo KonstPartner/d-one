@@ -2,8 +2,8 @@ import { Pressable, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 
-import { PlatformOS } from '@features/shared/model';
-import * as globalStyles from '@features/shared/styles/global';
+import { PlatformOS } from '../model';
+import * as globalStyles from '../styles/global';
 
 const WebRefresh = ({ onRefresh }: { onRefresh: () => void }) => {
   const theme = useTheme();

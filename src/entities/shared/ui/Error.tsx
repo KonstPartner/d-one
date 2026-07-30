@@ -2,9 +2,11 @@ import { Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
-import * as styles from '@entities/shared/styles/Error';
-import Button from '@entities/shared/ui/Button';
 import * as globalStyles from '@features/shared/styles/global';
+
+import * as styles from '../styles/Error';
+
+import Button from './Button';
 
 const ErrorSection = ({
   callback,

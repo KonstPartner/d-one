@@ -1,8 +1,8 @@
 import { useIsMutating, useQuery } from '@tanstack/react-query';
 
-import { authApi } from '@features/auth/api/authApi';
-import { userQueryKeys } from '@features/auth/api/constants';
-import { useAuth } from '@features/auth/model/context/AuthContext';
+import { useAuth } from '../../model/context/AuthContext';
+import { authApi } from '../authApi';
+import { userQueryKeys } from '../constants';
 
 const useAuthData = () => {
   const { authUser, isAuthReady } = useAuth();

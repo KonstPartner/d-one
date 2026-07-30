@@ -2,10 +2,11 @@ import { StyleProp, ViewStyle } from 'react-native';
 import { css } from '@emotion/native';
 import { Theme } from '@emotion/react';
 
-import { Stack } from '@features/shared/styles/global/layout';
-import { CardContainer } from '@features/shared/styles/global/surfaces';
-import { ThemeSpacing } from '@features/shared/styles/global/types';
 import { toPX } from '@features/theme/model';
+
+import { Stack } from './layout';
+import { CardContainer } from './surfaces';
+import { ThemeSpacing } from './types';
 
 export const PageRoot = (theme: Theme) =>
   css`

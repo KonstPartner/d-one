@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
-import { updateUserPassword } from '@features/auth/api/firebase/services';
 import { errorMapper, validateInput } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
+
+import { updateUserPassword } from '../firebase/services';
 
 const useChangePasswordForm = () => {
   const { t } = useTranslation();

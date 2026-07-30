@@ -1,6 +1,6 @@
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 
-import { db } from '@features/auth/api/firebase/config';
+import { db } from '../config';
 
 type CheckUserExistsResult = {
   isExists: boolean;

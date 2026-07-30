@@ -2,13 +2,14 @@ import { StyleProp, ViewStyle } from 'react-native';
 import { css } from '@emotion/native';
 import { Theme } from '@emotion/react';
 
+import { toPX } from '@features/theme/model';
+
 import {
   SurfaceShadowLevel,
   SurfaceTone,
   ThemeRadius,
   ThemeSpacing,
-} from '@features/shared/styles/global/types';
-import { toPX } from '@features/theme/model';
+} from './types';
 
 const surfaceBackground = (theme: Theme, tone: SurfaceTone) => {
   if (tone === 'input') {

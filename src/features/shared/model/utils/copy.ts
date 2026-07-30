@@ -1,4 +1,4 @@
-import { PlatformOS } from '@features/shared/model/constants';
+import { PlatformOS } from '../constants';
 
 export const copyToClipboard = async (text: string) => {
   const safe = text || '';

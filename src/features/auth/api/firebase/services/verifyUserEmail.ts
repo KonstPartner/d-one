@@ -1,6 +1,6 @@
 import { sendEmailVerification } from 'firebase/auth';
 
-import { auth } from '@features/auth/api/firebase/config';
+import { auth } from '../config';
 
 export const verifyUserEmail = async () => {
   const user = auth.currentUser;

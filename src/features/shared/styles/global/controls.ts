@@ -2,8 +2,9 @@ import { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { css } from '@emotion/native';
 import { Theme } from '@emotion/react';
 
-import { ButtonTone, ControlSize } from '@features/shared/styles/global/types';
 import { toPX } from '@features/theme/model';
+
+import { ButtonTone, ControlSize } from './types';
 
 const buttonBackground = (
   theme: Theme,

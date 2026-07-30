@@ -3,14 +3,16 @@ import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Input, PasswordInput } from '@entities/shared/ui';
+
 import {
   GoogleRegisterPrefill,
   LoginUserFormValues,
   useLoginForm,
-} from '@features/auth/model';
-import * as styles from '@features/auth/styles/forms/AuthForm';
-import GoogleSignInButton from '@features/auth/ui/forms/GoogleSignIn';
-import ResetPasswordModal from '@features/auth/ui/ResetPasswordModal';
+} from '../../model';
+import * as styles from '../../styles/forms/AuthForm';
+import ResetPasswordModal from '../ResetPasswordModal';
+
+import GoogleSignInButton from './GoogleSignIn';
 
 type LogInFormProps = {
   onSubmit: (data: LoginUserFormValues) => Promise<boolean>;

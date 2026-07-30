@@ -3,25 +3,15 @@ import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 import {
   Calendar,
-  CalendarProps,
   CalendarProvider,
   WeekCalendar,
 } from 'react-native-calendars';
 
 import { SegmentedSwitch } from '@entities/shared/ui';
-import { useCalendar } from '@features/shared/model';
-import * as styles from '@features/shared/styles/Calendar';
-import * as globalStyles from '@features/shared/styles/global';
 
-export type CalendarComponentProps = CalendarProps & {
-  showBackToCurrentMonth?: boolean;
-  highlightSelected?: boolean;
-  showWeekToggle?: boolean;
-
-  blockMinDatePress?: boolean;
-  extraDayPaddingBottom?: number;
-  weekHeight?: number;
-};
+import { CalendarComponentProps, useCalendar } from '../model';
+import * as styles from '../styles/Calendar';
+import * as globalStyles from '../styles/global';
 
 const CalendarComponent = ({
   showBackToCurrentMonth = false,

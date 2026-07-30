@@ -1,11 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import { authApi } from '@features/auth/api/authApi';
-import { userQueryKeys } from '@features/auth/api/constants';
-import { LoginUserFormValues } from '@features/auth/model';
 import { errorMapper } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
+
+import { LoginUserFormValues } from '../../model/types/auth';
+import { authApi } from '../authApi';
+import { userQueryKeys } from '../constants';
 
 const useLogin = () => {
   const { t } = useTranslation();

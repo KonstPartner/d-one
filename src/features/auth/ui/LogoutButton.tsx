@@ -3,8 +3,9 @@ import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@entities/shared/ui';
-import { useLogout } from '@features/auth/api/hooks';
-import * as styles from '@features/auth/styles/LogoutButton';
+
+import { useLogout } from '../api/hooks';
+import * as styles from '../styles/LogoutButton';
 
 const LogoutButton = () => {
   const theme = useTheme();

@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 
-import * as styles from '@entities/shared/styles/SegmentedSwitch';
+import * as styles from '../styles/SegmentedSwitch';
 
 export type SegmentedSwitchOption<T extends string> = {
   value: T;

@@ -7,10 +7,11 @@ import {
 import { css } from '@emotion/native';
 import { Theme } from '@emotion/react';
 
-import * as controls from '@features/shared/styles/global/controls';
-import * as surfaces from '@features/shared/styles/global/surfaces';
-import * as typography from '@features/shared/styles/global/typography';
 import { toPX } from '@features/theme/model';
+
+import * as controls from './controls';
+import * as surfaces from './surfaces';
+import * as typography from './typography';
 
 type LegacyActionStyle = StyleProp<ViewStyle> & StyleProp<TextStyleProp>;
 

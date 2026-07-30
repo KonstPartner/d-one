@@ -9,10 +9,11 @@ import {
 } from 'react-native';
 import { useTheme } from '@emotion/react';
 
-import * as styles from '@entities/shared/styles/Input';
 import { ValidateInputType } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
 import InvalidMessageText from '@features/shared/ui/InvalidMessageText';
+
+import * as styles from '../styles/Input';
 
 export type InputProps = TextInputProps & {
   style?: StyleProp<TextStyle>;

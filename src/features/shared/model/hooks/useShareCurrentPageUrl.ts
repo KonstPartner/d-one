@@ -1,9 +1,10 @@
 import { useCallback, useMemo } from 'react';
 import { useLocalSearchParams, usePathname } from 'expo-router';
 
-import { envConfig } from '@features/shared/model/constants';
-import useShareContent from '@features/shared/model/hooks/useShareContent';
-import { buildShareUrl } from '@features/shared/model/utils/buildShareUrl';
+import { envConfig } from '../constants';
+import { buildShareUrl } from '../utils/buildShareUrl';
+
+import useShareContent from './useShareContent';
 
 type SearchParamsValue = string | string[] | undefined;
 

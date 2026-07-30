@@ -2,12 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AuthSessionResult } from 'expo-auth-session';
 import { useTranslation } from 'react-i18next';
 
-import { userQueryKeys } from '@features/auth/api/constants';
-import { loginWithGoogle } from '@features/auth/api/firebase';
-import type { UserData } from '@features/auth/model/types';
-import { getIdTokenFromResponse } from '@features/auth/model/utils';
 import { errorMapper } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
+
+import type { UserData } from '../../model/types';
+import { getIdTokenFromResponse } from '../../model/utils';
+import { userQueryKeys } from '../constants';
+import { loginWithGoogle } from '../firebase';
 
 const useGoogleAuth = () => {
   const { t } = useTranslation();

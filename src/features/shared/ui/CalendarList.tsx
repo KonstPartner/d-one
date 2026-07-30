@@ -1,8 +1,8 @@
 import { Pressable, Text, View } from 'react-native';
 import { CalendarList } from 'react-native-calendars';
 
-import { useListCalendar } from '@features/shared/model';
-import * as globalStyles from '@features/shared/styles/global';
+import { useListCalendar } from '../model';
+import * as globalStyles from '../styles/global';
 
 type Props = {
   currentDateString: string;

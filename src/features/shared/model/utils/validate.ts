@@ -1,6 +1,7 @@
 import { i18n } from '@features/i18n/model';
-import { ValidateInputType } from '@features/shared/model/types';
-import { showNotification } from '@features/shared/ui/Notification';
+
+import { showNotification } from '../../ui/Notification';
+import { ValidateInputType } from '../types';
 
 type ValidationKey = `common.validation.${string}`;
 

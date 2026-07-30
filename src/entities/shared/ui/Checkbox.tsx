@@ -3,8 +3,9 @@ import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 
-import * as styles from '@entities/shared/styles/Checkbox';
 import * as globalStyles from '@features/shared/styles/global';
+
+import * as styles from '../styles/Checkbox';
 
 const Checkbox = ({
   onPress,

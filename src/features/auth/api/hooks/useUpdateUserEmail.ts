@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { verifyBeforeUpdateEmail } from 'firebase/auth';
 import { useTranslation } from 'react-i18next';
 
-import { useAuth } from '@features/auth/model/context';
 import { errorMapper, validateInput } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
+
+import { useAuth } from '../../model/context';
 
 type UiMode = 'view' | 'edit' | 'sent';
 

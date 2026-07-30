@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import type { UserData } from '@features/auth/model/types';
+import type { UserData } from '../types';
 
 const LOCAL_PROFILE_KEY = 'auth.profile';
 

@@ -4,9 +4,11 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import * as styles from '@entities/shared/styles/Input';
-import Input, { InputProps } from '@entities/shared/ui/Input';
 import * as globalStyles from '@features/shared/styles/global';
+
+import * as styles from '../styles/Input';
+
+import Input, { InputProps } from './Input';
 
 const PasswordInput = (props: InputProps) => {
   const { t } = useTranslation();

@@ -4,9 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import { LoadingView } from '@entities/shared/ui';
-import type { GoogleRegisterPrefill } from '@features/auth/model';
-import { useGoogleSignInButton } from '@features/auth/model';
-import * as styles from '@features/auth/styles/forms/GoogleSignIn';
+
+import type { GoogleRegisterPrefill } from '../../model';
+import { useGoogleSignInButton } from '../../model';
+import * as styles from '../../styles/forms/GoogleSignIn';
 
 type GoogleSignInButtonProps = {
   onRegister: (prefill: GoogleRegisterPrefill) => void;

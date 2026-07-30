@@ -1,7 +1,7 @@
 import { doc, getDoc } from 'firebase/firestore';
 
-import { db } from '@features/auth/api/firebase/config';
-import type { UserData } from '@features/auth/model';
+import type { UserData } from '../../../model';
+import { db } from '../config';
 
 export const getUserProfile = async (uid: string): Promise<UserData> => {
   const snapshot = await getDoc(doc(db, 'users', uid));

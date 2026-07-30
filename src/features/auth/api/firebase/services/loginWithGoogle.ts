@@ -4,9 +4,10 @@ import {
   signOut,
 } from 'firebase/auth';
 
-import { auth } from '@features/auth/api/firebase/config';
-import { getUserProfile } from '@features/auth/api/firebase/services/getUserProfile';
-import type { UserData } from '@features/auth/model/types';
+import type { UserData } from '../../../model/types';
+import { auth } from '../config';
+
+import { getUserProfile } from './getUserProfile';
 
 export const loginWithGoogle = async (idToken: string): Promise<UserData> => {
   const credential = GoogleAuthProvider.credential(idToken);

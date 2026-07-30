@@ -1,9 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import { auth } from '@features/auth/api/firebase/config';
 import { errorMapper } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
+
+import { auth } from '../firebase/config';
 
 const useCheckVerifiedEmail = () => {
   const { t } = useTranslation();

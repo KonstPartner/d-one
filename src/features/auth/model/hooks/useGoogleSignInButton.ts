@@ -2,24 +2,25 @@ import { useCallback, useRef, useState } from 'react';
 import * as Google from 'expo-auth-session/providers/google';
 import { Href, router, usePathname } from 'expo-router';
 
-import { useGoogleAuth } from '@features/auth/api';
-import { checkUserExistsByEmail } from '@features/auth/api/firebase';
+import { errorMapper } from '@features/shared/model';
+import { showNotification } from '@features/shared/ui';
+
+import { useGoogleAuth } from '../../api';
+import { checkUserExistsByEmail } from '../../api/firebase';
 import {
   getGoogleClientId,
   GOOGLE_AUTH_REDIRECT_URI,
   GOOGLE_AUTH_SCOPES,
   googleClientIds,
-} from '@features/auth/model/constants';
-import { useAuth } from '@features/auth/model/context';
-import type { GoogleRegisterPrefill } from '@features/auth/model/types';
+} from '../constants';
+import { useAuth } from '../context';
+import type { GoogleRegisterPrefill } from '../types';
 import {
   buildGoogleRegisterPrefill,
   exchangeGoogleCodeForIdToken,
   getIdTokenFromResponse,
   withIdTokenResponse,
-} from '@features/auth/model/utils';
-import { errorMapper } from '@features/shared/model';
-import { showNotification } from '@features/shared/ui';
+} from '../utils';
 
 type UseGoogleSignInButtonParams = {
   onRegister: (data: GoogleRegisterPrefill) => void;

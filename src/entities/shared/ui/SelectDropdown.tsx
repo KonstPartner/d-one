@@ -3,18 +3,10 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 
-import * as styles from '@entities/shared/styles/SelectDropdown';
+import { SelectDropdownOption } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
 
-export type SelectDropdownTone = 'primary' | 'success' | 'warning' | 'danger';
-
-export type SelectDropdownOption<T> = {
-  value: T;
-  label: string;
-  key?: string;
-  icon?: keyof typeof Ionicons.glyphMap;
-  tone?: SelectDropdownTone;
-};
+import * as styles from '../styles/SelectDropdown';
 
 type SelectDropdownProps<T> = {
   label?: string;

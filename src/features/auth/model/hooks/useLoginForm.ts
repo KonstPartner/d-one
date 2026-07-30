@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { LoginUserFormValues } from '@features/auth/model';
+import { LoginUserFormValues } from '../types/auth';
 
 const useLoginForm = ({
   onSubmit,

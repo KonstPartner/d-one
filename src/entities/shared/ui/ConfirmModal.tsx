@@ -2,8 +2,9 @@ import { Modal, StyleProp, Text, View, ViewStyle } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
-import Button from '@entities/shared/ui/Button';
 import * as globalStyles from '@features/shared/styles/global';
+
+import Button from './Button';
 
 const ConfirmModal = ({
   title,

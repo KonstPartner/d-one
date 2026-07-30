@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { RegisterUserFormValues } from '@features/auth/model';
 import { validateInput } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
+
+import { RegisterUserFormValues } from '../types/auth';
 
 const useRegisterForm = ({
   onSubmit,

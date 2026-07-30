@@ -1,5 +1,6 @@
 import { i18n } from '@features/i18n/model';
-import { errorMapper } from '@features/shared/model/utils/error';
+
+import { errorMapper } from '../error';
 
 jest.mock('@features/i18n/model', () => ({
   i18n: {

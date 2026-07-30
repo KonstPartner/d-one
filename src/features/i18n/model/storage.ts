@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import type { AppLanguage } from '@features/i18n/model/resources';
+import type { AppLanguage } from './resources';
 
 const KEY = 'app_language';
 

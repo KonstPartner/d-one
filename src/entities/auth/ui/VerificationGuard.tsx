@@ -4,11 +4,12 @@ import { useTheme } from '@emotion/react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import * as styles from '@entities/auth/styles/VerificationGuard';
 import { Button, LoadingView, Spinner } from '@entities/shared/ui';
 import { useAuthData } from '@features/auth/api/hooks';
 import { useAuth } from '@features/auth/model';
 import * as globalStyles from '@features/shared/styles/global';
+
+import * as styles from '../styles/VerificationGuard';
 
 const VerificationGuard = ({
   children,

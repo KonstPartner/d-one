@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 
 import { HeaderMenuSettings } from '@entities/header/ui';
-import type { HeaderMenuItem } from '@features/header/model';
+
+import type { HeaderMenuItem } from '..';
 
 const useToggle = (initial = false) => {
   const [visible, setVisible] = useState(initial);

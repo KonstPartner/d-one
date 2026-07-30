@@ -1,15 +1,10 @@
 import type { AuthSessionResult } from 'expo-auth-session';
 import * as AuthSession from 'expo-auth-session';
 
-import {
-  GOOGLE_AUTH_REDIRECT_URI,
-  GOOGLE_DISCOVERY,
-} from '@features/auth/model/constants';
-import type {
-  GoogleIdTokenPayload,
-  GoogleRegisterPrefill,
-} from '@features/auth/model/types';
 import { decodeJwtPayload } from '@features/shared/model';
+
+import { GOOGLE_AUTH_REDIRECT_URI, GOOGLE_DISCOVERY } from '../constants';
+import type { GoogleIdTokenPayload, GoogleRegisterPrefill } from '../types';
 
 export const getIdTokenFromResponse = (
   response: AuthSessionResult

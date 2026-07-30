@@ -4,10 +4,12 @@ import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import * as styles from '@entities/shared/styles/Loader';
-import ErrorSection from '@entities/shared/ui/Error';
-import Spinner from '@entities/shared/ui/Spinner';
 import { errorMapper, ErrorType } from '@features/shared/model';
+
+import * as styles from '../styles/Loader';
+
+import ErrorSection from './Error';
+import Spinner from './Spinner';
 
 type LoaderProps = {
   children: ReactNode;

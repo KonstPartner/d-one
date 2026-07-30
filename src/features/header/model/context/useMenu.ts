@@ -2,10 +2,7 @@ import { useCallback, useId } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { usePathname } from 'expo-router';
 
-import {
-  HeaderMenuItem,
-  useHeaderMenuContext,
-} from '@features/header/model/context/menu';
+import { HeaderMenuItem, useHeaderMenuContext } from './menu';
 
 const useHeaderMenu = (items: HeaderMenuItem[], deps: unknown[] = []) => {
   const pathname = usePathname();

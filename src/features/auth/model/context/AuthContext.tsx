@@ -8,8 +8,8 @@ import {
 } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
-import { auth } from '@features/auth/api/firebase/config';
-import { clearAuthSessionData } from '@features/auth/model/utils';
+import { auth } from '../../api/firebase/config';
+import { clearAuthSessionData } from '../utils';
 
 type AuthContextValue = {
   authUser: User | null;

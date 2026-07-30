@@ -7,8 +7,9 @@ import { DateData } from 'react-native-calendars';
 
 import { calendarThemeStyles } from '@entities/shared/constants';
 import { i18n } from '@features/i18n/model';
-import { dateKit } from '@features/shared/model/constants/date';
-import { CalendarComponentProps } from '@features/shared/ui';
+
+import { dateKit } from '../constants/date';
+import { CalendarComponentProps } from '../types';
 
 const getSelectedDateFromMarkedDates = (markedDates: any | undefined) => {
   if (!markedDates) {

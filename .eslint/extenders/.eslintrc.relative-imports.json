@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "prefer-relative-self-slice-import": [
+      "error",
+      {
+        "srcDir": "src"
+      }
+    ]
+  }
+}

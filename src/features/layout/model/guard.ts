@@ -1,4 +1,5 @@
 import { UserRole } from '@features/auth/model';
+
 import {
   AUTH_PATH,
   DIARY_PATH,
@@ -8,8 +9,8 @@ import {
   PENDING_PATHS,
   UNVERIFIED_PATHS,
   USER_PATHS,
-} from '@features/layout/model/constants';
-import { isPathAllowed, normalizePath } from '@features/layout/model/path';
+} from './constants';
+import { isPathAllowed, normalizePath } from './path';
 
 type GetGuardRedirectPathParams = {
   pathname: string;

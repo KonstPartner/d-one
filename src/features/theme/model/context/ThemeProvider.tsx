@@ -11,8 +11,8 @@ import { Appearance, useColorScheme } from 'react-native';
 import { ThemeProvider } from '@emotion/react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { darkTheme, lightTheme } from '@features/theme/model/tokens';
-import { Mode } from '@features/theme/model/types';
+import { darkTheme, lightTheme } from '../tokens';
+import { Mode } from '../types';
 
 type Ctx = {
   mode: Mode;

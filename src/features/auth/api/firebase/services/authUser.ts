@@ -5,8 +5,11 @@ import {
   User,
 } from 'firebase/auth';
 
-import { auth } from '@features/auth/api/firebase/config';
-import { LoginUserFormValues, RegisterUserPayload } from '@features/auth/model';
+import {
+  LoginUserFormValues,
+  RegisterUserPayload,
+} from '../../../model/types/auth';
+import { auth } from '../config';
 
 export const loginAuthUser = async (
   payload: LoginUserFormValues

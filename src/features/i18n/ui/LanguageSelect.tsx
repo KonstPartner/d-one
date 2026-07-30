@@ -3,14 +3,10 @@ import { Modal, Pressable, Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  AppLanguage,
-  i18n,
-  saveLanguage,
-  setAppLanguage,
-} from '@features/i18n/model';
-import * as styles from '@features/i18n/styles/LanguageSelect';
 import * as globalStyles from '@features/shared/styles/global';
+
+import { AppLanguage, i18n, saveLanguage, setAppLanguage } from '../model';
+import * as styles from '../styles/LanguageSelect';
 
 type Option = { value: AppLanguage; label: string };
 

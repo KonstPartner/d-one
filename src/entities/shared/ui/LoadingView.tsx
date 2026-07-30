@@ -1,8 +1,9 @@
 import { ReactNode } from 'react';
 import { View } from 'react-native';
 
-import * as styles from '@entities/shared/styles/LoadingView';
-import Spinner from '@entities/shared/ui/Spinner';
+import * as styles from '../styles/LoadingView';
+
+import Spinner from './Spinner';
 
 const LoadingView = ({
   loading = true,

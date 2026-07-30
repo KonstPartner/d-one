@@ -15,11 +15,13 @@
     "web": "expo start --web",
     "deploy-web": "rm -rf dist && expo export --platform web && eas deploy --prod",
     "test": "jest --watchAll",
+    "test-check": "jest --ci --bail --runInBand --passWithNoTests",
     "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
-    "lint": "eslint ./src/ --ext .js,.jsx,.ts,.tsx",
-    "lint-fix": "eslint --fix ./src/ --ext .js,.jsx,.ts,.tsx -c .eslintrc.imports.json",
+    "lint-fix": "npm run lint-fix:relative && npm run lint-fix:imports",
     "lint:errors-only": "eslint ./src/ --ext .js,.jsx,.ts,.tsx --quiet",
-    "prepare": "husky install .husky"
+    "prepare": "husky install .husky",
+    "lint-fix:relative": "eslint --fix ./src/ --ext .js,.jsx,.ts,.tsx -c ./.eslint/extenders/.eslintrc.relative-imports.json --rulesdir ./.eslint/rules",
+    "lint-fix:imports": "eslint --fix ./src/ --ext .js,.jsx,.ts,.tsx -c ./.eslint/extenders/.eslintrc.imports.json"
   },
   "jest": {
     "preset": "jest-expo"
@@ -95,6 +97,8 @@
     "babel-plugin-module-resolver": "^5.0.2",
     "baseline-browser-mapping": "^2.9.16",
     "eslint": "^8.17.0",
+    "eslint-import-resolver-typescript": "2.7.1",
+    "eslint-plugin-import": "2.31.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-native": "^4.1.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useCheckVerifiedEmail } from '@features/auth/api';
-import { verifyUserEmail } from '@features/auth/api/firebase/services';
-import { useAuth } from '@features/auth/model/context/AuthContext';
 import { errorMapper } from '@features/shared/model/utils/error';
 import { showNotification } from '@features/shared/ui';
+
+import { useCheckVerifiedEmail } from '../../api';
+import { verifyUserEmail } from '../../api/firebase/services';
+import { useAuth } from '../context/AuthContext';
 
 const useVerifyEmailButtons = () => {
   const { t } = useTranslation();

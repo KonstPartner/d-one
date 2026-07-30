@@ -2,9 +2,10 @@ import { Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 
 import { Button } from '@entities/shared/ui';
-import { useAuth } from '@features/auth/model';
-import { useVerifyEmailButtons } from '@features/auth/model/hooks';
-import * as styles from '@features/auth/styles/VerifyEmail';
+
+import { useAuth } from '../model';
+import { useVerifyEmailButtons } from '../model/hooks';
+import * as styles from '../styles/VerifyEmail';
 
 const VerifyEmail = () => {
   const theme = useTheme();

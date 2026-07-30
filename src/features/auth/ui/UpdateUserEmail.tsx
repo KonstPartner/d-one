@@ -2,8 +2,9 @@ import { Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 
 import { Button, Input } from '@entities/shared/ui';
-import { useAuthData, useUpdateUserEmail } from '@features/auth/api/hooks';
 import * as globalStyles from '@features/shared/styles/global';
+
+import { useAuthData, useUpdateUserEmail } from '../api/hooks';
 
 const UpdateUserEmail = () => {
   const theme = useTheme();

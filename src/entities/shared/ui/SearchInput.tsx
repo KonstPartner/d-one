@@ -3,8 +3,9 @@ import { Pressable, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 
-import * as styles from '@entities/shared/styles/SearchInput';
-import Input, { InputProps } from '@entities/shared/ui/Input';
+import * as styles from '../styles/SearchInput';
+
+import Input, { InputProps } from './Input';
 
 const SearchInput = (
   props: InputProps & {

@@ -3,8 +3,9 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 
 import * as globalStyles from '@features/shared/styles/global';
-import { useThemeMode } from '@features/theme/model';
-import * as styles from '@features/theme/styles/Switcher';
+
+import { useThemeMode } from '../model';
+import * as styles from '../styles/Switcher';
 
 const ThemeSwitcher = () => {
   const { mode, setMode } = useThemeMode();

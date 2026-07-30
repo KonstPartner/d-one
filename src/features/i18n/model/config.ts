@@ -1,12 +1,12 @@
-import '@features/i18n/model/calendar';
+import './calendar';
 
 import * as Localization from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { LocaleConfig } from 'react-native-calendars';
 
-import { AppLanguage, resources } from '@features/i18n/model/resources';
-import { getSavedLanguage } from '@features/i18n/model/storage';
+import { AppLanguage, resources } from './resources';
+import { getSavedLanguage } from './storage';
 
 const FALLBACK: AppLanguage = 'en';
 i18n.on('languageChanged', (lng) => {

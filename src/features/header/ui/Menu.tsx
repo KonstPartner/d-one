@@ -6,13 +6,14 @@ import { usePathname } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import Popover from 'react-native-popover-view';
 
+import * as globalStyles from '@features/shared/styles/global';
+
 import {
   HeaderMenuItem,
   useHeaderBaseMenu,
   useHeaderMenuContext,
-} from '@features/header/model';
-import * as styles from '@features/header/styles/Menu';
-import * as globalStyles from '@features/shared/styles/global';
+} from '../model';
+import * as styles from '../styles/Menu';
 
 const HeaderMenu = ({ color }: { color?: string }) => {
   const theme = useTheme();

@@ -1,13 +1,14 @@
-import { FirebaseError } from 'firebase/app';
 import type { User } from 'firebase/auth';
 
-import { getUserProfile } from '@features/auth/api/firebase/services';
-import type { UserData } from '@features/auth/model';
+import { useNetworkStore } from '@features/network/model/context/store';
+
 import {
   getLocalUserProfile,
   saveLocalUserProfile,
-} from '@features/auth/model/context';
-import { useNetworkStore } from '@features/network/model';
+} from '../model/context/localProfileStorage';
+import type { UserData } from '../model/types';
+
+import { getUserProfile } from './firebase/services/getUserProfile';
 
 const TEMPORARY_ERROR_CODES = new Set([
   'unavailable',
@@ -15,8 +16,14 @@ const TEMPORARY_ERROR_CODES = new Set([
   'auth/network-request-failed',
 ]);
 
+const hasErrorCode = (error: unknown): error is { code: string } =>
+  typeof error === 'object' &&
+  error !== null &&
+  'code' in error &&
+  typeof error.code === 'string';
+
 const isTemporaryNetworkError = (error: unknown): boolean =>
-  error instanceof FirebaseError && TEMPORARY_ERROR_CODES.has(error.code);
+  hasErrorCode(error) && TEMPORARY_ERROR_CODES.has(error.code);
 
 const getCachedUserProfile = async (uid: string): Promise<UserData> => {
   const profile = await getLocalUserProfile(uid);

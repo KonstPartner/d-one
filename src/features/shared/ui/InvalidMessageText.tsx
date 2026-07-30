@@ -1,8 +1,8 @@
 import { Text } from 'react-native';
 
-import { ValidateInputType } from '@features/shared/model/types';
-import { validateInput } from '@features/shared/model/utils/validate';
-import * as styles from '@features/shared/styles/InvalidMessageText';
+import { ValidateInputType } from '../model/types';
+import { validateInput } from '../model/utils/validate';
+import * as styles from '../styles/InvalidMessageText';
 
 const InvalidMessageText = ({
   field,

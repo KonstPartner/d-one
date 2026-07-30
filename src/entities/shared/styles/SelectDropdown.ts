@@ -2,7 +2,7 @@ import { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { css } from '@emotion/native';
 import { Theme } from '@emotion/react';
 
-import { SelectDropdownTone } from '@entities/shared/ui/SelectDropdown';
+import { SelectDropdownTone } from '@features/shared/model';
 import { toPX } from '@features/theme/model';
 
 export const getToneColor = (theme: Theme, tone: SelectDropdownTone) => {

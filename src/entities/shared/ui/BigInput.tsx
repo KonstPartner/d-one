@@ -9,9 +9,11 @@ import {
 } from 'react-native';
 import { useTheme } from '@emotion/react';
 
-import * as styles from '@entities/shared/styles/BigInput';
-import Input from '@entities/shared/ui/Input';
 import { ValidateInput } from '@features/shared/model';
+
+import * as styles from '../styles/BigInput';
+
+import Input from './Input';
 
 type BigInputProps = Omit<TextInputProps, 'value' | 'onChangeText'> & {
   style?: StyleProp<TextStyle>;

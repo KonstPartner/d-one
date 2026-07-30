@@ -1,8 +1,8 @@
 import { User } from 'firebase/auth';
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 
-import { db } from '@features/auth/api/firebase/config';
-import type { UserData } from '@features/auth/model';
+import type { UserData } from '../../../model';
+import { db } from '../config';
 
 export const createUserProfile = async (
   user: User,

@@ -1,10 +1,7 @@
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { create } from 'zustand';
 
-import type {
-  ConnectionState,
-  NetworkStore,
-} from '@features/network/model/types';
+import type { ConnectionState, NetworkStore } from '../types';
 
 const resolveConnectionState = (
   networkState: NetInfoState

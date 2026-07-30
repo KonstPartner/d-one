@@ -14,8 +14,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ToastProvider, { Toast } from 'toastify-react-native';
 
 import { i18n } from '@features/i18n/model';
-import * as globalStyles from '@features/shared/styles/global';
-import * as styles from '@features/shared/styles/Notifications';
+
+import * as globalStyles from '../styles/global';
+import * as styles from '../styles/Notifications';
 
 type NotificationType = 'success' | 'error' | 'info' | 'warn';
 

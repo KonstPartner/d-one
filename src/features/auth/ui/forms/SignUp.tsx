@@ -4,12 +4,13 @@ import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Input, PasswordInput } from '@entities/shared/ui';
+
 import {
   GoogleRegisterPrefill,
   RegisterUserFormValues,
   useRegisterForm,
-} from '@features/auth/model';
-import * as styles from '@features/auth/styles/forms/AuthForm';
+} from '../../model';
+import * as styles from '../../styles/forms/AuthForm';
 
 type SignUpFormProps = {
   onSubmit: (data: RegisterUserFormValues) => Promise<boolean>;

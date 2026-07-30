@@ -2,13 +2,9 @@ import { StyleProp, TextStyle } from 'react-native';
 import { css } from '@emotion/native';
 import { Theme } from '@emotion/react';
 
-import {
-  TextTone,
-  ThemeLineHeight,
-  ThemeSize,
-  ThemeWeight,
-} from '@features/shared/styles/global/types';
 import { toPX } from '@features/theme/model';
+
+import { TextTone, ThemeLineHeight, ThemeSize, ThemeWeight } from './types';
 
 const textColor = (theme: Theme, tone: TextTone) => {
   if (tone === 'muted') {

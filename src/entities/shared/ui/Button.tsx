@@ -7,8 +7,9 @@ import {
   ViewStyle,
 } from 'react-native';
 
-import * as styles from '@entities/shared/styles/Button';
-import Spinner from '@entities/shared/ui/Spinner';
+import * as styles from '../styles/Button';
+
+import Spinner from './Spinner';
 
 type ButtonProps = TouchableOpacityProps & {
   onPress: () => void;

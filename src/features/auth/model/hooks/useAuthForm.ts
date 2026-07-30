@@ -1,14 +1,15 @@
 import { useState } from 'react';
 
-import useLogin from '@features/auth/api/hooks/useLogin';
-import useRegister from '@features/auth/api/hooks/useRegister';
-import { useAuth } from '@features/auth/model/context';
+import { showNotification } from '@features/shared/ui';
+
+import useLogin from '../../api/hooks/useLogin';
+import useRegister from '../../api/hooks/useRegister';
+import { useAuth } from '../context';
 import {
   AuthFormMode,
   LoginUserFormValues,
   RegisterUserFormValues,
-} from '@features/auth/model/types/auth';
-import { showNotification } from '@features/shared/ui';
+} from '../types/auth';
 
 const useAuthForm = () => {
   const { authUser } = useAuth();

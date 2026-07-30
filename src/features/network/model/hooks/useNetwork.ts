@@ -1,4 +1,4 @@
-import { useNetworkStore } from '@features/network/model/context';
+import { useNetworkStore } from '../context';
 
 export const useNetwork = () => {
   const status = useNetworkStore((state) => state.connectionState);
