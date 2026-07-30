@@ -6,10 +6,10 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 
 import { auth } from '../../api/firebase/config';
-import { clearAuthSessionData } from '../utils';
+import { clearAuthSessionData } from '../utils/clearAuthSessionData';
 
 type AuthContextValue = {
   authUser: User | null;

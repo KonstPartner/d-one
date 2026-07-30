@@ -1,3 +1,4 @@
+import { View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
@@ -7,11 +8,14 @@ import { useAuthData } from '@features/auth/api';
 import { UserRole } from '@features/auth/model';
 import { HeaderMenu } from '@features/header/ui';
 import { headerTabs } from '@features/layout/model';
+import { useNetwork } from '@features/network/model';
+import * as globalStyles from '@features/shared/styles/global';
 
 const TabsRoot = () => {
   const theme = useTheme();
   const { t } = useTranslation();
   const { authData } = useAuthData();
+  const { status } = useNetwork();
 
   const role = authData?.role ?? null;
 
@@ -19,11 +23,25 @@ const TabsRoot = () => {
   const isUser = role === UserRole.User;
   const isFollower = role === UserRole.Follower;
 
+  const iconName: keyof typeof Ionicons.glyphMap =
+    status === 'online'
+      ? 'wifi'
+      : status === 'offline'
+        ? 'cloud-offline-outline'
+        : 'help-circle-outline';
+
   return (
     <Tabs
       screenOptions={headerTabs({
         theme,
-        headerRight: () => <HeaderMenu />,
+        headerRight: () => (
+          <View
+            style={globalStyles.ContainerFlex('row', 'center', 'center', 10)}
+          >
+            <Ionicons name={iconName} size={20} color={theme.colors.text} />
+            <HeaderMenu />
+          </View>
+        ),
       })}
     >
       <Tabs.Screen

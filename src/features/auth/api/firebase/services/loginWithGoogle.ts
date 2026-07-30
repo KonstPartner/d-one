@@ -4,6 +4,7 @@ import {
   signOut,
 } from 'firebase/auth';
 
+import { saveLocalUserProfile } from '../../../model/context/localProfileStorage';
 import type { UserData } from '../../../model/types';
 import { auth } from '../config';
 
@@ -15,7 +16,11 @@ export const loginWithGoogle = async (idToken: string): Promise<UserData> => {
   const userCredential = await signInWithCredential(auth, credential);
 
   try {
-    return await getUserProfile(userCredential.user.uid);
+    const profile = await getUserProfile(userCredential.user.uid);
+
+    await saveLocalUserProfile(profile);
+
+    return profile;
   } catch (error) {
     await signOut(auth);
 

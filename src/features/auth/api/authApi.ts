@@ -1,17 +1,18 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { User } from 'firebase/auth';
 
-import { FORCE_CACHE } from '@features/shared/api';
+import { FORCE_CACHE } from '@features/shared/api/constants';
 
+import { saveLocalUserProfile } from '../model/context/localProfileStorage';
 import type {
   LoginUserFormValues,
   RegisterUserPayload,
   UserData,
-} from '../model';
-import { saveLocalUserProfile } from '../model/context';
+} from '../model/types';
 
 import { userQueryKeys } from './constants';
-import { loginAuthUser, registerAuthUser } from './firebase/services';
+import { loginAuthUser } from './firebase/services/authUser';
+import { registerAuthUser } from './firebase/services/authUser';
 import { createUserProfile } from './firebase/services/createUserProfile';
 import { getUserData } from './getUserData';
 
