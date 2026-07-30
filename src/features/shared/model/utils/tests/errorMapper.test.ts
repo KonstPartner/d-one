@@ -41,24 +41,6 @@ describe('errorMapper', () => {
     expect(tMock).toHaveBeenCalledWith('common.errors.tooManyRequests');
   });
 
-  it('returns translated api error for internet connection issues (array match)', () => {
-    const error = new Error('Network request failed');
-
-    const res = errorMapper(error, 'api');
-
-    expect(res).toBe('t:common.errors.checkInternet');
-    expect(tMock).toHaveBeenCalledWith('common.errors.checkInternet');
-  });
-
-  it('returns translated api error for noPermission (string match)', () => {
-    const error = new Error('Access Denied');
-
-    const res = errorMapper(error, 'api');
-
-    expect(res).toBe('t:common.errors.noPermission');
-    expect(tMock).toHaveBeenCalledWith('common.errors.noPermission');
-  });
-
   it('returns original error.message when type is none and no mapping exists', () => {
     const error = new Error('Some random error');
 

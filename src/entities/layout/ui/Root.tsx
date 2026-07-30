@@ -10,6 +10,7 @@ import Routs from '@entities/layout/ui/Routs';
 import { AuthProvider } from '@features/auth/model';
 import { HeaderMenuProvider } from '@features/header/model';
 import { initI18n } from '@features/i18n/model';
+import { startNetworkListener } from '@features/network/model';
 import { queryClient } from '@features/shared/api';
 import { PlatformOS } from '@features/shared/model';
 import { Notification } from '@features/shared/ui';
@@ -22,6 +23,10 @@ const RootLayout = () => {
 
   useEffect(() => {
     initI18n().finally(() => setReady(true));
+  }, []);
+
+  useEffect(() => {
+    return startNetworkListener();
   }, []);
 
   if (!ready) {
@@ -37,6 +42,7 @@ const RootLayout = () => {
               <HeaderMenuProvider>
                 <AppGuard>
                   <Routs />
+
                   {PlatformOS.WEB && (
                     <ReactQueryDevtools initialIsOpen={false} />
                   )}

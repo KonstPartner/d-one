@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 
 import { userQueryKeys } from '@features/auth/api/constants';
 import {
@@ -7,12 +7,14 @@ import {
   registerAuthUser,
 } from '@features/auth/api/firebase/services';
 import { createUserProfile } from '@features/auth/api/firebase/services/createUserProfile';
-import { getUserProfile } from '@features/auth/api/firebase/services/getUserProfile';
-import {
+import { getUserData } from '@features/auth/api/getUserData';
+import type {
   LoginUserFormValues,
   RegisterUserPayload,
   UserData,
 } from '@features/auth/model';
+import { saveLocalUserProfile } from '@features/auth/model/context';
+import { FORCE_CACHE } from '@features/shared/api';
 
 export const authApi = {
   baseKey: 'auth',
@@ -28,17 +30,17 @@ export const authApi = {
           throw new Error('custom/no-user-is-currently-logged-in');
         }
 
-        return getUserProfile(authUser.uid);
+        return getUserData(authUser);
       },
 
       enabled: Boolean(authUser),
-      staleTime: Infinity,
+      ...FORCE_CACHE,
     }),
 
   loginWithEmail: async (payload: LoginUserFormValues): Promise<UserData> => {
     const user = await loginAuthUser(payload);
 
-    return getUserProfile(user.uid);
+    return getUserData(user);
   },
 
   registerWithEmail: async (
@@ -46,6 +48,10 @@ export const authApi = {
   ): Promise<UserData> => {
     const user = await registerAuthUser(payload);
 
-    return createUserProfile(user, payload.nickname);
+    const profile = await createUserProfile(user, payload.nickname);
+
+    await saveLocalUserProfile(profile);
+
+    return profile;
   },
 };
