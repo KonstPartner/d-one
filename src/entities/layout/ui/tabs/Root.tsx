@@ -1,19 +1,49 @@
+import { type PropsWithChildren } from 'react';
 import { View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { ErrorSection, LoadingView } from '@entities/shared/ui';
 import { useAuthData } from '@features/auth/api';
-import { UserRole } from '@features/auth/model';
+import { useAuth, UserRole } from '@features/auth/model';
+import {
+  DiaryDatabaseProvider,
+  useDiaryDatabase,
+} from '@features/diary/api/sqlite';
 import { HeaderMenu } from '@features/header/ui';
 import { headerTabs } from '@features/layout/model';
 import { useNetwork } from '@features/network/model';
+import { PlatformOS } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
+
+const supportsLocalDiary = PlatformOS.ANDROID || PlatformOS.IOS;
+
+const DiaryDatabaseBoundary = ({ children }: PropsWithChildren) => {
+  const { t } = useTranslation();
+  const { status, retry } = useDiaryDatabase();
+
+  if (status === 'opening') {
+    return <LoadingView loading />;
+  }
+
+  if (status === 'error') {
+    return (
+      <ErrorSection
+        callback={retry}
+        error={t('diary.database.initializationFailed')}
+      />
+    );
+  }
+
+  return <>{children}</>;
+};
 
 const TabsRoot = () => {
   const theme = useTheme();
   const { t } = useTranslation();
+  const { authUser } = useAuth();
   const { authData } = useAuthData();
   const { status } = useNetwork();
 
@@ -30,7 +60,7 @@ const TabsRoot = () => {
         ? 'cloud-offline-outline'
         : 'help-circle-outline';
 
-  return (
+  const tabs = (
     <Tabs
       screenOptions={headerTabs({
         theme,
@@ -103,6 +133,20 @@ const TabsRoot = () => {
         }}
       />
     </Tabs>
+  );
+
+  if (!isUser || !supportsLocalDiary) {
+    return tabs;
+  }
+
+  if (authUser === null) {
+    return <LoadingView loading />;
+  }
+
+  return (
+    <DiaryDatabaseProvider userId={authUser.uid}>
+      <DiaryDatabaseBoundary>{tabs}</DiaryDatabaseBoundary>
+    </DiaryDatabaseProvider>
   );
 };
 

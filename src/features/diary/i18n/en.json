@@ -4,6 +4,9 @@
       "title": "Access pending",
       "roleNotAssigned": "No role has been assigned to your account yet.",
       "description": "The main application features will become available after an administrator assigns you a role."
+    },
+    "database": {
+      "initializationFailed": "Failed to initialize the diary database."
     }
   }
 }

@@ -5,6 +5,9 @@
     "cancel": "Cancel",
     "send": "Send",
     "close": "Close",
+    "actions": {
+      "tryAgain": "Try again"
+    },
     "validation": {
       "required": "This field is required.",
       "email": "Enter a valid email address.",

@@ -5,6 +5,9 @@
     "cancel": "Отмена",
     "send": "Отправить",
     "close": "Закрыть",
+    "actions": {
+      "tryAgain": "Повторить"
+    },
     "validation": {
       "required": "Это поле обязательно.",
       "email": "Введите корректный email.",
