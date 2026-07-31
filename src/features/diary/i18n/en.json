@@ -7,6 +7,10 @@
     },
     "database": {
       "initializationFailed": "Failed to initialize the diary database."
+    },
+    "unsupportedPlatform": {
+      "title": "Diary is unavailable on Web",
+      "description": "Maintaining your diary is available only in the mobile application."
     }
   }
 }

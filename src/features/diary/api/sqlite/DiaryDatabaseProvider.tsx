@@ -7,6 +7,10 @@ import {
   useState,
 } from 'react';
 
+import { queryClient } from '@features/shared/api';
+
+import { diaryQueryKeys } from '../constants';
+
 import { closeDiaryDatabase, openDiaryDatabase } from './diaryDatabase';
 import type { DiaryRepository } from './diaryRepository';
 
@@ -19,13 +23,18 @@ type DiaryDatabaseState = {
   error: Error | null;
 };
 
-type DiaryDatabaseContextValue = Omit<DiaryDatabaseState, 'userId'> & {
+type DiaryDatabaseContextValue = DiaryDatabaseState & {
   retry: () => void;
 };
 
 type DiaryDatabaseProviderProps = PropsWithChildren<{
   userId: string;
 }>;
+
+type ReadyDiaryDatabaseContextValue = {
+  userId: string;
+  repository: DiaryRepository;
+};
 
 const DiaryDatabaseContext = createContext<DiaryDatabaseContextValue | null>(
   null
@@ -43,7 +52,21 @@ const normalizeError = (error: unknown): Error =>
     ? error
     : new Error('Failed to initialize diary database');
 
-const closeDatabase = (): void => {
+const releaseDatabase = (userId: string): void => {
+  const queryKey = diaryQueryKeys.localRoot(userId);
+
+  void queryClient
+    .cancelQueries({
+      queryKey,
+    })
+    .catch((error) => {
+      console.error('Failed to cancel diary queries', error);
+    });
+
+  queryClient.removeQueries({
+    queryKey,
+  });
+
   void closeDiaryDatabase().catch((error) => {
     console.error('Failed to close diary database', error);
   });
@@ -96,7 +119,7 @@ export const DiaryDatabaseProvider = ({
 
     return () => {
       isCurrent = false;
-      closeDatabase();
+      releaseDatabase(userId);
     };
   }, [attempt, userId]);
 
@@ -106,6 +129,7 @@ export const DiaryDatabaseProvider = ({
   return (
     <DiaryDatabaseContext.Provider
       value={{
+        userId: currentState.userId,
         status: currentState.status,
         repository: currentState.repository,
         error: currentState.error,
@@ -127,4 +151,17 @@ export const useDiaryDatabase = (): DiaryDatabaseContextValue => {
   }
 
   return context;
+};
+
+export const useReadyDiaryDatabase = (): ReadyDiaryDatabaseContextValue => {
+  const context = useDiaryDatabase();
+
+  if (context.status !== 'ready' || context.repository === null) {
+    throw new Error('Diary database repository is not ready');
+  }
+
+  return {
+    userId: context.userId,
+    repository: context.repository,
+  };
 };
