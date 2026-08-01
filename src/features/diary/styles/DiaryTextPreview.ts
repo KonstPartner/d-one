@@ -1,6 +1,6 @@
 import { type StyleProp, type ViewStyle } from 'react-native';
 import { css } from '@emotion/native';
-import { Theme } from '@emotion/react';
+import type { Theme } from '@emotion/react';
 
 import * as globalStyles from '@features/shared/styles/global';
 

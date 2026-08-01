@@ -1,157 +1,88 @@
-import { type ComponentProps, memo, useMemo, useState } from 'react';
+import { memo } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
 
-import { dateKit } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
 
 import type { DiaryEntry } from '../model';
+import { useDiaryEntryCard } from '../model/hooks';
 import * as styles from '../styles/DiaryEntryCard';
 
+import DiaryEntryPhoto from './DiaryEntryPhoto';
 import DiaryTextModal from './DiaryTextModal';
 import DiaryTextPreview from './DiaryTextPreview';
 
 type DiaryEntryCardProps = {
   entry: DiaryEntry;
+  isVisible?: boolean;
   synchronizing?: boolean;
   onPress?: (entry: DiaryEntry) => void;
+  onOpenPhoto?: (entry: DiaryEntry) => void;
 };
-
-type DiaryMetric = {
-  key: string;
-  label: string;
-  value: string;
-};
-
-type DiaryTextKey = 'comment' | 'aiAnalysis';
-
-type IoniconName = ComponentProps<typeof Ionicons>['name'];
 
 const DiaryEntryCard = ({
   entry,
+  isVisible = false,
   synchronizing = false,
   onPress,
+  onOpenPhoto,
 }: DiaryEntryCardProps) => {
   const theme = useTheme();
-  const { t, i18n } = useTranslation();
 
-  const [openedText, setOpenedText] = useState<DiaryTextKey | null>(null);
-
-  const locale = i18n.resolvedLanguage ?? i18n.language;
-
-  const dateTimeLabel = dateKit.relativeDateTimeLabel(entry.eventAt);
-
-  const numberFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat(locale, {
-        maximumFractionDigits: 1,
-      }),
-    [locale]
-  );
-
-  const metrics: DiaryMetric[] = [];
-
-  if (entry.glucose !== null) {
-    metrics.push({
-      key: 'glucose',
-      label: t('diary.entry.metrics.glucose'),
-      value: `${numberFormatter.format(entry.glucose)} ${t(
-        'diary.entry.units.glucose'
-      )}`,
-    });
-  }
-
-  if (entry.shortInsulin !== null) {
-    metrics.push({
-      key: 'shortInsulin',
-      label: t('diary.entry.metrics.shortInsulin'),
-      value: `${numberFormatter.format(entry.shortInsulin)} ${t(
-        'diary.entry.units.insulin'
-      )}`,
-    });
-  }
-
-  if (entry.longInsulin !== null) {
-    metrics.push({
-      key: 'longInsulin',
-      label: t('diary.entry.metrics.longInsulin'),
-      value: `${numberFormatter.format(entry.longInsulin)} ${t(
-        'diary.entry.units.insulin'
-      )}`,
-    });
-  }
-
-  if (entry.carbsGram !== null) {
-    metrics.push({
-      key: 'carbsGram',
-      label: t('diary.entry.metrics.carbohydrates'),
-      value: `${numberFormatter.format(entry.carbsGram)} ${t(
-        'diary.entry.units.carbohydrates'
-      )}`,
-    });
-  }
-
-  const comment = entry.comment.trim();
-  const aiAnalysis = entry.aiAnalysis.trim();
-
-  const pendingDelete = entry.syncStatus === 'pendingDelete';
-  const interactive = Boolean(onPress) && !pendingDelete && !synchronizing;
-  const actionsDisabled = pendingDelete || synchronizing;
-
-  const openedTextTitle =
-    openedText === 'comment'
-      ? t('diary.entry.comment')
-      : openedText === 'aiAnalysis'
-        ? t('diary.entry.aiAnalysis')
-        : '';
-
-  const openedTextValue =
-    openedText === 'comment'
-      ? comment
-      : openedText === 'aiAnalysis'
-        ? aiAnalysis
-        : '';
-
-  let syncIcon: IoniconName = 'cloud-done-outline';
-  let syncLabel = t('diary.entry.sync.synced');
-  let syncColor = theme.colors.success;
-
-  if (pendingDelete) {
-    syncIcon = 'trash-outline';
-    syncLabel = t('diary.entry.sync.deleting');
-    syncColor = theme.colors.muted;
-  } else if (entry.syncStatus !== 'synced') {
-    syncIcon = 'cloud-offline-outline';
-    syncLabel = t('diary.entry.sync.pending');
-    syncColor = theme.colors.warning;
-  }
+  const {
+    dateTimeLabel,
+    metrics,
+    comment,
+    commentTitle,
+    aiAnalysis,
+    aiAnalysisTitle,
+    mealRelationLabel,
+    pendingDelete,
+    actionsDisabled,
+    cardInteractive,
+    photoInteractive,
+    openedText,
+    syncStatus,
+    handleCardPress,
+    handlePhotoPress,
+    handleOpenComment,
+    handleOpenAiAnalysis,
+    handleCloseText,
+  } = useDiaryEntryCard({
+    entry,
+    synchronizing,
+    onPress,
+    onOpenPhoto,
+  });
 
   return (
     <>
       <Pressable
-        disabled={!interactive}
+        disabled={!cardInteractive}
         accessibilityRole={onPress ? 'button' : undefined}
         accessibilityState={
           onPress
             ? {
-                disabled: !interactive,
+                disabled: !cardInteractive,
               }
             : undefined
         }
-        onPress={
-          onPress
-            ? () => {
-                onPress(entry);
-              }
-            : undefined
-        }
+        onPress={cardInteractive ? handleCardPress : undefined}
         style={({ pressed }) => [
           styles.Card(theme, pendingDelete),
-          pressed && interactive && styles.Pressed,
+          pressed && cardInteractive && styles.Pressed,
         ]}
       >
+        <DiaryEntryPhoto
+          entryId={entry.id}
+          localPhotoUri={entry.localPhotoUri}
+          photoUrl={entry.photoUrl}
+          isVisible={isVisible}
+          disabled={actionsDisabled}
+          onPress={photoInteractive ? handlePhotoPress : undefined}
+        />
+
         <View style={styles.Header(theme)}>
           <View style={globalStyles.FlexItem}>
             <Text style={globalStyles.Subheading(theme)} numberOfLines={1}>
@@ -159,10 +90,10 @@ const DiaryEntryCard = ({
             </Text>
           </View>
 
-          {entry.mealRelation !== null && (
+          {mealRelationLabel !== null && (
             <View style={styles.MealRelation(theme)}>
               <Text style={globalStyles.Text(theme, 'sm', 'medium', 'primary')}>
-                {t(`diary.entry.mealRelation.${entry.mealRelation}`)}
+                {mealRelationLabel}
               </Text>
             </View>
           )}
@@ -184,44 +115,44 @@ const DiaryEntryCard = ({
 
         {comment.length > 0 && (
           <DiaryTextPreview
-            title={t('diary.entry.comment')}
+            title={commentTitle}
             text={comment}
             disabled={actionsDisabled}
-            onOpen={() => setOpenedText('comment')}
+            onOpen={handleOpenComment}
           />
         )}
 
         {aiAnalysis.length > 0 && (
           <DiaryTextPreview
-            title={t('diary.entry.aiAnalysis')}
+            title={aiAnalysisTitle}
             text={aiAnalysis}
             disabled={actionsDisabled}
-            onOpen={() => setOpenedText('aiAnalysis')}
+            onOpen={handleOpenAiAnalysis}
           />
         )}
 
         <View style={globalStyles.Divider(theme)} />
 
         <View style={styles.Status(theme)}>
-          {synchronizing && !pendingDelete ? (
-            <ActivityIndicator size="small" color={theme.colors.primary} />
+          {syncStatus.loading ? (
+            <ActivityIndicator size="small" color={syncStatus.color} />
           ) : (
-            <Ionicons name={syncIcon} size={theme.size.md} color={syncColor} />
+            <Ionicons
+              name={syncStatus.icon}
+              size={theme.size.md}
+              color={syncStatus.color}
+            />
           )}
 
-          <Text style={globalStyles.Caption(theme)}>
-            {synchronizing && !pendingDelete
-              ? t('diary.entry.sync.synchronizing')
-              : syncLabel}
-          </Text>
+          <Text style={globalStyles.Caption(theme)}>{syncStatus.label}</Text>
         </View>
       </Pressable>
 
       <DiaryTextModal
-        visible={openedText !== null}
-        title={openedTextTitle}
-        text={openedTextValue}
-        onClose={() => setOpenedText(null)}
+        visible={openedText.visible}
+        title={openedText.title}
+        text={openedText.value}
+        onClose={handleCloseText}
       />
     </>
   );

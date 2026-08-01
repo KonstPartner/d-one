@@ -55,6 +55,14 @@
         "pending": "Not synchronized",
         "synchronizing": "Synchronizing…",
         "deleting": "Deleting…"
+      },
+      "photo": {
+        "unavailableOffline": "Photo is unavailable offline",
+        "loadFailed": "Failed to load photo",
+        "localOnly": "Stored only on this device",
+        "cloudOnly": "Available only from the cloud",
+        "accessibilityLabel": "Diary entry photo",
+        "openAccessibilityLabel": "Open diary entry photo"
       }
     }
   }
