@@ -11,6 +11,21 @@
     "unsupportedPlatform": {
       "title": "Diary is unavailable on Web",
       "description": "Maintaining your diary is available only in the mobile application."
+    },
+    "list": {
+      "loadFailed": "Failed to load entries",
+      "empty": {
+        "title": "No entries yet",
+        "description": "Create your first entry with the “+” button."
+      },
+      "day": {
+        "entries_one": "{{count}} entry",
+        "entries_other": "{{count}} entries"
+      }
+    },
+    "pagination": {
+      "previousPage": "Previous page",
+      "nextPage": "Next page"
     }
   }
 }

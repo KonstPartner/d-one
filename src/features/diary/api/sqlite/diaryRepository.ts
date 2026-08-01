@@ -8,6 +8,8 @@ import type {
 } from '../../model/types';
 import { DIARY_SYNC_STATUSES, MEAL_RELATIONS } from '../../model/types';
 
+import type { DiaryDatabaseOperationGate } from './diaryDatabaseOperationGate';
+
 const DIARY_PAGE_SIZE = 30;
 
 type DiaryEntryRow = {
@@ -117,73 +119,78 @@ const mapDiaryEntryRow = (row: DiaryEntryRow): DiaryEntry => {
 export class DiaryRepository {
   public constructor(
     private readonly database: SQLiteDatabase,
-    private readonly userId: string
+    private readonly userId: string,
+    private readonly operationGate: DiaryDatabaseOperationGate
   ) {}
 
-  public async findById(id: string): Promise<DiaryEntry | null> {
-    const row = await this.database.getFirstAsync<DiaryEntryRow>(
-      FIND_DIARY_ENTRY_BY_ID_SQL,
-      {
-        $id: id,
-        $userId: this.userId,
-      }
-    );
+  public findById(id: string): Promise<DiaryEntry | null> {
+    return this.operationGate.run(async () => {
+      const row = await this.database.getFirstAsync<DiaryEntryRow>(
+        FIND_DIARY_ENTRY_BY_ID_SQL,
+        {
+          $id: id,
+          $userId: this.userId,
+        }
+      );
 
-    return row === null ? null : mapDiaryEntryRow(row);
+      return row === null ? null : mapDiaryEntryRow(row);
+    });
   }
 
-  public async findPage(page: number): Promise<DiaryPageResult> {
+  public findPage(page: number): Promise<DiaryPageResult> {
     if (!Number.isInteger(page) || page < 1) {
-      throw new Error(`Invalid diary page: ${page}`);
+      return Promise.reject(new Error(`Invalid diary page: ${page}`));
     }
 
-    const countRow = await this.database.getFirstAsync<DiaryCountRow>(
-      `
-        SELECT COUNT(*) AS total_items
-        FROM diary_entries
-        WHERE user_id = ?
-      `,
-      this.userId
-    );
+    return this.operationGate.run(async () => {
+      const countRow = await this.database.getFirstAsync<DiaryCountRow>(
+        `
+          SELECT COUNT(*) AS total_items
+          FROM diary_entries
+          WHERE user_id = ?
+        `,
+        this.userId
+      );
 
-    const totalItems = countRow?.total_items ?? 0;
+      const totalItems = countRow?.total_items ?? 0;
 
-    if (totalItems === 0) {
+      if (totalItems === 0) {
+        return {
+          items: [],
+          pagination: {
+            page: 1,
+            pageSize: DIARY_PAGE_SIZE,
+            totalItems: 0,
+            totalPages: 0,
+            hasPreviousPage: false,
+            hasNextPage: false,
+          },
+        };
+      }
+
+      const totalPages = Math.ceil(totalItems / DIARY_PAGE_SIZE);
+      const offset = (page - 1) * DIARY_PAGE_SIZE;
+
+      const rows = await this.database.getAllAsync<DiaryEntryRow>(
+        FIND_DIARY_PAGE_SQL,
+        {
+          $userId: this.userId,
+          $limit: DIARY_PAGE_SIZE,
+          $offset: offset,
+        }
+      );
+
       return {
-        items: [],
+        items: rows.map(mapDiaryEntryRow),
         pagination: {
-          page: 1,
+          page,
           pageSize: DIARY_PAGE_SIZE,
-          totalItems: 0,
-          totalPages: 0,
-          hasPreviousPage: false,
-          hasNextPage: false,
+          totalItems,
+          totalPages,
+          hasPreviousPage: page > 1,
+          hasNextPage: page < totalPages,
         },
       };
-    }
-
-    const totalPages = Math.ceil(totalItems / DIARY_PAGE_SIZE);
-    const offset = (page - 1) * DIARY_PAGE_SIZE;
-
-    const rows = await this.database.getAllAsync<DiaryEntryRow>(
-      FIND_DIARY_PAGE_SQL,
-      {
-        $userId: this.userId,
-        $limit: DIARY_PAGE_SIZE,
-        $offset: offset,
-      }
-    );
-
-    return {
-      items: rows.map(mapDiaryEntryRow),
-      pagination: {
-        page,
-        pageSize: DIARY_PAGE_SIZE,
-        totalItems,
-        totalPages,
-        hasPreviousPage: page > 1,
-        hasNextPage: page < totalPages,
-      },
-    };
+    });
   }
 }

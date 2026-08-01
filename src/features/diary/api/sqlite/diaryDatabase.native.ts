@@ -1,6 +1,7 @@
 import { Directory, Paths } from 'expo-file-system';
 import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 
+import { DiaryDatabaseOperationGate } from './diaryDatabaseOperationGate';
 import { DiaryRepository } from './diaryRepository';
 import { migrateDiaryDatabase } from './migrations';
 
@@ -10,6 +11,7 @@ type ActiveDiaryDatabase = {
   userId: string;
   database: SQLiteDatabase;
   repository: DiaryRepository;
+  operationGate: DiaryDatabaseOperationGate;
 };
 
 let activeDiaryDatabase: ActiveDiaryDatabase | null = null;
@@ -40,15 +42,18 @@ const createDiaryDatabaseDirectory = (userId: string): Directory => {
 };
 
 const closeActiveDiaryDatabase = async (): Promise<void> => {
-  if (activeDiaryDatabase === null) {
+  const activeDatabase = activeDiaryDatabase;
+
+  if (activeDatabase === null) {
     return;
   }
 
-  const { database } = activeDiaryDatabase;
+  await activeDatabase.operationGate.stopAndWaitForIdle();
+  await activeDatabase.database.closeAsync();
 
-  activeDiaryDatabase = null;
-
-  await database.closeAsync();
+  if (activeDiaryDatabase === activeDatabase) {
+    activeDiaryDatabase = null;
+  }
 };
 
 const runDatabaseTransition = <T>(operation: () => Promise<T>): Promise<T> => {
@@ -62,11 +67,22 @@ const runDatabaseTransition = <T>(operation: () => Promise<T>): Promise<T> => {
   return result;
 };
 
-export const openDiaryDatabase = (userId: string): Promise<DiaryRepository> =>
-  runDatabaseTransition(async () => {
+export const openDiaryDatabase = (userId: string): Promise<DiaryRepository> => {
+  try {
     assertValidUserId(userId);
+  } catch (error) {
+    return Promise.reject(error);
+  }
 
-    if (activeDiaryDatabase?.userId === userId) {
+  if (activeDiaryDatabase !== null && activeDiaryDatabase.userId !== userId) {
+    void activeDiaryDatabase.operationGate.stopAndWaitForIdle();
+  }
+
+  return runDatabaseTransition(async () => {
+    if (
+      activeDiaryDatabase?.userId === userId &&
+      !activeDiaryDatabase.operationGate.isClosing
+    ) {
       return activeDiaryDatabase.repository;
     }
 
@@ -90,16 +106,24 @@ export const openDiaryDatabase = (userId: string): Promise<DiaryRepository> =>
       throw error;
     }
 
-    const repository = new DiaryRepository(database, userId);
+    const operationGate = new DiaryDatabaseOperationGate();
+    const repository = new DiaryRepository(database, userId, operationGate);
 
     activeDiaryDatabase = {
       userId,
       database,
       repository,
+      operationGate,
     };
 
     return repository;
   });
+};
 
-export const closeDiaryDatabase = (): Promise<void> =>
-  runDatabaseTransition(closeActiveDiaryDatabase);
+export const closeDiaryDatabase = (): Promise<void> => {
+  if (activeDiaryDatabase !== null) {
+    void activeDiaryDatabase.operationGate.stopAndWaitForIdle();
+  }
+
+  return runDatabaseTransition(closeActiveDiaryDatabase);
+};

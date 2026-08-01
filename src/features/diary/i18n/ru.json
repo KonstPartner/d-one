@@ -11,6 +11,23 @@
     "unsupportedPlatform": {
       "title": "Дневник недоступен в Web-версии",
       "description": "Ведение дневника доступно только в мобильном приложении."
+    },
+    "list": {
+      "loadFailed": "Не удалось загрузить записи",
+      "empty": {
+        "title": "Записей пока нет",
+        "description": "Создайте первую запись с помощью кнопки «+»."
+      },
+      "day": {
+        "entries_one": "{{count}} запись",
+        "entries_few": "{{count}} записи",
+        "entries_many": "{{count}} записей",
+        "entries_other": "{{count}} записи"
+      }
+    },
+    "pagination": {
+      "previousPage": "Предыдущая страница",
+      "nextPage": "Следующая страница"
     }
   }
 }
