@@ -26,6 +26,36 @@
     "pagination": {
       "previousPage": "Previous page",
       "nextPage": "Next page"
+    },
+    "entry": {
+      "more": "More",
+      "openFullText": "Open full text: {{title}}",
+      "metrics": {
+        "glucose": "Glucose",
+        "shortInsulin": "Short insulin",
+        "longInsulin": "Long insulin",
+        "carbohydrates": "Carbohydrates"
+      },
+      "units": {
+        "glucose": "mmol/L",
+        "insulin": "U",
+        "carbohydrates": "g"
+      },
+      "mealRelation": {
+        "beforeMeal": "Before meal",
+        "afterMeal": "After meal",
+        "fasting": "Fasting",
+        "bedtime": "Bedtime",
+        "night": "Night"
+      },
+      "comment": "Comment",
+      "aiAnalysis": "AI analysis",
+      "sync": {
+        "synced": "Synchronized",
+        "pending": "Not synchronized",
+        "synchronizing": "Synchronizing…",
+        "deleting": "Deleting…"
+      }
     }
   }
 }

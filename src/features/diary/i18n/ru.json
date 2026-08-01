@@ -28,6 +28,36 @@
     "pagination": {
       "previousPage": "Предыдущая страница",
       "nextPage": "Следующая страница"
+    },
+    "entry": {
+      "more": "Подробнее",
+      "openFullText": "Открыть полный текст: {{title}}",
+      "metrics": {
+        "glucose": "Глюкоза",
+        "shortInsulin": "Короткий инсулин",
+        "longInsulin": "Длинный инсулин",
+        "carbohydrates": "Углеводы"
+      },
+      "units": {
+        "glucose": "ммоль/л",
+        "insulin": "ЕД",
+        "carbohydrates": "г"
+      },
+      "mealRelation": {
+        "beforeMeal": "До еды",
+        "afterMeal": "После еды",
+        "fasting": "Натощак",
+        "bedtime": "Перед сном",
+        "night": "Ночью"
+      },
+      "comment": "Комментарий",
+      "aiAnalysis": "AI-анализ",
+      "sync": {
+        "synced": "Синхронизировано",
+        "pending": "Не синхронизировано",
+        "synchronizing": "Синхронизация…",
+        "deleting": "Удаление…"
+      }
     }
   }
 }

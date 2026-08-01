@@ -6,16 +6,23 @@ import { PageWrapper } from '@entities/layout/ui';
 import { Loader, LoadingView } from '@entities/shared/ui';
 import { useAuthData } from '@features/auth/api';
 import { UserRole } from '@features/auth/model';
+import type { DiaryEntry } from '@features/diary/model';
 import * as styles from '@features/diary/styles/Diary';
+import { DiaryEntryCard, LocalDiaryContent } from '@features/diary/ui';
 import { PlatformOS } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
+
+const renderLocalEntry = (entry: DiaryEntry) => (
+  <DiaryEntryCard entry={entry} />
+);
 
 const Diary = () => {
   const theme = useTheme();
   const { t } = useTranslation();
   const { authData, isAuthLoading } = useAuthData();
 
-  const isOwnerWeb = PlatformOS.WEB && authData?.role === UserRole.User;
+  const isOwner = authData?.role === UserRole.User;
+  const isOwnerWeb = PlatformOS.WEB && isOwner;
 
   return (
     <PageWrapper>
@@ -31,6 +38,8 @@ const Diary = () => {
                 {t('diary.unsupportedPlatform.description')}
               </Text>
             </View>
+          ) : isOwner ? (
+            <LocalDiaryContent renderEntry={renderLocalEntry} />
           ) : (
             <View>
               <Text style={globalStyles.Body(theme)}>Diary</Text>
