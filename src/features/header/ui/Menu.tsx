@@ -8,11 +8,8 @@ import Popover from 'react-native-popover-view';
 
 import * as globalStyles from '@features/shared/styles/global';
 
-import {
-  HeaderMenuItem,
-  useHeaderBaseMenu,
-  useHeaderMenuContext,
-} from '../model';
+import { HeaderMenuItem, useHeaderMenuContext } from '../model/context/menu';
+import useHeaderBaseMenu from '../model/hooks/useBaseMenu';
 import * as styles from '../styles/Menu';
 
 const HeaderMenu = ({ color }: { color?: string }) => {

@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 
 import * as globalStyles from '@features/shared/styles/global';
 
-import { AppLanguage, i18n, saveLanguage, setAppLanguage } from '../model';
+import i18n, { setAppLanguage } from '../model/config';
+import { AppLanguage } from '../model/resources';
+import { saveLanguage } from '../model/storage';
 import * as styles from '../styles/LanguageSelect';
 
 type Option = { value: AppLanguage; label: string };

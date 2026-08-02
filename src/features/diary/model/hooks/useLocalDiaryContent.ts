@@ -5,8 +5,11 @@ import { useTranslation } from 'react-i18next';
 
 import { showNotification } from '@features/shared/ui';
 
-import { diaryApi, useDiaryPage, useReadyDiaryDatabase } from '../../api';
-import { buildDiaryListItems, type DiaryListItem } from '../list';
+import { diaryApi } from '../../api/diaryApi';
+import useDiaryPage from '../../api/hooks/useDiaryPage';
+import { useReadyDiaryDatabase } from '../../api/sqlite/DiaryDatabaseProvider';
+import type { DiaryListItem } from '../list';
+import { buildDiaryListItems } from '../list';
 import { useDiaryList } from '../useDiaryList';
 
 const VIEWABILITY_CONFIG = {

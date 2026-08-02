@@ -4,7 +4,7 @@ import { showNotification } from '@features/shared/ui';
 
 import useLogin from '../../api/hooks/useLogin';
 import useRegister from '../../api/hooks/useRegister';
-import { useAuth } from '../context';
+import { useAuth } from '../context/AuthContext';
 import {
   AuthFormMode,
   LoginUserFormValues,

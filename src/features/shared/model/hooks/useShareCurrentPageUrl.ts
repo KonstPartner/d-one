@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useLocalSearchParams, usePathname } from 'expo-router';
 
-import { envConfig } from '../constants';
+import { envConfig } from '../constants/environment';
 import { buildShareUrl } from '../utils/buildShareUrl';
 
 import useShareContent from './useShareContent';

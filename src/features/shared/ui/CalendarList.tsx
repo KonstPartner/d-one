@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 import { CalendarList } from 'react-native-calendars';
 
-import { useListCalendar } from '../model';
+import useListCalendar from '../model/hooks/useListCalendar';
 import * as globalStyles from '../styles/global';
 
 type Props = {

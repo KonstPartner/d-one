@@ -5,22 +5,22 @@ import { Href, router, usePathname } from 'expo-router';
 import { errorMapper } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
 
-import { useGoogleAuth } from '../../api';
-import { checkUserExistsByEmail } from '../../api/firebase';
+import { checkUserExistsByEmail } from '../../api/firebase/services/checkUserExistsByEmail';
+import useGoogleAuth from '../../api/hooks/useGoogleAuth';
 import {
   getGoogleClientId,
   GOOGLE_AUTH_REDIRECT_URI,
   GOOGLE_AUTH_SCOPES,
   googleClientIds,
 } from '../constants';
-import { useAuth } from '../context';
-import type { GoogleRegisterPrefill } from '../types';
+import { useAuth } from '../context/AuthContext';
+import type { GoogleRegisterPrefill } from '../types/googleAuth';
 import {
   buildGoogleRegisterPrefill,
   exchangeGoogleCodeForIdToken,
   getIdTokenFromResponse,
   withIdTokenResponse,
-} from '../utils';
+} from '../utils/googleAuth';
 
 type UseGoogleSignInButtonParams = {
   onRegister: (data: GoogleRegisterPrefill) => void;

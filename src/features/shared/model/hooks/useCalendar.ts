@@ -9,7 +9,7 @@ import { calendarThemeStyles } from '@entities/shared/constants';
 import { i18n } from '@features/i18n/model';
 
 import { dateKit } from '../constants/date';
-import { CalendarComponentProps } from '../types';
+import { CalendarComponentProps } from '../types/calendar';
 
 const getSelectedDateFromMarkedDates = (markedDates: any | undefined) => {
   if (!markedDates) {

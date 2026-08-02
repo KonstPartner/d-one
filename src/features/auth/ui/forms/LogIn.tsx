@@ -4,11 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Input, PasswordInput } from '@entities/shared/ui';
 
-import {
-  GoogleRegisterPrefill,
-  LoginUserFormValues,
-  useLoginForm,
-} from '../../model';
+import useLoginForm from '../../model/hooks/useLoginForm';
+import { LoginUserFormValues } from '../../model/types/auth';
+import { GoogleRegisterPrefill } from '../../model/types/googleAuth';
 import * as styles from '../../styles/forms/AuthForm';
 import ResetPasswordModal from '../ResetPasswordModal';
 

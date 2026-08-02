@@ -8,7 +8,7 @@ import { errorMapper, validateInput } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
 import { PortalModal, showNotification } from '@features/shared/ui';
 
-import { requestPasswordReset } from '../api/firebase';
+import { requestPasswordReset } from '../api/firebase/services/requestPasswordReset';
 import * as styles from '../styles/ResetPassword';
 
 const ResetPasswordModal = () => {

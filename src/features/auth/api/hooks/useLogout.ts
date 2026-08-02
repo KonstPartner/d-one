@@ -5,7 +5,7 @@ import { errorMapper } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
 
 import { userQueryKeys } from '../constants';
-import { logoutUser } from '../firebase/services';
+import { logoutUser } from '../firebase/services/logoutUser';
 
 const useLogout = () => {
   const { t } = useTranslation();

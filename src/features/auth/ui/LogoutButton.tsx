@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@entities/shared/ui';
 
-import { useLogout } from '../api/hooks';
+import useLogout from '../api/hooks/useLogout';
 import * as styles from '../styles/LogoutButton';
 
 const LogoutButton = () => {

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import * as globalStyles from '@features/shared/styles/global';
 
-import type { DiaryDayKey } from '../model';
+import type { DiaryDayKey } from '../model/list';
 
 type DiaryDayHeaderProps = {
   dayKey: DiaryDayKey;

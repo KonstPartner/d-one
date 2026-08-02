@@ -11,8 +11,9 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorSection, LoadingView } from '@entities/shared/ui';
 
-import { type DiaryEntry, type DiaryListItem } from '../model';
 import useLocalDiaryContent from '../model/hooks/useLocalDiaryContent';
+import type { DiaryListItem } from '../model/list';
+import type { DiaryEntry } from '../model/types';
 import * as styles from '../styles/LocalDiaryContent';
 
 import DiaryDayHeader from './DiaryDayHeader';

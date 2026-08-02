@@ -1,7 +1,6 @@
 import { getLocales } from 'expo-localization';
 
 import { i18n } from '@features/i18n/model';
-import { OpeningHour } from '@features/services/model';
 
 export type DateInput = string | number | Date | null | undefined;
 
@@ -299,21 +298,4 @@ export const createDateKit = (realNow?: DateInput) => {
       return `${dateLabel}, ${time}`;
     },
   };
-};
-
-export const parseOpeningHoursDate = (date: string): OpeningHour => {
-  if (!date) {
-    return {
-      openingHour: '',
-      openingMinute: '',
-      closingHour: '',
-      closingMinute: '',
-    };
-  }
-
-  const [open = '', close = ''] = date.split('-');
-  const [openingHour = '', openingMinute = ''] = open.split(':');
-  const [closingHour = '', closingMinute = ''] = close.split(':');
-
-  return { openingHour, openingMinute, closingHour, closingMinute };
 };

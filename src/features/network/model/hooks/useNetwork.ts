@@ -1,4 +1,4 @@
-import { useNetworkStore } from '../context';
+import { useNetworkStore } from '../context/store';
 
 export const useNetwork = () => {
   const status = useNetworkStore((state) => state.connectionState);

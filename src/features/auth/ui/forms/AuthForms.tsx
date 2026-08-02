@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import { appIcon } from '@entities/shared/constants';
 
-import { GoogleRegisterPrefill, useAuthForm } from '../../model';
+import useAuthForm from '../../model/hooks/useAuthForm';
+import { GoogleRegisterPrefill } from '../../model/types/googleAuth';
 import * as styles from '../../styles/forms/AuthForm';
 
 import LogInForm from './LogIn';

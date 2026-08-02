@@ -1,6 +1,6 @@
 import { doc, getDoc } from 'firebase/firestore';
 
-import type { UserData } from '../../../model';
+import type { UserData } from '../../../model/types/auth';
 import { db } from '../config';
 
 export const getUserProfile = async (uid: string): Promise<UserData> => {

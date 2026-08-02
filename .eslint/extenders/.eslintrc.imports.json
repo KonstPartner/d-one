@@ -1,9 +1,9 @@
 {
   "plugins": ["simple-import-sort"],
   "rules": {
-    "unused-imports/no-unused-imports": "warn",
+    "unused-imports/no-unused-imports": "error",
     "simple-import-sort/imports": [
-      "warn",
+      "error",
       {
         "groups": [
           ["^\\u0000"],
@@ -19,6 +19,6 @@
         ]
       }
     ],
-    "simple-import-sort/exports": "warn"
+    "simple-import-sort/exports": "error"
   }
 }

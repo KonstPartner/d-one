@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { errorMapper, validateInput } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
 
-import { updateUserPassword } from '../firebase/services';
+import { updateUserPassword } from '../firebase/services/updateUserPassword';
 
 const useChangePasswordForm = () => {
   const { t } = useTranslation();

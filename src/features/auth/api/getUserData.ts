@@ -6,7 +6,7 @@ import {
   getLocalUserProfile,
   saveLocalUserProfile,
 } from '../model/context/localProfileStorage';
-import type { UserData } from '../model/types';
+import type { UserData } from '../model/types/auth';
 
 import { getUserProfile } from './firebase/services/getUserProfile';
 

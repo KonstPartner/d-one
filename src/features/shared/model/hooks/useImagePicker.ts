@@ -4,8 +4,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { i18n } from '@features/i18n/model';
 
 import { showNotification } from '../../ui/Notification';
-import { PlatformOS } from '../constants';
-import { errorMapper } from '../utils';
+import { PlatformOS } from '../constants/platformOS';
+import { errorMapper } from '../utils/error';
 
 type PickRoundOptions = {
   size?: number;

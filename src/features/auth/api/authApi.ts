@@ -8,7 +8,7 @@ import type {
   LoginUserFormValues,
   RegisterUserPayload,
   UserData,
-} from '../model/types';
+} from '../model/types/auth';
 
 import { userQueryKeys } from './constants';
 import { loginAuthUser } from './firebase/services/authUser';

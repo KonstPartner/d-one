@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import * as globalStyles from '@features/shared/styles/global';
 
-import { useThemeMode } from '../model';
+import { useThemeMode } from '../model/context/ThemeProvider';
 import * as styles from '../styles/Switcher';
 
 const ThemeSwitcher = () => {

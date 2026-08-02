@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { errorMapper } from '@features/shared/model/utils/error';
 import { showNotification } from '@features/shared/ui';
 
-import { useCheckVerifiedEmail } from '../../api';
-import { verifyUserEmail } from '../../api/firebase/services';
+import { verifyUserEmail } from '../../api/firebase/services/verifyUserEmail';
+import useCheckVerifiedEmail from '../../api/hooks/useCheckVerifiedEmail';
 import { useAuth } from '../context/AuthContext';
 
 const useVerifyEmailButtons = () => {

@@ -4,7 +4,8 @@ import { useTheme } from '@emotion/react';
 import { Button, Input } from '@entities/shared/ui';
 import * as globalStyles from '@features/shared/styles/global';
 
-import { useAuthData, useUpdateUserEmail } from '../api/hooks';
+import useAuthData from '../api/hooks/useAuthData';
+import useUpdateUserEmail from '../api/hooks/useUpdateUserEmail';
 
 const UpdateUserEmail = () => {
   const theme = useTheme();

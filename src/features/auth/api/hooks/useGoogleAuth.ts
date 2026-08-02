@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { errorMapper } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
 
-import type { UserData } from '../../model/types';
-import { getIdTokenFromResponse } from '../../model/utils';
+import type { UserData } from '../../model/types/auth';
+import { getIdTokenFromResponse } from '../../model/utils/googleAuth';
 import { userQueryKeys } from '../constants';
-import { loginWithGoogle } from '../firebase';
+import { loginWithGoogle } from '../firebase/services/loginWithGoogle';
 
 const useGoogleAuth = () => {
   const { t } = useTranslation();

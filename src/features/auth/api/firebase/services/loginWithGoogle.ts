@@ -5,7 +5,7 @@ import {
 } from 'firebase/auth';
 
 import { saveLocalUserProfile } from '../../../model/context/localProfileStorage';
-import type { UserData } from '../../../model/types';
+import type { UserData } from '../../../model/types/auth';
 import { auth } from '../config';
 
 import { getUserProfile } from './getUserProfile';

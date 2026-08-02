@@ -5,8 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 
 import * as globalStyles from '@features/shared/styles/global';
 
-import type { DiaryEntry } from '../model';
 import useDiaryEntryCard from '../model/hooks/useDiaryEntryCard';
+import type { DiaryEntry } from '../model/types';
 import * as styles from '../styles/DiaryEntryCard';
 
 import DiaryEntryPhoto from './DiaryEntryPhoto';

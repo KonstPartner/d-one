@@ -5,7 +5,7 @@ import {
   removeLocalUserProfile,
   saveLocalUserProfile,
 } from '../context/localProfileStorage';
-import type { UserData } from '../types';
+import type { UserData } from '../types/auth';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   __esModule: true,

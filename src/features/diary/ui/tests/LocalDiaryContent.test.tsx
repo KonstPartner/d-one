@@ -8,8 +8,8 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 
-import type { DiaryEntry } from '../../model';
-import { useDiaryListStore } from '../../model';
+import { useDiaryListStore } from '../../model/store';
+import type { DiaryEntry } from '../../model/types';
 import DiaryEntryCard from '../DiaryEntryCard';
 import LocalDiaryContent from '../LocalDiaryContent';
 
@@ -64,12 +64,19 @@ jest.mock('@tanstack/react-query', () => ({
   }),
 }));
 
-jest.mock('@features/diary/api', () => ({
+jest.mock('../../api/diaryApi', () => ({
   diaryApi: {
     getLocalPageOptions: (...args: unknown[]) =>
       mockGetLocalPageOptions(...args),
   },
-  useDiaryPage: (...args: unknown[]) => mockUseDiaryPage(...args),
+}));
+
+jest.mock('../../api/hooks/useDiaryPage', () => ({
+  __esModule: true,
+  default: (...args: unknown[]) => mockUseDiaryPage(...args),
+}));
+
+jest.mock('../../api/sqlite/DiaryDatabaseProvider', () => ({
   useReadyDiaryDatabase: () => mockUseReadyDiaryDatabase(),
 }));
 

@@ -1,6 +1,6 @@
 import { Text } from 'react-native';
 
-import { ValidateInputType } from '../model/types';
+import { ValidateInputType } from '../model/types/validate';
 import { validateInput } from '../model/utils/validate';
 import * as styles from '../styles/InvalidMessageText';
 

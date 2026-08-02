@@ -1,7 +1,7 @@
 import { PhotoViewer } from '@features/shared/ui';
 
-import type { DiaryEntry } from '../model';
 import useDiaryEntryPhoto from '../model/hooks/useDiaryEntryPhoto';
+import type { DiaryEntry } from '../model/types';
 
 type DiaryPhotoViewerProps = {
   entry: DiaryEntry | null;

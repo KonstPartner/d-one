@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { errorMapper, validateInput } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
 
-import { useAuth } from '../../model/context';
+import { useAuth } from '../../model/context/AuthContext';
 
 type UiMode = 'view' | 'edit' | 'sent';
 

@@ -13,7 +13,8 @@ import { useNetworkStore } from '@features/network/model/context/store';
 
 import { useAuth } from '../../model/context/AuthContext';
 import { saveLocalUserProfile } from '../../model/context/localProfileStorage';
-import { type UserData, UserRole } from '../../model/types';
+import type { UserData } from '../../model/types/auth';
+import { UserRole } from '../../model/types/auth';
 import { getUserProfile } from '../firebase/services/getUserProfile';
 import useAuthData from '../hooks/useAuthData';
 

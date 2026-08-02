@@ -4,7 +4,10 @@ import * as AuthSession from 'expo-auth-session';
 import { decodeJwtPayload } from '@features/shared/model';
 
 import { GOOGLE_AUTH_REDIRECT_URI, GOOGLE_DISCOVERY } from '../constants';
-import type { GoogleIdTokenPayload, GoogleRegisterPrefill } from '../types';
+import type {
+  GoogleIdTokenPayload,
+  GoogleRegisterPrefill,
+} from '../types/googleAuth';
 
 export const getIdTokenFromResponse = (
   response: AuthSessionResult

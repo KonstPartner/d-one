@@ -3,7 +3,7 @@ import type { ReactElement, ReactNode } from 'react';
 
 import Diary from '@pages/Diary';
 
-import type { DiaryEntry } from '../../model';
+import type { DiaryEntry } from '../../model/types';
 
 const mockUseAuthData = jest.fn();
 

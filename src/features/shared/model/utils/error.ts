@@ -1,6 +1,6 @@
 import { i18n } from '@features/i18n/model';
 
-import { ErrorType } from '../types';
+import { ErrorType } from '../types/error';
 
 type I18nErrorKey = `common.errors.${string}`;
 type Dict = Record<I18nErrorKey, string | string[]>;

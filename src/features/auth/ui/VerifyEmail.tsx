@@ -3,8 +3,8 @@ import { useTheme } from '@emotion/react';
 
 import { Button } from '@entities/shared/ui';
 
-import { useAuth } from '../model';
-import { useVerifyEmailButtons } from '../model/hooks';
+import { useAuth } from '../model/context/AuthContext';
+import useVerifyEmailButtons from '../model/hooks/useVerifyEmailButtons';
 import * as styles from '../styles/VerifyEmail';
 
 const VerifyEmail = () => {

@@ -9,7 +9,8 @@ import {
 
 import { SegmentedSwitch } from '@entities/shared/ui';
 
-import { CalendarComponentProps, useCalendar } from '../model';
+import useCalendar from '../model/hooks/useCalendar';
+import { CalendarComponentProps } from '../model/types/calendar';
 import * as styles from '../styles/Calendar';
 import * as globalStyles from '../styles/global';
 

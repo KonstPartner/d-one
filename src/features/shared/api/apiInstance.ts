@@ -1,6 +1,6 @@
 import { getAuthToken } from '@features/auth/api/firebase/services/getAuthToken';
 
-import { deepTrim } from '../model';
+import { deepTrim } from '../model/utils/deepTrim';
 
 export class ApiError extends Error {
   constructor(

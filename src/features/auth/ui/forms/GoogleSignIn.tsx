@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import { LoadingView } from '@entities/shared/ui';
 
-import type { GoogleRegisterPrefill } from '../../model';
-import { useGoogleSignInButton } from '../../model';
+import useGoogleSignInButton from '../../model/hooks/useGoogleSignInButton';
+import type { GoogleRegisterPrefill } from '../../model/types/googleAuth';
 import * as styles from '../../styles/forms/GoogleSignIn';
 
 type GoogleSignInButtonProps = {

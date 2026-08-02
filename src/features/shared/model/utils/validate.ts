@@ -1,7 +1,7 @@
 import { i18n } from '@features/i18n/model';
 
 import { showNotification } from '../../ui/Notification';
-import { ValidateInputType } from '../types';
+import { ValidateInputType } from '../types/validate';
 
 type ValidationKey = `common.validation.${string}`;
 

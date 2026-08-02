@@ -2,7 +2,7 @@ import { Pressable, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 
-import { PlatformOS } from '../model';
+import { PlatformOS } from '../model/constants/platformOS';
 import * as globalStyles from '../styles/global';
 
 const WebRefresh = ({ onRefresh }: { onRefresh: () => void }) => {
