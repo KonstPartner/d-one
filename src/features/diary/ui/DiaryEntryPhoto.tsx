@@ -115,7 +115,9 @@ const DiaryEntryPhoto = ({
           />
 
           {fallbackText !== null && (
-            <Text style={[globalStyles.Caption(theme), styles.FallbackText]}>
+            <Text
+              style={[globalStyles.Caption(theme), styles.FallbackText(theme)]}
+            >
               {fallbackText}
             </Text>
           )}

@@ -1,3 +1,5 @@
+import { act } from 'react';
+import { FlatList, Text } from 'react-native';
 import {
   cleanup,
   fireEvent,
@@ -228,7 +230,9 @@ const makePage = (
 const renderContent = () =>
   render(
     <LocalDiaryContent
-      renderEntry={(entry) => <DiaryEntryCard entry={entry} />}
+      renderEntry={(entry, isVisible) => (
+        <DiaryEntryCard entry={entry} isVisible={isVisible} />
+      )}
     />
   );
 
@@ -451,5 +455,52 @@ describe('LocalDiaryContent', () => {
     expect(screen.getByText('diary.list.empty.description')).toBeTruthy();
 
     expect(screen.queryByLabelText('diary.pagination.nextPage')).toBeNull();
+  });
+
+  it('passes current entry visibility to renderEntry', () => {
+    const entry = makeEntry('visible-entry', new Date(2026, 6, 19, 12, 0));
+
+    mockPages.set(1, makePage(1, 1, [entry]));
+
+    const renderEntry = jest.fn(
+      (currentEntry: DiaryEntry, isVisible: boolean) => (
+        <Text>{`${currentEntry.id}:${String(isVisible)}`}</Text>
+      )
+    );
+
+    render(<LocalDiaryContent renderEntry={renderEntry} />);
+
+    expect(screen.getByText('visible-entry:false')).toBeTruthy();
+
+    const list = screen.UNSAFE_getByType(FlatList);
+
+    const entryItem = list.props.data.find(
+      (item: { type: string }) => item.type === 'entry'
+    );
+
+    expect(entryItem).toBeDefined();
+
+    act(() => {
+      list.props.onViewableItemsChanged({
+        viewableItems: [
+          {
+            item: entryItem,
+            key: 'entry:visible-entry',
+            index: 1,
+            isViewable: true,
+          },
+        ],
+      });
+    });
+
+    expect(screen.getByText('visible-entry:true')).toBeTruthy();
+
+    act(() => {
+      list.props.onViewableItemsChanged({
+        viewableItems: [],
+      });
+    });
+
+    expect(screen.getByText('visible-entry:false')).toBeTruthy();
   });
 });

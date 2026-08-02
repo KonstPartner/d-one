@@ -10,7 +10,7 @@ export const Frame = (theme: Theme) =>
     width: 100%;
     aspect-ratio: 1.7777778;
     overflow: hidden;
-    border-radius: ${toPX(theme.spacing.sm)};
+    border-radius: ${toPX(theme.radius.sm)};
     background-color: ${theme.colors.bg};
   ` as StyleProp<ViewStyle>;
 
@@ -34,10 +34,11 @@ export const CenteredOverlay = (theme: Theme) =>
     background-color: ${theme.colors.bg};
   ` as StyleProp<ViewStyle>;
 
-export const FallbackText = css`
-  margin-top: 8px;
-  text-align: center;
-` as StyleProp<TextStyle>;
+export const FallbackText = (theme: Theme) =>
+  css`
+    margin-top: ${toPX(theme.spacing.sm)};
+    text-align: center;
+  ` as StyleProp<TextStyle>;
 
 export const Indicator = (theme: Theme) =>
   css`
@@ -49,8 +50,8 @@ export const Indicator = (theme: Theme) =>
     justify-content: center;
 
     padding: ${toPX(theme.spacing.xs)};
-    border-radius: ${toPX(theme.size.xl)};
-    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: ${toPX(theme.radius.full)};
+    background-color: ${theme.colors.blackAlpha.xl};
   ` as StyleProp<ViewStyle>;
 
 export const Pressed = css`

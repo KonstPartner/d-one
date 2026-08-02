@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useNetwork } from '@features/network/model';
+import { showNotification } from '@features/shared/ui';
 
 type UseDiaryEntryPhotoParams = {
   localPhotoUri: string | null;
@@ -25,6 +26,8 @@ const useDiaryEntryPhoto = ({
 
   const normalizedLocalPhotoUri = normalizeUri(localPhotoUri);
   const normalizedPhotoUrl = normalizeUri(photoUrl);
+
+  const notifiedCloudPhotoUrlRef = useRef<string | null>(null);
 
   const [failedLocalPhotoUri, setFailedLocalPhotoUri] = useState<string | null>(
     null
@@ -85,6 +88,15 @@ const useDiaryEntryPhoto = ({
   const openAccessibilityLabel = t('diary.entry.photo.openAccessibilityLabel');
 
   useEffect(() => {
+    setFailedLocalPhotoUri(null);
+  }, [normalizedLocalPhotoUri]);
+
+  useEffect(() => {
+    setFailedPhotoUrl(null);
+    notifiedCloudPhotoUrlRef.current = null;
+  }, [normalizedPhotoUrl]);
+
+  useEffect(() => {
     setLoading(sourceUri !== null);
   }, [sourceUri]);
 
@@ -105,10 +117,28 @@ const useDiaryEntryPhoto = ({
       return;
     }
 
-    if (sourceUri === normalizedPhotoUrl) {
-      setFailedPhotoUrl(normalizedPhotoUrl);
+    if (sourceUri !== normalizedPhotoUrl) {
+      return;
     }
-  }, [normalizedLocalPhotoUri, normalizedPhotoUrl, sourceUri]);
+
+    setFailedPhotoUrl(normalizedPhotoUrl);
+
+    if (
+      normalizedPhotoUrl !== null &&
+      notifiedCloudPhotoUrlRef.current !== normalizedPhotoUrl
+    ) {
+      notifiedCloudPhotoUrlRef.current = normalizedPhotoUrl;
+
+      showNotification(
+        'error',
+        t(
+          isOffline
+            ? 'diary.entry.photo.unavailableOffline'
+            : 'diary.entry.photo.loadFailed'
+        )
+      );
+    }
+  }, [isOffline, normalizedLocalPhotoUri, normalizedPhotoUrl, sourceUri, t]);
 
   return {
     hasPhoto,

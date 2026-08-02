@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
@@ -8,21 +9,44 @@ import { useAuthData } from '@features/auth/api';
 import { UserRole } from '@features/auth/model';
 import type { DiaryEntry } from '@features/diary/model';
 import * as styles from '@features/diary/styles/Diary';
-import { DiaryEntryCard, LocalDiaryContent } from '@features/diary/ui';
+import {
+  DiaryEntryCard,
+  DiaryPhotoViewer,
+  LocalDiaryContent,
+} from '@features/diary/ui';
 import { PlatformOS } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
-
-const renderLocalEntry = (entry: DiaryEntry) => (
-  <DiaryEntryCard entry={entry} />
-);
 
 const Diary = () => {
   const theme = useTheme();
   const { t } = useTranslation();
   const { authData, isAuthLoading } = useAuthData();
 
+  const [openedPhotoEntry, setOpenedPhotoEntry] = useState<DiaryEntry | null>(
+    null
+  );
+
   const isOwner = authData?.role === UserRole.User;
   const isOwnerWeb = PlatformOS.WEB && isOwner;
+
+  const handleOpenPhoto = useCallback((entry: DiaryEntry) => {
+    setOpenedPhotoEntry(entry);
+  }, []);
+
+  const handleClosePhoto = useCallback(() => {
+    setOpenedPhotoEntry(null);
+  }, []);
+
+  const renderLocalEntry = useCallback(
+    (entry: DiaryEntry, isVisible: boolean) => (
+      <DiaryEntryCard
+        entry={entry}
+        isVisible={isVisible}
+        onOpenPhoto={handleOpenPhoto}
+      />
+    ),
+    [handleOpenPhoto]
+  );
 
   return (
     <PageWrapper>
@@ -39,7 +63,14 @@ const Diary = () => {
               </Text>
             </View>
           ) : isOwner ? (
-            <LocalDiaryContent renderEntry={renderLocalEntry} />
+            <>
+              <LocalDiaryContent renderEntry={renderLocalEntry} />
+
+              <DiaryPhotoViewer
+                entry={openedPhotoEntry}
+                onClose={handleClosePhoto}
+              />
+            </>
           ) : (
             <View>
               <Text style={globalStyles.Body(theme)}>Diary</Text>

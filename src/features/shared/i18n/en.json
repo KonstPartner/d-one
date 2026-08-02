@@ -37,6 +37,9 @@
         "info": "Information",
         "warn": "Warning"
       }
+    },
+    "photoViewer": {
+      "hint": "Pinch or double tap to zoom or reset"
     }
   }
 }

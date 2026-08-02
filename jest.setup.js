@@ -12,3 +12,5 @@ jest.mock('toastify-react-native', () => ({
     hide: jest.fn(),
   },
 }));
+
+require('react-native-reanimated').setUpTests();
