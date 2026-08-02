@@ -66,6 +66,43 @@
         "accessibilityLabel": "Фотография записи дневника",
         "openAccessibilityLabel": "Открыть фотографию записи дневника"
       }
+    },
+    "form": {
+      "createTitle": "Новая запись",
+      "cancel": "Отмена",
+      "create": "Создать",
+      "creating": "Сохранение…",
+      "cancelAccessibilityLabel": "Отменить создание записи",
+      "dateAccessibilityLabel": "Выбрать дату записи",
+      "timeAccessibilityLabel": "Выбрать время записи",
+      "useCurrentDateTime": "Сейчас",
+      "mealRelation": "Отношение к приёму пищи",
+      "mealRelationPlaceholder": "Выбрать",
+      "mealRelationNone": "Не указано",
+      "commentPlaceholder": "Добавить заметку…",
+      "commentAccessibilityLabel": "Комментарий к записи",
+      "metric": {
+        "valueAccessibilityLabel": "Значение: {{metric}}",
+        "decreaseAccessibilityLabel": "Уменьшить: {{metric}}",
+        "increaseAccessibilityLabel": "Увеличить: {{metric}}",
+        "clearAccessibilityLabel": "Очистить: {{metric}}"
+      },
+      "errors": {
+        "invalidEventAt": "Выберите корректные дату и время.",
+        "invalidGlucose": "Глюкоза должна быть от 0 до 100 и содержать не более одного знака после запятой.",
+        "invalidShortInsulin": "Короткий инсулин должен быть от 0 до 1000 и содержать не более одного знака после запятой.",
+        "invalidLongInsulin": "Длинный инсулин должен быть от 0 до 1000 и содержать не более одного знака после запятой.",
+        "invalidCarbsGram": "Углеводы должны быть от 0 до 1000 и содержать не более одного знака после запятой.",
+        "commentTooLong": "Комментарий не может быть длиннее 5000 символов.",
+        "emptyEntry": "Заполните хотя бы одно поле записи.",
+        "creationFailed": "Не удалось создать запись."
+      },
+      "openCreateAccessibilityLabel": "Создать запись дневника",
+      "discard": {
+        "title": "Отменить изменения?",
+        "description": "Введённые данные не будут сохранены.",
+        "confirm": "Отменить изменения"
+      }
     }
   }
 }

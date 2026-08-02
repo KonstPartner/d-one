@@ -64,6 +64,43 @@
         "accessibilityLabel": "Diary entry photo",
         "openAccessibilityLabel": "Open diary entry photo"
       }
+    },
+    "form": {
+      "createTitle": "New entry",
+      "cancel": "Cancel",
+      "create": "Create",
+      "creating": "Creating…",
+      "cancelAccessibilityLabel": "Cancel entry form",
+      "dateAccessibilityLabel": "Select entry date",
+      "timeAccessibilityLabel": "Select entry time",
+      "useCurrentDateTime": "Now",
+      "mealRelation": "Meal relation",
+      "mealRelationPlaceholder": "Select",
+      "mealRelationNone": "Not specified",
+      "commentPlaceholder": "Add note…",
+      "commentAccessibilityLabel": "Entry comment",
+      "metric": {
+        "valueAccessibilityLabel": "{{metric}} value",
+        "decreaseAccessibilityLabel": "Decrease {{metric}}",
+        "increaseAccessibilityLabel": "Increase {{metric}}",
+        "clearAccessibilityLabel": "Clear {{metric}}"
+      },
+      "errors": {
+        "invalidEventAt": "Select a valid date and time.",
+        "invalidGlucose": "Glucose must be between 0 and 100 with no more than one decimal place.",
+        "invalidShortInsulin": "Short insulin must be between 0 and 1000 with no more than one decimal place.",
+        "invalidLongInsulin": "Long insulin must be between 0 and 1000 with no more than one decimal place.",
+        "invalidCarbsGram": "Carbohydrates must be between 0 and 1000 with no more than one decimal place.",
+        "commentTooLong": "The comment cannot exceed 5000 characters.",
+        "emptyEntry": "Fill in at least one entry field.",
+        "creationFailed": "Failed to create the entry."
+      },
+      "openCreateAccessibilityLabel": "Create diary entry",
+      "discard": {
+        "title": "Discard changes?",
+        "description": "The entered data will not be saved.",
+        "confirm": "Discard"
+      }
     }
   }
 }

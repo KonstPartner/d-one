@@ -34,6 +34,29 @@ export type DiaryEntry = {
   syncStatus: DiarySyncStatus;
 };
 
+export type CreateDiaryEntryData = Pick<
+  DiaryEntry,
+  | 'glucose'
+  | 'mealRelation'
+  | 'shortInsulin'
+  | 'longInsulin'
+  | 'carbsGram'
+  | 'comment'
+  | 'eventAt'
+>;
+
+export type CreateDiaryEntryInput = CreateDiaryEntryData &
+  Pick<DiaryEntry, 'id' | 'localPhotoUri' | 'photoPath'>;
+
+export type DiaryEntryFormError =
+  | 'invalidEventAt'
+  | 'invalidGlucose'
+  | 'invalidShortInsulin'
+  | 'invalidLongInsulin'
+  | 'invalidCarbsGram'
+  | 'commentTooLong'
+  | 'emptyEntry';
+
 export type DiaryPagination = {
   page: number;
   pageSize: number;

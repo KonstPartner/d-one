@@ -11,6 +11,7 @@ const mockTheme = {
   colors: {
     text: '#111111',
     muted: '#777777',
+    primary: '#ea580c',
     success: '#008000',
     warning: '#ff9900',
     white: '#ffffff',
@@ -28,6 +29,11 @@ type ChildrenProps = {
 
 type LocalDiaryContentProps = {
   renderEntry: (entry: DiaryEntry, isVisible: boolean) => ReactElement;
+};
+
+type CreateDiaryEntryFormProps = {
+  onClose: () => void;
+  onCreated: (entryId: string) => void;
 };
 
 type PhotoViewerProps = {
@@ -169,6 +175,13 @@ jest.mock('@features/diary/ui/DiaryTextModal', () => ({
 }));
 
 jest.mock('@features/diary/ui', () => {
+  const React = jest.requireActual('react');
+  const {
+    Pressable: NativePressable,
+    Text: NativeText,
+    View: NativeView,
+  } = jest.requireActual('react-native');
+
   const DiaryEntryCard = jest.requireActual(
     '@features/diary/ui/DiaryEntryCard'
   ).default;
@@ -180,6 +193,32 @@ jest.mock('@features/diary/ui', () => {
   return {
     DiaryEntryCard,
     DiaryPhotoViewer,
+
+    CreateDiaryEntryForm: ({ onClose, onCreated }: CreateDiaryEntryFormProps) =>
+      React.createElement(
+        NativeView,
+        {
+          testID: 'create-diary-entry-form',
+        },
+        React.createElement(
+          NativePressable,
+          {
+            accessibilityRole: 'button',
+            accessibilityLabel: 'close-create-form',
+            onPress: onClose,
+          },
+          React.createElement(NativeText, null, 'close')
+        ),
+        React.createElement(
+          NativePressable,
+          {
+            accessibilityRole: 'button',
+            accessibilityLabel: 'complete-create-form',
+            onPress: () => onCreated('created-entry-id'),
+          },
+          React.createElement(NativeText, null, 'create')
+        )
+      ),
 
     LocalDiaryContent: ({ renderEntry }: LocalDiaryContentProps) => {
       const entry: DiaryEntry = {
@@ -205,6 +244,9 @@ jest.mock('@features/diary/ui', () => {
 });
 
 jest.mock('@features/diary/styles/Diary', () => ({
+  OwnerContent: {},
+  Toolbar: () => ({}),
+  CreateButton: () => ({}),
   UnsupportedContent: () => ({}),
   CenteredText: {},
 }));
@@ -242,7 +284,7 @@ jest.mock('@features/shared/styles/global', () => {
   };
 });
 
-describe('Diary photo viewer integration', () => {
+describe('Diary integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -281,5 +323,33 @@ describe('Diary photo viewer integration', () => {
     expect(screen.getByTestId('viewer-state').props.children).toBe(
       'false:none'
     );
+  });
+
+  it('opens and closes the create form', () => {
+    render(<Diary />);
+
+    expect(screen.queryByTestId('create-diary-entry-form')).toBeNull();
+
+    fireEvent.press(
+      screen.getByLabelText('diary.form.openCreateAccessibilityLabel')
+    );
+
+    expect(screen.getByTestId('create-diary-entry-form')).toBeTruthy();
+
+    fireEvent.press(screen.getByLabelText('close-create-form'));
+
+    expect(screen.queryByTestId('create-diary-entry-form')).toBeNull();
+  });
+
+  it('closes the create form after an entry is created', () => {
+    render(<Diary />);
+
+    fireEvent.press(
+      screen.getByLabelText('diary.form.openCreateAccessibilityLabel')
+    );
+
+    fireEvent.press(screen.getByLabelText('complete-create-form'));
+
+    expect(screen.queryByTestId('create-diary-entry-form')).toBeNull();
   });
 });

@@ -1,6 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type {
+  CreateDiaryEntryInput,
   DiaryEntry,
   DiaryPageResult,
   DiarySyncStatus,
@@ -32,6 +33,41 @@ type DiaryEntryRow = {
 type DiaryCountRow = {
   total_items: number;
 };
+
+const CREATE_DIARY_ENTRY_SQL = `
+  INSERT INTO diary_entries (
+    id,
+    user_id,
+    glucose,
+    meal_relation,
+    short_insulin,
+    long_insulin,
+    carbs_gram,
+    comment,
+    ai_analysis,
+    local_photo_uri,
+    photo_path,
+    photo_url,
+    event_at,
+    sync_status
+  )
+  VALUES (
+    $id,
+    $userId,
+    $glucose,
+    $mealRelation,
+    $shortInsulin,
+    $longInsulin,
+    $carbsGram,
+    $comment,
+    $aiAnalysis,
+    $localPhotoUri,
+    $photoPath,
+    $photoUrl,
+    $eventAt,
+    $syncStatus
+  )
+`;
 
 const FIND_DIARY_ENTRY_BY_ID_SQL = `
   SELECT
@@ -122,6 +158,33 @@ export class DiaryRepository {
     private readonly userId: string,
     private readonly operationGate: DiaryDatabaseOperationGate
   ) {}
+
+  public create(input: CreateDiaryEntryInput): Promise<void> {
+    const eventAt = input.eventAt.getTime();
+
+    if (Number.isNaN(eventAt)) {
+      return Promise.reject(new Error('Invalid diary event date'));
+    }
+
+    return this.operationGate.run(async () => {
+      await this.database.runAsync(CREATE_DIARY_ENTRY_SQL, {
+        $id: input.id,
+        $userId: this.userId,
+        $glucose: input.glucose,
+        $mealRelation: input.mealRelation,
+        $shortInsulin: input.shortInsulin,
+        $longInsulin: input.longInsulin,
+        $carbsGram: input.carbsGram,
+        $comment: input.comment,
+        $aiAnalysis: '',
+        $localPhotoUri: input.localPhotoUri,
+        $photoPath: input.photoPath,
+        $photoUrl: null,
+        $eventAt: eventAt,
+        $syncStatus: 'pendingCreate',
+      });
+    });
+  }
 
   public findById(id: string): Promise<DiaryEntry | null> {
     return this.operationGate.run(async () => {

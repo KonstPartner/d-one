@@ -1,5 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import type { CreateDiaryEntryInput } from '../../../model/types';
 import { DiaryDatabaseOperationGate } from '../diaryDatabaseOperationGate';
 import { DiaryRepository } from '../diaryRepository';
 
@@ -22,6 +23,22 @@ type DiaryEntryRowFixture = {
 
 const eventAt = Date.UTC(2026, 6, 31, 18, 30);
 
+const createInput = (
+  overrides: Partial<CreateDiaryEntryInput> = {}
+): CreateDiaryEntryInput => ({
+  id: 'entry-1',
+  glucose: 6.5,
+  mealRelation: 'beforeMeal',
+  shortInsulin: 4,
+  longInsulin: 10,
+  carbsGram: 35,
+  comment: 'Dinner',
+  localPhotoUri: null,
+  photoPath: null,
+  eventAt: new Date(eventAt),
+  ...overrides,
+});
+
 const createRow = (
   overrides: Partial<DiaryEntryRowFixture> = {}
 ): DiaryEntryRowFixture => ({
@@ -43,15 +60,18 @@ const createRow = (
 });
 
 describe('DiaryRepository', () => {
+  let runAsync: jest.Mock;
   let getFirstAsync: jest.Mock;
   let getAllAsync: jest.Mock;
   let repository: DiaryRepository;
 
   beforeEach(() => {
+    runAsync = jest.fn();
     getFirstAsync = jest.fn();
     getAllAsync = jest.fn();
 
     const database = {
+      runAsync,
       getFirstAsync,
       getAllAsync,
     } as unknown as SQLiteDatabase;
@@ -61,6 +81,81 @@ describe('DiaryRepository', () => {
       'user-1',
       new DiaryDatabaseOperationGate()
     );
+  });
+
+  describe('create', () => {
+    it('creates a pending local entry for the current user', async () => {
+      runAsync.mockResolvedValue({
+        changes: 1,
+        lastInsertRowId: 1,
+      });
+
+      await expect(repository.create(createInput())).resolves.toBeUndefined();
+
+      expect(runAsync).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO diary_entries'),
+        {
+          $id: 'entry-1',
+          $userId: 'user-1',
+          $glucose: 6.5,
+          $mealRelation: 'beforeMeal',
+          $shortInsulin: 4,
+          $longInsulin: 10,
+          $carbsGram: 35,
+          $comment: 'Dinner',
+          $aiAnalysis: '',
+          $localPhotoUri: null,
+          $photoPath: null,
+          $photoUrl: null,
+          $eventAt: eventAt,
+          $syncStatus: 'pendingCreate',
+        }
+      );
+    });
+
+    it('stores prepared local photo information', async () => {
+      runAsync.mockResolvedValue({
+        changes: 1,
+        lastInsertRowId: 1,
+      });
+
+      await repository.create(
+        createInput({
+          localPhotoUri: 'file:///diary/entry-1.jpg',
+          photoPath: 'users/user-1/diaryPhotos/entry-1.jpg',
+        })
+      );
+
+      expect(runAsync).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          $localPhotoUri: 'file:///diary/entry-1.jpg',
+          $photoPath: 'users/user-1/diaryPhotos/entry-1.jpg',
+          $photoUrl: null,
+          $syncStatus: 'pendingCreate',
+        })
+      );
+    });
+
+    it('rejects an invalid event date before accessing SQLite', async () => {
+      await expect(
+        repository.create(
+          createInput({
+            eventAt: new Date(Number.NaN),
+          })
+        )
+      ).rejects.toThrow('Invalid diary event date');
+
+      expect(runAsync).not.toHaveBeenCalled();
+    });
+
+    it('propagates SQLite errors', async () => {
+      const error = new Error('SQLite insert failed');
+
+      runAsync.mockRejectedValue(error);
+
+      await expect(repository.create(createInput())).rejects.toBe(error);
+    });
   });
 
   describe('findById', () => {

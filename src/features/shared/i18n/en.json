@@ -40,6 +40,10 @@
     },
     "photoViewer": {
       "hint": "Pinch or double tap to zoom or reset"
+    },
+    "relativeDate": {
+      "today": "Today",
+      "yesterday": "Yesterday"
     }
   }
 }
