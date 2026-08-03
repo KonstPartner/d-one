@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,7 @@ import {
 import * as styles from '../styles/DiaryEntryForm';
 
 import DiaryEntryDateTimeFields from './DiaryEntryDateTimeFields';
+import DiaryEntryFormPhoto from './DiaryEntryFormPhoto';
 import MetricStepper from './MetricStepper';
 
 type DiaryEntryFormProps = {
@@ -52,6 +53,13 @@ const DiaryEntryForm = ({
     validationError,
     submissionError,
     isSubmitting,
+    photoUri,
+    photoError,
+    hasTemporaryPhoto,
+    isPhotoBusy,
+    handleChoosePhoto,
+    handleDeletePhoto,
+    discardPhotoChanges,
     handleGlucoseChange,
     handleMealRelationChange,
     handleShortInsulinChange,
@@ -125,11 +133,48 @@ const DiaryEntryForm = ({
         : 'diary.form.save'
   );
 
+  const isBusy = isSubmitting || isPhotoBusy;
+
   const handleRequestClose = useCallback(() => {
-    if (!isSubmitting) {
-      onClose();
+    if (isBusy) {
+      return;
     }
-  }, [isSubmitting, onClose]);
+
+    const closeAfterDiscard = () => {
+      if (discardPhotoChanges()) {
+        onClose();
+      }
+    };
+
+    if (!isCreateMode || !hasTemporaryPhoto) {
+      closeAfterDiscard();
+
+      return;
+    }
+
+    Alert.alert(
+      t('diary.form.photo.discardTitle'),
+      t('diary.form.photo.discardMessage'),
+      [
+        {
+          text: t('common.cancel'),
+          style: 'cancel',
+        },
+        {
+          text: t('diary.form.photo.discard'),
+          style: 'destructive',
+          onPress: closeAfterDiscard,
+        },
+      ]
+    );
+  }, [
+    discardPhotoChanges,
+    hasTemporaryPhoto,
+    isBusy,
+    isCreateMode,
+    onClose,
+    t,
+  ]);
 
   const handleSave = useCallback(() => {
     void handleSubmit();
@@ -141,22 +186,22 @@ const DiaryEntryForm = ({
       onClose={handleRequestClose}
       withoutScroll
       withoutCloseBtn
-      isDisabled={isSubmitting}
+      isDisabled={isBusy}
     >
       <View style={styles.Root}>
         <View style={styles.Header(theme)}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('diary.form.cancelAccessibilityLabel')}
-            accessibilityState={{ disabled: isSubmitting }}
-            disabled={isSubmitting}
+            accessibilityState={{ disabled: isBusy }}
+            disabled={isBusy}
             onPress={handleRequestClose}
-            style={globalStyles.IconButton(theme, 'ghost', 'sm', isSubmitting)}
+            style={globalStyles.IconButton(theme, 'ghost', 'sm', isBusy)}
           >
             <Ionicons
               name="chevron-back"
               size={theme.size.md}
-              color={isSubmitting ? theme.colors.muted : theme.colors.text}
+              color={isBusy ? theme.colors.muted : theme.colors.text}
             />
           </Pressable>
 
@@ -373,6 +418,15 @@ const DiaryEntryForm = ({
             />
           </View>
 
+          <DiaryEntryFormPhoto
+            photoUri={photoUri}
+            errorCode={photoError}
+            disabled={isSubmitting}
+            isBusy={isPhotoBusy}
+            onChoosePhoto={handleChoosePhoto}
+            onDeletePhoto={handleDeletePhoto}
+          />
+
           {errorMessage !== null ? (
             <Text
               accessibilityRole="alert"
@@ -388,27 +442,21 @@ const DiaryEntryForm = ({
           <Button
             accessibilityRole="button"
             accessibilityLabel={t('diary.form.cancel')}
-            disabled={isSubmitting}
+            disabled={isBusy}
             onPress={handleRequestClose}
             style={[
               styles.Action,
-              globalStyles.Button(theme, 'secondary', isSubmitting),
+              globalStyles.Button(theme, 'secondary', isBusy),
             ]}
           >
             <View style={styles.ButtonContent(theme)}>
               <Ionicons
                 name="close"
                 size={theme.size.md}
-                color={isSubmitting ? theme.colors.muted : theme.colors.text}
+                color={isBusy ? theme.colors.muted : theme.colors.text}
               />
 
-              <Text
-                style={globalStyles.ButtonText(
-                  theme,
-                  'secondary',
-                  isSubmitting
-                )}
-              >
+              <Text style={globalStyles.ButtonText(theme, 'secondary', isBusy)}>
                 {t('diary.form.cancel')}
               </Text>
             </View>
@@ -419,11 +467,11 @@ const DiaryEntryForm = ({
             accessibilityLabel={t(
               isCreateMode ? 'diary.form.create' : 'diary.form.save'
             )}
-            disabled={isSubmitting}
+            disabled={isBusy}
             onPress={handleSave}
             style={[
               styles.Action,
-              globalStyles.Button(theme, 'primary', isSubmitting),
+              globalStyles.Button(theme, 'primary', isBusy),
             ]}
           >
             <View style={styles.ButtonContent(theme)}>
@@ -440,9 +488,7 @@ const DiaryEntryForm = ({
                 />
               )}
 
-              <Text
-                style={globalStyles.ButtonText(theme, 'primary', isSubmitting)}
-              >
+              <Text style={globalStyles.ButtonText(theme, 'primary', isBusy)}>
                 {submitLabel}
               </Text>
             </View>

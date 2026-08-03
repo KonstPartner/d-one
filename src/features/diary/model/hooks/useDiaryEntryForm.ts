@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import useCreateDiaryEntry from '../../api/hooks/useCreateDiaryEntry';
-import useUpdateDiaryEntry from '../../api/hooks/useUpdateDiaryEntry';
+import useUpdateDiaryEntry, {
+  type UpdateDiaryEntryPhotoChange,
+} from '../../api/hooks/useUpdateDiaryEntry';
 import type {
   CreateDiaryEntryData,
   DiaryEntry,
@@ -9,6 +11,8 @@ import type {
   DiaryEntryFormMode,
   MealRelation,
 } from '../types';
+
+import useDiaryEntryFormPhoto from './useDiaryEntryFormPhoto';
 
 type UseDiaryEntryFormParams = {
   visible: boolean;
@@ -76,16 +80,21 @@ const isValidMetric = (value: number | null, maximum: number): boolean =>
     value <= maximum &&
     hasMaximumOneDecimalPlace(value));
 
-const isMeaningfulEntry = (values: CreateDiaryEntryData): boolean =>
+const isMeaningfulEntry = (
+  values: CreateDiaryEntryData,
+  hasPhoto: boolean
+): boolean =>
   values.glucose !== null ||
   values.mealRelation !== null ||
   values.shortInsulin !== null ||
   values.longInsulin !== null ||
   values.carbsGram !== null ||
-  values.comment.length > 0;
+  values.comment.length > 0 ||
+  hasPhoto;
 
 const validateValues = (
-  values: CreateDiaryEntryData
+  values: CreateDiaryEntryData,
+  hasPhoto: boolean
 ): DiaryEntryFormError | null => {
   if (Number.isNaN(values.eventAt.getTime())) {
     return 'invalidEventAt';
@@ -111,7 +120,7 @@ const validateValues = (
     return 'commentTooLong';
   }
 
-  if (!isMeaningfulEntry(values)) {
+  if (!isMeaningfulEntry(values, hasPhoto)) {
     return 'emptyEntry';
   }
 
@@ -145,6 +154,23 @@ const useDiaryEntryForm = ({
 
   const createMutation = useCreateDiaryEntry();
   const updateMutation = useUpdateDiaryEntry();
+  const {
+    photoUri,
+    photoDraftUri,
+    photoAction,
+    photoError,
+    hasPhoto,
+    hasTemporaryPhoto,
+    isPhotoBusy,
+    handleChoosePhoto,
+    handleDeletePhoto,
+    discardPhotoChanges,
+    markPhotoSaved,
+  } = useDiaryEntryFormPhoto({
+    visible,
+    mode,
+    entry,
+  });
 
   const clearErrors = useCallback(() => {
     setValidationError(null);
@@ -353,7 +379,11 @@ const useDiaryEntryForm = ({
   );
 
   const handleSubmit = useCallback(async (): Promise<string | null> => {
-    if (submitInProgressRef.current || (mode === 'edit' && entry === null)) {
+    if (
+      submitInProgressRef.current ||
+      isPhotoBusy ||
+      (mode === 'edit' && entry === null)
+    ) {
       return null;
     }
 
@@ -363,7 +393,7 @@ const useDiaryEntryForm = ({
       eventAt: useCurrentDateTime ? new Date() : new Date(values.eventAt),
     };
 
-    const nextValidationError = validateValues(normalizedValues);
+    const nextValidationError = validateValues(normalizedValues, hasPhoto);
 
     if (nextValidationError !== null) {
       clearErrors();
@@ -379,17 +409,34 @@ const useDiaryEntryForm = ({
       let entryId: string;
 
       if (mode === 'create') {
-        entryId = await createMutation.mutateAsync(normalizedValues);
+        entryId = await createMutation.mutateAsync({
+          ...normalizedValues,
+          photoDraftUri,
+        });
       } else {
         if (entry === null) {
           return null;
         }
 
+        let photoChange: UpdateDiaryEntryPhotoChange = { type: 'keep' };
+
+        if (photoAction === 'delete') {
+          photoChange = { type: 'delete' };
+        } else if (photoAction === 'replace' && photoDraftUri !== null) {
+          photoChange = {
+            type: 'replace',
+            draftUri: photoDraftUri,
+          };
+        }
+
         entryId = await updateMutation.mutateAsync({
           ...normalizedValues,
           id: entry.id,
+          photoChange,
         });
       }
+
+      markPhotoSaved();
 
       if (mode === 'create') {
         resetCreateDraft();
@@ -407,8 +454,13 @@ const useDiaryEntryForm = ({
     clearErrors,
     createMutation,
     entry,
+    hasPhoto,
+    isPhotoBusy,
+    markPhotoSaved,
     mode,
     onSaved,
+    photoAction,
+    photoDraftUri,
     resetCreateDraft,
     updateMutation,
     useCurrentDateTime,
@@ -423,6 +475,13 @@ const useDiaryEntryForm = ({
     validationError,
     submissionError: activeMutation.error,
     isSubmitting: activeMutation.isPending,
+    photoUri,
+    photoError,
+    hasTemporaryPhoto,
+    isPhotoBusy,
+    handleChoosePhoto,
+    handleDeletePhoto,
+    discardPhotoChanges,
     handleGlucoseChange,
     handleMealRelationChange,
     handleShortInsulinChange,

@@ -89,6 +89,30 @@
         "increaseAccessibilityLabel": "Increase {{metric}}",
         "clearAccessibilityLabel": "Clear {{metric}}"
       },
+      "photo": {
+        "title": "Photo",
+        "empty": "No photo selected",
+        "add": "Add photo",
+        "replace": "Replace",
+        "delete": "Delete",
+        "addAccessibilityLabel": "Add a photo to the diary entry",
+        "replaceAccessibilityLabel": "Replace the diary entry photo",
+        "deleteAccessibilityLabel": "Delete the diary entry photo",
+        "previewAccessibilityLabel": "Selected diary entry photo",
+        "sourceTitle": "Add photo",
+        "sourceMessage": "Choose a photo source.",
+        "camera": "Camera",
+        "gallery": "Photo library",
+        "discardTitle": "Delete the added photo?",
+        "discardMessage": "The added photo will be deleted. Other entered data will remain in the draft.",
+        "discard": "Delete photo and close",
+        "errors": {
+          "processingFailed": "Failed to process the photo.",
+          "invalidFile": "The selected photo is invalid.",
+          "fileTooLarge": "The photo must not exceed 10 MB.",
+          "storageFailed": "Failed to save or delete the photo."
+        }
+      },
       "errors": {
         "invalidEventAt": "Select a valid date and time.",
         "invalidGlucose": "Glucose must be between 0 and 100 with no more than one decimal place.",

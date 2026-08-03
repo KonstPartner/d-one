@@ -13,17 +13,19 @@ import {
 import type { DiaryEntry, DiaryEntryFormMode } from '../types';
 
 type UseDiaryEntryFormPhotoParams = {
+  visible: boolean;
   mode: DiaryEntryFormMode;
   entry: DiaryEntry | null;
 };
 
-type DiaryEntryFormPhotoAction = 'keep' | 'replace' | 'delete';
+export type DiaryEntryFormPhotoAction = 'keep' | 'replace' | 'delete';
 type DiaryPhotoSource = 'camera' | 'library';
 
 const getPhotoErrorCode = (error: unknown): DiaryPhotoErrorCode =>
   error instanceof DiaryPhotoError ? error.code : 'processingFailed';
 
 const useDiaryEntryFormPhoto = ({
+  visible,
   mode,
   entry,
 }: UseDiaryEntryFormPhotoParams) => {
@@ -59,6 +61,18 @@ const useDiaryEntryFormPhoto = ({
     }
   }, []);
 
+  const deleteUncommittedDraft = useCallback((draftUri: string | null) => {
+    if (draftUri === null) {
+      return;
+    }
+
+    try {
+      removeDiaryPhotoDraft(draftUri);
+    } catch {
+      return;
+    }
+  }, []);
+
   const resetPhotoState = useCallback(
     (removeDraft: boolean): boolean => {
       operationIdRef.current += 1;
@@ -80,6 +94,15 @@ const useDiaryEntryFormPhoto = ({
   );
 
   useEffect(() => {
+    if (!visible) {
+      if (formKeyRef.current !== null) {
+        formKeyRef.current = null;
+        resetPhotoState(true);
+      }
+
+      return;
+    }
+
     const formKey = mode === 'create' ? 'create' : `edit:${entry?.id ?? ''}`;
 
     if (formKeyRef.current === formKey) {
@@ -88,7 +111,7 @@ const useDiaryEntryFormPhoto = ({
 
     formKeyRef.current = formKey;
     resetPhotoState(true);
-  }, [entry?.id, mode, resetPhotoState]);
+  }, [entry?.id, mode, resetPhotoState, visible]);
 
   useEffect(
     () => () => {
@@ -112,6 +135,7 @@ const useDiaryEntryFormPhoto = ({
       }
 
       const operationId = operationIdRef.current + 1;
+      let uncommittedDraftUri: string | null = null;
 
       operationIdRef.current = operationId;
       isBusyRef.current = true;
@@ -128,33 +152,34 @@ const useDiaryEntryFormPhoto = ({
 
         const nextDraft = await createDiaryPhotoDraft(sourceUri);
 
-        if (operationId !== operationIdRef.current) {
-          removeDiaryPhotoDraft(nextDraft.uri);
+        uncommittedDraftUri = nextDraft.uri;
 
+        if (operationId !== operationIdRef.current) {
           return;
         }
 
-        const previousDraftUri = photoDraftUriRef.current;
-
-        if (!deleteDraft(previousDraftUri)) {
-          removeDiaryPhotoDraft(nextDraft.uri);
-
+        if (!deleteDraft(photoDraftUriRef.current)) {
           return;
         }
 
         photoDraftUriRef.current = nextDraft.uri;
         setPhotoDraftUri(nextDraft.uri);
         setPhotoAction('replace');
+        uncommittedDraftUri = null;
       } catch (error) {
-        setPhotoError(getPhotoErrorCode(error));
+        if (operationId === operationIdRef.current) {
+          setPhotoError(getPhotoErrorCode(error));
+        }
       } finally {
+        deleteUncommittedDraft(uncommittedDraftUri);
+
         if (operationId === operationIdRef.current) {
           isBusyRef.current = false;
           setIsProcessing(false);
         }
       }
     },
-    [deleteDraft, pickImage, takeImage]
+    [deleteDraft, deleteUncommittedDraft, pickImage, takeImage]
   );
 
   const handleChoosePhoto = useCallback(() => {
@@ -226,6 +251,7 @@ const useDiaryEntryFormPhoto = ({
     photoDraftUri,
     photoAction,
     photoError,
+    hasPhoto: photoUri !== null,
     hasTemporaryPhoto: photoDraftUri !== null,
     isPhotoBusy: isPicking || isProcessing,
     handleChoosePhoto,

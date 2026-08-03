@@ -3,7 +3,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDiaryListStore } from '../../model/store';
 import type { UpdateDiaryEntryData } from '../../model/types';
 import { diaryQueryKeys } from '../constants';
-import { prepareDiaryPhotoForEntry } from '../diaryPhotoService';
+import {
+  prepareDiaryPhotoForEntry,
+  prepareDiaryPhotoRemoval,
+} from '../diaryPhotoService';
 import { useReadyDiaryDatabase } from '../sqlite/DiaryDatabaseProvider';
 
 export type UpdateDiaryEntryPhotoChange =
@@ -41,16 +44,29 @@ const useUpdateDiaryEntry = () => {
       }
 
       if (photoChange.type === 'delete') {
-        await repository.update({
-          ...data,
-          photo: {
-            localPhotoUri: null,
-            photoPath: currentEntry.photoPath,
-            photoUrl: null,
-          },
+        const preparedRemoval = prepareDiaryPhotoRemoval({
+          userId,
+          entryId: data.id,
         });
 
-        return data.id;
+        try {
+          await repository.update({
+            ...data,
+            photo: {
+              localPhotoUri: null,
+              photoPath: currentEntry.photoPath,
+              photoUrl: null,
+            },
+          });
+
+          preparedRemoval.finalize();
+
+          return data.id;
+        } catch (error) {
+          preparedRemoval.rollback();
+
+          throw error;
+        }
       }
 
       const preparedPhoto = prepareDiaryPhotoForEntry({

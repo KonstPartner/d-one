@@ -1,77 +1,61 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { collection, doc } from 'firebase/firestore';
+
+import { db } from '@features/auth/api/firebase/config';
 
 import { useDiaryListStore } from '../../model/store';
-import type { UpdateDiaryEntryData } from '../../model/types';
+import type { CreateDiaryEntryData } from '../../model/types';
 import { diaryQueryKeys } from '../constants';
 import { prepareDiaryPhotoForEntry } from '../diaryPhotoService';
 import { useReadyDiaryDatabase } from '../sqlite/DiaryDatabaseProvider';
 
-export type UpdateDiaryEntryPhotoChange =
-  | { type: 'keep' }
-  | { type: 'replace'; draftUri: string }
-  | { type: 'delete' };
-
-export type UpdateDiaryEntryMutationData = UpdateDiaryEntryData & {
-  photoChange?: UpdateDiaryEntryPhotoChange;
+export type CreateDiaryEntryMutationData = CreateDiaryEntryData & {
+  photoDraftUri?: string | null;
 };
 
-const useUpdateDiaryEntry = () => {
+const useCreateDiaryEntry = () => {
   const queryClient = useQueryClient();
   const { userId, repository } = useReadyDiaryDatabase();
 
   const resetListState = useDiaryListStore((state) => state.resetListState);
 
   return useMutation({
-    mutationKey: [...diaryQueryKeys.localRoot(userId), 'update'],
+    mutationKey: [...diaryQueryKeys.localRoot(userId), 'create'],
 
     mutationFn: async ({
-      photoChange = { type: 'keep' },
+      photoDraftUri = null,
       ...data
-    }: UpdateDiaryEntryMutationData): Promise<string> => {
-      if (photoChange.type === 'keep') {
-        await repository.update(data);
+    }: CreateDiaryEntryMutationData): Promise<string> => {
+      const entryId = doc(collection(db, 'users', userId, 'diaryEntries')).id;
 
-        return data.id;
-      }
-
-      const currentEntry = await repository.findById(data.id);
-
-      if (currentEntry === null) {
-        throw new Error(`Diary entry does not exist: ${data.id}`);
-      }
-
-      if (photoChange.type === 'delete') {
-        await repository.update({
+      if (photoDraftUri === null) {
+        await repository.create({
           ...data,
-          photo: {
-            localPhotoUri: null,
-            photoPath: currentEntry.photoPath,
-            photoUrl: null,
-          },
+          id: entryId,
+          localPhotoUri: null,
+          photoPath: null,
         });
 
-        return data.id;
+        return entryId;
       }
 
       const preparedPhoto = prepareDiaryPhotoForEntry({
         userId,
-        entryId: data.id,
-        draftUri: photoChange.draftUri,
+        entryId,
+        draftUri: photoDraftUri,
       });
 
       try {
-        await repository.update({
+        await repository.create({
           ...data,
-          photo: {
-            localPhotoUri: preparedPhoto.localPhotoUri,
-            photoPath: preparedPhoto.photoPath,
-            photoUrl: null,
-          },
+          id: entryId,
+          localPhotoUri: preparedPhoto.localPhotoUri,
+          photoPath: preparedPhoto.photoPath,
         });
 
         preparedPhoto.finalize();
 
-        return data.id;
+        return entryId;
       } catch (error) {
         preparedPhoto.rollback();
 
@@ -87,7 +71,7 @@ const useUpdateDiaryEntry = () => {
           queryKey: diaryQueryKeys.localPagesRoot(userId),
         })
         .catch((error) => {
-          console.error('Failed to refresh diary after entry update', error);
+          console.error('Failed to refresh diary after entry creation', error);
         });
     },
 
@@ -96,4 +80,4 @@ const useUpdateDiaryEntry = () => {
   });
 };
 
-export default useUpdateDiaryEntry;
+export default useCreateDiaryEntry;

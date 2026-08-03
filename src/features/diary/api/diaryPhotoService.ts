@@ -15,6 +15,11 @@ export type PreparedDiaryPhoto = {
   rollback: () => void;
 };
 
+export type PreparedDiaryPhotoRemoval = {
+  finalize: () => void;
+  rollback: () => void;
+};
+
 export type DiaryPhotoErrorCode =
   | 'processingFailed'
   | 'invalidFile'
@@ -78,6 +83,23 @@ const createBackupFile = (entryId: string): File => {
   const suffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
   return new File(backupDirectory, `${entryId}-${suffix}.jpg`);
+};
+
+const createDiaryPhotoFile = ({
+  userId,
+  entryId,
+}: {
+  userId: string;
+  entryId: string;
+}): File => {
+  const photoDirectory = new Directory(
+    Paths.document,
+    'users',
+    userId,
+    'diaryPhotos'
+  );
+
+  return new File(photoDirectory, `${entryId}.jpg`);
 };
 
 export const createDiaryPhotoDraft = async (
@@ -171,7 +193,10 @@ export const prepareDiaryPhotoForEntry = ({
     userId,
     'diaryPhotos'
   );
-  const destinationFile = new File(photoDirectory, `${entryId}.jpg`);
+  const destinationFile = createDiaryPhotoFile({
+    userId,
+    entryId,
+  });
   const hadExistingDestination = destinationFile.exists;
 
   let backupFile: File | null = null;
@@ -253,6 +278,73 @@ export const prepareDiaryPhotoForEntry = ({
   return {
     localPhotoUri: destinationFile.uri,
     photoPath: `users/${userId}/diaryPhotos/${entryId}.jpg`,
+    finalize,
+    rollback,
+  };
+};
+
+export const prepareDiaryPhotoRemoval = ({
+  userId,
+  entryId,
+}: {
+  userId: string;
+  entryId: string;
+}): PreparedDiaryPhotoRemoval => {
+  validateIdentifier(userId);
+  validateIdentifier(entryId);
+
+  const photoFile = createDiaryPhotoFile({
+    userId,
+    entryId,
+  });
+
+  if (!photoFile.exists) {
+    return {
+      finalize: () => undefined,
+      rollback: () => undefined,
+    };
+  }
+
+  let backupFile: File | null = null;
+
+  try {
+    backupFile = createBackupFile(entryId);
+    photoFile.copy(backupFile);
+    validatePhotoFile(backupFile);
+    photoFile.delete();
+  } catch {
+    safelyDeleteFile(backupFile);
+    throw new DiaryPhotoError('storageFailed');
+  }
+
+  let active = true;
+
+  const finalize = (): void => {
+    if (!active) {
+      return;
+    }
+
+    safelyDeleteFile(backupFile);
+    active = false;
+  };
+
+  const rollback = (): void => {
+    if (!active || backupFile === null) {
+      return;
+    }
+
+    try {
+      deleteFileIfExists(photoFile);
+      backupFile.copy(photoFile);
+      validatePhotoFile(photoFile);
+      backupFile.delete();
+      active = false;
+    } catch {
+      throw new DiaryPhotoError('storageFailed');
+    }
+  };
+
+  return {
     finalize,
     rollback,
   };
