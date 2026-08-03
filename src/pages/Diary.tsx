@@ -9,40 +9,31 @@ import { Loader, LoadingView } from '@entities/shared/ui';
 import { useAuthData } from '@features/auth/api';
 import { UserRole } from '@features/auth/model';
 import type { DiaryEntry } from '@features/diary/model';
+import useDiaryEntryFormController from '@features/diary/model/hooks/useDiaryEntryFormController';
 import * as styles from '@features/diary/styles/Diary';
 import {
-  CreateDiaryEntryForm,
   DiaryEntryCard,
+  DiaryEntryForm,
   DiaryPhotoViewer,
   LocalDiaryContent,
 } from '@features/diary/ui';
 import { PlatformOS } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
 
-const Diary = () => {
+const LocalDiaryOwnerContent = () => {
   const theme = useTheme();
   const { t } = useTranslation();
-  const { authData, isAuthLoading } = useAuthData();
-
-  const [createFormVisible, setCreateFormVisible] = useState(false);
   const [openedPhotoEntry, setOpenedPhotoEntry] = useState<DiaryEntry | null>(
     null
   );
 
-  const isOwner = authData?.role === UserRole.User;
-  const isOwnerWeb = PlatformOS.WEB && isOwner;
-
-  const handleOpenCreateForm = useCallback(() => {
-    setCreateFormVisible(true);
-  }, []);
-
-  const handleCloseCreateForm = useCallback(() => {
-    setCreateFormVisible(false);
-  }, []);
-
-  const handleEntryCreated = useCallback(() => {
-    setCreateFormVisible(false);
-  }, []);
+  const {
+    formState,
+    handleOpenCreateForm,
+    handleOpenEditForm,
+    handleCloseForm,
+    handleEntrySaved,
+  } = useDiaryEntryFormController();
 
   const handleOpenPhoto = useCallback((entry: DiaryEntry) => {
     setOpenedPhotoEntry(entry);
@@ -57,11 +48,52 @@ const Diary = () => {
       <DiaryEntryCard
         entry={entry}
         isVisible={isVisible}
+        onPress={handleOpenEditForm}
         onOpenPhoto={handleOpenPhoto}
       />
     ),
-    [handleOpenPhoto]
+    [handleOpenEditForm, handleOpenPhoto]
   );
+
+  return (
+    <View style={styles.OwnerContent}>
+      <View style={styles.Toolbar(theme)}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('diary.form.openCreateAccessibilityLabel')}
+          onPress={handleOpenCreateForm}
+          style={styles.CreateButton(theme)}
+        >
+          <Ionicons
+            name="add"
+            size={theme.size.lg}
+            color={theme.colors.white}
+          />
+        </Pressable>
+      </View>
+
+      <LocalDiaryContent renderEntry={renderLocalEntry} />
+
+      <DiaryPhotoViewer entry={openedPhotoEntry} onClose={handleClosePhoto} />
+
+      <DiaryEntryForm
+        visible={formState.visible}
+        mode={formState.mode}
+        entry={formState.entry}
+        onClose={handleCloseForm}
+        onSaved={handleEntrySaved}
+      />
+    </View>
+  );
+};
+
+const Diary = () => {
+  const theme = useTheme();
+  const { t } = useTranslation();
+  const { authData, isAuthLoading } = useAuthData();
+
+  const isOwner = authData?.role === UserRole.User;
+  const isOwnerWeb = PlatformOS.WEB && isOwner;
 
   return (
     <PageWrapper>
@@ -78,37 +110,7 @@ const Diary = () => {
               </Text>
             </View>
           ) : isOwner ? (
-            <View style={styles.OwnerContent}>
-              <View style={styles.Toolbar(theme)}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t(
-                    'diary.form.openCreateAccessibilityLabel'
-                  )}
-                  onPress={handleOpenCreateForm}
-                  style={styles.CreateButton(theme)}
-                >
-                  <Ionicons
-                    name="add"
-                    size={theme.size.lg}
-                    color={theme.colors.white}
-                  />
-                </Pressable>
-              </View>
-
-              <LocalDiaryContent renderEntry={renderLocalEntry} />
-
-              <DiaryPhotoViewer
-                entry={openedPhotoEntry}
-                onClose={handleClosePhoto}
-              />
-
-              <CreateDiaryEntryForm
-                createFormVisible={createFormVisible}
-                onClose={handleCloseCreateForm}
-                onCreated={handleEntryCreated}
-              />
-            </View>
+            <LocalDiaryOwnerContent />
           ) : (
             <View>
               <Text style={globalStyles.Body(theme)}>Diary</Text>

@@ -12,28 +12,37 @@ import type { SelectDropdownOption } from '@features/shared/model/types/dropdown
 import * as globalStyles from '@features/shared/styles/global';
 import PortalModal from '@features/shared/ui/PortalModal';
 
-import useCreateDiaryEntryForm from '../model/hooks/useCreateDiaryEntryForm';
+import useDiaryEntryForm from '../model/hooks/useDiaryEntryForm';
 import { MEAL_RELATION_PRESENTATION } from '../model/mealRelationPresentation';
-import { MEAL_RELATIONS, type MealRelation } from '../model/types';
-import * as styles from '../styles/CreateDiaryEntryForm';
+import {
+  type DiaryEntry,
+  type DiaryEntryFormMode,
+  MEAL_RELATIONS,
+  type MealRelation,
+} from '../model/types';
+import * as styles from '../styles/DiaryEntryForm';
 
 import DiaryEntryDateTimeFields from './DiaryEntryDateTimeFields';
 import MetricStepper from './MetricStepper';
 
-type CreateDiaryEntryFormProps = {
-  createFormVisible: boolean;
+type DiaryEntryFormProps = {
+  visible: boolean;
+  mode: DiaryEntryFormMode;
+  entry: DiaryEntry | null;
   onClose: () => void;
-  onCreated: (entryId: string) => void;
+  onSaved: (entryId: string) => void;
 };
 
 const GLUCOSE_MAXIMUM = 100;
 const METRIC_MAXIMUM = 1000;
 
-const CreateDiaryEntryForm = ({
-  createFormVisible,
+const DiaryEntryForm = ({
+  visible,
+  mode,
+  entry,
   onClose,
-  onCreated,
-}: CreateDiaryEntryFormProps) => {
+  onSaved,
+}: DiaryEntryFormProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -41,7 +50,7 @@ const CreateDiaryEntryForm = ({
     values,
     useCurrentDateTime,
     validationError,
-    creationError,
+    submissionError,
     isSubmitting,
     handleGlucoseChange,
     handleMealRelationChange,
@@ -53,9 +62,11 @@ const CreateDiaryEntryForm = ({
     handleEventDateChange,
     handleEventTimeChange,
     handleSubmit,
-  } = useCreateDiaryEntryForm({
-    createFormVisible,
-    onCreated,
+  } = useDiaryEntryForm({
+    visible,
+    mode,
+    entry,
+    onSaved,
   });
 
   const mealRelationOptions = useMemo<
@@ -92,9 +103,27 @@ const CreateDiaryEntryForm = ({
   const errorMessage =
     validationError !== null
       ? t(`diary.form.errors.${validationError}`)
-      : creationError
-        ? t('diary.form.errors.creationFailed')
+      : submissionError
+        ? t(
+            mode === 'create'
+              ? 'diary.form.errors.creationFailed'
+              : 'diary.form.errors.updateFailed'
+          )
         : null;
+
+  const isCreateMode = mode === 'create';
+  const title = t(
+    isCreateMode ? 'diary.form.createTitle' : 'diary.form.editTitle'
+  );
+  const submitLabel = t(
+    isSubmitting
+      ? isCreateMode
+        ? 'diary.form.creating'
+        : 'diary.form.saving'
+      : isCreateMode
+        ? 'diary.form.create'
+        : 'diary.form.save'
+  );
 
   const handleRequestClose = useCallback(() => {
     if (!isSubmitting) {
@@ -102,13 +131,13 @@ const CreateDiaryEntryForm = ({
     }
   }, [isSubmitting, onClose]);
 
-  const handleCreate = useCallback(() => {
+  const handleSave = useCallback(() => {
     void handleSubmit();
   }, [handleSubmit]);
 
   return (
     <PortalModal
-      visible={createFormVisible}
+      visible={visible}
       onClose={handleRequestClose}
       withoutScroll
       withoutCloseBtn
@@ -131,13 +160,13 @@ const CreateDiaryEntryForm = ({
             />
           </Pressable>
 
-          <Text style={styles.Title(theme)}>{t('diary.form.createTitle')}</Text>
+          <Text style={styles.Title(theme)}>{title}</Text>
 
           <View style={styles.HeaderSide(theme)} />
         </View>
 
         <ScrollView
-          testID="create-diary-entry-scroll"
+          testID="diary-entry-form-scroll"
           style={styles.Scroll}
           contentContainerStyle={styles.Content(theme)}
           keyboardShouldPersistTaps="handled"
@@ -387,9 +416,11 @@ const CreateDiaryEntryForm = ({
 
           <Button
             accessibilityRole="button"
-            accessibilityLabel={t('diary.form.create')}
+            accessibilityLabel={t(
+              isCreateMode ? 'diary.form.create' : 'diary.form.save'
+            )}
             disabled={isSubmitting}
-            onPress={handleCreate}
+            onPress={handleSave}
             style={[
               styles.Action,
               globalStyles.Button(theme, 'primary', isSubmitting),
@@ -403,7 +434,7 @@ const CreateDiaryEntryForm = ({
                 />
               ) : (
                 <Ionicons
-                  name="add"
+                  name={isCreateMode ? 'add' : 'checkmark'}
                   size={theme.size.md}
                   color={theme.colors.white}
                 />
@@ -412,9 +443,7 @@ const CreateDiaryEntryForm = ({
               <Text
                 style={globalStyles.ButtonText(theme, 'primary', isSubmitting)}
               >
-                {isSubmitting
-                  ? t('diary.form.creating')
-                  : t('diary.form.create')}
+                {submitLabel}
               </Text>
             </View>
           </Button>
@@ -424,4 +453,4 @@ const CreateDiaryEntryForm = ({
   );
 };
 
-export default CreateDiaryEntryForm;
+export default DiaryEntryForm;

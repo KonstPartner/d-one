@@ -1,6 +1,9 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { CreateDiaryEntryInput } from '../../../model/types';
+import type {
+  CreateDiaryEntryInput,
+  UpdateDiaryEntryData,
+} from '../../../model/types';
 import { DiaryDatabaseOperationGate } from '../diaryDatabaseOperationGate';
 import { DiaryRepository } from '../diaryRepository';
 
@@ -56,6 +59,20 @@ const createRow = (
   photo_url: null,
   event_at: eventAt,
   sync_status: 'synced',
+  ...overrides,
+});
+
+const createUpdateData = (
+  overrides: Partial<UpdateDiaryEntryData> = {}
+): UpdateDiaryEntryData => ({
+  id: 'entry-1',
+  glucose: 7.2,
+  mealRelation: 'afterMeal',
+  shortInsulin: 5,
+  longInsulin: 11,
+  carbsGram: 40,
+  comment: 'Updated dinner',
+  eventAt: new Date(eventAt + 60_000),
   ...overrides,
 });
 
@@ -236,6 +253,107 @@ describe('DiaryRepository', () => {
       getFirstAsync.mockRejectedValue(error);
 
       await expect(repository.findById('entry-1')).rejects.toBe(error);
+    });
+  });
+
+  describe('update', () => {
+    it('updates only editable fields for the current user', async () => {
+      runAsync.mockResolvedValue({
+        changes: 1,
+        lastInsertRowId: 0,
+      });
+
+      await expect(
+        repository.update(createUpdateData())
+      ).resolves.toBeUndefined();
+
+      expect(runAsync).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE diary_entries'),
+        {
+          $id: 'entry-1',
+          $userId: 'user-1',
+          $glucose: 7.2,
+          $mealRelation: 'afterMeal',
+          $shortInsulin: 5,
+          $longInsulin: 11,
+          $carbsGram: 40,
+          $comment: 'Updated dinner',
+          $eventAt: eventAt + 60_000,
+        }
+      );
+
+      const [sql, parameters] = runAsync.mock.calls[0];
+
+      expect(sql).not.toContain('ai_analysis =');
+      expect(sql).not.toContain('local_photo_uri =');
+      expect(sql).not.toContain('photo_path =');
+      expect(sql).not.toContain('photo_url =');
+      expect(parameters).not.toHaveProperty('$aiAnalysis');
+      expect(parameters).not.toHaveProperty('$localPhotoUri');
+      expect(parameters).not.toHaveProperty('$photoPath');
+      expect(parameters).not.toHaveProperty('$photoUrl');
+    });
+
+    it('preserves pendingCreate and marks synchronized entries as pendingUpdate', async () => {
+      runAsync.mockResolvedValue({
+        changes: 1,
+        lastInsertRowId: 0,
+      });
+
+      await repository.update(createUpdateData());
+
+      const [sql] = runAsync.mock.calls[0];
+
+      expect(sql).toContain("WHEN 'pendingCreate' THEN 'pendingCreate'");
+      expect(sql).toContain("ELSE 'pendingUpdate'");
+    });
+
+    it('does not update pendingDelete entries', async () => {
+      runAsync.mockResolvedValue({
+        changes: 0,
+        lastInsertRowId: 0,
+      });
+
+      await expect(repository.update(createUpdateData())).rejects.toThrow(
+        'Diary entry cannot be updated: entry-1'
+      );
+
+      const [sql] = runAsync.mock.calls[0];
+
+      expect(sql).toContain(
+        "sync_status IN ('synced', 'pendingCreate', 'pendingUpdate')"
+      );
+    });
+
+    it('rejects a missing entry', async () => {
+      runAsync.mockResolvedValue({
+        changes: 0,
+        lastInsertRowId: 0,
+      });
+
+      await expect(repository.update(createUpdateData())).rejects.toThrow(
+        'Diary entry cannot be updated: entry-1'
+      );
+    });
+
+    it('rejects an invalid event date before accessing SQLite', async () => {
+      await expect(
+        repository.update(
+          createUpdateData({
+            eventAt: new Date(Number.NaN),
+          })
+        )
+      ).rejects.toThrow('Invalid diary event date');
+
+      expect(runAsync).not.toHaveBeenCalled();
+    });
+
+    it('propagates SQLite errors', async () => {
+      const error = new Error('SQLite update failed');
+
+      runAsync.mockRejectedValue(error);
+
+      await expect(repository.update(createUpdateData())).rejects.toBe(error);
     });
   });
 

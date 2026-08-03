@@ -1,7 +1,7 @@
-export { default as CreateDiaryEntryForm } from './CreateDiaryEntryForm';
 export { default as DiaryDayHeader } from './DiaryDayHeader';
 export { default as DiaryEntryCard } from './DiaryEntryCard';
 export { default as DiaryEntryDateTimeFields } from './DiaryEntryDateTimeFields';
+export { default as DiaryEntryForm } from './DiaryEntryForm';
 export { default as DiaryEntryPhoto } from './DiaryEntryPhoto';
 export { default as DiaryPagination } from './DiaryPagination';
 export { default as DiaryPhotoViewer } from './DiaryPhotoViewer';

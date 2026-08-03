@@ -45,6 +45,7 @@ const DiaryEntryCard = ({
     commentTitle,
     aiAnalysis,
     aiAnalysisTitle,
+    editAccessibilityLabel,
     mealRelationLabel,
     pendingDelete,
     actionsDisabled,
@@ -74,6 +75,7 @@ const DiaryEntryCard = ({
       <Pressable
         disabled={!cardInteractive}
         accessibilityRole={onPress ? 'button' : undefined}
+        accessibilityLabel={onPress ? editAccessibilityLabel : undefined}
         accessibilityState={
           onPress
             ? {

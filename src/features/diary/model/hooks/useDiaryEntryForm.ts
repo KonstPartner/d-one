@@ -1,15 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import useCreateDiaryEntry from '../../api/hooks/useCreateDiaryEntry';
+import useUpdateDiaryEntry from '../../api/hooks/useUpdateDiaryEntry';
 import type {
   CreateDiaryEntryData,
+  DiaryEntry,
   DiaryEntryFormError,
+  DiaryEntryFormMode,
   MealRelation,
 } from '../types';
 
-type UseCreateDiaryEntryFormParams = {
-  createFormVisible: boolean;
-  onCreated: (entryId: string) => void;
+type UseDiaryEntryFormParams = {
+  visible: boolean;
+  mode: DiaryEntryFormMode;
+  entry: DiaryEntry | null;
+  onSaved: (entryId: string) => void;
+};
+
+type CreateDraft = {
+  values: CreateDiaryEntryData;
+  useCurrentDateTime: boolean;
+  changed: boolean;
 };
 
 const GLUCOSE_MAXIMUM = 100;
@@ -32,6 +43,22 @@ const createInitialValues = (): CreateDiaryEntryData => {
     eventAt,
   };
 };
+
+const createInitialDraft = (): CreateDraft => ({
+  values: createInitialValues(),
+  useCurrentDateTime: true,
+  changed: false,
+});
+
+const createValuesFromEntry = (entry: DiaryEntry): CreateDiaryEntryData => ({
+  glucose: entry.glucose,
+  mealRelation: entry.mealRelation,
+  shortInsulin: entry.shortInsulin,
+  longInsulin: entry.longInsulin,
+  carbsGram: entry.carbsGram,
+  comment: entry.comment,
+  eventAt: new Date(entry.eventAt),
+});
 
 const hasMaximumOneDecimalPlace = (value: number): boolean => {
   const shiftedValue = value * 10;
@@ -91,67 +118,112 @@ const validateValues = (
   return null;
 };
 
-const useCreateDiaryEntryForm = ({
-  createFormVisible,
-  onCreated,
-}: UseCreateDiaryEntryFormParams) => {
-  const [values, setValues] =
-    useState<CreateDiaryEntryData>(createInitialValues);
-  const [useCurrentDateTime, setUseCurrentDateTime] = useState(true);
+const useDiaryEntryForm = ({
+  visible,
+  mode,
+  entry,
+  onSaved,
+}: UseDiaryEntryFormParams) => {
+  const initialDraftRef = useRef<CreateDraft | null>(null);
+
+  if (initialDraftRef.current === null) {
+    initialDraftRef.current = createInitialDraft();
+  }
+
+  const [values, setValues] = useState<CreateDiaryEntryData>(
+    initialDraftRef.current.values
+  );
+  const [useCurrentDateTime, setUseCurrentDateTime] = useState(
+    initialDraftRef.current.useCurrentDateTime
+  );
   const [validationError, setValidationError] =
     useState<DiaryEntryFormError | null>(null);
 
+  const createDraftRef = useRef<CreateDraft>(initialDraftRef.current);
+  const activeFormKeyRef = useRef<string | null>(null);
   const submitInProgressRef = useRef(false);
-  const draftChangedRef = useRef(false);
-  const previousVisibilityRef = useRef(createFormVisible);
 
-  const {
-    mutateAsync,
-    reset: resetCreation,
-    error: creationError,
-    isPending,
-  } = useCreateDiaryEntry();
+  const createMutation = useCreateDiaryEntry();
+  const updateMutation = useUpdateDiaryEntry();
 
   const clearErrors = useCallback(() => {
     setValidationError(null);
-    resetCreation();
-  }, [resetCreation]);
+    createMutation.reset();
+    updateMutation.reset();
+  }, [createMutation, updateMutation]);
 
-  const resetData = useCallback(() => {
-    const initialValues = createInitialValues();
+  const resetCreateDraft = useCallback(() => {
+    const nextDraft = createInitialDraft();
 
-    draftChangedRef.current = false;
+    createDraftRef.current = nextDraft;
 
-    setValues(initialValues);
-    setUseCurrentDateTime(true);
+    if (mode === 'create') {
+      setValues(nextDraft.values);
+      setUseCurrentDateTime(nextDraft.useCurrentDateTime);
+    }
+
     setValidationError(null);
-    resetCreation();
-  }, [resetCreation]);
+    createMutation.reset();
+  }, [createMutation, mode]);
 
   useEffect(() => {
-    const wasVisible = previousVisibilityRef.current;
+    if (!visible) {
+      activeFormKeyRef.current = null;
 
-    previousVisibilityRef.current = createFormVisible;
-
-    if (createFormVisible && !wasVisible && !draftChangedRef.current) {
-      resetData();
+      return;
     }
-  }, [createFormVisible, resetData]);
+
+    const formKey = mode === 'create' ? 'create' : `edit:${entry?.id ?? ''}`;
+
+    if (activeFormKeyRef.current === formKey) {
+      return;
+    }
+
+    activeFormKeyRef.current = formKey;
+    clearErrors();
+
+    if (mode === 'create') {
+      if (!createDraftRef.current.changed) {
+        createDraftRef.current = createInitialDraft();
+      }
+
+      setValues(createDraftRef.current.values);
+      setUseCurrentDateTime(createDraftRef.current.useCurrentDateTime);
+
+      return;
+    }
+
+    if (entry !== null) {
+      setValues(createValuesFromEntry(entry));
+      setUseCurrentDateTime(false);
+    }
+  }, [clearErrors, entry, mode, visible]);
 
   const updateValue = useCallback(
     <Key extends keyof CreateDiaryEntryData>(
       key: Key,
       value: CreateDiaryEntryData[Key]
     ) => {
-      draftChangedRef.current = true;
       clearErrors();
 
-      setValues((currentValues) => ({
-        ...currentValues,
-        [key]: value,
-      }));
+      setValues((currentValues) => {
+        const nextValues = {
+          ...currentValues,
+          [key]: value,
+        };
+
+        if (mode === 'create') {
+          createDraftRef.current = {
+            ...createDraftRef.current,
+            values: nextValues,
+            changed: true,
+          };
+        }
+
+        return nextValues;
+      });
     },
-    [clearErrors]
+    [clearErrors, mode]
   );
 
   const handleGlucoseChange = useCallback(
@@ -198,11 +270,18 @@ const useCreateDiaryEntryForm = ({
 
   const handleCurrentDateTimeChange = useCallback(
     (value: boolean) => {
-      draftChangedRef.current = true;
       clearErrors();
       setUseCurrentDateTime(value);
+
+      if (mode === 'create') {
+        createDraftRef.current = {
+          ...createDraftRef.current,
+          useCurrentDateTime: value,
+          changed: true,
+        };
+      }
     },
-    [clearErrors]
+    [clearErrors, mode]
   );
 
   const handleEventDateChange = useCallback(
@@ -211,7 +290,6 @@ const useCreateDiaryEntryForm = ({
         return;
       }
 
-      draftChangedRef.current = true;
       clearErrors();
 
       setValues((currentValues) => {
@@ -223,13 +301,23 @@ const useCreateDiaryEntryForm = ({
           date.getDate()
         );
 
-        return {
+        const nextValues = {
           ...currentValues,
           eventAt,
         };
+
+        if (mode === 'create') {
+          createDraftRef.current = {
+            ...createDraftRef.current,
+            values: nextValues,
+            changed: true,
+          };
+        }
+
+        return nextValues;
       });
     },
-    [clearErrors, useCurrentDateTime]
+    [clearErrors, mode, useCurrentDateTime]
   );
 
   const handleEventTimeChange = useCallback(
@@ -238,7 +326,6 @@ const useCreateDiaryEntryForm = ({
         return;
       }
 
-      draftChangedRef.current = true;
       clearErrors();
 
       setValues((currentValues) => {
@@ -246,17 +333,27 @@ const useCreateDiaryEntryForm = ({
 
         eventAt.setHours(time.getHours(), time.getMinutes(), 0, 0);
 
-        return {
+        const nextValues = {
           ...currentValues,
           eventAt,
         };
+
+        if (mode === 'create') {
+          createDraftRef.current = {
+            ...createDraftRef.current,
+            values: nextValues,
+            changed: true,
+          };
+        }
+
+        return nextValues;
       });
     },
-    [clearErrors, useCurrentDateTime]
+    [clearErrors, mode, useCurrentDateTime]
   );
 
   const handleSubmit = useCallback(async (): Promise<string | null> => {
-    if (submitInProgressRef.current) {
+    if (submitInProgressRef.current || (mode === 'edit' && entry === null)) {
       return null;
     }
 
@@ -269,7 +366,7 @@ const useCreateDiaryEntryForm = ({
     const nextValidationError = validateValues(normalizedValues);
 
     if (nextValidationError !== null) {
-      resetCreation();
+      clearErrors();
       setValidationError(nextValidationError);
 
       return null;
@@ -279,10 +376,26 @@ const useCreateDiaryEntryForm = ({
     setValidationError(null);
 
     try {
-      const entryId = await mutateAsync(normalizedValues);
+      let entryId: string;
 
-      resetData();
-      onCreated(entryId);
+      if (mode === 'create') {
+        entryId = await createMutation.mutateAsync(normalizedValues);
+      } else {
+        if (entry === null) {
+          return null;
+        }
+
+        entryId = await updateMutation.mutateAsync({
+          ...normalizedValues,
+          id: entry.id,
+        });
+      }
+
+      if (mode === 'create') {
+        resetCreateDraft();
+      }
+
+      onSaved(entryId);
 
       return entryId;
     } catch {
@@ -291,20 +404,25 @@ const useCreateDiaryEntryForm = ({
       submitInProgressRef.current = false;
     }
   }, [
-    mutateAsync,
-    onCreated,
-    resetCreation,
-    resetData,
+    clearErrors,
+    createMutation,
+    entry,
+    mode,
+    onSaved,
+    resetCreateDraft,
+    updateMutation,
     useCurrentDateTime,
     values,
   ]);
+
+  const activeMutation = mode === 'create' ? createMutation : updateMutation;
 
   return {
     values,
     useCurrentDateTime,
     validationError,
-    creationError,
-    isSubmitting: isPending,
+    submissionError: activeMutation.error,
+    isSubmitting: activeMutation.isPending,
     handleGlucoseChange,
     handleMealRelationChange,
     handleShortInsulinChange,
@@ -318,4 +436,4 @@ const useCreateDiaryEntryForm = ({
   };
 };
 
-export default useCreateDiaryEntryForm;
+export default useDiaryEntryForm;

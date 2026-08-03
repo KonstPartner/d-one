@@ -6,6 +6,7 @@ import type {
   DiaryPageResult,
   DiarySyncStatus,
   MealRelation,
+  UpdateDiaryEntryData,
 } from '../../model/types';
 import { DIARY_SYNC_STATUSES, MEAL_RELATIONS } from '../../model/types';
 
@@ -89,6 +90,25 @@ const FIND_DIARY_ENTRY_BY_ID_SQL = `
   WHERE id = $id
     AND user_id = $userId
   LIMIT 1
+`;
+
+const UPDATE_DIARY_ENTRY_SQL = `
+  UPDATE diary_entries
+  SET
+    glucose = $glucose,
+    meal_relation = $mealRelation,
+    short_insulin = $shortInsulin,
+    long_insulin = $longInsulin,
+    carbs_gram = $carbsGram,
+    comment = $comment,
+    event_at = $eventAt,
+    sync_status = CASE sync_status
+      WHEN 'pendingCreate' THEN 'pendingCreate'
+      ELSE 'pendingUpdate'
+    END
+  WHERE id = $id
+    AND user_id = $userId
+    AND sync_status IN ('synced', 'pendingCreate', 'pendingUpdate')
 `;
 
 const FIND_DIARY_PAGE_SQL = `
@@ -197,6 +217,32 @@ export class DiaryRepository {
       );
 
       return row === null ? null : mapDiaryEntryRow(row);
+    });
+  }
+
+  public update(data: UpdateDiaryEntryData): Promise<void> {
+    const eventAt = data.eventAt.getTime();
+
+    if (Number.isNaN(eventAt)) {
+      return Promise.reject(new Error('Invalid diary event date'));
+    }
+
+    return this.operationGate.run(async () => {
+      const result = await this.database.runAsync(UPDATE_DIARY_ENTRY_SQL, {
+        $id: data.id,
+        $userId: this.userId,
+        $glucose: data.glucose,
+        $mealRelation: data.mealRelation,
+        $shortInsulin: data.shortInsulin,
+        $longInsulin: data.longInsulin,
+        $carbsGram: data.carbsGram,
+        $comment: data.comment,
+        $eventAt: eventAt,
+      });
+
+      if (result.changes !== 1) {
+        throw new Error(`Diary entry cannot be updated: ${data.id}`);
+      }
     });
   }
 

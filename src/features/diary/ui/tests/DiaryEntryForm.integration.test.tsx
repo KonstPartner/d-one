@@ -29,7 +29,8 @@ import {
 } from '../../api/sqlite/DiaryDatabaseProvider';
 import { DiaryRepository } from '../../api/sqlite/diaryRepository';
 import { useDiaryListStore } from '../../model/store';
-import CreateDiaryEntryForm from '../CreateDiaryEntryForm';
+import type { DiaryEntry, DiaryEntryFormMode } from '../../model/types';
+import DiaryEntryForm from '../DiaryEntryForm';
 
 const CURRENT_DATE = new Date('2026-08-02T10:15:00.000Z');
 
@@ -79,26 +80,28 @@ const mockedOpenDiaryDatabase = jest.mocked(openDiaryDatabase);
 const mockedCloseDiaryDatabase = jest.mocked(closeDiaryDatabase);
 
 type ReadyFormProps = {
+  mode: DiaryEntryFormMode;
+  entry: DiaryEntry | null;
   onClose: () => void;
-  onCreated: (entryId: string) => void;
+  onSaved: (entryId: string) => void;
 };
 
-const ReadyForm = ({ onClose, onCreated }: ReadyFormProps) => {
+const ReadyForm = ({ mode, entry, onClose, onSaved }: ReadyFormProps) => {
   const database = useDiaryDatabase();
-  const [createFormVisible, setCreateFormVisible] = useState(true);
+  const [visible, setVisible] = useState(true);
 
   if (database.status !== 'ready') {
     return null;
   }
 
   const handleClose = () => {
-    setCreateFormVisible(false);
+    setVisible(false);
     onClose();
   };
 
-  const handleCreated = (entryId: string) => {
-    setCreateFormVisible(false);
-    onCreated(entryId);
+  const handleSaved = (entryId: string) => {
+    setVisible(false);
+    onSaved(entryId);
   };
 
   return (
@@ -106,13 +109,15 @@ const ReadyForm = ({ onClose, onCreated }: ReadyFormProps) => {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="open-create-form"
-        onPress={() => setCreateFormVisible(true)}
+        onPress={() => setVisible(true)}
       />
 
-      <CreateDiaryEntryForm
-        createFormVisible={createFormVisible}
+      <DiaryEntryForm
+        visible={visible}
+        mode={mode}
+        entry={entry}
         onClose={handleClose}
-        onCreated={handleCreated}
+        onSaved={handleSaved}
       />
     </>
   );
@@ -147,25 +152,36 @@ let queryClient: QueryClient;
 let runAsync: jest.Mock;
 let repository: DiaryRepository;
 
-const renderForm = () => {
+const renderForm = ({
+  mode = 'create',
+  entry = null,
+}: {
+  mode?: DiaryEntryFormMode;
+  entry?: DiaryEntry | null;
+} = {}) => {
   const onClose = jest.fn();
-  const onCreated = jest.fn();
+  const onSaved = jest.fn();
 
   render(
     <TestProviders>
       <DiaryDatabaseProvider userId="user-1">
-        <ReadyForm onClose={onClose} onCreated={onCreated} />
+        <ReadyForm
+          mode={mode}
+          entry={entry}
+          onClose={onClose}
+          onSaved={onSaved}
+        />
       </DiaryDatabaseProvider>
     </TestProviders>
   );
 
   return {
     onClose,
-    onCreated,
+    onSaved,
   };
 };
 
-describe('CreateDiaryEntryForm integration', () => {
+describe('DiaryEntryForm integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -220,7 +236,7 @@ describe('CreateDiaryEntryForm integration', () => {
   });
 
   it('rejects an empty entry without writing to SQLite', async () => {
-    const { onCreated } = renderForm();
+    const { onSaved } = renderForm();
 
     fireEvent.press(await screen.findByLabelText('diary.form.create'));
 
@@ -229,7 +245,7 @@ describe('CreateDiaryEntryForm integration', () => {
     ).toBeTruthy();
 
     expect(runAsync).not.toHaveBeenCalled();
-    expect(onCreated).not.toHaveBeenCalled();
+    expect(onSaved).not.toHaveBeenCalled();
   });
 
   it('keeps form scrolling enabled and allows dropdown selection', async () => {
@@ -239,7 +255,7 @@ describe('CreateDiaryEntryForm integration', () => {
       await screen.findByText('diary.form.mealRelationPlaceholder')
     );
 
-    const formScroll = screen.getByTestId('create-diary-entry-scroll');
+    const formScroll = screen.getByTestId('diary-entry-form-scroll');
 
     expect(formScroll.props.scrollEnabled).toBeUndefined();
     expect(screen.getByTestId('select-dropdown-options')).toBeTruthy();
@@ -277,7 +293,7 @@ describe('CreateDiaryEntryForm integration', () => {
   it('normalizes and saves the entry as pendingCreate', async () => {
     const earliestEventAt = CURRENT_DATE.getTime();
     const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
-    const { onCreated } = renderForm();
+    const { onSaved } = renderForm();
 
     fireEvent.changeText(
       await screen.findByLabelText('diary.form.commentAccessibilityLabel'),
@@ -287,12 +303,12 @@ describe('CreateDiaryEntryForm integration', () => {
     fireEvent.press(screen.getByLabelText('diary.form.create'));
 
     await waitFor(() => {
-      expect(onCreated).toHaveBeenCalledWith('entry-created');
+      expect(onSaved).toHaveBeenCalledWith('entry-created');
     });
 
     const latestEventAt = Date.now();
 
-    expect(onCreated).toHaveBeenCalledTimes(1);
+    expect(onSaved).toHaveBeenCalledTimes(1);
 
     expect(mockedCollection).toHaveBeenCalledWith(
       db,
@@ -356,7 +372,7 @@ describe('CreateDiaryEntryForm integration', () => {
 
     runAsync.mockRejectedValueOnce(error);
 
-    const { onClose, onCreated } = renderForm();
+    const { onClose, onSaved } = renderForm();
 
     const commentInput = await screen.findByLabelText(
       'diary.form.commentAccessibilityLabel'
@@ -369,7 +385,7 @@ describe('CreateDiaryEntryForm integration', () => {
       await screen.findByText('diary.form.errors.creationFailed')
     ).toBeTruthy();
 
-    expect(onCreated).not.toHaveBeenCalled();
+    expect(onSaved).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
 
     expect(
@@ -384,5 +400,67 @@ describe('CreateDiaryEntryForm integration', () => {
     expect(
       screen.getByLabelText('diary.form.commentAccessibilityLabel').props.value
     ).toBe('  Dinner  ');
+  });
+
+  it('loads edit values and saves the update through SQLite', async () => {
+    const entry: DiaryEntry = {
+      id: 'entry-1',
+      userId: 'user-1',
+      glucose: 7.2,
+      mealRelation: 'afterMeal',
+      shortInsulin: 3,
+      longInsulin: null,
+      carbsGram: 45,
+      comment: 'Dinner',
+      aiAnalysis: 'Existing analysis',
+      localPhotoUri: 'file:///entry-1.jpg',
+      photoPath: 'users/user-1/entry-1.jpg',
+      photoUrl: 'https://example.com/entry-1.jpg',
+      eventAt: new Date('2026-08-01T18:30:00.000Z'),
+      syncStatus: 'synced',
+    };
+    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    const { onSaved } = renderForm({
+      mode: 'edit',
+      entry,
+    });
+
+    expect(await screen.findByText('diary.form.editTitle')).toBeTruthy();
+    expect(
+      screen.getByLabelText('diary.form.commentAccessibilityLabel').props.value
+    ).toBe('Dinner');
+
+    fireEvent.changeText(
+      screen.getByLabelText('diary.form.commentAccessibilityLabel'),
+      '  Updated dinner  '
+    );
+    fireEvent.press(screen.getByLabelText('diary.form.save'));
+
+    await waitFor(() => {
+      expect(onSaved).toHaveBeenCalledWith('entry-1');
+    });
+
+    expect(runAsync).toHaveBeenCalledTimes(1);
+
+    const [sql, parameters] = runAsync.mock.calls[0] as [
+      string,
+      Record<string, unknown>,
+    ];
+
+    expect(sql).toContain('UPDATE diary_entries');
+    expect(parameters).toEqual({
+      $id: 'entry-1',
+      $userId: 'user-1',
+      $glucose: 7.2,
+      $mealRelation: 'afterMeal',
+      $shortInsulin: 3,
+      $longInsulin: null,
+      $carbsGram: 45,
+      $comment: 'Updated dinner',
+      $eventAt: entry.eventAt.getTime(),
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: diaryQueryKeys.localPagesRoot('user-1'),
+    });
   });
 });

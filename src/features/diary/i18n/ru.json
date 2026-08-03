@@ -31,6 +31,7 @@
     },
     "entry": {
       "more": "Подробнее",
+      "editAccessibilityLabel": "Редактировать запись дневника",
       "openFullText": "Открыть полный текст: {{title}}",
       "metrics": {
         "glucose": "Глюкоза",
@@ -69,10 +70,13 @@
     },
     "form": {
       "createTitle": "Новая запись",
+      "editTitle": "Редактирование записи",
       "cancel": "Отмена",
       "create": "Создать",
       "creating": "Сохранение…",
-      "cancelAccessibilityLabel": "Отменить создание записи",
+      "save": "Сохранить",
+      "saving": "Сохранение…",
+      "cancelAccessibilityLabel": "Закрыть форму записи",
       "dateAccessibilityLabel": "Выбрать дату записи",
       "timeAccessibilityLabel": "Выбрать время записи",
       "useCurrentDateTime": "Сейчас",
@@ -95,7 +99,9 @@
         "invalidCarbsGram": "Углеводы должны быть от 0 до 1000 и содержать не более одного знака после запятой.",
         "commentTooLong": "Комментарий не может быть длиннее 5000 символов.",
         "emptyEntry": "Заполните хотя бы одно поле записи.",
-        "creationFailed": "Не удалось создать запись."
+        "creationFailed": "Не удалось создать запись.",
+        "updateFailed": "Не удалось сохранить запись.",
+        "openFailed": "Не удалось открыть запись для редактирования."
       },
       "openCreateAccessibilityLabel": "Создать запись дневника",
       "discard": {
@@ -103,11 +109,6 @@
         "description": "Введённые данные не будут сохранены.",
         "confirm": "Отменить изменения"
       }
-    },
-    "metric": {
-      "valueAccessibilityLabel": "Значение: {{metric}}",
-      "decreaseAccessibilityLabel": "Уменьшить: {{metric}}",
-      "increaseAccessibilityLabel": "Увеличить: {{metric}}"
     }
   }
 }

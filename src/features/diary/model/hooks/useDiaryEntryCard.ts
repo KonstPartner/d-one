@@ -104,6 +104,7 @@ const useDiaryEntryCard = ({
 
   const commentTitle = t('diary.entry.comment');
   const aiAnalysisTitle = t('diary.entry.aiAnalysis');
+  const editAccessibilityLabel = t('diary.entry.editAccessibilityLabel');
 
   const pendingDelete = entry.syncStatus === 'pendingDelete';
   const actionsDisabled = pendingDelete || synchronizing;
@@ -186,6 +187,7 @@ const useDiaryEntryCard = ({
     commentTitle,
     aiAnalysis,
     aiAnalysisTitle,
+    editAccessibilityLabel,
     mealRelationLabel,
     pendingDelete,
     actionsDisabled,

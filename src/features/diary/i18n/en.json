@@ -29,6 +29,7 @@
     },
     "entry": {
       "more": "More",
+      "editAccessibilityLabel": "Edit diary entry",
       "openFullText": "Open full text: {{title}}",
       "metrics": {
         "glucose": "Glucose",
@@ -67,9 +68,12 @@
     },
     "form": {
       "createTitle": "New entry",
+      "editTitle": "Edit entry",
       "cancel": "Cancel",
       "create": "Create",
       "creating": "Creating…",
+      "save": "Save",
+      "saving": "Saving…",
       "cancelAccessibilityLabel": "Cancel entry form",
       "dateAccessibilityLabel": "Select entry date",
       "timeAccessibilityLabel": "Select entry time",
@@ -93,7 +97,9 @@
         "invalidCarbsGram": "Carbohydrates must be between 0 and 1000 with no more than one decimal place.",
         "commentTooLong": "The comment cannot exceed 5000 characters.",
         "emptyEntry": "Fill in at least one entry field.",
-        "creationFailed": "Failed to create the entry."
+        "creationFailed": "Failed to create the entry.",
+        "updateFailed": "Failed to save the entry.",
+        "openFailed": "Failed to open the entry for editing."
       },
       "openCreateAccessibilityLabel": "Create diary entry",
       "discard": {
@@ -101,11 +107,6 @@
         "description": "The entered data will not be saved.",
         "confirm": "Discard"
       }
-    },
-    "metric": {
-      "valueAccessibilityLabel": "{{metric}} value",
-      "decreaseAccessibilityLabel": "Decrease {{metric}}",
-      "increaseAccessibilityLabel": "Increase {{metric}}"
     }
   }
 }

@@ -1,4 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import type { ReactElement, ReactNode } from 'react';
 
 import Diary from '@pages/Diary';
@@ -6,6 +11,24 @@ import Diary from '@pages/Diary';
 import type { DiaryEntry } from '../../model/types';
 
 const mockUseAuthData = jest.fn();
+const mockFindById = jest.fn();
+
+const createDiaryEntry = (): DiaryEntry => ({
+  id: 'entry-1',
+  userId: 'user-1',
+  glucose: null,
+  mealRelation: null,
+  shortInsulin: null,
+  longInsulin: null,
+  carbsGram: null,
+  comment: '',
+  aiAnalysis: '',
+  localPhotoUri: null,
+  photoPath: 'users/user-1/entry-1.jpg',
+  photoUrl: 'https://example.com/entry-1.jpg',
+  eventAt: new Date('2026-08-01T12:00:00.000Z'),
+  syncStatus: 'synced',
+});
 
 const mockTheme = {
   colors: {
@@ -46,10 +69,12 @@ type LocalDiaryContentProps = {
   renderEntry: (entry: DiaryEntry, isVisible: boolean) => ReactElement;
 };
 
-type CreateDiaryEntryFormProps = {
-  createFormVisible: boolean;
+type DiaryEntryFormProps = {
+  visible: boolean;
+  mode: 'create' | 'edit';
+  entry: DiaryEntry | null;
   onClose: () => void;
-  onCreated: (entryId: string) => void;
+  onSaved: (entryId: string) => void;
 };
 
 type PhotoViewerProps = {
@@ -109,6 +134,15 @@ jest.mock('@features/network/model', () => ({
   useNetwork: () => ({
     isOnline: true,
     isOffline: false,
+  }),
+}));
+
+jest.mock('../../api/sqlite/DiaryDatabaseProvider', () => ({
+  useReadyDiaryDatabase: () => ({
+    userId: 'user-1',
+    repository: {
+      findById: mockFindById,
+    },
   }),
 }));
 
@@ -210,22 +244,31 @@ jest.mock('@features/diary/ui', () => {
     DiaryEntryCard,
     DiaryPhotoViewer,
 
-    CreateDiaryEntryForm: ({
-      createFormVisible,
+    DiaryEntryForm: ({
+      visible,
+      mode,
+      entry,
       onClose,
-      onCreated,
-    }: CreateDiaryEntryFormProps) =>
-      createFormVisible
+      onSaved,
+    }: DiaryEntryFormProps) =>
+      visible
         ? React.createElement(
             NativeView,
             {
-              testID: 'create-diary-entry-form',
+              testID: 'diary-entry-form',
             },
+            React.createElement(
+              NativeText,
+              {
+                testID: 'diary-entry-form-state',
+              },
+              `${mode}:${entry?.id ?? 'none'}`
+            ),
             React.createElement(
               NativePressable,
               {
                 accessibilityRole: 'button',
-                accessibilityLabel: 'close-create-form',
+                accessibilityLabel: 'close-entry-form',
                 onPress: onClose,
               },
               React.createElement(NativeText, null, 'close')
@@ -234,8 +277,8 @@ jest.mock('@features/diary/ui', () => {
               NativePressable,
               {
                 accessibilityRole: 'button',
-                accessibilityLabel: 'complete-create-form',
-                onPress: () => onCreated('created-entry-id'),
+                accessibilityLabel: 'complete-entry-form',
+                onPress: () => onSaved(entry?.id ?? 'created-entry-id'),
               },
               React.createElement(NativeText, null, 'create')
             )
@@ -243,22 +286,7 @@ jest.mock('@features/diary/ui', () => {
         : null,
 
     LocalDiaryContent: ({ renderEntry }: LocalDiaryContentProps) => {
-      const entry: DiaryEntry = {
-        id: 'entry-1',
-        userId: 'user-1',
-        glucose: null,
-        mealRelation: null,
-        shortInsulin: null,
-        longInsulin: null,
-        carbsGram: null,
-        comment: '',
-        aiAnalysis: '',
-        localPhotoUri: null,
-        photoPath: 'users/user-1/entry-1.jpg',
-        photoUrl: 'https://example.com/entry-1.jpg',
-        eventAt: new Date('2026-08-01T12:00:00.000Z'),
-        syncStatus: 'synced',
-      };
+      const entry = createDiaryEntry();
 
       return renderEntry(entry, true);
     },
@@ -322,6 +350,8 @@ describe('Diary integration', () => {
       },
       isAuthLoading: false,
     });
+
+    mockFindById.mockResolvedValue(createDiaryEntry());
   });
 
   it('passes visibility, opens cloud photo and closes viewer', () => {
@@ -356,17 +386,20 @@ describe('Diary integration', () => {
   it('opens and closes the create form', () => {
     render(<Diary />);
 
-    expect(screen.queryByTestId('create-diary-entry-form')).toBeNull();
+    expect(screen.queryByTestId('diary-entry-form')).toBeNull();
 
     fireEvent.press(
       screen.getByLabelText('diary.form.openCreateAccessibilityLabel')
     );
 
-    expect(screen.getByTestId('create-diary-entry-form')).toBeTruthy();
+    expect(screen.getByTestId('diary-entry-form')).toBeTruthy();
+    expect(screen.getByTestId('diary-entry-form-state').props.children).toBe(
+      'create:none'
+    );
 
-    fireEvent.press(screen.getByLabelText('close-create-form'));
+    fireEvent.press(screen.getByLabelText('close-entry-form'));
 
-    expect(screen.queryByTestId('create-diary-entry-form')).toBeNull();
+    expect(screen.queryByTestId('diary-entry-form')).toBeNull();
   });
 
   it('closes the create form after an entry is created', () => {
@@ -376,8 +409,23 @@ describe('Diary integration', () => {
       screen.getByLabelText('diary.form.openCreateAccessibilityLabel')
     );
 
-    fireEvent.press(screen.getByLabelText('complete-create-form'));
+    fireEvent.press(screen.getByLabelText('complete-entry-form'));
 
-    expect(screen.queryByTestId('create-diary-entry-form')).toBeNull();
+    expect(screen.queryByTestId('diary-entry-form')).toBeNull();
+  });
+
+  it('re-reads the entry from SQLite before opening edit mode', async () => {
+    render(<Diary />);
+
+    fireEvent.press(
+      screen.getByLabelText('diary.entry.editAccessibilityLabel')
+    );
+
+    await waitFor(() => {
+      expect(mockFindById).toHaveBeenCalledWith('entry-1');
+      expect(screen.getByTestId('diary-entry-form-state').props.children).toBe(
+        'edit:entry-1'
+      );
+    });
   });
 });

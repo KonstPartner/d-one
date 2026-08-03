@@ -48,6 +48,11 @@ export type CreateDiaryEntryData = Pick<
 export type CreateDiaryEntryInput = CreateDiaryEntryData &
   Pick<DiaryEntry, 'id' | 'localPhotoUri' | 'photoPath'>;
 
+export type UpdateDiaryEntryData = CreateDiaryEntryData &
+  Pick<DiaryEntry, 'id'>;
+
+export type DiaryEntryFormMode = 'create' | 'edit';
+
 export type DiaryEntryFormError =
   | 'invalidEventAt'
   | 'invalidGlucose'
