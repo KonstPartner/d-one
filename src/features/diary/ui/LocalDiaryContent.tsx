@@ -21,9 +21,13 @@ import DiaryPagination from './DiaryPagination';
 
 type LocalDiaryContentProps = {
   renderEntry: (entry: DiaryEntry, isVisible: boolean) => ReactElement;
+  selectionMode?: boolean;
 };
 
-const LocalDiaryContent = ({ renderEntry }: LocalDiaryContentProps) => {
+const LocalDiaryContent = ({
+  renderEntry,
+  selectionMode = false,
+}: LocalDiaryContentProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -54,14 +58,14 @@ const LocalDiaryContent = ({ renderEntry }: LocalDiaryContentProps) => {
             title={item.title}
             entriesCount={item.entriesCount}
             collapsed={collapsedDayKeys.has(item.dayKey)}
-            onToggle={toggleDay}
+            onToggle={selectionMode ? () => undefined : toggleDay}
           />
         );
       }
 
       return renderEntry(item.entry, visibleEntryIds.has(item.entry.id));
     },
-    [collapsedDayKeys, renderEntry, toggleDay, visibleEntryIds]
+    [collapsedDayKeys, renderEntry, selectionMode, toggleDay, visibleEntryIds]
   );
 
   if (isInitialLoading) {
@@ -97,7 +101,7 @@ const LocalDiaryContent = ({ renderEntry }: LocalDiaryContentProps) => {
     <FlatList
       ref={listRef}
       data={listItems}
-      extraData={visibleEntryIds}
+      extraData={{ selectionMode, visibleEntryIds }}
       renderItem={renderItem}
       keyExtractor={getDiaryListItemKey}
       style={styles.Fill}
@@ -106,16 +110,20 @@ const LocalDiaryContent = ({ renderEntry }: LocalDiaryContentProps) => {
         isRefetching ? <ActivityIndicator color={theme.colors.primary} /> : null
       }
       ListFooterComponent={
-        <DiaryPagination
-          currentPage={page.pagination.page}
-          totalPages={page.pagination.totalPages}
-          loading={isPaginationLoading}
-          previousPageAccessibilityLabel={t('diary.pagination.previousPage')}
-          nextPageAccessibilityLabel={t('diary.pagination.nextPage')}
-          onChangePage={handleChangePage}
-        />
+        selectionMode ? null : (
+          <DiaryPagination
+            currentPage={page.pagination.page}
+            totalPages={page.pagination.totalPages}
+            loading={isPaginationLoading}
+            previousPageAccessibilityLabel={t('diary.pagination.previousPage')}
+            nextPageAccessibilityLabel={t('diary.pagination.nextPage')}
+            onChangePage={handleChangePage}
+          />
+        )
       }
-      ListFooterComponentStyle={styles.ListFooter(theme)}
+      ListFooterComponentStyle={
+        selectionMode ? undefined : styles.ListFooter(theme)
+      }
       onViewableItemsChanged={handleViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
       initialNumToRender={12}

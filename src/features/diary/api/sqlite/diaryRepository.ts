@@ -291,6 +291,54 @@ export class DiaryRepository {
     });
   }
 
+  public markPendingDelete(ids: ReadonlyArray<string>): Promise<void> {
+    const uniqueIds = Array.from(new Set(ids));
+
+    if (
+      uniqueIds.length === 0 ||
+      uniqueIds.length > DIARY_PAGE_SIZE ||
+      uniqueIds.some((id) => id.length === 0)
+    ) {
+      return Promise.reject(new Error('Invalid diary entry deletion request'));
+    }
+
+    const placeholders = uniqueIds.map((_, index) => `$entryId${index}`);
+    const entriesList = placeholders.join(', ');
+
+    const parameters: Record<string, string | number> = {
+      $userId: this.userId,
+      $expectedCount: uniqueIds.length,
+    };
+
+    uniqueIds.forEach((id, index) => {
+      parameters[`$entryId${index}`] = id;
+    });
+
+    return this.operationGate.run(async () => {
+      const result = await this.database.runAsync(
+        `
+          UPDATE diary_entries
+          SET sync_status = 'pendingDelete'
+          WHERE user_id = $userId
+            AND id IN (${entriesList})
+            AND sync_status IN ('synced', 'pendingCreate', 'pendingUpdate')
+            AND (
+              SELECT COUNT(*)
+              FROM diary_entries
+              WHERE user_id = $userId
+                AND id IN (${entriesList})
+                AND sync_status IN ('synced', 'pendingCreate', 'pendingUpdate')
+            ) = $expectedCount
+        `,
+        parameters
+      );
+
+      if (result.changes !== uniqueIds.length) {
+        throw new Error('One or more diary entries cannot be deleted');
+      }
+    });
+  }
+
   public findPage(page: number): Promise<DiaryPageResult> {
     if (!Number.isInteger(page) || page < 1) {
       return Promise.reject(new Error(`Invalid diary page: ${page}`));

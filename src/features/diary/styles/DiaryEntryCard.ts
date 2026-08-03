@@ -14,6 +14,7 @@ export const Card = (theme: Theme, pendingDelete: boolean) =>
     globalStyles.Rounded(theme, 'md'),
     css`
       overflow: hidden;
+      opacity: ${pendingDelete ? 0.5 : 1};
     ` as StyleProp<ViewStyle>,
   ] as StyleProp<ViewStyle>;
 

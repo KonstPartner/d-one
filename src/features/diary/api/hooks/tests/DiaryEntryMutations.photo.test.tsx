@@ -102,6 +102,7 @@ describe('diary entry photo mutations', () => {
         },
         mutations: {
           retry: false,
+          gcTime: Infinity,
         },
       },
     });

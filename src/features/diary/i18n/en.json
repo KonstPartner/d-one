@@ -12,6 +12,22 @@
       "title": "Diary is unavailable on Web",
       "description": "Maintaining your diary is available only in the mobile application."
     },
+    "menu": {
+      "selectEntries": "Select entries"
+    },
+    "selection": {
+      "selectAll": "Select all",
+      "clearAll": "Clear all",
+      "selected_one": "{{count}} selected",
+      "selected_other": "{{count}} selected",
+      "delete": "Delete",
+      "close": "Close selection mode",
+      "entryAccessibilityLabel": "Select diary entry",
+      "deleteConfirmTitle": "Delete selected entries?",
+      "deleteConfirmDescription_one": "{{count}} entry will remain visible as Deleting until synchronization completes.",
+      "deleteConfirmDescription_other": "{{count}} entries will remain visible as Deleting until synchronization completes.",
+      "deleteFailed": "Failed to delete the selected entries."
+    },
     "list": {
       "loadFailed": "Failed to load entries",
       "empty": {

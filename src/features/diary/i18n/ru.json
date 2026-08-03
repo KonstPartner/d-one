@@ -12,6 +12,26 @@
       "title": "Дневник недоступен в Web-версии",
       "description": "Ведение дневника доступно только в мобильном приложении."
     },
+    "menu": {
+      "selectEntries": "Выбрать записи"
+    },
+    "selection": {
+      "selectAll": "Выбрать все",
+      "clearAll": "Снять выбор",
+      "selected_one": "Выбрана {{count}} запись",
+      "selected_few": "Выбрано {{count}} записи",
+      "selected_many": "Выбрано {{count}} записей",
+      "selected_other": "Выбрано {{count}} записи",
+      "delete": "Удалить",
+      "close": "Закрыть режим выбора",
+      "entryAccessibilityLabel": "Выбрать запись дневника",
+      "deleteConfirmTitle": "Удалить выбранные записи?",
+      "deleteConfirmDescription_one": "{{count}} запись останется видимой со статусом «Удаление…» до завершения синхронизации.",
+      "deleteConfirmDescription_few": "{{count}} записи останутся видимыми со статусом «Удаление…» до завершения синхронизации.",
+      "deleteConfirmDescription_many": "{{count}} записей останутся видимыми со статусом «Удаление…» до завершения синхронизации.",
+      "deleteConfirmDescription_other": "{{count}} записи останутся видимыми со статусом «Удаление…» до завершения синхронизации.",
+      "deleteFailed": "Не удалось удалить выбранные записи."
+    },
     "list": {
       "loadFailed": "Не удалось загрузить записи",
       "empty": {

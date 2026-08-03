@@ -1,4 +1,6 @@
+import { StyleSheet } from 'react-native';
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -12,6 +14,11 @@ import type { DiaryEntry } from '../../model/types';
 
 const mockUseAuthData = jest.fn();
 const mockFindById = jest.fn();
+const mockUseDiaryPage = jest.fn();
+const mockDeleteMutateAsync = jest.fn();
+const mockUseHeaderMenu = jest.fn();
+
+let mockCurrentDiaryEntry: DiaryEntry;
 
 const createDiaryEntry = (): DiaryEntry => ({
   id: 'entry-1',
@@ -67,6 +74,7 @@ type ChildrenProps = {
 
 type LocalDiaryContentProps = {
   renderEntry: (entry: DiaryEntry, isVisible: boolean) => ReactElement;
+  selectionMode?: boolean;
 };
 
 type DiaryEntryFormProps = {
@@ -128,6 +136,18 @@ jest.mock('@features/auth/model', () => ({
     User: 'user',
     Follower: 'follower',
   },
+}));
+
+jest.mock('@features/diary/api', () => ({
+  useDeleteDiaryEntries: () => ({
+    mutateAsync: (...args: unknown[]) => mockDeleteMutateAsync(...args),
+    isPending: false,
+  }),
+  useDiaryPage: (...args: unknown[]) => mockUseDiaryPage(...args),
+}));
+
+jest.mock('@features/header/model', () => ({
+  useHeaderMenu: (...args: unknown[]) => mockUseHeaderMenu(...args),
 }));
 
 jest.mock('@features/network/model', () => ({
@@ -201,9 +221,25 @@ jest.mock('@entities/layout/ui', () => {
 
 jest.mock('@entities/shared/ui', () => {
   const React = jest.requireActual('react');
-  const { Text: NativeText } = jest.requireActual('react-native');
+  const { Pressable: NativePressable, Text: NativeText } =
+    jest.requireActual('react-native');
 
   return {
+    ConfirmModal: ({
+      handleConfirmation,
+    }: {
+      handleConfirmation: () => void;
+    }) =>
+      React.createElement(
+        NativePressable,
+        {
+          accessibilityRole: 'button',
+          accessibilityLabel: 'confirm-delete',
+          onPress: handleConfirmation,
+        },
+        React.createElement(NativeText, null, 'confirm-delete')
+      ),
+
     Loader: ({ children }: ChildrenProps) =>
       React.createElement(React.Fragment, null, children),
 
@@ -285,11 +321,8 @@ jest.mock('@features/diary/ui', () => {
           )
         : null,
 
-    LocalDiaryContent: ({ renderEntry }: LocalDiaryContentProps) => {
-      const entry = createDiaryEntry();
-
-      return renderEntry(entry, true);
-    },
+    LocalDiaryContent: ({ renderEntry }: LocalDiaryContentProps) =>
+      renderEntry(mockCurrentDiaryEntry, true),
   };
 });
 
@@ -297,12 +330,26 @@ jest.mock('@features/diary/styles/Diary', () => ({
   OwnerContent: {},
   Toolbar: () => ({}),
   CreateButton: () => ({}),
+  EntryState: (pendingDelete: boolean) => ({
+    opacity: pendingDelete ? 0.5 : 1,
+  }),
+  SelectionToolbar: () => ({}),
+  SelectionCount: () => ({}),
+  SelectionAction: () => ({}),
+  SelectionActionText: () => ({}),
+  CloseSelectionButton: () => ({}),
+  SelectableEntry: () => ({}),
+  SelectionIndicator: () => ({}),
+  SelectionIndicatorSlot: {},
+  SelectionCard: () => ({}),
   UnsupportedContent: () => ({}),
   CenteredText: {},
 }));
 
 jest.mock('@features/diary/styles/DiaryEntryCard', () => ({
-  Card: () => ({}),
+  Card: (_theme: unknown, pendingDelete: boolean) => ({
+    opacity: pendingDelete ? 0.5 : 1,
+  }),
   Body: () => ({}),
   Header: () => ({}),
   Time: () => ({}),
@@ -336,6 +383,7 @@ jest.mock('@features/shared/styles/global', () => {
     Heading: emptyStyle,
     Subheading: emptyStyle,
     Text: emptyStyle,
+    Button: emptyStyle,
     FlexItem: {},
   };
 });
@@ -352,6 +400,15 @@ describe('Diary integration', () => {
     });
 
     mockFindById.mockResolvedValue(createDiaryEntry());
+    mockCurrentDiaryEntry = createDiaryEntry();
+
+    mockUseDiaryPage.mockReturnValue({
+      data: {
+        items: [mockCurrentDiaryEntry],
+      },
+    });
+
+    mockDeleteMutateAsync.mockResolvedValue(['entry-1']);
   });
 
   it('passes visibility, opens cloud photo and closes viewer', () => {
@@ -426,6 +483,77 @@ describe('Diary integration', () => {
       expect(screen.getByTestId('diary-entry-form-state').props.children).toBe(
         'edit:entry-1'
       );
+    });
+  });
+
+  it('dims a pendingDelete entry and disables its actions', () => {
+    mockCurrentDiaryEntry = {
+      ...createDiaryEntry(),
+      syncStatus: 'pendingDelete',
+    };
+
+    mockUseDiaryPage.mockReturnValue({
+      data: {
+        items: [mockCurrentDiaryEntry],
+      },
+    });
+
+    render(<Diary />);
+
+    const entryCard = screen.getByTestId('diary-entry-card-entry-1');
+
+    expect(entryCard.props.accessibilityState).toEqual({ disabled: true });
+    expect(entryCard.props.onPress).toBeUndefined();
+    expect(StyleSheet.flatten(entryCard.props.style)).toEqual(
+      expect.objectContaining({ opacity: 0.5 })
+    );
+    expect(screen.getByText('diary.entry.sync.deleting')).toBeTruthy();
+    expect(
+      screen.queryByLabelText('diary.entry.photo.openAccessibilityLabel')
+    ).toBeNull();
+
+    fireEvent.press(entryCard);
+
+    expect(mockFindById).not.toHaveBeenCalled();
+  });
+
+  it('selects an entry through the header menu and marks it for deletion', async () => {
+    render(<Diary />);
+
+    const headerItems = mockUseHeaderMenu.mock.calls.at(-1)?.[0] as Array<{
+      key: string;
+      onPress: () => void;
+    }>;
+
+    const selectEntriesItem = headerItems.find(
+      (item) => item.key === 'diary-select-entries'
+    );
+
+    expect(selectEntriesItem).toBeDefined();
+
+    act(() => {
+      selectEntriesItem?.onPress();
+    });
+
+    expect(
+      screen.queryByLabelText('diary.form.openCreateAccessibilityLabel')
+    ).toBeNull();
+
+    fireEvent.press(
+      screen.getByLabelText('diary.selection.entryAccessibilityLabel')
+    );
+
+    fireEvent.press(screen.getByLabelText('diary.selection.delete'));
+    fireEvent.press(screen.getByLabelText('confirm-delete'));
+
+    await waitFor(() => {
+      expect(mockDeleteMutateAsync).toHaveBeenCalledWith(['entry-1']);
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByLabelText('diary.form.openCreateAccessibilityLabel')
+      ).toBeTruthy();
     });
   });
 });

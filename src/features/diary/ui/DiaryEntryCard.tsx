@@ -73,6 +73,7 @@ const DiaryEntryCard = ({
   return (
     <>
       <Pressable
+        testID={`diary-entry-card-${entry.id}`}
         disabled={!cardInteractive}
         accessibilityRole={onPress ? 'button' : undefined}
         accessibilityLabel={onPress ? editAccessibilityLabel : undefined}
