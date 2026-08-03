@@ -1,8 +1,8 @@
-import { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { css } from '@emotion/native';
-import { Theme } from '@emotion/react';
+import type { Theme } from '@emotion/react';
+import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 
-import { SelectDropdownTone } from '@features/shared/model';
+import type { SelectDropdownTone } from '@features/shared/model';
 import { toPX } from '@features/theme/model';
 
 export const getToneColor = (theme: Theme, tone: SelectDropdownTone) => {
@@ -73,24 +73,36 @@ export const FieldText = (theme: Theme, hasValue: boolean) =>
     font-size: ${toPX(theme.size.base)};
   ` as StyleProp<TextStyle>;
 
-export const Dropdown = (theme: Theme, hasLabel: boolean) =>
-  css`
-    position: absolute;
-    top: ${hasLabel ? '74px' : '52px'};
-    left: 0px;
-    right: 0px;
-    max-height: 230px;
-    padding: 6px;
-    border-radius: ${toPX(theme.radius.md)};
-    border-width: ${toPX(theme.border.width.sm)};
-    border-color: ${theme.colors.border};
-    background-color: ${theme.colors.card};
-    gap: 6px;
-    z-index: 10000;
-    elevation: 30;
-  ` as StyleProp<ViewStyle>;
+export const Dropdown = (
+  theme: Theme,
+  hasLabel: boolean,
+  inlineOptions: boolean
+) =>
+  [
+    css`
+      padding: 6px;
+      border-radius: ${toPX(theme.radius.md)};
+      border-width: ${toPX(theme.border.width.sm)};
+      border-color: ${theme.colors.border};
+      background-color: ${theme.colors.card};
+      z-index: 10000;
+      elevation: 30;
+    ` as StyleProp<ViewStyle>,
+    inlineOptions
+      ? (css`
+          position: relative;
+          max-height: 230px;
+        ` as StyleProp<ViewStyle>)
+      : (css`
+          position: absolute;
+          top: ${hasLabel ? '74px' : '52px'};
+          left: 0;
+          right: 0;
+          max-height: 230px;
+        ` as StyleProp<ViewStyle>),
+  ] as StyleProp<ViewStyle>;
 
-export const DropdownScrollContent = css`
+export const DropdownContent = css`
   gap: 5px;
 ` as StyleProp<ViewStyle>;
 

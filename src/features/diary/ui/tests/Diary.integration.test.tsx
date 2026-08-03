@@ -15,8 +15,23 @@ const mockTheme = {
     success: '#008000',
     warning: '#ff9900',
     white: '#ffffff',
+    metrics: {
+      glucose: {
+        text: '#ff0000',
+      },
+      carbsGram: {
+        text: '#00aa00',
+      },
+      shortInsulin: {
+        text: '#0000ff',
+      },
+      longInsulin: {
+        text: '#800080',
+      },
+    },
   },
   size: {
+    base: 14,
     md: 16,
     lg: 20,
     xl: 24,
@@ -32,6 +47,7 @@ type LocalDiaryContentProps = {
 };
 
 type CreateDiaryEntryFormProps = {
+  createFormVisible: boolean;
   onClose: () => void;
   onCreated: (entryId: string) => void;
 };
@@ -194,31 +210,37 @@ jest.mock('@features/diary/ui', () => {
     DiaryEntryCard,
     DiaryPhotoViewer,
 
-    CreateDiaryEntryForm: ({ onClose, onCreated }: CreateDiaryEntryFormProps) =>
-      React.createElement(
-        NativeView,
-        {
-          testID: 'create-diary-entry-form',
-        },
-        React.createElement(
-          NativePressable,
-          {
-            accessibilityRole: 'button',
-            accessibilityLabel: 'close-create-form',
-            onPress: onClose,
-          },
-          React.createElement(NativeText, null, 'close')
-        ),
-        React.createElement(
-          NativePressable,
-          {
-            accessibilityRole: 'button',
-            accessibilityLabel: 'complete-create-form',
-            onPress: () => onCreated('created-entry-id'),
-          },
-          React.createElement(NativeText, null, 'create')
-        )
-      ),
+    CreateDiaryEntryForm: ({
+      createFormVisible,
+      onClose,
+      onCreated,
+    }: CreateDiaryEntryFormProps) =>
+      createFormVisible
+        ? React.createElement(
+            NativeView,
+            {
+              testID: 'create-diary-entry-form',
+            },
+            React.createElement(
+              NativePressable,
+              {
+                accessibilityRole: 'button',
+                accessibilityLabel: 'close-create-form',
+                onPress: onClose,
+              },
+              React.createElement(NativeText, null, 'close')
+            ),
+            React.createElement(
+              NativePressable,
+              {
+                accessibilityRole: 'button',
+                accessibilityLabel: 'complete-create-form',
+                onPress: () => onCreated('created-entry-id'),
+              },
+              React.createElement(NativeText, null, 'create')
+            )
+          )
+        : null,
 
     LocalDiaryContent: ({ renderEntry }: LocalDiaryContentProps) => {
       const entry: DiaryEntry = {
@@ -253,10 +275,16 @@ jest.mock('@features/diary/styles/Diary', () => ({
 
 jest.mock('@features/diary/styles/DiaryEntryCard', () => ({
   Card: () => ({}),
+  Body: () => ({}),
   Header: () => ({}),
+  Time: () => ({}),
+  TimeText: () => ({}),
   MealRelation: () => ({}),
+  MealRelationText: () => ({}),
   Metrics: () => ({}),
   Metric: () => ({}),
+  MetricIcon: {},
+  MetricValue: () => ({}),
   Status: () => ({}),
   Pressed: {},
 }));

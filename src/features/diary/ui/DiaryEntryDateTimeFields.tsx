@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { createDateKit } from '@features/shared/model/utils/date';
-import * as globalStyles from '@features/shared/styles/global';
 
 import useDiaryEntryDateTimeFields from '../model/hooks/useDiaryEntryDateTimeFields';
 import * as styles from '../styles/DiaryEntryDateTimeFields';
@@ -67,83 +66,32 @@ const DiaryEntryDateTimeFields = ({
     : theme.colors.text;
 
   return (
-    <View style={globalStyles.Stack(theme, 'sm')}>
-      <View style={styles.Controls(theme)}>
+    <View style={styles.Container(theme)}>
+      <View style={styles.CurrentDateTime(theme)}>
         <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={dateAccessibilityLabel}
-          accessibilityState={{ disabled: manualSelectionDisabled }}
-          disabled={manualSelectionDisabled}
-          onPress={handleDatePress}
-          style={styles.Control(theme)}
+          accessible={false}
+          disabled={disabled}
+          onPress={handleCurrentDateTimePress}
+          style={styles.CurrentDateTimeAction(theme)}
         >
           <Ionicons
-            name="calendar-outline"
+            name="flash-outline"
             size={theme.size.md}
-            color={controlColor}
+            color={disabled ? theme.colors.muted : theme.colors.primary}
           />
 
-          <Text style={styles.ControlText(theme, manualSelectionDisabled)}>
-            {dateText}
+          <Text style={styles.CurrentDateTimeLabel(theme, disabled)}>
+            {currentDateTimeLabel}
           </Text>
-
-          <Ionicons
-            name="chevron-down"
-            size={theme.size.sm}
-            color={controlColor}
-          />
         </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={timeAccessibilityLabel}
-          accessibilityState={{ disabled: manualSelectionDisabled }}
-          disabled={manualSelectionDisabled}
-          onPress={handleTimePress}
-          style={styles.Control(theme)}
-        >
-          <Ionicons
-            name="time-outline"
-            size={theme.size.md}
-            color={controlColor}
-          />
-
-          <Text style={styles.ControlText(theme, manualSelectionDisabled)}>
-            {timeText}
-          </Text>
-
-          <Ionicons
-            name="chevron-down"
-            size={theme.size.sm}
-            color={controlColor}
-          />
-        </Pressable>
-      </View>
-
-      <Pressable
-        accessibilityRole="switch"
-        accessibilityLabel={currentDateTimeLabel}
-        accessibilityState={{
-          checked: useCurrentDateTime,
-          disabled,
-        }}
-        disabled={disabled}
-        onPress={handleCurrentDateTimePress}
-        style={styles.CurrentDateTime(theme)}
-      >
-        <Ionicons
-          name="flash-outline"
-          size={theme.size.md}
-          color={disabled ? theme.colors.muted : theme.colors.primary}
-        />
-
-        <Text style={styles.CurrentDateTimeLabel(theme, disabled)}>
-          {currentDateTimeLabel}
-        </Text>
 
         <Switch
-          accessible={false}
-          pointerEvents="none"
+          accessibilityRole="switch"
+          accessibilityLabel={currentDateTimeLabel}
+          accessibilityState={{
+            checked: useCurrentDateTime,
+            disabled,
+          }}
           value={useCurrentDateTime}
           disabled={disabled}
           trackColor={{
@@ -152,8 +100,63 @@ const DiaryEntryDateTimeFields = ({
           }}
           thumbColor={theme.colors.white}
           ios_backgroundColor={theme.colors.border}
+          onValueChange={onCurrentDateTimeChange}
         />
-      </Pressable>
+      </View>
+
+      {!useCurrentDateTime ? (
+        <View style={styles.Controls(theme)}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={dateAccessibilityLabel}
+            accessibilityState={{ disabled: manualSelectionDisabled }}
+            disabled={manualSelectionDisabled}
+            onPress={handleDatePress}
+            style={styles.Control(theme)}
+          >
+            <Ionicons
+              name="calendar-outline"
+              size={theme.size.md}
+              color={controlColor}
+            />
+
+            <Text style={styles.ControlText(theme, manualSelectionDisabled)}>
+              {dateText}
+            </Text>
+
+            <Ionicons
+              name="chevron-down"
+              size={theme.size.sm}
+              color={controlColor}
+            />
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={timeAccessibilityLabel}
+            accessibilityState={{ disabled: manualSelectionDisabled }}
+            disabled={manualSelectionDisabled}
+            onPress={handleTimePress}
+            style={styles.Control(theme)}
+          >
+            <Ionicons
+              name="time-outline"
+              size={theme.size.md}
+              color={controlColor}
+            />
+
+            <Text style={styles.ControlText(theme, manualSelectionDisabled)}>
+              {timeText}
+            </Text>
+
+            <Ionicons
+              name="chevron-down"
+              size={theme.size.sm}
+              color={controlColor}
+            />
+          </Pressable>
+        </View>
+      ) : null}
 
       {pickerMode !== null ? (
         <DateTimePicker

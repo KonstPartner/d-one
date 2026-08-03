@@ -3,29 +3,35 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 
 import Input from '@entities/shared/ui/Input';
-import * as globalStyles from '@features/shared/styles/global';
 
 import useMetricStepper from '../model/hooks/useMetricStepper';
+import * as styles from '../styles/MetricStepper';
+
+type MetricKey = keyof ReturnType<typeof useTheme>['colors']['metrics'];
 
 type MetricStepperProps = {
+  metricKey: MetricKey;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
   label: string;
   value: number | null;
+  maximum: number;
   disabled?: boolean;
   inputAccessibilityLabel: string;
   decrementAccessibilityLabel: string;
   incrementAccessibilityLabel: string;
-  clearAccessibilityLabel: string;
   onChange: (value: number | null) => void;
 };
 
 const MetricStepper = ({
+  metricKey,
+  icon,
   label,
   value,
+  maximum,
   disabled = false,
   inputAccessibilityLabel,
   decrementAccessibilityLabel,
   incrementAccessibilityLabel,
-  clearAccessibilityLabel,
   onChange,
 }: MetricStepperProps) => {
   const theme = useTheme();
@@ -33,10 +39,9 @@ const MetricStepper = ({
   const {
     inputValue,
     decrementDisabled,
-    clearDisabled,
+    incrementDisabled,
     handleChangeText,
     handleBlur,
-    handleClear,
     handleDecrementPressIn,
     handleDecrementLongPress,
     handleDecrementPress,
@@ -45,15 +50,24 @@ const MetricStepper = ({
     handleIncrementPress,
   } = useMetricStepper({
     value,
+    maximum,
     disabled,
     onChange,
   });
 
-  return (
-    <View style={globalStyles.Stack(theme, 'xs')}>
-      <Text style={globalStyles.Label(theme)}>{label}</Text>
+  const metricColor = theme.colors.metrics[metricKey].text;
 
-      <View style={globalStyles.Row(theme, 'center', 'flex-start', 'sm')}>
+  return (
+    <View style={styles.Container(theme, metricKey)}>
+      <View style={styles.Header(theme)}>
+        <Ionicons name={icon} size={theme.size.xl} color={metricColor} />
+
+        <Text style={styles.Label(theme)} numberOfLines={2}>
+          {label}
+        </Text>
+      </View>
+
+      <View style={styles.Stepper(theme, metricKey)}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={decrementAccessibilityLabel}
@@ -62,63 +76,43 @@ const MetricStepper = ({
           onPressIn={handleDecrementPressIn}
           onLongPress={handleDecrementLongPress}
           onPress={handleDecrementPress}
-          style={globalStyles.IconButton(
-            theme,
-            'secondary',
-            'md',
-            decrementDisabled
-          )}
+          style={styles.StepButton(theme, metricKey, decrementDisabled)}
         >
           <Ionicons
             name="remove"
             size={theme.size.md}
-            color={decrementDisabled ? theme.colors.muted : theme.colors.text}
+            color={decrementDisabled ? theme.colors.muted : metricColor}
           />
         </Pressable>
 
-        <View style={globalStyles.FlexItem}>
-          <Input
-            value={inputValue}
-            accessibilityLabel={inputAccessibilityLabel}
-            editable={!disabled}
-            keyboardType="decimal-pad"
-            inputMode="decimal"
-            selectTextOnFocus
-            textAlign="center"
-            onChangeText={handleChangeText}
-            onBlurEvent={handleBlur}
-          />
-        </View>
+        <Input
+          value={inputValue}
+          accessibilityLabel={inputAccessibilityLabel}
+          editable={!disabled}
+          keyboardType="decimal-pad"
+          inputMode="decimal"
+          selectTextOnFocus
+          textAlign="center"
+          rejectResponderTermination={false}
+          onChangeText={handleChangeText}
+          onBlurEvent={handleBlur}
+          style={styles.Input(theme, metricKey)}
+        />
 
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={incrementAccessibilityLabel}
-          accessibilityState={{ disabled }}
-          disabled={disabled}
+          accessibilityState={{ disabled: incrementDisabled }}
+          disabled={incrementDisabled}
           onPressIn={handleIncrementPressIn}
           onLongPress={handleIncrementLongPress}
           onPress={handleIncrementPress}
-          style={globalStyles.IconButton(theme, 'secondary', 'md', disabled)}
+          style={styles.StepButton(theme, metricKey, incrementDisabled)}
         >
           <Ionicons
             name="add"
             size={theme.size.md}
-            color={disabled ? theme.colors.muted : theme.colors.text}
-          />
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={clearAccessibilityLabel}
-          accessibilityState={{ disabled: clearDisabled }}
-          disabled={clearDisabled}
-          onPress={handleClear}
-          style={globalStyles.IconButton(theme, 'ghost', 'md', clearDisabled)}
-        >
-          <Ionicons
-            name="close"
-            size={theme.size.md}
-            color={clearDisabled ? theme.colors.muted : theme.colors.danger}
+            color={incrementDisabled ? theme.colors.muted : metricColor}
           />
         </Pressable>
       </View>

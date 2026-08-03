@@ -103,12 +103,11 @@ const Diary = () => {
                 onClose={handleClosePhoto}
               />
 
-              {createFormVisible ? (
-                <CreateDiaryEntryForm
-                  onClose={handleCloseCreateForm}
-                  onCreated={handleEntryCreated}
-                />
-              ) : null}
+              <CreateDiaryEntryForm
+                createFormVisible={createFormVisible}
+                onClose={handleCloseCreateForm}
+                onCreated={handleEntryCreated}
+              />
             </View>
           ) : (
             <View>

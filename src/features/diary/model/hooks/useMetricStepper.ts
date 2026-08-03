@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 type UseMetricStepperParams = {
   value: number | null;
+  maximum: number;
   disabled: boolean;
   onChange: (value: number | null) => void;
 };
@@ -30,6 +31,7 @@ const normalizeStepResult = (value: number): number =>
 
 const useMetricStepper = ({
   value,
+  maximum,
   disabled,
   onChange,
 }: UseMetricStepperParams) => {
@@ -60,16 +62,26 @@ const useMetricStepper = ({
         return;
       }
 
-      const currentValue = parseValue(inputValue) ?? value ?? MINIMUM_VALUE;
+      const currentValue = parseValue(inputValue) ?? value;
+
+      if (delta < 0 && currentValue === MINIMUM_VALUE) {
+        setInputValue('');
+        onChange(null);
+
+        return;
+      }
 
       const nextValue = normalizeStepResult(
-        Math.max(MINIMUM_VALUE, currentValue + delta)
+        Math.min(
+          maximum,
+          Math.max(MINIMUM_VALUE, (currentValue ?? MINIMUM_VALUE) + delta)
+        )
       );
 
       setInputValue(formatValue(nextValue));
       onChange(nextValue);
     },
-    [disabled, inputValue, onChange, value]
+    [disabled, inputValue, maximum, onChange, value]
   );
 
   const handleChangeText = useCallback(
@@ -98,15 +110,6 @@ const useMetricStepper = ({
   const handleBlur = useCallback(() => {
     setInputValue(formatValue(value));
   }, [value]);
-
-  const handleClear = useCallback(() => {
-    if (disabled) {
-      return;
-    }
-
-    setInputValue('');
-    onChange(null);
-  }, [disabled, onChange]);
 
   const handleDecrementPressIn = useCallback(() => {
     decrementLongPressHandled.current = false;
@@ -150,12 +153,11 @@ const useMetricStepper = ({
 
   return {
     inputValue,
-    decrementDisabled:
-      disabled || currentValue === null || currentValue <= MINIMUM_VALUE,
-    clearDisabled: disabled || (value === null && inputValue.length === 0),
+    decrementDisabled: disabled || currentValue === null,
+    incrementDisabled:
+      disabled || (currentValue !== null && currentValue >= maximum),
     handleChangeText,
     handleBlur,
-    handleClear,
     handleDecrementPressIn,
     handleDecrementLongPress,
     handleDecrementPress,

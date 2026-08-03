@@ -13,8 +13,10 @@ type UseDiaryEntryCardParams = {
   onOpenPhoto?: (entry: DiaryEntry) => void;
 };
 
+type DiaryMetricKey = 'glucose' | 'carbsGram' | 'shortInsulin' | 'longInsulin';
+
 type DiaryMetric = {
-  key: string;
+  key: DiaryMetricKey;
   label: string;
   value: string;
 };
@@ -59,29 +61,7 @@ const useDiaryEntryCard = ({
       result.push({
         key: 'glucose',
         label: t('diary.entry.metrics.glucose'),
-        value: `${numberFormatter.format(entry.glucose)} ${t(
-          'diary.entry.units.glucose'
-        )}`,
-      });
-    }
-
-    if (entry.shortInsulin !== null) {
-      result.push({
-        key: 'shortInsulin',
-        label: t('diary.entry.metrics.shortInsulin'),
-        value: `${numberFormatter.format(entry.shortInsulin)} ${t(
-          'diary.entry.units.insulin'
-        )}`,
-      });
-    }
-
-    if (entry.longInsulin !== null) {
-      result.push({
-        key: 'longInsulin',
-        label: t('diary.entry.metrics.longInsulin'),
-        value: `${numberFormatter.format(entry.longInsulin)} ${t(
-          'diary.entry.units.insulin'
-        )}`,
+        value: numberFormatter.format(entry.glucose),
       });
     }
 
@@ -89,9 +69,23 @@ const useDiaryEntryCard = ({
       result.push({
         key: 'carbsGram',
         label: t('diary.entry.metrics.carbohydrates'),
-        value: `${numberFormatter.format(entry.carbsGram)} ${t(
-          'diary.entry.units.carbohydrates'
-        )}`,
+        value: numberFormatter.format(entry.carbsGram),
+      });
+    }
+
+    if (entry.shortInsulin !== null) {
+      result.push({
+        key: 'shortInsulin',
+        label: t('diary.entry.metrics.shortInsulin'),
+        value: numberFormatter.format(entry.shortInsulin),
+      });
+    }
+
+    if (entry.longInsulin !== null) {
+      result.push({
+        key: 'longInsulin',
+        label: t('diary.entry.metrics.longInsulin'),
+        value: numberFormatter.format(entry.longInsulin),
       });
     }
 

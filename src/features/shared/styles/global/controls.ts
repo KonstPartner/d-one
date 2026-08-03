@@ -11,8 +11,16 @@ const buttonBackground = (
   tone: ButtonTone,
   disabled: boolean
 ) => {
-  if (disabled) {
-    return theme.colors.muted;
+  if (disabled && tone === 'danger') {
+    return theme.colors.shades.danger.md;
+  }
+
+  if (disabled && tone === 'success') {
+    return theme.colors.shades.success.md;
+  }
+
+  if (disabled && tone === 'primary') {
+    return theme.colors.shades.primary.md;
   }
 
   if (tone === 'danger') {
@@ -34,7 +42,27 @@ const buttonBackground = (
   return theme.colors.primary;
 };
 
-const buttonTextColor = (theme: Theme, tone: ButtonTone) => {
+const buttonTextColor = (
+  theme: Theme,
+  tone: ButtonTone,
+  disabled: boolean = false
+) => {
+  if (disabled && tone === 'danger') {
+    return theme.colors.shades.danger.text;
+  }
+
+  if (disabled && tone === 'success') {
+    return theme.colors.shades.success.text;
+  }
+
+  if (disabled && tone === 'primary') {
+    return theme.colors.shades.primary.text;
+  }
+
+  if (disabled) {
+    return theme.colors.muted;
+  }
+
   if (tone === 'secondary' || tone === 'ghost') {
     return theme.colors.text;
   }
@@ -63,12 +91,17 @@ export const Button = (
     align-items: center;
     justify-content: center;
     background-color: ${buttonBackground(theme, tone, disabled)};
-    opacity: ${disabled ? 0.7 : 1};
+    border-width: ${tone === 'secondary' ? toPX(theme.border.width.sm) : '0px'};
+    border-color: ${theme.colors.border};
   ` as StyleProp<ViewStyle>;
 
-export const ButtonText = (theme: Theme, tone: ButtonTone = 'primary') =>
+export const ButtonText = (
+  theme: Theme,
+  tone: ButtonTone = 'primary',
+  disabled: boolean = false
+) =>
   css`
-    color: ${buttonTextColor(theme, tone)};
+    color: ${buttonTextColor(theme, tone, disabled)};
     font-size: ${toPX(theme.size.md)};
     font-weight: ${theme.weight.bold};
     line-height: ${toPX(theme.lineHeight.md)};
@@ -148,7 +181,6 @@ export const CompactButton = (
     align-items: center;
     justify-content: center;
     background-color: ${buttonBackground(theme, tone, disabled)};
-    opacity: ${disabled ? 0.7 : 1};
   ` as StyleProp<ViewStyle>;
 
 export const CompactButtonText = (theme: Theme, tone: ButtonTone = 'primary') =>

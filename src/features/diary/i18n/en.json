@@ -101,6 +101,11 @@
         "description": "The entered data will not be saved.",
         "confirm": "Discard"
       }
+    },
+    "metric": {
+      "valueAccessibilityLabel": "{{metric}} value",
+      "decreaseAccessibilityLabel": "Decrease {{metric}}",
+      "increaseAccessibilityLabel": "Increase {{metric}}"
     }
   }
 }

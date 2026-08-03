@@ -103,6 +103,11 @@
         "description": "Введённые данные не будут сохранены.",
         "confirm": "Отменить изменения"
       }
+    },
+    "metric": {
+      "valueAccessibilityLabel": "Значение: {{metric}}",
+      "decreaseAccessibilityLabel": "Уменьшить: {{metric}}",
+      "increaseAccessibilityLabel": "Увеличить: {{metric}}"
     }
   }
 }

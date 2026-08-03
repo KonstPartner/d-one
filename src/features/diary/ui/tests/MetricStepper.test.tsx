@@ -12,12 +12,14 @@ jest.mock('@expo/vector-icons', () => ({
 
 type ControlledMetricStepperProps = {
   initialValue: number | null;
+  maximum?: number;
   disabled?: boolean;
   onChange: jest.Mock;
 };
 
 const ControlledMetricStepper = ({
   initialValue,
+  maximum = 100,
   disabled = false,
   onChange,
 }: ControlledMetricStepperProps) => {
@@ -31,13 +33,15 @@ const ControlledMetricStepper = ({
   return (
     <ThemeProvider theme={lightTheme}>
       <MetricStepper
+        metricKey="glucose"
+        icon="water"
         label="Glucose"
         value={value}
+        maximum={maximum}
         disabled={disabled}
         inputAccessibilityLabel="Glucose value"
         decrementAccessibilityLabel="Decrease glucose"
         incrementAccessibilityLabel="Increase glucose"
-        clearAccessibilityLabel="Clear glucose"
         onChange={handleChange}
       />
     </ThemeProvider>
@@ -127,7 +131,7 @@ describe('MetricStepper', () => {
     expect(input.props.value).toBe('7.5');
   });
 
-  it('clears the value through manual input and the clear button', () => {
+  it('clears the value through manual input', () => {
     const onChange = jest.fn();
 
     render(<ControlledMetricStepper initialValue={4.5} onChange={onChange} />);
@@ -138,15 +142,9 @@ describe('MetricStepper', () => {
 
     expect(onChange).toHaveBeenLastCalledWith(null);
     expect(input.props.value).toBe('');
-
-    fireEvent.changeText(input, '3.5');
-    fireEvent.press(screen.getByLabelText('Clear glucose'));
-
-    expect(onChange).toHaveBeenLastCalledWith(null);
-    expect(screen.getByLabelText('Glucose value').props.value).toBe('');
   });
 
-  it('does not decrement below zero', () => {
+  it('changes zero to null when decrementing', () => {
     const onChange = jest.fn();
 
     render(<ControlledMetricStepper initialValue={0} onChange={onChange} />);
@@ -154,12 +152,13 @@ describe('MetricStepper', () => {
     const decrementButton = screen.getByLabelText('Decrease glucose');
 
     expect(decrementButton.props.accessibilityState).toEqual({
-      disabled: true,
+      disabled: false,
     });
 
     fireEvent.press(decrementButton);
 
-    expect(onChange).not.toHaveBeenCalled();
+    expect(onChange).toHaveBeenCalledWith(null);
+    expect(screen.getByLabelText('Glucose value').props.value).toBe('');
   });
 
   it('creates value one when incrementing an empty field', () => {
@@ -173,6 +172,28 @@ describe('MetricStepper', () => {
     expect(screen.getByLabelText('Glucose value').props.value).toBe('1');
   });
 
+  it('disables incrementing at the maximum value', () => {
+    const onChange = jest.fn();
+
+    render(
+      <ControlledMetricStepper
+        initialValue={40}
+        maximum={40}
+        onChange={onChange}
+      />
+    );
+
+    const incrementButton = screen.getByLabelText('Increase glucose');
+
+    expect(incrementButton.props.accessibilityState).toEqual({
+      disabled: true,
+    });
+
+    fireEvent.press(incrementButton);
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it('disables input and every action when the component is disabled', () => {
     const onChange = jest.fn();
 
@@ -182,17 +203,15 @@ describe('MetricStepper', () => {
 
     expect(screen.getByLabelText('Glucose value').props.editable).toBe(false);
 
-    ['Decrease glucose', 'Increase glucose', 'Clear glucose'].forEach(
-      (accessibilityLabel) => {
-        const button = screen.getByLabelText(accessibilityLabel);
+    ['Decrease glucose', 'Increase glucose'].forEach((accessibilityLabel) => {
+      const button = screen.getByLabelText(accessibilityLabel);
 
-        expect(button.props.accessibilityState).toEqual({
-          disabled: true,
-        });
+      expect(button.props.accessibilityState).toEqual({
+        disabled: true,
+      });
 
-        fireEvent.press(button);
-      }
-    );
+      fireEvent.press(button);
+    });
 
     expect(onChange).not.toHaveBeenCalled();
   });

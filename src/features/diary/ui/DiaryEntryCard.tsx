@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as globalStyles from '@features/shared/styles/global';
 
 import useDiaryEntryCard from '../model/hooks/useDiaryEntryCard';
+import { MEAL_RELATION_PRESENTATION } from '../model/mealRelationPresentation';
 import type { DiaryEntry } from '../model/types';
 import * as styles from '../styles/DiaryEntryCard';
 
@@ -20,6 +21,13 @@ type DiaryEntryCardProps = {
   onPress?: (entry: DiaryEntry) => void;
   onOpenPhoto?: (entry: DiaryEntry) => void;
 };
+
+const metricIcons = {
+  glucose: 'water',
+  carbsGram: 'leaf-outline',
+  shortInsulin: 'medical-outline',
+  longInsulin: 'shield-checkmark-outline',
+} as const;
 
 const DiaryEntryCard = ({
   entry,
@@ -56,6 +64,11 @@ const DiaryEntryCard = ({
     onOpenPhoto,
   });
 
+  const mealRelationPresentation =
+    entry.mealRelation === null
+      ? null
+      : MEAL_RELATION_PRESENTATION[entry.mealRelation];
+
   return (
     <>
       <Pressable
@@ -83,55 +96,89 @@ const DiaryEntryCard = ({
           onPress={photoInteractive ? handlePhotoPress : undefined}
         />
 
-        <View style={styles.Header(theme)}>
-          <View style={globalStyles.FlexItem}>
-            <Text style={globalStyles.Subheading(theme)} numberOfLines={1}>
-              {dateTimeLabel}
-            </Text>
-          </View>
+        <View style={styles.Body(theme)}>
+          <View style={styles.Header(theme)}>
+            <View style={styles.Time(theme)}>
+              <Ionicons
+                name="time-outline"
+                size={theme.size.lg}
+                color={theme.colors.primary}
+              />
 
-          {mealRelationLabel !== null && (
-            <View style={styles.MealRelation(theme)}>
-              <Text style={globalStyles.Text(theme, 'sm', 'medium', 'primary')}>
-                {mealRelationLabel}
+              <Text style={styles.TimeText(theme)} numberOfLines={1}>
+                {dateTimeLabel}
               </Text>
             </View>
+
+            {mealRelationLabel !== null &&
+              mealRelationPresentation !== null && (
+                <View
+                  style={styles.MealRelation(
+                    theme,
+                    mealRelationPresentation.tone
+                  )}
+                >
+                  <Ionicons
+                    name={mealRelationPresentation.icon}
+                    size={theme.size.base}
+                    color={theme.colors[mealRelationPresentation.tone]}
+                  />
+
+                  <Text
+                    style={styles.MealRelationText(
+                      theme,
+                      mealRelationPresentation.tone
+                    )}
+                  >
+                    {mealRelationLabel}
+                  </Text>
+                </View>
+              )}
+          </View>
+
+          {metrics.length > 0 && (
+            <View style={styles.Metrics(theme)}>
+              {metrics.map((metric) => (
+                <View
+                  key={metric.key}
+                  accessible
+                  accessibilityLabel={`${metric.label}: ${metric.value}`}
+                  style={styles.Metric(theme, metric.key)}
+                >
+                  <View style={styles.MetricIcon}>
+                    <Ionicons
+                      name={metricIcons[metric.key]}
+                      size={theme.size.xl}
+                      color={theme.colors.metrics[metric.key].text}
+                    />
+                  </View>
+
+                  <Text style={styles.MetricValue(theme, metric.key)}>
+                    {metric.value}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {comment.length > 0 && (
+            <DiaryTextPreview
+              title={commentTitle}
+              text={comment}
+              disabled={actionsDisabled}
+              onOpen={handleOpenComment}
+            />
+          )}
+
+          {aiAnalysis.length > 0 && (
+            <DiaryTextPreview
+              title={aiAnalysisTitle}
+              text={aiAnalysis}
+              disabled={actionsDisabled}
+              onOpen={handleOpenAiAnalysis}
+            />
           )}
         </View>
-
-        {metrics.length > 0 && (
-          <View style={styles.Metrics(theme)}>
-            {metrics.map((metric) => (
-              <View key={metric.key} style={styles.Metric(theme)}>
-                <Text style={globalStyles.Caption(theme)}>{metric.label}</Text>
-
-                <Text style={globalStyles.Text(theme, 'sm', 'semibold')}>
-                  {metric.value}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {comment.length > 0 && (
-          <DiaryTextPreview
-            title={commentTitle}
-            text={comment}
-            disabled={actionsDisabled}
-            onOpen={handleOpenComment}
-          />
-        )}
-
-        {aiAnalysis.length > 0 && (
-          <DiaryTextPreview
-            title={aiAnalysisTitle}
-            text={aiAnalysis}
-            disabled={actionsDisabled}
-            onOpen={handleOpenAiAnalysis}
-          />
-        )}
-
-        <View style={globalStyles.Divider(theme)} />
 
         <View style={styles.Status(theme)}>
           {syncStatus.loading ? (

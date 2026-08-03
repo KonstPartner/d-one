@@ -1,4 +1,4 @@
-import { Theme } from '@emotion/react';
+import type { Theme } from '@emotion/react';
 
 const base = {
   border: {
@@ -42,7 +42,14 @@ const base = {
     '5xl': 48,
   },
 
-  radius: { xs: 4, sm: 6, md: 12, lg: 20, xl: 24, full: 999 },
+  radius: {
+    xs: 4,
+    sm: 6,
+    md: 12,
+    lg: 20,
+    xl: 24,
+    full: 999,
+  },
 
   size: {
     xs: 10,
@@ -76,24 +83,47 @@ export const lightTheme: Theme = {
     bg: '#F9FAFB',
     text: '#111827',
     card: '#FFFFFF',
-    primary: '#EA580C',
+    primary: '#3B82F6',
     border: '#E5E7EB',
     muted: '#6B7280',
     input: '#F3F4F6',
     success: '#16A34A',
-    warning: '#EAB308',
+    warning: '#F59E0B',
     danger: '#DC2626',
     white: '#FFFFFF',
     black: '#000000',
 
+    metrics: {
+      glucose: {
+        text: '#EF4444',
+        background: '#FEF2F2',
+        border: '#FECACA',
+      },
+      carbsGram: {
+        text: '#65A30D',
+        background: '#F7FEE7',
+        border: '#D9F99D',
+      },
+      shortInsulin: {
+        text: '#3B82F6',
+        background: '#EFF6FF',
+        border: '#BFDBFE',
+      },
+      longInsulin: {
+        text: '#8B5CF6',
+        background: '#F5F3FF',
+        border: '#DDD6FE',
+      },
+    },
+
     shades: {
       primary: {
-        sm: '#FFF7ED',
-        md: '#FFEDD5',
-        lg: '#FED7AA',
-        xl: '#EA580C',
-        text: '#9A3412',
-        mutedText: 'rgba(154, 52, 18, 0.72)',
+        sm: '#EFF6FF',
+        md: '#DBEAFE',
+        lg: '#BFDBFE',
+        xl: '#3B82F6',
+        text: '#1D4ED8',
+        mutedText: 'rgba(29, 78, 216, 0.72)',
       },
       success: {
         sm: '#ECFDF5',
@@ -131,26 +161,48 @@ export const darkTheme: Theme = {
     bg: '#0A092B',
     text: '#F5F7FA',
     card: '#191932',
-    primary: '#EA580C',
+    primary: '#60A5FA',
     border: '#303854',
     muted: '#959BB2',
     input: '#20203E',
-    success: '#16A34A',
-    warning: '#EAB308',
-    danger: '#DC2626',
+    success: '#22C55E',
+    warning: '#FACC15',
+    danger: '#EF4444',
     white: '#FFFFFF',
     black: '#000000',
 
+    metrics: {
+      glucose: {
+        text: '#F87171',
+        background: 'rgba(239, 68, 68, 0.12)',
+        border: 'rgba(239, 68, 68, 0.3)',
+      },
+      carbsGram: {
+        text: '#A3E635',
+        background: 'rgba(132, 204, 22, 0.12)',
+        border: 'rgba(132, 204, 22, 0.3)',
+      },
+      shortInsulin: {
+        text: '#60A5FA',
+        background: 'rgba(59, 130, 246, 0.12)',
+        border: 'rgba(59, 130, 246, 0.3)',
+      },
+      longInsulin: {
+        text: '#A78BFA',
+        background: 'rgba(139, 92, 246, 0.12)',
+        border: 'rgba(139, 92, 246, 0.3)',
+      },
+    },
+
     shades: {
       primary: {
-        sm: 'rgba(234, 88, 12, 0.14)',
-        md: 'rgba(234, 88, 12, 0.22)',
-        lg: 'rgba(234, 88, 12, 0.34)',
-        xl: '#F97316',
-        text: '#FDBA74',
-        mutedText: 'rgba(253, 186, 116, 0.72)',
+        sm: 'rgba(59, 130, 246, 0.14)',
+        md: 'rgba(59, 130, 246, 0.22)',
+        lg: 'rgba(59, 130, 246, 0.34)',
+        xl: '#60A5FA',
+        text: '#93C5FD',
+        mutedText: 'rgba(147, 197, 253, 0.72)',
       },
-
       success: {
         sm: 'rgba(22, 163, 74, 0.14)',
         md: 'rgba(22, 163, 74, 0.22)',
@@ -159,7 +211,6 @@ export const darkTheme: Theme = {
         text: '#86EFAC',
         mutedText: 'rgba(134, 239, 172, 0.72)',
       },
-
       warning: {
         sm: 'rgba(234, 179, 8, 0.14)',
         md: 'rgba(234, 179, 8, 0.22)',
@@ -167,7 +218,6 @@ export const darkTheme: Theme = {
         text: '#FDE68A',
         mutedText: 'rgba(253, 230, 138, 0.72)',
       },
-
       danger: {
         sm: 'rgba(220, 38, 38, 0.14)',
         md: 'rgba(220, 38, 38, 0.22)',

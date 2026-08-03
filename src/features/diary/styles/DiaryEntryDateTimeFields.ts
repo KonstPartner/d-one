@@ -4,6 +4,11 @@ import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 
 import { toPX } from '@features/theme/model';
 
+export const Container = (theme: Theme) =>
+  css`
+    gap: ${toPX(theme.spacing.sm)};
+  ` as StyleProp<ViewStyle>;
+
 export const Controls = (theme: Theme) =>
   css`
     flex-direction: row;
@@ -47,11 +52,20 @@ export const CurrentDateTime = (theme: Theme) =>
     padding: 0 ${toPX(theme.spacing.md)};
   ` as StyleProp<ViewStyle>;
 
+export const CurrentDateTimeAction = (theme: Theme) =>
+  css`
+    min-height: ${toPX(theme.control.height.md)};
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    gap: ${toPX(theme.spacing.md)};
+  ` as StyleProp<ViewStyle>;
+
 export const CurrentDateTimeLabel = (theme: Theme, disabled: boolean) =>
   css`
     flex: 1;
     color: ${disabled ? theme.colors.muted : theme.colors.text};
     font-size: ${toPX(theme.size.sm)};
     line-height: ${toPX(theme.lineHeight.md)};
-    font-weight: ${theme.weight.medium};
+    font-weight: ${theme.weight.semibold};
   ` as StyleProp<TextStyle>;

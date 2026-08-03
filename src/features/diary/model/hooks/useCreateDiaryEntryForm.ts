@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import useCreateDiaryEntry from '../../api/hooks/useCreateDiaryEntry';
 import type {
@@ -8,6 +8,7 @@ import type {
 } from '../types';
 
 type UseCreateDiaryEntryFormParams = {
+  createFormVisible: boolean;
   onCreated: (entryId: string) => void;
 };
 
@@ -91,6 +92,7 @@ const validateValues = (
 };
 
 const useCreateDiaryEntryForm = ({
+  createFormVisible,
   onCreated,
 }: UseCreateDiaryEntryFormParams) => {
   const [values, setValues] =
@@ -100,7 +102,8 @@ const useCreateDiaryEntryForm = ({
     useState<DiaryEntryFormError | null>(null);
 
   const submitInProgressRef = useRef(false);
-  const initialValuesRef = useRef(values);
+  const draftChangedRef = useRef(false);
+  const previousVisibilityRef = useRef(createFormVisible);
 
   const {
     mutateAsync,
@@ -114,11 +117,33 @@ const useCreateDiaryEntryForm = ({
     resetCreation();
   }, [resetCreation]);
 
+  const resetData = useCallback(() => {
+    const initialValues = createInitialValues();
+
+    draftChangedRef.current = false;
+
+    setValues(initialValues);
+    setUseCurrentDateTime(true);
+    setValidationError(null);
+    resetCreation();
+  }, [resetCreation]);
+
+  useEffect(() => {
+    const wasVisible = previousVisibilityRef.current;
+
+    previousVisibilityRef.current = createFormVisible;
+
+    if (createFormVisible && !wasVisible && !draftChangedRef.current) {
+      resetData();
+    }
+  }, [createFormVisible, resetData]);
+
   const updateValue = useCallback(
     <Key extends keyof CreateDiaryEntryData>(
       key: Key,
       value: CreateDiaryEntryData[Key]
     ) => {
+      draftChangedRef.current = true;
       clearErrors();
 
       setValues((currentValues) => ({
@@ -173,6 +198,7 @@ const useCreateDiaryEntryForm = ({
 
   const handleCurrentDateTimeChange = useCallback(
     (value: boolean) => {
+      draftChangedRef.current = true;
       clearErrors();
       setUseCurrentDateTime(value);
     },
@@ -185,6 +211,7 @@ const useCreateDiaryEntryForm = ({
         return;
       }
 
+      draftChangedRef.current = true;
       clearErrors();
 
       setValues((currentValues) => {
@@ -211,6 +238,7 @@ const useCreateDiaryEntryForm = ({
         return;
       }
 
+      draftChangedRef.current = true;
       clearErrors();
 
       setValues((currentValues) => {
@@ -253,6 +281,7 @@ const useCreateDiaryEntryForm = ({
     try {
       const entryId = await mutateAsync(normalizedValues);
 
+      resetData();
       onCreated(entryId);
 
       return entryId;
@@ -261,24 +290,18 @@ const useCreateDiaryEntryForm = ({
     } finally {
       submitInProgressRef.current = false;
     }
-  }, [mutateAsync, onCreated, resetCreation, useCurrentDateTime, values]);
-
-  const initialValues = initialValuesRef.current;
-
-  const isDirty =
-    useCurrentDateTime !== true ||
-    values.eventAt.getTime() !== initialValues.eventAt.getTime() ||
-    values.glucose !== initialValues.glucose ||
-    values.mealRelation !== initialValues.mealRelation ||
-    values.shortInsulin !== initialValues.shortInsulin ||
-    values.longInsulin !== initialValues.longInsulin ||
-    values.carbsGram !== initialValues.carbsGram ||
-    values.comment !== initialValues.comment;
+  }, [
+    mutateAsync,
+    onCreated,
+    resetCreation,
+    resetData,
+    useCurrentDateTime,
+    values,
+  ]);
 
   return {
     values,
     useCurrentDateTime,
-    isDirty,
     validationError,
     creationError,
     isSubmitting: isPending,

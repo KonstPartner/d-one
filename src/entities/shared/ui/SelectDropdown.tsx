@@ -1,9 +1,11 @@
-import { ReactNode, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
+import type { ReactNode } from 'react';
+import { ScrollView } from 'react-native-gesture-handler';
 
-import { SelectDropdownOption } from '@features/shared/model';
+import type { SelectDropdownOption } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
 
 import * as styles from '../styles/SelectDropdown';
@@ -13,6 +15,7 @@ type SelectDropdownProps<T> = {
   placeholder: string;
   selectedLabel?: string | null;
   options: SelectDropdownOption<T>[];
+  inlineOptions?: boolean;
   onSelect: (value: T) => void;
   isSelected?: (option: SelectDropdownOption<T>) => boolean;
   renderOption?: (params: {
@@ -29,6 +32,7 @@ const SelectDropdown = <T,>({
   placeholder,
   selectedLabel,
   options,
+  inlineOptions = false,
   onSelect,
   isSelected,
   renderOption,
@@ -43,6 +47,68 @@ const SelectDropdown = <T,>({
 
   const selectedOption =
     options.find((option) => isSelected?.(option) ?? false) ?? null;
+
+  const optionItems = options.length
+    ? options.map((option) => {
+        const selected = isSelected?.(option) ?? false;
+
+        const handlePress = () => {
+          onSelect(option.value);
+          setOpened(false);
+        };
+
+        if (renderOption) {
+          return (
+            <View key={option.key ?? String(option.label)}>
+              {renderOption({
+                option,
+                selected,
+                onPress: handlePress,
+              })}
+            </View>
+          );
+        }
+
+        const tone = option.tone ?? 'primary';
+
+        return (
+          <Pressable
+            key={option.key ?? String(option.label)}
+            style={styles.Option(theme, selected)}
+            onPress={handlePress}
+            accessibilityRole="button"
+          >
+            <View style={styles.OptionContent}>
+              {option.icon ? (
+                <View style={styles.IconBox(theme, tone, selected)}>
+                  <Ionicons
+                    name={option.icon}
+                    size={20}
+                    color={
+                      selected
+                        ? theme.colors.white
+                        : styles.getToneColor(theme, tone)
+                    }
+                  />
+                </View>
+              ) : null}
+
+              <Text style={styles.OptionText(theme, selected)}>
+                {option.label}
+              </Text>
+            </View>
+
+            {selected ? (
+              <Ionicons
+                name="checkmark"
+                size={18}
+                color={styles.getToneColor(theme, tone)}
+              />
+            ) : null}
+          </Pressable>
+        );
+      })
+    : empty;
 
   return (
     <View style={styles.Container(opened)}>
@@ -59,7 +125,7 @@ const SelectDropdown = <T,>({
 
       <Pressable
         style={styles.Field(theme, opened)}
-        onPress={() => setOpened((prev) => !prev)}
+        onPress={() => setOpened((previous) => !previous)}
         accessibilityRole="button"
       >
         <View style={styles.FieldContent}>
@@ -95,70 +161,17 @@ const SelectDropdown = <T,>({
       </Pressable>
 
       {opened ? (
-        <View style={styles.Dropdown(theme, hasLabel)}>
+        <View style={styles.Dropdown(theme, hasLabel, inlineOptions)}>
           <ScrollView
-            showsVerticalScrollIndicator={false}
+            testID="select-dropdown-options"
+            disallowInterruption
+            bounces={false}
+            overScrollMode="never"
+            showsVerticalScrollIndicator
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={styles.DropdownScrollContent}
+            contentContainerStyle={styles.DropdownContent}
           >
-            {options.length
-              ? options.map((option) => {
-                  const selected = isSelected?.(option) ?? false;
-
-                  const onPress = () => {
-                    onSelect(option.value);
-                    setOpened(false);
-                  };
-
-                  if (renderOption) {
-                    return (
-                      <View key={option.key ?? String(option.label)}>
-                        {renderOption({ option, selected, onPress })}
-                      </View>
-                    );
-                  }
-
-                  const tone = option.tone ?? 'primary';
-
-                  return (
-                    <Pressable
-                      key={option.key ?? String(option.label)}
-                      style={styles.Option(theme, selected)}
-                      onPress={onPress}
-                      accessibilityRole="button"
-                    >
-                      <View style={styles.OptionContent}>
-                        {option.icon ? (
-                          <View style={styles.IconBox(theme, tone, selected)}>
-                            <Ionicons
-                              name={option.icon}
-                              size={20}
-                              color={
-                                selected
-                                  ? theme.colors.white
-                                  : styles.getToneColor(theme, tone)
-                              }
-                            />
-                          </View>
-                        ) : null}
-
-                        <Text style={styles.OptionText(theme, selected)}>
-                          {option.label}
-                        </Text>
-                      </View>
-
-                      {selected ? (
-                        <Ionicons
-                          name="checkmark"
-                          size={18}
-                          color={styles.getToneColor(theme, tone)}
-                        />
-                      ) : null}
-                    </Pressable>
-                  );
-                })
-              : empty}
-
+            {optionItems}
             {footer}
           </ScrollView>
         </View>

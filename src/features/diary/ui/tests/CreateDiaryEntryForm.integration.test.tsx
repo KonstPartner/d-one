@@ -1,3 +1,5 @@
+import { type PropsWithChildren, useState } from 'react';
+import { Pressable } from 'react-native';
 import { ThemeProvider } from '@emotion/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -9,7 +11,6 @@ import {
 } from '@testing-library/react-native';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { collection, doc } from 'firebase/firestore';
-import type { PropsWithChildren } from 'react';
 import { Host } from 'react-native-portalize';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -84,12 +85,37 @@ type ReadyFormProps = {
 
 const ReadyForm = ({ onClose, onCreated }: ReadyFormProps) => {
   const database = useDiaryDatabase();
+  const [createFormVisible, setCreateFormVisible] = useState(true);
 
   if (database.status !== 'ready') {
     return null;
   }
 
-  return <CreateDiaryEntryForm onClose={onClose} onCreated={onCreated} />;
+  const handleClose = () => {
+    setCreateFormVisible(false);
+    onClose();
+  };
+
+  const handleCreated = (entryId: string) => {
+    setCreateFormVisible(false);
+    onCreated(entryId);
+  };
+
+  return (
+    <>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="open-create-form"
+        onPress={() => setCreateFormVisible(true)}
+      />
+
+      <CreateDiaryEntryForm
+        createFormVisible={createFormVisible}
+        onClose={handleClose}
+        onCreated={handleCreated}
+      />
+    </>
+  );
 };
 
 const TestProviders = ({ children }: PropsWithChildren) => (
@@ -206,6 +232,48 @@ describe('CreateDiaryEntryForm integration', () => {
     expect(onCreated).not.toHaveBeenCalled();
   });
 
+  it('keeps form scrolling enabled and allows dropdown selection', async () => {
+    renderForm();
+
+    fireEvent.press(
+      await screen.findByText('diary.form.mealRelationPlaceholder')
+    );
+
+    const formScroll = screen.getByTestId('create-diary-entry-scroll');
+
+    expect(formScroll.props.scrollEnabled).toBeUndefined();
+    expect(screen.getByTestId('select-dropdown-options')).toBeTruthy();
+
+    fireEvent.press(screen.getByText('diary.entry.mealRelation.afterMeal'));
+
+    expect(screen.queryByTestId('select-dropdown-options')).toBeNull();
+    expect(screen.getByText('diary.entry.mealRelation.afterMeal')).toBeTruthy();
+  });
+
+  it('keeps the draft after closing and reopening the form', async () => {
+    const { onClose } = renderForm();
+
+    fireEvent.changeText(
+      await screen.findByLabelText('diary.form.commentAccessibilityLabel'),
+      'Draft dinner'
+    );
+
+    fireEvent.press(
+      screen.getByLabelText('diary.form.cancelAccessibilityLabel')
+    );
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByLabelText('diary.form.commentAccessibilityLabel')
+    ).toBeNull();
+
+    fireEvent.press(screen.getByLabelText('open-create-form'));
+
+    expect(
+      screen.getByLabelText('diary.form.commentAccessibilityLabel').props.value
+    ).toBe('Draft dinner');
+  });
+
   it('normalizes and saves the entry as pendingCreate', async () => {
     const earliestEventAt = CURRENT_DATE.getTime();
     const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
@@ -271,6 +339,16 @@ describe('CreateDiaryEntryForm integration', () => {
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: diaryQueryKeys.localPagesRoot('user-1'),
     });
+
+    expect(
+      screen.queryByLabelText('diary.form.commentAccessibilityLabel')
+    ).toBeNull();
+
+    fireEvent.press(screen.getByLabelText('open-create-form'));
+
+    expect(
+      screen.getByLabelText('diary.form.commentAccessibilityLabel').props.value
+    ).toBe('');
   });
 
   it('keeps the form open and shows an error when SQLite fails', async () => {
@@ -293,6 +371,15 @@ describe('CreateDiaryEntryForm integration', () => {
 
     expect(onCreated).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
+
+    expect(
+      screen.getByLabelText('diary.form.commentAccessibilityLabel').props.value
+    ).toBe('  Dinner  ');
+
+    fireEvent.press(
+      screen.getByLabelText('diary.form.cancelAccessibilityLabel')
+    );
+    fireEvent.press(screen.getByLabelText('open-create-form'));
 
     expect(
       screen.getByLabelText('diary.form.commentAccessibilityLabel').props.value

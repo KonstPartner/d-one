@@ -27,6 +27,20 @@ const mockTheme = {
     muted: '#777777',
     success: '#008000',
     warning: '#ff9900',
+    metrics: {
+      glucose: {
+        text: '#ff0000',
+      },
+      carbsGram: {
+        text: '#00aa00',
+      },
+      shortInsulin: {
+        text: '#0000ff',
+      },
+      longInsulin: {
+        text: '#800080',
+      },
+    },
   },
   spacing: {
     sm: 8,
@@ -34,7 +48,10 @@ const mockTheme = {
     xl: 20,
   },
   size: {
+    base: 14,
     md: 16,
+    lg: 22,
+    xl: 28,
   },
 };
 
@@ -44,9 +61,15 @@ jest.mock('@emotion/react', () => ({
   useTheme: () => mockTheme,
 }));
 
-jest.mock('@expo/vector-icons', () => ({
-  Ionicons: () => null,
-}));
+jest.mock('@expo/vector-icons', () => {
+  const React = jest.requireActual('react');
+  const { Text } = jest.requireActual('react-native');
+
+  return {
+    Ionicons: ({ color, name }: { color: string; name: string }) =>
+      React.createElement(Text, { testID: `icon-${name}` }, color),
+  };
+});
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -135,10 +158,16 @@ jest.mock('@features/shared/styles/global', () => {
 
 jest.mock('../../styles/DiaryEntryCard', () => ({
   Card: () => ({}),
+  Body: () => ({}),
   Header: () => ({}),
+  Time: () => ({}),
+  TimeText: () => ({}),
   MealRelation: () => ({}),
+  MealRelationText: () => ({}),
   Metrics: () => ({}),
   Metric: () => ({}),
+  MetricIcon: {},
+  MetricValue: () => ({}),
   Status: () => ({}),
   Pressed: {},
 }));
@@ -312,6 +341,21 @@ describe('LocalDiaryContent', () => {
     expect(screen.getByText('entry:third')).toBeTruthy();
 
     expect(screen.getAllByText('diary.entry.sync.synced')).toHaveLength(3);
+  });
+
+  it('uses the configured icon and color for the meal relation', () => {
+    const entry = makeEntry('meal-relation', new Date(2026, 6, 19, 12, 0));
+
+    entry.mealRelation = 'afterMeal';
+
+    mockPages.set(1, makePage(1, 1, [entry]));
+
+    renderContent();
+
+    expect(screen.getByText('diary.entry.mealRelation.afterMeal')).toBeTruthy();
+    expect(
+      screen.getByTestId('icon-checkmark-circle-outline').props.children
+    ).toBe(mockTheme.colors.success);
   });
 
   it('collapses and expands one day without removing its header', () => {
