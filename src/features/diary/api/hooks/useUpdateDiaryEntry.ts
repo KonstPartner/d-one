@@ -3,7 +3,17 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDiaryListStore } from '../../model/store';
 import type { UpdateDiaryEntryData } from '../../model/types';
 import { diaryQueryKeys } from '../constants';
+import { prepareDiaryPhotoForEntry } from '../diaryPhotoService';
 import { useReadyDiaryDatabase } from '../sqlite/DiaryDatabaseProvider';
+
+export type UpdateDiaryEntryPhotoChange =
+  | { type: 'keep' }
+  | { type: 'replace'; draftUri: string }
+  | { type: 'delete' };
+
+export type UpdateDiaryEntryMutationData = UpdateDiaryEntryData & {
+  photoChange?: UpdateDiaryEntryPhotoChange;
+};
 
 const useUpdateDiaryEntry = () => {
   const queryClient = useQueryClient();
@@ -14,10 +24,59 @@ const useUpdateDiaryEntry = () => {
   return useMutation({
     mutationKey: [...diaryQueryKeys.localRoot(userId), 'update'],
 
-    mutationFn: async (data: UpdateDiaryEntryData): Promise<string> => {
-      await repository.update(data);
+    mutationFn: async ({
+      photoChange = { type: 'keep' },
+      ...data
+    }: UpdateDiaryEntryMutationData): Promise<string> => {
+      if (photoChange.type === 'keep') {
+        await repository.update(data);
 
-      return data.id;
+        return data.id;
+      }
+
+      const currentEntry = await repository.findById(data.id);
+
+      if (currentEntry === null) {
+        throw new Error(`Diary entry does not exist: ${data.id}`);
+      }
+
+      if (photoChange.type === 'delete') {
+        await repository.update({
+          ...data,
+          photo: {
+            localPhotoUri: null,
+            photoPath: currentEntry.photoPath,
+            photoUrl: null,
+          },
+        });
+
+        return data.id;
+      }
+
+      const preparedPhoto = prepareDiaryPhotoForEntry({
+        userId,
+        entryId: data.id,
+        draftUri: photoChange.draftUri,
+      });
+
+      try {
+        await repository.update({
+          ...data,
+          photo: {
+            localPhotoUri: preparedPhoto.localPhotoUri,
+            photoPath: preparedPhoto.photoPath,
+            photoUrl: null,
+          },
+        });
+
+        preparedPhoto.finalize();
+
+        return data.id;
+      } catch (error) {
+        preparedPhoto.rollback();
+
+        throw error;
+      }
     },
 
     onSuccess: () => {

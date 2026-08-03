@@ -35,6 +35,15 @@ type DiaryCountRow = {
   total_items: number;
 };
 
+type DiaryEntryPhotoUpdate = Pick<
+  DiaryEntry,
+  'localPhotoUri' | 'photoPath' | 'photoUrl'
+>;
+
+type UpdateDiaryEntryInput = UpdateDiaryEntryData & {
+  photo?: DiaryEntryPhotoUpdate;
+};
+
 const CREATE_DIARY_ENTRY_SQL = `
   INSERT INTO diary_entries (
     id,
@@ -101,6 +110,28 @@ const UPDATE_DIARY_ENTRY_SQL = `
     long_insulin = $longInsulin,
     carbs_gram = $carbsGram,
     comment = $comment,
+    event_at = $eventAt,
+    sync_status = CASE sync_status
+      WHEN 'pendingCreate' THEN 'pendingCreate'
+      ELSE 'pendingUpdate'
+    END
+  WHERE id = $id
+    AND user_id = $userId
+    AND sync_status IN ('synced', 'pendingCreate', 'pendingUpdate')
+`;
+
+const UPDATE_DIARY_ENTRY_WITH_PHOTO_SQL = `
+  UPDATE diary_entries
+  SET
+    glucose = $glucose,
+    meal_relation = $mealRelation,
+    short_insulin = $shortInsulin,
+    long_insulin = $longInsulin,
+    carbs_gram = $carbsGram,
+    comment = $comment,
+    local_photo_uri = $localPhotoUri,
+    photo_path = $photoPath,
+    photo_url = $photoUrl,
     event_at = $eventAt,
     sync_status = CASE sync_status
       WHEN 'pendingCreate' THEN 'pendingCreate'
@@ -220,7 +251,7 @@ export class DiaryRepository {
     });
   }
 
-  public update(data: UpdateDiaryEntryData): Promise<void> {
+  public update(data: UpdateDiaryEntryInput): Promise<void> {
     const eventAt = data.eventAt.getTime();
 
     if (Number.isNaN(eventAt)) {
@@ -228,7 +259,7 @@ export class DiaryRepository {
     }
 
     return this.operationGate.run(async () => {
-      const result = await this.database.runAsync(UPDATE_DIARY_ENTRY_SQL, {
+      const parameters = {
         $id: data.id,
         $userId: this.userId,
         $glucose: data.glucose,
@@ -238,7 +269,21 @@ export class DiaryRepository {
         $carbsGram: data.carbsGram,
         $comment: data.comment,
         $eventAt: eventAt,
-      });
+        ...(data.photo === undefined
+          ? {}
+          : {
+              $localPhotoUri: data.photo.localPhotoUri,
+              $photoPath: data.photo.photoPath,
+              $photoUrl: data.photo.photoUrl,
+            }),
+      };
+
+      const result = await this.database.runAsync(
+        data.photo === undefined
+          ? UPDATE_DIARY_ENTRY_SQL
+          : UPDATE_DIARY_ENTRY_WITH_PHOTO_SQL,
+        parameters
+      );
 
       if (result.changes !== 1) {
         throw new Error(`Diary entry cannot be updated: ${data.id}`);

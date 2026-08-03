@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 
 import { i18n } from '@features/i18n/model';
@@ -28,6 +28,7 @@ const RECTANGULAR_DEFAULTS: Required<PickRectangularImageOptions> = {
 };
 
 type ImageCropMode = 'none' | 'square' | 'round' | 'rectangular';
+type ImagePickerSource = 'camera' | 'library';
 
 type PickImageOptions = {
   crop?: ImageCropMode;
@@ -63,12 +64,21 @@ const handleError = (error: unknown) => {
   return null;
 };
 
-const ensureGalleryPermission = async (): Promise<boolean> => {
+const ensurePermission = async (
+  source: ImagePickerSource
+): Promise<boolean> => {
   const permissionResult =
-    await ImagePicker.requestMediaLibraryPermissionsAsync();
+    source === 'camera'
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
   if (!permissionResult.granted) {
-    showNotification('error', i18n.t('common.permissions.gallery.denied'));
+    const permissionKey =
+      source === 'camera'
+        ? 'common.permissions.camera.denied'
+        : 'common.permissions.gallery.denied';
+
+    showNotification('error', i18n.t(permissionKey));
 
     return false;
   }
@@ -91,35 +101,48 @@ const normalizeImageUri = (uri: string): string => {
 
 const useImagePicker = () => {
   const [isPicking, setIsPicking] = useState(false);
+  const isPickingRef = useRef(false);
 
-  const pickImage = useCallback(
-    async (options: PickImageOptions = {}): Promise<string | null> => {
+  const pickImageFromSource = useCallback(
+    async (
+      source: ImagePickerSource,
+      options: PickImageOptions = {}
+    ): Promise<string | null> => {
       const { crop, aspect, size, quality } = {
         ...IMAGE_DEFAULTS,
         ...options,
       };
 
-      if (isPicking) {
+      if (isPickingRef.current) {
         return null;
       }
 
       try {
+        isPickingRef.current = true;
         setIsPicking(true);
 
-        const ok = await ensureGalleryPermission();
-        if (!ok) {
+        const hasPermission = await ensurePermission(source);
+
+        if (!hasPermission) {
           return null;
         }
 
-        if (PlatformOS.WEB || !CropPicker?.openPicker) {
-          const result = await ImagePicker.launchImageLibraryAsync({
+        const nativeMethod =
+          source === 'camera' ? CropPicker?.openCamera : CropPicker?.openPicker;
+
+        if (PlatformOS.WEB || !nativeMethod) {
+          const pickerOptions: ImagePicker.ImagePickerOptions = {
             mediaTypes: ['images'],
             allowsMultipleSelection: false,
             allowsEditing: crop !== 'none',
             aspect,
             quality,
             selectionLimit: 1,
-          });
+          };
+          const result =
+            source === 'camera'
+              ? await ImagePicker.launchCameraAsync(pickerOptions)
+              : await ImagePicker.launchImageLibraryAsync(pickerOptions);
 
           if (result.canceled || !result.assets?.length) {
             return null;
@@ -129,7 +152,7 @@ const useImagePicker = () => {
         }
 
         if (crop === 'none') {
-          const image = await CropPicker.openPicker({
+          const image = await nativeMethod({
             mediaType: 'photo',
             cropping: false,
             compressImageQuality: quality,
@@ -140,7 +163,7 @@ const useImagePicker = () => {
         }
 
         if (crop === 'round') {
-          const image = await CropPicker.openPicker({
+          const image = await nativeMethod({
             mediaType: 'photo',
             cropping: true,
             cropperCircleOverlay: true,
@@ -158,8 +181,7 @@ const useImagePicker = () => {
           crop === 'square'
             ? size
             : Math.round(width * (aspect[1] / aspect[0]));
-
-        const image = await CropPicker.openPicker({
+        const image = await nativeMethod({
           mediaType: 'photo',
           cropping: true,
           cropperCircleOverlay: false,
@@ -174,10 +196,23 @@ const useImagePicker = () => {
       } catch (error) {
         return handleError(error);
       } finally {
+        isPickingRef.current = false;
         setIsPicking(false);
       }
     },
-    [isPicking]
+    []
+  );
+
+  const pickImage = useCallback(
+    async (options: PickImageOptions = {}): Promise<string | null> =>
+      pickImageFromSource('library', options),
+    [pickImageFromSource]
+  );
+
+  const takeImage = useCallback(
+    async (options: PickImageOptions = {}): Promise<string | null> =>
+      pickImageFromSource('camera', options),
+    [pickImageFromSource]
   );
 
   const pickRoundImage = useCallback(
@@ -227,6 +262,7 @@ const useImagePicker = () => {
 
   return {
     pickImage,
+    takeImage,
     pickRoundImage,
     pickRectangularImage,
     pickSquareImage,

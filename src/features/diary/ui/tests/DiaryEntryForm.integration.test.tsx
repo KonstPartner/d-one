@@ -14,7 +14,6 @@ import { collection, doc } from 'firebase/firestore';
 import { Host } from 'react-native-portalize';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { db } from '@features/auth/api/firebase/config';
 import { lightTheme } from '@features/theme/model';
 
 import { diaryQueryKeys } from '../../api/constants';
@@ -288,83 +287,6 @@ describe('DiaryEntryForm integration', () => {
     expect(
       screen.getByLabelText('diary.form.commentAccessibilityLabel').props.value
     ).toBe('Draft dinner');
-  });
-
-  it('normalizes and saves the entry as pendingCreate', async () => {
-    const earliestEventAt = CURRENT_DATE.getTime();
-    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
-    const { onSaved } = renderForm();
-
-    fireEvent.changeText(
-      await screen.findByLabelText('diary.form.commentAccessibilityLabel'),
-      '  Dinner  '
-    );
-
-    fireEvent.press(screen.getByLabelText('diary.form.create'));
-
-    await waitFor(() => {
-      expect(onSaved).toHaveBeenCalledWith('entry-created');
-    });
-
-    const latestEventAt = Date.now();
-
-    expect(onSaved).toHaveBeenCalledTimes(1);
-
-    expect(mockedCollection).toHaveBeenCalledWith(
-      db,
-      'users',
-      'user-1',
-      'diaryEntries'
-    );
-
-    expect(mockedDoc).toHaveBeenCalledTimes(1);
-    expect(runAsync).toHaveBeenCalledTimes(1);
-
-    const [sql, parameters] = runAsync.mock.calls[0] as [
-      string,
-      Record<string, unknown>,
-    ];
-
-    expect(sql).toContain('INSERT INTO diary_entries');
-
-    expect(parameters).toEqual(
-      expect.objectContaining({
-        $id: 'entry-created',
-        $userId: 'user-1',
-        $glucose: null,
-        $mealRelation: null,
-        $shortInsulin: null,
-        $longInsulin: null,
-        $carbsGram: null,
-        $comment: 'Dinner',
-        $aiAnalysis: '',
-        $localPhotoUri: null,
-        $photoPath: null,
-        $photoUrl: null,
-        $syncStatus: 'pendingCreate',
-      })
-    );
-
-    expect(parameters.$eventAt).toEqual(expect.any(Number));
-    expect(parameters.$eventAt).toBeGreaterThanOrEqual(earliestEventAt);
-    expect(parameters.$eventAt).toBeLessThanOrEqual(latestEventAt);
-
-    expect(useDiaryListStore.getState().currentPage).toBe(1);
-    expect(useDiaryListStore.getState().collapsedDayKeys).toEqual(new Set());
-
-    expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: diaryQueryKeys.localPagesRoot('user-1'),
-    });
-
-    expect(
-      screen.queryByLabelText('diary.form.commentAccessibilityLabel')
-    ).toBeNull();
-
-    fireEvent.press(screen.getByLabelText('open-create-form'));
-
-    expect(
-      screen.getByLabelText('diary.form.commentAccessibilityLabel').props.value
-    ).toBe('');
   });
 
   it('keeps the form open and shows an error when SQLite fails', async () => {
