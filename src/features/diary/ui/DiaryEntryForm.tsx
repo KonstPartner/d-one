@@ -50,13 +50,10 @@ const DiaryEntryForm = ({
   const {
     values,
     useCurrentDateTime,
-    validationError,
-    submissionError,
     isSubmitting,
     preparationState,
     isEntrySynchronizing,
     photoUri,
-    photoError,
     hasTemporaryPhoto,
     isPhotoBusy,
     handleChoosePhoto,
@@ -110,17 +107,6 @@ const DiaryEntryForm = ({
     values.mealRelation === null
       ? null
       : t(`diary.entry.mealRelation.${values.mealRelation}`);
-
-  const errorMessage =
-    validationError !== null
-      ? t(`diary.form.errors.${validationError}`)
-      : submissionError
-        ? t(
-            mode === 'create'
-              ? 'diary.form.errors.creationFailed'
-              : 'diary.form.errors.updateFailed'
-          )
-        : null;
 
   const isCreateMode = mode === 'create';
   const title = t(
@@ -211,15 +197,6 @@ const DiaryEntryForm = ({
               <View style={styles.MetaContent(theme)}>
                 <Text style={globalStyles.Label(theme)}>
                   {t('diary.form.preparation.uploadingPhoto')}
-                </Text>
-
-                <Text
-                  accessibilityRole="text"
-                  accessibilityLiveRegion="polite"
-                  testID="diary-photo-upload-progress"
-                  style={styles.Title(theme)}
-                >
-                  {preparationState.progress}%
                 </Text>
               </View>
             </View>
@@ -473,22 +450,11 @@ const DiaryEntryForm = ({
 
           <DiaryEntryFormPhoto
             photoUri={photoUri}
-            errorCode={photoError}
             disabled={isSubmitting}
             isBusy={isPhotoBusy}
             onChoosePhoto={handleChoosePhoto}
             onDeletePhoto={handleDeletePhoto}
           />
-
-          {errorMessage !== null ? (
-            <Text
-              accessibilityRole="alert"
-              accessibilityLiveRegion="polite"
-              style={styles.ErrorText(theme)}
-            >
-              {errorMessage}
-            </Text>
-          ) : null}
         </ScrollView>
 
         <View style={styles.Footer(theme)}>

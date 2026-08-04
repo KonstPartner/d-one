@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { File } from 'expo-file-system';
 import { useTranslation } from 'react-i18next';
 
 import { useNetwork } from '@features/network/model';
@@ -10,10 +11,23 @@ type UseDiaryEntryPhotoParams = {
   isVisible: boolean;
 };
 
+const IMAGE_LOAD_TIMEOUT_MS = 15_000;
+
 const normalizeUri = (uri: string | null): string | null => {
   const normalizedUri = uri?.trim();
 
   return normalizedUri ? normalizedUri : null;
+};
+
+const createLocalPhotoSourceKey = (localPhotoUri: string): string => {
+  try {
+    const photoFile = new File(localPhotoUri);
+    const modificationTime = photoFile.modificationTime ?? 0;
+
+    return `${localPhotoUri}:${modificationTime}:${photoFile.size}`;
+  } catch {
+    return localPhotoUri;
+  }
 };
 
 const useDiaryEntryPhoto = ({
@@ -27,11 +41,16 @@ const useDiaryEntryPhoto = ({
   const normalizedLocalPhotoUri = normalizeUri(localPhotoUri);
   const normalizedPhotoUrl = normalizeUri(photoUrl);
 
+  const localPhotoSourceKey =
+    normalizedLocalPhotoUri === null
+      ? null
+      : createLocalPhotoSourceKey(normalizedLocalPhotoUri);
+
   const notifiedCloudPhotoUrlRef = useRef<string | null>(null);
 
-  const [failedLocalPhotoUri, setFailedLocalPhotoUri] = useState<string | null>(
-    null
-  );
+  const [failedLocalPhotoSourceKey, setFailedLocalPhotoSourceKey] = useState<
+    string | null
+  >(null);
 
   const [failedPhotoUrl, setFailedPhotoUrl] = useState<string | null>(null);
 
@@ -42,8 +61,8 @@ const useDiaryEntryPhoto = ({
   const hasPhoto = hasLocalPhoto || hasCloudPhoto;
 
   const localPhotoFailed =
-    normalizedLocalPhotoUri !== null &&
-    failedLocalPhotoUri === normalizedLocalPhotoUri;
+    localPhotoSourceKey !== null &&
+    failedLocalPhotoSourceKey === localPhotoSourceKey;
 
   const cloudPhotoFailed =
     normalizedPhotoUrl !== null && failedPhotoUrl === normalizedPhotoUrl;
@@ -58,9 +77,17 @@ const useDiaryEntryPhoto = ({
       ? normalizedPhotoUrl
       : null;
 
+  const sourceIsLocal = availableLocalPhotoUri !== null;
+
   const sourceUri =
     availableLocalPhotoUri ??
     (isVisible && isOnline ? availablePhotoUrl : null);
+
+  const sourceKey = sourceIsLocal
+    ? localPhotoSourceKey
+    : sourceUri === null
+      ? null
+      : sourceUri;
 
   const localOnly = hasLocalPhoto && !hasCloudPhoto;
 
@@ -88,8 +115,8 @@ const useDiaryEntryPhoto = ({
   const openAccessibilityLabel = t('diary.entry.photo.openAccessibilityLabel');
 
   useEffect(() => {
-    setFailedLocalPhotoUri(null);
-  }, [normalizedLocalPhotoUri]);
+    setFailedLocalPhotoSourceKey(null);
+  }, [localPhotoSourceKey]);
 
   useEffect(() => {
     setFailedPhotoUrl(null);
@@ -97,7 +124,9 @@ const useDiaryEntryPhoto = ({
   }, [normalizedPhotoUrl]);
 
   useEffect(() => {
-    setLoading(sourceUri !== null);
+    if (sourceUri === null) {
+      setLoading(false);
+    }
   }, [sourceUri]);
 
   const onLoadStart = useCallback(() => {
@@ -111,8 +140,8 @@ const useDiaryEntryPhoto = ({
   const onError = useCallback(() => {
     setLoading(false);
 
-    if (sourceUri === normalizedLocalPhotoUri) {
-      setFailedLocalPhotoUri(normalizedLocalPhotoUri);
+    if (sourceIsLocal) {
+      setFailedLocalPhotoSourceKey(localPhotoSourceKey);
 
       return;
     }
@@ -138,11 +167,32 @@ const useDiaryEntryPhoto = ({
         )
       );
     }
-  }, [isOffline, normalizedLocalPhotoUri, normalizedPhotoUrl, sourceUri, t]);
+  }, [
+    isOffline,
+    localPhotoSourceKey,
+    normalizedPhotoUrl,
+    sourceIsLocal,
+    sourceUri,
+    t,
+  ]);
+
+  useEffect(() => {
+    if (!loading) {
+      return;
+    }
+
+    const timeoutId = setTimeout(onError, IMAGE_LOAD_TIMEOUT_MS);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [loading, onError, sourceKey]);
 
   return {
     hasPhoto,
     sourceUri,
+    sourceKey,
+    sourceIsLocal,
     loading,
     localOnly,
     cloudOnly,

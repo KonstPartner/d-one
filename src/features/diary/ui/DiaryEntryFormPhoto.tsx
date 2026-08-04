@@ -7,12 +7,10 @@ import { useTranslation } from 'react-i18next';
 import Button from '@entities/shared/ui/Button';
 import * as globalStyles from '@features/shared/styles/global';
 
-import type { DiaryPhotoErrorCode } from '../api/diaryPhotoService';
 import * as styles from '../styles/DiaryEntryFormPhoto';
 
 type DiaryEntryFormPhotoProps = {
   photoUri: string | null;
-  errorCode: DiaryPhotoErrorCode | null;
   disabled: boolean;
   isBusy: boolean;
   onChoosePhoto: () => void;
@@ -21,7 +19,6 @@ type DiaryEntryFormPhotoProps = {
 
 const DiaryEntryFormPhoto = ({
   photoUri,
-  errorCode,
   disabled,
   isBusy,
   onChoosePhoto,
@@ -143,16 +140,6 @@ const DiaryEntryFormPhoto = ({
           </Button>
         ) : null}
       </View>
-
-      {errorCode !== null ? (
-        <Text
-          accessibilityRole="alert"
-          accessibilityLiveRegion="polite"
-          style={globalStyles.Text(theme, 'sm', 'medium', 'danger')}
-        >
-          {t(`diary.form.photo.errors.${errorCode}`)}
-        </Text>
-      ) : null}
     </View>
   );
 };

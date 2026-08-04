@@ -487,9 +487,10 @@ describe('Diary integration', () => {
   it('passes visibility, opens cloud photo and closes viewer', () => {
     render(<Diary />);
 
-    expect(screen.getByTestId('diary-entry-image').props.source).toBe(
-      'https://example.com/entry-1.jpg'
-    );
+    expect(screen.getByTestId('diary-entry-image').props.source).toEqual({
+      uri: 'https://example.com/entry-1.jpg',
+      cacheKey: 'https://example.com/entry-1.jpg',
+    });
 
     expect(screen.getByTestId('viewer-state').props.children).toBe(
       'false:none'

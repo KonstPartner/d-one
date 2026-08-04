@@ -108,6 +108,18 @@ const assertExpectedPhotoPath = (
   }
 };
 
+const assertSynchronizationSucceeded = (
+  results: ReadonlyArray<DiarySyncResult>
+): void => {
+  const failedResult = results.find((result) => result.status === 'failed');
+
+  if (failedResult !== undefined) {
+    throw new Error(
+      `Failed to synchronize diary entry: ${failedResult.entryId}`
+    );
+  }
+};
+
 const deleteStorageObjectIfExists = async (
   photoPath: string
 ): Promise<void> => {
@@ -475,7 +487,7 @@ const refreshLocalDiaryAfterSync = async ({
   }
 };
 
-const queueBatchPass = ({
+const queueBatchPass = async ({
   userId,
   entryIds,
   repository,
@@ -483,27 +495,36 @@ const queueBatchPass = ({
   operationId,
   startIndex,
   total,
-}: BatchPassInput): Promise<DiarySyncResult[]> =>
-  Promise.all(
-    entryIds.map((entryId, index) =>
-      enqueueEntry(
-        {
+}: BatchPassInput): Promise<DiarySyncResult[]> => {
+  const results: DiarySyncResult[] = [];
+
+  for (const [index, entryId] of entryIds.entries()) {
+    const result = await enqueueEntry(
+      {
+        userId,
+        entryId,
+        repository,
+        force,
+      },
+      () => {
+        useDiarySyncStore.getState().updateBatchProgress({
           userId,
-          entryId,
-          repository,
-          force,
-        },
-        () => {
-          useDiarySyncStore.getState().updateBatchProgress({
-            userId,
-            operationId,
-            current: startIndex + index + 1,
-            total,
-          });
-        }
-      )
-    )
-  );
+          operationId,
+          current: startIndex + index + 1,
+          total,
+        });
+      }
+    );
+
+    results.push(result);
+
+    if (result.status === 'failed') {
+      break;
+    }
+  }
+
+  return results;
+};
 
 const createEntryFingerprint = (entry: DiaryEntry | null): string | null => {
   if (entry === null) {
@@ -612,6 +633,7 @@ const runPendingBatch = async ({
     });
 
     batchResults = firstPassResults;
+    assertSynchronizationSucceeded(firstPassResults);
 
     const recheckEntryIds = await findRecheckIds({
       userId,
@@ -644,6 +666,7 @@ const runPendingBatch = async ({
     });
 
     batchResults = [...firstPassResults, ...secondPassResults];
+    assertSynchronizationSucceeded(secondPassResults);
 
     return batchResults;
   } finally {
@@ -697,6 +720,8 @@ const runForcedBatch = async ({
       total: availableEntryIds.length,
     });
 
+    assertSynchronizationSucceeded(batchResults);
+
     return batchResults;
   } finally {
     useDiarySyncStore.getState().finishBatch({
@@ -746,22 +771,30 @@ export const queueDiaryEntriesForSync = async ({
 }: QueueEntriesInput): Promise<DiarySyncResult[]> => {
   activateDiarySyncUser(userId);
 
-  const results = await Promise.all(
-    uniqueEntryIds(entryIds).map((entryId) =>
-      enqueueEntry({
-        userId,
-        entryId,
-        repository,
-        force,
-      })
-    )
-  );
+  const results: DiarySyncResult[] = [];
+
+  for (const entryId of uniqueEntryIds(entryIds)) {
+    const result = await enqueueEntry({
+      userId,
+      entryId,
+      repository,
+      force,
+    });
+
+    results.push(result);
+
+    if (result.status === 'failed') {
+      break;
+    }
+  }
 
   await refreshLocalDiaryAfterSync({
     userId,
     repository,
     results,
   });
+
+  assertSynchronizationSucceeded(results);
 
   return results;
 };

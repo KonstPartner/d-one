@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type LayoutChangeEvent, Platform } from 'react-native';
 import type { ImageLoadEventData } from 'expo-image';
-import type { LayoutChangeEvent } from 'react-native';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { Gesture } from 'react-native-gesture-handler';
 import {
   useAnimatedStyle,
@@ -28,6 +29,14 @@ const clampValue = (value: number, minimum: number, maximum: number) => {
   'worklet';
 
   return Math.min(Math.max(value, minimum), maximum);
+};
+
+const lockOrientation = (
+  orientationLock: ScreenOrientation.OrientationLock
+): void => {
+  void ScreenOrientation.lockAsync(orientationLock).catch((error) => {
+    console.error('Failed to change photo viewer orientation', error);
+  });
 };
 
 const usePhotoViewer = ({
@@ -65,6 +74,24 @@ const usePhotoViewer = ({
       height: sourceSize.height * ratio,
     };
   }, [sourceSize, viewportSize]);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      return;
+    }
+
+    lockOrientation(
+      visible
+        ? ScreenOrientation.OrientationLock.DEFAULT
+        : ScreenOrientation.OrientationLock.PORTRAIT_UP
+    );
+
+    return () => {
+      if (visible) {
+        lockOrientation(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+      }
+    };
+  }, [visible]);
 
   useEffect(() => {
     setSourceSize(null);

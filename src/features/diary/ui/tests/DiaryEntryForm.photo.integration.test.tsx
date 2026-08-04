@@ -53,6 +53,7 @@ const mockFinalizePhoto = jest.fn();
 const mockRollbackPhoto = jest.fn();
 const mockFinalizeRemoval = jest.fn();
 const mockRollbackRemoval = jest.fn();
+const mockShowNotification = jest.fn();
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -62,6 +63,10 @@ jest.mock('react-i18next', () => ({
       resolvedLanguage: 'en',
     },
   }),
+}));
+
+jest.mock('@features/shared/ui', () => ({
+  showNotification: (...args: unknown[]) => mockShowNotification(...args),
 }));
 
 jest.mock('@expo/vector-icons', () => ({
@@ -488,7 +493,7 @@ describe('DiaryEntryForm photo integration', () => {
     ).toBeTruthy();
   });
 
-  it('shows the mapped photo error and keeps the form open', async () => {
+  it('shows the mapped photo error notification and keeps the form open', async () => {
     mockedCreateDiaryPhotoDraft.mockRejectedValueOnce(
       new DiaryPhotoError('fileTooLarge')
     );
@@ -500,9 +505,16 @@ describe('DiaryEntryForm photo integration', () => {
     );
     pressLastAlertButton('diary.form.photo.gallery');
 
+    await waitFor(() => {
+      expect(mockShowNotification).toHaveBeenCalledWith(
+        'error',
+        'diary.form.photo.errors.fileTooLarge'
+      );
+    });
+
     expect(
-      await screen.findByText('diary.form.photo.errors.fileTooLarge')
-    ).toBeTruthy();
+      screen.queryByText('diary.form.photo.errors.fileTooLarge')
+    ).toBeNull();
     expect(onClose).not.toHaveBeenCalled();
     expect(onSaved).not.toHaveBeenCalled();
     expect(mockedPrepareDiaryPhotoForEntry).not.toHaveBeenCalled();
@@ -636,9 +648,16 @@ describe('DiaryEntryForm photo integration', () => {
       2,
       NEXT_DRAFT_PHOTO_URI
     );
+    await waitFor(() => {
+      expect(mockShowNotification).toHaveBeenCalledWith(
+        'error',
+        'diary.form.photo.errors.storageFailed'
+      );
+    });
+
     expect(
-      screen.getByText('diary.form.photo.errors.storageFailed')
-    ).toBeTruthy();
+      screen.queryByText('diary.form.photo.errors.storageFailed')
+    ).toBeNull();
     expect(
       screen.getByLabelText('diary.form.photo.replaceAccessibilityLabel')
     ).toBeTruthy();

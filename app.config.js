@@ -9,7 +9,7 @@ export default {
     version: '1.0.0',
     scheme: 'done',
 
-    orientation: 'portrait',
+    orientation: 'default',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     icon: appIcon,
@@ -82,6 +82,12 @@ export default {
         },
       ],
 
+      [
+        'expo-screen-orientation',
+        {
+          initialOrientation: 'PORTRAIT_UP',
+        },
+      ],
       'expo-sqlite',
       'expo-secure-store',
       [

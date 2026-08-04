@@ -13,6 +13,8 @@ const DiaryPhotoViewer = ({ entry, onClose }: DiaryPhotoViewerProps) => {
 
   const {
     sourceUri,
+    sourceKey,
+    sourceIsLocal,
     loading,
     cloudOnlyOffline,
     fallbackText,
@@ -30,6 +32,8 @@ const DiaryPhotoViewer = ({ entry, onClose }: DiaryPhotoViewerProps) => {
     <PhotoViewer
       visible={visible}
       sourceUri={sourceUri}
+      sourceKey={sourceKey}
+      sourceIsLocal={sourceIsLocal}
       recyclingKey={entry?.id ?? null}
       loading={loading}
       fallbackText={fallbackText}

@@ -32,6 +32,7 @@ import type { DiaryEntry, DiaryEntryFormMode } from '../../model/types';
 import DiaryEntryForm from '../DiaryEntryForm';
 
 const CURRENT_DATE = new Date('2026-08-02T10:15:00.000Z');
+const mockShowNotification = jest.fn();
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -41,6 +42,10 @@ jest.mock('react-i18next', () => ({
       resolvedLanguage: 'en',
     },
   }),
+}));
+
+jest.mock('@features/shared/ui', () => ({
+  showNotification: (...args: unknown[]) => mockShowNotification(...args),
 }));
 
 jest.mock('@expo/vector-icons', () => ({
@@ -244,9 +249,14 @@ describe('DiaryEntryForm integration', () => {
 
     fireEvent.press(await screen.findByLabelText('diary.form.create'));
 
-    expect(
-      await screen.findByText('diary.form.errors.emptyEntry')
-    ).toBeTruthy();
+    await waitFor(() => {
+      expect(mockShowNotification).toHaveBeenCalledWith(
+        'error',
+        'diary.form.errors.emptyEntry'
+      );
+    });
+
+    expect(screen.queryByText('diary.form.errors.emptyEntry')).toBeNull();
 
     expect(runAsync).not.toHaveBeenCalled();
     expect(getFirstAsync).not.toHaveBeenCalled();
@@ -298,7 +308,7 @@ describe('DiaryEntryForm integration', () => {
     ).toBe('Draft dinner');
   });
 
-  it('keeps the form open and shows an error when SQLite fails', async () => {
+  it('keeps the form open and shows a notification when SQLite fails', async () => {
     const error = new Error('SQLite write failed');
 
     runAsync.mockRejectedValueOnce(error);
@@ -313,9 +323,14 @@ describe('DiaryEntryForm integration', () => {
 
     fireEvent.press(screen.getByLabelText('diary.form.create'));
 
-    expect(
-      await screen.findByText('diary.form.errors.creationFailed')
-    ).toBeTruthy();
+    await waitFor(() => {
+      expect(mockShowNotification).toHaveBeenCalledWith(
+        'error',
+        'diary.form.errors.creationFailed'
+      );
+    });
+
+    expect(screen.queryByText('diary.form.errors.creationFailed')).toBeNull();
 
     expect(onSaved).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();

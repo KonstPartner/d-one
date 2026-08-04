@@ -37,6 +37,8 @@ const DiaryEntryPhoto = ({
   const {
     hasPhoto,
     sourceUri,
+    sourceKey,
+    sourceIsLocal,
     loading,
     localOnly,
     cloudOnly,
@@ -91,13 +93,17 @@ const DiaryEntryPhoto = ({
         pressed && interactive && styles.Pressed,
       ]}
     >
-      {sourceUri !== null && (
+      {sourceUri !== null && sourceKey !== null && (
         <Image
-          source={sourceUri}
+          key={`${entryId}:${sourceKey}`}
+          source={{
+            uri: sourceUri,
+            cacheKey: sourceKey,
+          }}
           style={styles.Image}
           contentFit="cover"
-          cachePolicy="memory-disk"
-          recyclingKey={entryId}
+          cachePolicy={sourceIsLocal ? 'none' : 'memory-disk'}
+          recyclingKey={`${entryId}:${sourceKey}`}
           transition={150}
           accessible={false}
           onLoadStart={onLoadStart}

@@ -88,6 +88,8 @@ jest.mock('../../styles/PhotoViewer', () => ({
 const makeProps = () => ({
   visible: true,
   sourceUri: 'https://example.com/photo.jpg',
+  sourceKey: 'https://example.com/photo.jpg',
+  sourceIsLocal: false,
   recyclingKey: 'entry-1',
   loading: false,
   fallbackText: null,
@@ -156,11 +158,14 @@ describe('PhotoViewer integration', () => {
 
     expect(image.props).toEqual(
       expect.objectContaining({
-        source: props.sourceUri,
+        source: {
+          uri: props.sourceUri,
+          cacheKey: props.sourceKey,
+        },
         contentFit: 'contain',
         cachePolicy: 'memory-disk',
         priority: 'high',
-        recyclingKey: props.recyclingKey,
+        recyclingKey: `${props.recyclingKey}:${props.sourceKey}`,
         transition: 150,
         accessibilityLabel: props.accessibilityLabel,
       })
@@ -307,6 +312,7 @@ describe('PhotoViewer integration', () => {
       <PhotoViewer
         {...props}
         sourceUri="https://example.com/second.jpg"
+        sourceKey="https://example.com/second.jpg"
         recyclingKey="entry-2"
       />
     );

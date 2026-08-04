@@ -30,7 +30,6 @@ type UseDiaryEntryFormParams = {
 
 export type DiaryEntryPreparationState = {
   type: 'photoUpload';
-  progress: number;
 };
 
 type CreateDraft = {
@@ -160,8 +159,6 @@ const useDiaryEntryForm = ({
   const [useCurrentDateTime, setUseCurrentDateTime] = useState(
     initialDraftRef.current.useCurrentDateTime
   );
-  const [validationError, setValidationError] =
-    useState<DiaryEntryFormError | null>(null);
   const [preparationState, setPreparationState] =
     useState<DiaryEntryPreparationState | null>(null);
 
@@ -171,6 +168,7 @@ const useDiaryEntryForm = ({
 
   const createMutation = useCreateDiaryEntry();
   const updateMutation = useUpdateDiaryEntry();
+  const activeMutation = mode === 'create' ? createMutation : updateMutation;
   const connectionState = useDiarySyncStore((state) => state.connectionState);
   const isEntrySynchronizing = useDiarySyncStore((state) =>
     entry === null ? false : state.syncingEntryIds.has(entry.id)
@@ -194,10 +192,15 @@ const useDiaryEntryForm = ({
   });
 
   const clearErrors = useCallback(() => {
-    setValidationError(null);
     createMutation.reset();
     updateMutation.reset();
   }, [createMutation, updateMutation]);
+
+  useEffect(() => {
+    if (photoError !== null) {
+      showNotification('error', t(`diary.form.photo.errors.${photoError}`));
+    }
+  }, [photoError, t]);
 
   const resetCreateDraft = useCallback(() => {
     const nextDraft = createInitialDraft();
@@ -209,7 +212,6 @@ const useDiaryEntryForm = ({
       setUseCurrentDateTime(nextDraft.useCurrentDateTime);
     }
 
-    setValidationError(null);
     createMutation.reset();
   }, [createMutation, mode]);
 
@@ -419,13 +421,12 @@ const useDiaryEntryForm = ({
 
     if (nextValidationError !== null) {
       clearErrors();
-      setValidationError(nextValidationError);
+      showNotification('error', t(`diary.form.errors.${nextValidationError}`));
 
       return null;
     }
 
     submitInProgressRef.current = true;
-    setValidationError(null);
     let locallySavedEntryId: string | null = null;
 
     try {
@@ -467,38 +468,33 @@ const useDiaryEntryForm = ({
         throw new Error(`Diary entry does not exist after saving: ${entryId}`);
       }
 
-      const photoNeedsUpload =
+      if (
         connectionState === 'online' &&
         savedEntry.localPhotoUri !== null &&
-        savedEntry.photoUrl === null;
+        savedEntry.photoUrl === null
+      ) {
+        const localPhotoUri = savedEntry.localPhotoUri;
+        const photoPath = savedEntry.photoPath;
 
-      if (photoNeedsUpload) {
-        if (savedEntry.photoPath === null) {
+        if (photoPath === null) {
           throw new Error('Local diary photo does not have a Storage path');
         }
 
         setPreparationState({
           type: 'photoUpload',
-          progress: 0,
         });
 
         try {
           const { uploadDiaryCloudPhoto } =
             await import('../../api/diaryFirebaseSyncGateway');
           const photoUrl = await uploadDiaryCloudPhoto({
-            localPhotoUri: savedEntry.localPhotoUri,
-            photoPath: savedEntry.photoPath,
-            onProgress: (progress) => {
-              setPreparationState({
-                type: 'photoUpload',
-                progress,
-              });
-            },
+            localPhotoUri,
+            photoPath,
           });
 
           await repository.updatePendingPhotoState({
             id: entryId,
-            photoPath: savedEntry.photoPath,
+            photoPath,
             photoUrl,
           });
         } catch (error) {
@@ -571,6 +567,21 @@ const useDiaryEntryForm = ({
         return locallySavedEntryId;
       }
 
+      console.error(
+        mode === 'create'
+          ? 'Failed to create diary entry'
+          : 'Failed to update diary entry',
+        error
+      );
+      showNotification(
+        'error',
+        t(
+          mode === 'create'
+            ? 'diary.form.errors.creationFailed'
+            : 'diary.form.errors.updateFailed'
+        )
+      );
+
       return null;
     } finally {
       submitInProgressRef.current = false;
@@ -598,18 +609,13 @@ const useDiaryEntryForm = ({
     values,
   ]);
 
-  const activeMutation = mode === 'create' ? createMutation : updateMutation;
-
   return {
     values,
     useCurrentDateTime,
-    validationError,
-    submissionError: activeMutation.error,
     isSubmitting: activeMutation.isPending || preparationState !== null,
     preparationState,
     isEntrySynchronizing,
     photoUri,
-    photoError,
     hasTemporaryPhoto,
     isPhotoBusy,
     handleChoosePhoto,

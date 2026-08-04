@@ -1,5 +1,5 @@
+import { fetch } from 'expo/fetch';
 import { File } from 'expo-file-system';
-import * as FileSystem from 'expo-file-system/legacy';
 import { getAuth } from 'firebase/auth';
 import { deleteDoc, doc, setDoc, Timestamp } from 'firebase/firestore';
 import {
@@ -14,6 +14,7 @@ import { app, db } from '@features/auth/api/firebase/config';
 import type { DiaryEntry } from '../model/types';
 
 const MAXIMUM_PHOTO_SIZE = 10 * 1024 * 1024;
+const PHOTO_UPLOAD_TIMEOUT_MS = 60_000;
 
 type CloudPhotoState = Pick<DiaryEntry, 'photoPath' | 'photoUrl'>;
 
@@ -58,6 +59,25 @@ const createMediaUploadUrl = (photoPath: string): string => {
   return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o?uploadType=media&name=${objectName}`;
 };
 
+const readUploadErrorMessage = (body: string): string => {
+  if (body.length === 0) {
+    return '';
+  }
+
+  try {
+    const parsedBody = JSON.parse(body) as {
+      error?: { message?: unknown };
+    };
+    const parsedMessage = parsedBody.error?.message;
+
+    return typeof parsedMessage === 'string' && parsedMessage.length > 0
+      ? parsedMessage
+      : body;
+  } catch {
+    return body;
+  }
+};
+
 const createUploadError = ({
   status,
   body,
@@ -65,17 +85,7 @@ const createUploadError = ({
   status: number;
   body: string;
 }): Error => {
-  let serverMessage = body;
-
-  const parsedBody = JSON.parse(body) as {
-    error?: { message?: unknown };
-  };
-  const parsedMessage = parsedBody.error?.message;
-
-  if (typeof parsedMessage === 'string' && parsedMessage.length > 0) {
-    serverMessage = parsedMessage;
-  }
-
+  const serverMessage = readUploadErrorMessage(body);
   const suffix = serverMessage.length > 0 ? `: ${serverMessage}` : '';
 
   return new Error(`Firebase Storage upload failed (${status})${suffix}`);
@@ -96,11 +106,9 @@ export const deleteDiaryCloudPhoto = async (
 export const uploadDiaryCloudPhoto = async ({
   localPhotoUri,
   photoPath,
-  onProgress,
 }: {
   localPhotoUri: string;
   photoPath: string;
-  onProgress?: (progress: number) => void;
 }): Promise<string> => {
   const photoFile = new File(localPhotoUri);
 
@@ -119,48 +127,43 @@ export const uploadDiaryCloudPhoto = async ({
   }
 
   const idToken = await currentUser.getIdToken();
-  const photoReference = ref(storage, photoPath);
-  const uploadTask = FileSystem.createUploadTask(
-    createMediaUploadUrl(photoPath),
-    localPhotoUri,
-    {
+  const controller = new AbortController();
+  let uploadTimedOut = false;
+  const timeoutId = setTimeout(() => {
+    uploadTimedOut = true;
+    controller.abort();
+  }, PHOTO_UPLOAD_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(createMediaUploadUrl(photoPath), {
+      method: 'POST',
       headers: {
         Accept: 'application/json',
         Authorization: `Firebase ${idToken}`,
         'Content-Type': 'image/jpeg',
       },
-      httpMethod: 'POST',
-      sessionType: FileSystem.FileSystemSessionType.FOREGROUND,
-      uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
-    },
-    ({ totalBytesExpectedToSend, totalBytesSent }) => {
-      const progress =
-        totalBytesExpectedToSend <= 0
-          ? 0
-          : Math.round((totalBytesSent / totalBytesExpectedToSend) * 100);
-
-      onProgress?.(Math.min(Math.max(progress, 0), 100));
-    }
-  );
-
-  onProgress?.(0);
-
-  const uploadResult = await uploadTask.uploadAsync();
-
-  if (!uploadResult) {
-    throw new Error('Firebase Storage upload was cancelled');
-  }
-
-  if (uploadResult.status < 200 || uploadResult.status >= 300) {
-    throw createUploadError({
-      status: uploadResult.status,
-      body: uploadResult.body,
+      body: await photoFile.bytes(),
+      signal: controller.signal,
     });
+    const responseBody = await response.text();
+
+    if (!response.ok) {
+      throw createUploadError({
+        status: response.status,
+        body: responseBody,
+      });
+    }
+  } catch (error) {
+    if (uploadTimedOut) {
+      throw new Error('Firebase Storage upload timed out');
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
 
-  onProgress?.(100);
-
-  return addPhotoVersion(await getDownloadURL(photoReference));
+  return addPhotoVersion(await getDownloadURL(ref(storage, photoPath)));
 };
 
 export const upsertDiaryCloudEntry = async ({

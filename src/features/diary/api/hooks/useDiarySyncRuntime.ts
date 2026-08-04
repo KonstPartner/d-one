@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type ConnectionState, useNetwork } from '@features/network/model';
+import { showNotification } from '@features/shared/ui';
 
 import {
   activateDiarySyncUser,
@@ -11,6 +13,7 @@ import { queuePendingDiaryEntriesForSync } from '../diarySyncCoordinator';
 import { useReadyDiaryDatabase } from '../sqlite/DiaryDatabaseProvider';
 
 const useDiarySyncRuntime = (): void => {
+  const { t } = useTranslation();
   const { status } = useNetwork();
   const { userId, repository } = useReadyDiaryDatabase();
 
@@ -53,8 +56,9 @@ const useDiarySyncRuntime = (): void => {
       batchType: 'automatic',
     }).catch((error) => {
       console.error('Automatic diary synchronization failed', error);
+      showNotification('error', t('diary.sync.failed'));
     });
-  }, [repository, status, userId]);
+  }, [repository, status, t, userId]);
 };
 
 export default useDiarySyncRuntime;
