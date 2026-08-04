@@ -149,6 +149,7 @@ const TestProviders = ({ children }: PropsWithChildren) => (
 
 let queryClient: QueryClient;
 let runAsync: jest.Mock;
+let getFirstAsync: jest.Mock;
 let repository: DiaryRepository;
 
 const renderForm = ({
@@ -204,15 +205,19 @@ describe('DiaryEntryForm integration', () => {
       lastInsertRowId: 1,
     });
 
+    getFirstAsync = jest.fn().mockResolvedValue(null);
+
     repository = new DiaryRepository(
       {
         runAsync,
+        getFirstAsync,
       } as unknown as SQLiteDatabase,
       'user-1',
       new DiaryDatabaseOperationGate()
     );
 
     mockedCollection.mockReturnValue({} as ReturnType<typeof collection>);
+
     mockedDoc.mockReturnValue({
       id: 'entry-created',
     } as ReturnType<typeof doc>);
@@ -244,6 +249,7 @@ describe('DiaryEntryForm integration', () => {
     ).toBeTruthy();
 
     expect(runAsync).not.toHaveBeenCalled();
+    expect(getFirstAsync).not.toHaveBeenCalled();
     expect(onSaved).not.toHaveBeenCalled();
   });
 
@@ -257,11 +263,13 @@ describe('DiaryEntryForm integration', () => {
     const formScroll = screen.getByTestId('diary-entry-form-scroll');
 
     expect(formScroll.props.scrollEnabled).toBeUndefined();
+
     expect(screen.getByTestId('select-dropdown-options')).toBeTruthy();
 
     fireEvent.press(screen.getByText('diary.entry.mealRelation.afterMeal'));
 
     expect(screen.queryByTestId('select-dropdown-options')).toBeNull();
+
     expect(screen.getByText('diary.entry.mealRelation.afterMeal')).toBeTruthy();
   });
 
@@ -278,6 +286,7 @@ describe('DiaryEntryForm integration', () => {
     );
 
     expect(onClose).toHaveBeenCalledTimes(1);
+
     expect(
       screen.queryByLabelText('diary.form.commentAccessibilityLabel')
     ).toBeNull();
@@ -301,6 +310,7 @@ describe('DiaryEntryForm integration', () => {
     );
 
     fireEvent.changeText(commentInput, '  Dinner  ');
+
     fireEvent.press(screen.getByLabelText('diary.form.create'));
 
     expect(
@@ -317,6 +327,7 @@ describe('DiaryEntryForm integration', () => {
     fireEvent.press(
       screen.getByLabelText('diary.form.cancelAccessibilityLabel')
     );
+
     fireEvent.press(screen.getByLabelText('open-create-form'));
 
     expect(
@@ -341,13 +352,33 @@ describe('DiaryEntryForm integration', () => {
       eventAt: new Date('2026-08-01T18:30:00.000Z'),
       syncStatus: 'synced',
     };
+
+    getFirstAsync.mockResolvedValue({
+      id: 'entry-1',
+      user_id: 'user-1',
+      glucose: 7.2,
+      meal_relation: 'afterMeal',
+      short_insulin: 3,
+      long_insulin: null,
+      carbs_gram: 45,
+      comment: 'Updated dinner',
+      ai_analysis: 'Existing analysis',
+      local_photo_uri: 'file:///entry-1.jpg',
+      photo_path: 'users/user-1/entry-1.jpg',
+      photo_url: 'https://example.com/entry-1.jpg',
+      event_at: entry.eventAt.getTime(),
+      sync_status: 'pendingUpdate',
+    });
+
     const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+
     const { onSaved } = renderForm({
       mode: 'edit',
       entry,
     });
 
     expect(await screen.findByText('diary.form.editTitle')).toBeTruthy();
+
     expect(
       screen.getByLabelText('diary.form.commentAccessibilityLabel').props.value
     ).toBe('Dinner');
@@ -356,6 +387,7 @@ describe('DiaryEntryForm integration', () => {
       screen.getByLabelText('diary.form.commentAccessibilityLabel'),
       '  Updated dinner  '
     );
+
     fireEvent.press(screen.getByLabelText('diary.form.save'));
 
     await waitFor(() => {
@@ -363,6 +395,7 @@ describe('DiaryEntryForm integration', () => {
     });
 
     expect(runAsync).toHaveBeenCalledTimes(1);
+    expect(getFirstAsync).toHaveBeenCalled();
 
     const [sql, parameters] = runAsync.mock.calls[0] as [
       string,
@@ -370,6 +403,7 @@ describe('DiaryEntryForm integration', () => {
     ];
 
     expect(sql).toContain('UPDATE diary_entries');
+
     expect(parameters).toEqual({
       $id: 'entry-1',
       $userId: 'user-1',
@@ -381,6 +415,7 @@ describe('DiaryEntryForm integration', () => {
       $comment: 'Updated dinner',
       $eventAt: entry.eventAt.getTime(),
     });
+
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: diaryQueryKeys.localPagesRoot('user-1'),
     });

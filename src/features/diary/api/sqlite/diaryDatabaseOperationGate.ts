@@ -2,8 +2,9 @@ const DATABASE_NOT_AVAILABLE_MESSAGE =
   'Diary database is not accepting new operations';
 
 export class DiaryDatabaseOperationGate {
-  private activeOperations = 0;
+  private pendingOperations = 0;
   private closing = false;
+  private operationQueue: Promise<void> = Promise.resolve();
   private idlePromise: Promise<void> | null = null;
   private resolveIdle: (() => void) | null = null;
 
@@ -11,29 +12,34 @@ export class DiaryDatabaseOperationGate {
     return this.closing;
   }
 
-  public async run<T>(operation: () => Promise<T>): Promise<T> {
+  public run<T>(operation: () => Promise<T>): Promise<T> {
     if (this.closing) {
-      throw new Error(DATABASE_NOT_AVAILABLE_MESSAGE);
+      return Promise.reject(new Error(DATABASE_NOT_AVAILABLE_MESSAGE));
     }
 
-    this.activeOperations += 1;
+    this.pendingOperations += 1;
 
-    try {
-      return await operation();
-    } finally {
-      this.activeOperations -= 1;
+    const result = this.operationQueue.then(operation);
 
-      if (this.closing && this.activeOperations === 0) {
+    this.operationQueue = result.then(
+      () => undefined,
+      () => undefined
+    );
+
+    return result.finally(() => {
+      this.pendingOperations -= 1;
+
+      if (this.closing && this.pendingOperations === 0) {
         this.resolveIdle?.();
         this.resolveIdle = null;
       }
-    }
+    });
   }
 
   public stopAndWaitForIdle(): Promise<void> {
     this.closing = true;
 
-    if (this.activeOperations === 0) {
+    if (this.pendingOperations === 0) {
       return Promise.resolve();
     }
 

@@ -7,6 +7,7 @@ import { useDiaryListStore } from '../../model/store';
 import type { CreateDiaryEntryData } from '../../model/types';
 import { diaryQueryKeys } from '../constants';
 import { prepareDiaryPhotoForEntry } from '../diaryPhotoService';
+import { setDiaryEntryPreparing } from '../diarySyncCoordinator';
 import { useReadyDiaryDatabase } from '../sqlite/DiaryDatabaseProvider';
 
 export type CreateDiaryEntryMutationData = CreateDiaryEntryData & {
@@ -28,36 +29,52 @@ const useCreateDiaryEntry = () => {
     }: CreateDiaryEntryMutationData): Promise<string> => {
       const entryId = doc(collection(db, 'users', userId, 'diaryEntries')).id;
 
-      if (photoDraftUri === null) {
-        await repository.create({
-          ...data,
-          id: entryId,
-          localPhotoUri: null,
-          photoPath: null,
-        });
-
-        return entryId;
-      }
-
-      const preparedPhoto = prepareDiaryPhotoForEntry({
+      setDiaryEntryPreparing({
         userId,
         entryId,
-        draftUri: photoDraftUri,
+        preparing: true,
       });
 
       try {
-        await repository.create({
-          ...data,
-          id: entryId,
-          localPhotoUri: preparedPhoto.localPhotoUri,
-          photoPath: preparedPhoto.photoPath,
+        if (photoDraftUri === null) {
+          await repository.create({
+            ...data,
+            id: entryId,
+            localPhotoUri: null,
+            photoPath: null,
+          });
+
+          return entryId;
+        }
+
+        const preparedPhoto = prepareDiaryPhotoForEntry({
+          userId,
+          entryId,
+          draftUri: photoDraftUri,
         });
 
-        preparedPhoto.finalize();
+        try {
+          await repository.create({
+            ...data,
+            id: entryId,
+            localPhotoUri: preparedPhoto.localPhotoUri,
+            photoPath: preparedPhoto.photoPath,
+          });
 
-        return entryId;
+          preparedPhoto.finalize();
+
+          return entryId;
+        } catch (error) {
+          preparedPhoto.rollback();
+
+          throw error;
+        }
       } catch (error) {
-        preparedPhoto.rollback();
+        setDiaryEntryPreparing({
+          userId,
+          entryId,
+          preparing: false,
+        });
 
         throw error;
       }

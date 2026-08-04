@@ -3,7 +3,12 @@ import { useTranslation } from 'react-i18next';
 
 import { showNotification } from '@features/shared/ui';
 
+import {
+  queueDiaryEntriesForSync,
+  setDiaryEntryPreparing,
+} from '../../api/diarySyncCoordinator';
 import { useReadyDiaryDatabase } from '../../api/sqlite/DiaryDatabaseProvider';
+import { useDiarySyncStore } from '../diarySyncStore';
 import type { DiaryEntry, DiaryEntryFormMode } from '../types';
 
 type DiaryEntryFormState = {
@@ -20,7 +25,7 @@ const INITIAL_FORM_STATE: DiaryEntryFormState = {
 
 const useDiaryEntryFormController = () => {
   const { t } = useTranslation();
-  const { repository } = useReadyDiaryDatabase();
+  const { userId, repository } = useReadyDiaryDatabase();
 
   const [formState, setFormState] =
     useState<DiaryEntryFormState>(INITIAL_FORM_STATE);
@@ -51,7 +56,8 @@ const useDiaryEntryFormController = () => {
 
           if (
             currentEntry === null ||
-            currentEntry.syncStatus === 'pendingDelete'
+            currentEntry.syncStatus === 'pendingDelete' ||
+            useDiarySyncStore.getState().syncingEntryIds.has(entry.id)
           ) {
             showNotification('error', t('diary.form.errors.openFailed'));
 
@@ -84,12 +90,29 @@ const useDiaryEntryFormController = () => {
     }));
   }, []);
 
-  const handleEntrySaved = useCallback(() => {
-    setFormState((currentState) => ({
-      ...currentState,
-      visible: false,
-    }));
-  }, []);
+  const handleEntrySaved = useCallback(
+    (entryId: string) => {
+      setFormState((currentState) => ({
+        ...currentState,
+        visible: false,
+      }));
+
+      setDiaryEntryPreparing({
+        userId,
+        entryId,
+        preparing: false,
+      });
+
+      void queueDiaryEntriesForSync({
+        userId,
+        entryIds: [entryId],
+        repository,
+      }).catch((error) => {
+        console.error('Targeted diary synchronization failed', error);
+      });
+    },
+    [repository, userId]
+  );
 
   return {
     formState,

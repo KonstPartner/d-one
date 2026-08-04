@@ -9,6 +9,28 @@ export const OwnerContent = css`
   flex: 1;
 ` as StyleProp<ViewStyle>;
 
+export const SyncProgress = (theme: Theme) =>
+  [
+    globalStyles.Surface(theme, 'card'),
+    globalStyles.Rounded(theme, 'md'),
+    globalStyles.Inset(theme, 'sm'),
+    globalStyles.Row(theme, 'center', 'flex-start', 'sm'),
+    css`
+      margin-top: ${toPX(theme.spacing.sm)};
+      border-width: ${toPX(theme.border.width.sm)};
+      border-color: ${theme.colors.shades.primary.lg};
+    ` as StyleProp<ViewStyle>,
+  ] as StyleProp<ViewStyle>;
+
+export const SyncProgressText = (theme: Theme) =>
+  [
+    globalStyles.Caption(theme),
+    css`
+      color: ${theme.colors.text};
+      font-weight: ${theme.weight.heavy};
+    ` as StyleProp<TextStyle>,
+  ] as StyleProp<TextStyle>;
+
 export const Toolbar = (theme: Theme) =>
   [
     globalStyles.Row(theme, 'center', 'flex-end', 'sm'),
@@ -32,6 +54,7 @@ export const SelectionToolbar = (theme: Theme) =>
     globalStyles.Inset(theme, 'sm'),
     globalStyles.Row(theme, 'center', 'space-between', 'sm'),
     css`
+      flex-wrap: wrap;
       margin-top: ${toPX(theme.spacing.sm)};
     ` as StyleProp<ViewStyle>,
   ] as StyleProp<ViewStyle>;
@@ -41,6 +64,7 @@ export const SelectionCount = (theme: Theme) =>
     globalStyles.Caption(theme),
     globalStyles.FlexItem,
     css`
+      min-width: 72px;
       color: ${theme.colors.text};
       text-align: center;
     ` as StyleProp<TextStyle>,

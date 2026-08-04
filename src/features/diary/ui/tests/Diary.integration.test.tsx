@@ -17,8 +17,20 @@ const mockFindById = jest.fn();
 const mockUseDiaryPage = jest.fn();
 const mockDeleteMutateAsync = jest.fn();
 const mockUseHeaderMenu = jest.fn();
+const mockExpandAllDays = jest.fn();
+
+const mockQueueDiaryEntriesForSync = jest.fn();
+const mockQueuePendingDiaryEntriesForSync = jest.fn();
+const mockQueueForcedDiaryEntriesForSync = jest.fn();
+const mockSetDiaryEntryPreparing = jest.fn();
+
+const mockRepository = {
+  findById: (...args: unknown[]) => mockFindById(...args),
+};
 
 let mockCurrentDiaryEntry: DiaryEntry;
+let mockSyncingEntryIds: ReadonlySet<string> = new Set();
+let mockBatchProgress: unknown = null;
 
 const createDiaryEntry = (): DiaryEntry => ({
   id: 'entry-1',
@@ -143,7 +155,51 @@ jest.mock('@features/diary/api', () => ({
     mutateAsync: (...args: unknown[]) => mockDeleteMutateAsync(...args),
     isPending: false,
   }),
+
   useDiaryPage: (...args: unknown[]) => mockUseDiaryPage(...args),
+
+  useReadyDiaryDatabase: () => ({
+    userId: 'user-1',
+    repository: mockRepository,
+  }),
+
+  queuePendingDiaryEntriesForSync: (...args: unknown[]) =>
+    mockQueuePendingDiaryEntriesForSync(...args),
+
+  queueForcedDiaryEntriesForSync: (...args: unknown[]) =>
+    mockQueueForcedDiaryEntriesForSync(...args),
+}));
+
+jest.mock('../../api/diarySyncCoordinator', () => ({
+  queueDiaryEntriesForSync: (...args: unknown[]) =>
+    mockQueueDiaryEntriesForSync(...args),
+
+  setDiaryEntryPreparing: (...args: unknown[]) =>
+    mockSetDiaryEntryPreparing(...args),
+}));
+
+jest.mock('@features/diary/model', () => ({
+  useDiaryListStore: (
+    selector: (state: {
+      currentPage: number;
+      expandAllDays: typeof mockExpandAllDays;
+    }) => unknown
+  ) =>
+    selector({
+      currentPage: 1,
+      expandAllDays: mockExpandAllDays,
+    }),
+
+  useDiarySyncStore: (
+    selector: (state: {
+      syncingEntryIds: ReadonlySet<string>;
+      batchProgress: unknown;
+    }) => unknown
+  ) =>
+    selector({
+      syncingEntryIds: mockSyncingEntryIds,
+      batchProgress: mockBatchProgress,
+    }),
 }));
 
 jest.mock('@features/header/model', () => ({
@@ -160,9 +216,7 @@ jest.mock('@features/network/model', () => ({
 jest.mock('../../api/sqlite/DiaryDatabaseProvider', () => ({
   useReadyDiaryDatabase: () => ({
     userId: 'user-1',
-    repository: {
-      findById: mockFindById,
-    },
+    repository: mockRepository,
   }),
 }));
 
@@ -177,6 +231,7 @@ jest.mock('@features/shared/model', () => ({
 
 jest.mock('@features/shared/ui', () => {
   const React = jest.requireActual('react');
+
   const {
     Pressable: NativePressable,
     Text: NativeText,
@@ -221,6 +276,7 @@ jest.mock('@entities/layout/ui', () => {
 
 jest.mock('@entities/shared/ui', () => {
   const React = jest.requireActual('react');
+
   const { Pressable: NativePressable, Text: NativeText } =
     jest.requireActual('react-native');
 
@@ -262,6 +318,7 @@ jest.mock('@features/diary/ui/DiaryTextModal', () => ({
 
 jest.mock('@features/diary/ui', () => {
   const React = jest.requireActual('react');
+
   const {
     Pressable: NativePressable,
     Text: NativeText,
@@ -333,6 +390,7 @@ jest.mock('@features/diary/styles/Diary', () => ({
   EntryState: (pendingDelete: boolean) => ({
     opacity: pendingDelete ? 0.5 : 1,
   }),
+  SyncProgress: () => ({}),
   SelectionToolbar: () => ({}),
   SelectionCount: () => ({}),
   SelectionAction: () => ({}),
@@ -392,6 +450,9 @@ describe('Diary integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockSyncingEntryIds = new Set();
+    mockBatchProgress = null;
+
     mockUseAuthData.mockReturnValue({
       authData: {
         role: 'user',
@@ -400,6 +461,7 @@ describe('Diary integration', () => {
     });
 
     mockFindById.mockResolvedValue(createDiaryEntry());
+
     mockCurrentDiaryEntry = createDiaryEntry();
 
     mockUseDiaryPage.mockReturnValue({
@@ -409,6 +471,17 @@ describe('Diary integration', () => {
     });
 
     mockDeleteMutateAsync.mockResolvedValue(['entry-1']);
+
+    mockQueueDiaryEntriesForSync.mockResolvedValue([
+      {
+        entryId: 'entry-1',
+        status: 'skipped',
+      },
+    ]);
+
+    mockQueuePendingDiaryEntriesForSync.mockResolvedValue([]);
+
+    mockQueueForcedDiaryEntriesForSync.mockResolvedValue([]);
   });
 
   it('passes visibility, opens cloud photo and closes viewer', () => {
@@ -450,6 +523,7 @@ describe('Diary integration', () => {
     );
 
     expect(screen.getByTestId('diary-entry-form')).toBeTruthy();
+
     expect(screen.getByTestId('diary-entry-form-state').props.children).toBe(
       'create:none'
     );
@@ -459,7 +533,7 @@ describe('Diary integration', () => {
     expect(screen.queryByTestId('diary-entry-form')).toBeNull();
   });
 
-  it('closes the create form after an entry is created', () => {
+  it('closes the create form after an entry is created', async () => {
     render(<Diary />);
 
     fireEvent.press(
@@ -469,6 +543,20 @@ describe('Diary integration', () => {
     fireEvent.press(screen.getByLabelText('complete-entry-form'));
 
     expect(screen.queryByTestId('diary-entry-form')).toBeNull();
+
+    expect(mockSetDiaryEntryPreparing).toHaveBeenCalledWith({
+      userId: 'user-1',
+      entryId: 'created-entry-id',
+      preparing: false,
+    });
+
+    await waitFor(() => {
+      expect(mockQueueDiaryEntriesForSync).toHaveBeenCalledWith({
+        userId: 'user-1',
+        entryIds: ['created-entry-id'],
+        repository: mockRepository,
+      });
+    });
   });
 
   it('re-reads the entry from SQLite before opening edit mode', async () => {
@@ -480,6 +568,7 @@ describe('Diary integration', () => {
 
     await waitFor(() => {
       expect(mockFindById).toHaveBeenCalledWith('entry-1');
+
       expect(screen.getByTestId('diary-entry-form-state').props.children).toBe(
         'edit:entry-1'
       );
@@ -502,12 +591,20 @@ describe('Diary integration', () => {
 
     const entryCard = screen.getByTestId('diary-entry-card-entry-1');
 
-    expect(entryCard.props.accessibilityState).toEqual({ disabled: true });
+    expect(entryCard.props.accessibilityState).toEqual({
+      disabled: true,
+    });
+
     expect(entryCard.props.onPress).toBeUndefined();
+
     expect(StyleSheet.flatten(entryCard.props.style)).toEqual(
-      expect.objectContaining({ opacity: 0.5 })
+      expect.objectContaining({
+        opacity: 0.5,
+      })
     );
+
     expect(screen.getByText('diary.entry.sync.deleting')).toBeTruthy();
+
     expect(
       screen.queryByLabelText('diary.entry.photo.openAccessibilityLabel')
     ).toBeNull();
@@ -539,11 +636,14 @@ describe('Diary integration', () => {
       screen.queryByLabelText('diary.form.openCreateAccessibilityLabel')
     ).toBeNull();
 
+    expect(mockExpandAllDays).toHaveBeenCalledTimes(1);
+
     fireEvent.press(
       screen.getByLabelText('diary.selection.entryAccessibilityLabel')
     );
 
     fireEvent.press(screen.getByLabelText('diary.selection.delete'));
+
     fireEvent.press(screen.getByLabelText('confirm-delete'));
 
     await waitFor(() => {

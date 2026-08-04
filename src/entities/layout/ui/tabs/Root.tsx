@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { ErrorSection, LoadingView } from '@entities/shared/ui';
 import { useAuthData } from '@features/auth/api';
 import { useAuth, UserRole } from '@features/auth/model';
+import { useDiarySyncRuntime } from '@features/diary/api';
 import {
   DiaryDatabaseProvider,
   useDiaryDatabase,
@@ -36,6 +37,12 @@ const DiaryDatabaseBoundary = ({ children }: PropsWithChildren) => {
       />
     );
   }
+
+  return <>{children}</>;
+};
+
+const DiarySyncRuntimeBoundary = ({ children }: PropsWithChildren) => {
+  useDiarySyncRuntime();
 
   return <>{children}</>;
 };
@@ -145,7 +152,9 @@ const TabsRoot = () => {
 
   return (
     <DiaryDatabaseProvider userId={authUser.uid}>
-      <DiaryDatabaseBoundary>{tabs}</DiaryDatabaseBoundary>
+      <DiaryDatabaseBoundary>
+        <DiarySyncRuntimeBoundary>{tabs}</DiarySyncRuntimeBoundary>
+      </DiaryDatabaseBoundary>
     </DiaryDatabaseProvider>
   );
 };

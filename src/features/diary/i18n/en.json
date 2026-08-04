@@ -13,6 +13,7 @@
       "description": "Maintaining your diary is available only in the mobile application."
     },
     "menu": {
+      "synchronize": "Synchronize",
       "selectEntries": "Select entries"
     },
     "selection": {
@@ -21,12 +22,17 @@
       "selected_one": "{{count}} selected",
       "selected_other": "{{count}} selected",
       "delete": "Delete",
+      "synchronize": "Synchronize",
       "close": "Close selection mode",
       "entryAccessibilityLabel": "Select diary entry",
       "deleteConfirmTitle": "Delete selected entries?",
       "deleteConfirmDescription_one": "{{count}} entry will remain visible as Deleting until synchronization completes.",
       "deleteConfirmDescription_other": "{{count}} entries will remain visible as Deleting until synchronization completes.",
       "deleteFailed": "Failed to delete the selected entries."
+    },
+    "sync": {
+      "progress": "Synchronizing: {{current}} of {{total}}",
+      "failed": "Failed to synchronize diary entries."
     },
     "list": {
       "loadFailed": "Failed to load entries",
@@ -126,8 +132,14 @@
           "processingFailed": "Failed to process the photo.",
           "invalidFile": "The selected photo is invalid.",
           "fileTooLarge": "The photo must not exceed 10 MB.",
-          "storageFailed": "Failed to save or delete the photo."
+          "storageFailed": "Failed to save or delete the photo.",
+          "uploadFailed": "The entry was saved locally, but the photo could not be uploaded."
         }
+      },
+      "preparation": {
+        "title": "Preparing entry",
+        "uploadingPhoto": "Uploading photo",
+        "savedLocally": "The entry is already saved locally. Keep this screen open while the cloud photo is prepared."
       },
       "errors": {
         "invalidEventAt": "Select a valid date and time.",

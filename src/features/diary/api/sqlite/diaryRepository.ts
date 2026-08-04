@@ -35,6 +35,10 @@ type DiaryCountRow = {
   total_items: number;
 };
 
+type DiaryEntryIdRow = {
+  id: string;
+};
+
 type DiaryEntryPhotoUpdate = Pick<
   DiaryEntry,
   'localPhotoUri' | 'photoPath' | 'photoUrl'
@@ -248,6 +252,102 @@ export class DiaryRepository {
       );
 
       return row === null ? null : mapDiaryEntryRow(row);
+    });
+  }
+
+  public findPendingIds(): Promise<string[]> {
+    return this.operationGate.run(async () => {
+      const rows = await this.database.getAllAsync<DiaryEntryIdRow>(
+        `
+          SELECT id
+          FROM diary_entries
+          WHERE user_id = $userId
+            AND sync_status IN (
+              'pendingCreate',
+              'pendingUpdate',
+              'pendingDelete'
+            )
+          ORDER BY event_at DESC, id DESC
+        `,
+        {
+          $userId: this.userId,
+        }
+      );
+
+      return rows.map((row) => row.id);
+    });
+  }
+
+  public updatePendingPhotoState({
+    id,
+    photoPath,
+    photoUrl,
+  }: Pick<DiaryEntry, 'id' | 'photoPath' | 'photoUrl'>): Promise<void> {
+    return this.operationGate.run(async () => {
+      const result = await this.database.runAsync(
+        `
+          UPDATE diary_entries
+          SET
+            photo_path = $photoPath,
+            photo_url = $photoUrl
+          WHERE id = $id
+            AND user_id = $userId
+            AND sync_status IN ('synced', 'pendingCreate', 'pendingUpdate')
+        `,
+        {
+          $id: id,
+          $userId: this.userId,
+          $photoPath: photoPath,
+          $photoUrl: photoUrl,
+        }
+      );
+
+      if (result.changes !== 1) {
+        throw new Error(`Diary photo state cannot be updated: ${id}`);
+      }
+    });
+  }
+
+  public markSynced(id: string): Promise<void> {
+    return this.operationGate.run(async () => {
+      const result = await this.database.runAsync(
+        `
+          UPDATE diary_entries
+          SET sync_status = 'synced'
+          WHERE id = $id
+            AND user_id = $userId
+            AND sync_status IN ('synced', 'pendingCreate', 'pendingUpdate')
+        `,
+        {
+          $id: id,
+          $userId: this.userId,
+        }
+      );
+
+      if (result.changes !== 1) {
+        throw new Error(`Diary entry cannot be marked as synchronized: ${id}`);
+      }
+    });
+  }
+
+  public deletePending(id: string): Promise<void> {
+    return this.operationGate.run(async () => {
+      const result = await this.database.runAsync(
+        `
+          DELETE FROM diary_entries
+          WHERE id = $id
+            AND user_id = $userId
+            AND sync_status = 'pendingDelete'
+        `,
+        {
+          $id: id,
+          $userId: this.userId,
+        }
+      );
+
+      if (result.changes !== 1) {
+        throw new Error(`Diary entry cannot be physically deleted: ${id}`);
+      }
     });
   }
 

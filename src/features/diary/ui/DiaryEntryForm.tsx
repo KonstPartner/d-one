@@ -53,6 +53,8 @@ const DiaryEntryForm = ({
     validationError,
     submissionError,
     isSubmitting,
+    preparationState,
+    isEntrySynchronizing,
     photoUri,
     photoError,
     hasTemporaryPhoto,
@@ -74,6 +76,7 @@ const DiaryEntryForm = ({
     visible,
     mode,
     entry,
+    onClose,
     onSaved,
   });
 
@@ -134,6 +137,7 @@ const DiaryEntryForm = ({
   );
 
   const isBusy = isSubmitting || isPhotoBusy;
+  const isSaveBlocked = isBusy || isEntrySynchronizing;
 
   const handleRequestClose = useCallback(() => {
     if (isBusy) {
@@ -179,6 +183,55 @@ const DiaryEntryForm = ({
   const handleSave = useCallback(() => {
     void handleSubmit();
   }, [handleSubmit]);
+
+  if (preparationState !== null) {
+    return (
+      <PortalModal
+        visible={visible}
+        onClose={handleRequestClose}
+        withoutScroll
+        withoutCloseBtn
+        isDisabled
+      >
+        <View style={styles.Root}>
+          <View style={styles.Header(theme)}>
+            <View style={styles.HeaderSide(theme)} />
+
+            <Text style={styles.Title(theme)}>
+              {t('diary.form.preparation.title')}
+            </Text>
+
+            <View style={styles.HeaderSide(theme)} />
+          </View>
+
+          <View style={styles.Content(theme)}>
+            <View style={styles.MetaField(theme, false)}>
+              <ActivityIndicator size="large" color={theme.colors.primary} />
+
+              <View style={styles.MetaContent(theme)}>
+                <Text style={globalStyles.Label(theme)}>
+                  {t('diary.form.preparation.uploadingPhoto')}
+                </Text>
+
+                <Text
+                  accessibilityRole="text"
+                  accessibilityLiveRegion="polite"
+                  testID="diary-photo-upload-progress"
+                  style={styles.Title(theme)}
+                >
+                  {preparationState.progress}%
+                </Text>
+              </View>
+            </View>
+
+            <Text style={globalStyles.Label(theme)}>
+              {t('diary.form.preparation.savedLocally')}
+            </Text>
+          </View>
+        </View>
+      </PortalModal>
+    );
+  }
 
   return (
     <PortalModal
@@ -467,11 +520,11 @@ const DiaryEntryForm = ({
             accessibilityLabel={t(
               isCreateMode ? 'diary.form.create' : 'diary.form.save'
             )}
-            disabled={isBusy}
+            disabled={isSaveBlocked}
             onPress={handleSave}
             style={[
               styles.Action,
-              globalStyles.Button(theme, 'primary', isBusy),
+              globalStyles.Button(theme, 'primary', isSaveBlocked),
             ]}
           >
             <View style={styles.ButtonContent(theme)}>
@@ -484,11 +537,15 @@ const DiaryEntryForm = ({
                 <Ionicons
                   name={isCreateMode ? 'add' : 'checkmark'}
                   size={theme.size.md}
-                  color={theme.colors.white}
+                  color={
+                    isSaveBlocked ? theme.colors.muted : theme.colors.white
+                  }
                 />
               )}
 
-              <Text style={globalStyles.ButtonText(theme, 'primary', isBusy)}>
+              <Text
+                style={globalStyles.ButtonText(theme, 'primary', isSaveBlocked)}
+              >
                 {submitLabel}
               </Text>
             </View>

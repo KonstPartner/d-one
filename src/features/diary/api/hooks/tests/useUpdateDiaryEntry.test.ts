@@ -12,11 +12,29 @@ const mockMutationResult = {
   mutateAsync: jest.fn(),
 };
 
-jest.mock('@tanstack/react-query', () => ({
-  useMutation: (...args: unknown[]) => mockUseMutation(...args),
-  useQueryClient: () => ({
-    invalidateQueries: (...args: unknown[]) => mockInvalidateQueries(...args),
-  }),
+jest.mock('@tanstack/react-query', () => {
+  const actual = jest.requireActual<typeof import('@tanstack/react-query')>(
+    '@tanstack/react-query'
+  );
+
+  return {
+    ...actual,
+
+    useMutation: (...args: unknown[]) => mockUseMutation(...args),
+
+    useQueryClient: () => ({
+      invalidateQueries: (...args: unknown[]) => mockInvalidateQueries(...args),
+    }),
+  };
+});
+
+jest.mock('firebase/firestore', () => ({
+  collection: jest.fn(),
+  doc: jest.fn(),
+}));
+
+jest.mock('@features/auth/api/firebase/config', () => ({
+  db: {},
 }));
 
 jest.mock('../../../model/store', () => ({

@@ -1,9 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { showNotification } from '@features/shared/ui';
+
+import { setDiaryEntryPreparing } from '../../api/diarySyncCoordinator';
 import useCreateDiaryEntry from '../../api/hooks/useCreateDiaryEntry';
 import useUpdateDiaryEntry, {
   type UpdateDiaryEntryPhotoChange,
 } from '../../api/hooks/useUpdateDiaryEntry';
+import { useReadyDiaryDatabase } from '../../api/sqlite/DiaryDatabaseProvider';
+import { useDiarySyncStore } from '../diarySyncStore';
 import type {
   CreateDiaryEntryData,
   DiaryEntry,
@@ -18,7 +24,13 @@ type UseDiaryEntryFormParams = {
   visible: boolean;
   mode: DiaryEntryFormMode;
   entry: DiaryEntry | null;
+  onClose: () => void;
   onSaved: (entryId: string) => void;
+};
+
+export type DiaryEntryPreparationState = {
+  type: 'photoUpload';
+  progress: number;
 };
 
 type CreateDraft = {
@@ -131,8 +143,11 @@ const useDiaryEntryForm = ({
   visible,
   mode,
   entry,
+  onClose,
   onSaved,
 }: UseDiaryEntryFormParams) => {
+  const { t } = useTranslation();
+  const { userId, repository } = useReadyDiaryDatabase();
   const initialDraftRef = useRef<CreateDraft | null>(null);
 
   if (initialDraftRef.current === null) {
@@ -147,6 +162,8 @@ const useDiaryEntryForm = ({
   );
   const [validationError, setValidationError] =
     useState<DiaryEntryFormError | null>(null);
+  const [preparationState, setPreparationState] =
+    useState<DiaryEntryPreparationState | null>(null);
 
   const createDraftRef = useRef<CreateDraft>(initialDraftRef.current);
   const activeFormKeyRef = useRef<string | null>(null);
@@ -154,6 +171,10 @@ const useDiaryEntryForm = ({
 
   const createMutation = useCreateDiaryEntry();
   const updateMutation = useUpdateDiaryEntry();
+  const connectionState = useDiarySyncStore((state) => state.connectionState);
+  const isEntrySynchronizing = useDiarySyncStore((state) =>
+    entry === null ? false : state.syncingEntryIds.has(entry.id)
+  );
   const {
     photoUri,
     photoDraftUri,
@@ -382,6 +403,7 @@ const useDiaryEntryForm = ({
     if (
       submitInProgressRef.current ||
       isPhotoBusy ||
+      isEntrySynchronizing ||
       (mode === 'edit' && entry === null)
     ) {
       return null;
@@ -404,6 +426,7 @@ const useDiaryEntryForm = ({
 
     submitInProgressRef.current = true;
     setValidationError(null);
+    let locallySavedEntryId: string | null = null;
 
     try {
       let entryId: string;
@@ -436,33 +459,141 @@ const useDiaryEntryForm = ({
         });
       }
 
+      locallySavedEntryId = entryId;
+
+      const savedEntry = await repository.findById(entryId);
+
+      if (savedEntry === null) {
+        throw new Error(`Diary entry does not exist after saving: ${entryId}`);
+      }
+
+      const photoNeedsUpload =
+        connectionState === 'online' &&
+        savedEntry.localPhotoUri !== null &&
+        savedEntry.photoUrl === null;
+
+      if (photoNeedsUpload) {
+        if (savedEntry.photoPath === null) {
+          throw new Error('Local diary photo does not have a Storage path');
+        }
+
+        setPreparationState({
+          type: 'photoUpload',
+          progress: 0,
+        });
+
+        try {
+          const { uploadDiaryCloudPhoto } =
+            await import('../../api/diaryFirebaseSyncGateway');
+          const photoUrl = await uploadDiaryCloudPhoto({
+            localPhotoUri: savedEntry.localPhotoUri,
+            photoPath: savedEntry.photoPath,
+            onProgress: (progress) => {
+              setPreparationState({
+                type: 'photoUpload',
+                progress,
+              });
+            },
+          });
+
+          await repository.updatePendingPhotoState({
+            id: entryId,
+            photoPath: savedEntry.photoPath,
+            photoUrl,
+          });
+        } catch (error) {
+          console.error(
+            'Failed to prepare diary photo for synchronization',
+            error
+          );
+
+          markPhotoSaved();
+
+          if (mode === 'create') {
+            resetCreateDraft();
+          }
+
+          setDiaryEntryPreparing({
+            userId,
+            entryId,
+            preparing: false,
+          });
+          setPreparationState(null);
+          onClose();
+          showNotification('error', t('diary.form.photo.errors.uploadFailed'));
+
+          return entryId;
+        }
+      }
+
       markPhotoSaved();
 
       if (mode === 'create') {
         resetCreateDraft();
       }
 
-      onSaved(entryId);
+      if (connectionState !== 'offline') {
+        onSaved(entryId);
+      } else {
+        setDiaryEntryPreparing({
+          userId,
+          entryId,
+          preparing: false,
+        });
+        onClose();
+      }
+
+      setPreparationState(null);
 
       return entryId;
-    } catch {
+    } catch (error) {
+      if (locallySavedEntryId !== null) {
+        console.error(
+          'Failed to prepare saved diary entry for synchronization',
+          error
+        );
+
+        markPhotoSaved();
+
+        if (mode === 'create') {
+          resetCreateDraft();
+        }
+
+        setDiaryEntryPreparing({
+          userId,
+          entryId: locallySavedEntryId,
+          preparing: false,
+        });
+        setPreparationState(null);
+        onClose();
+        showNotification('error', t('diary.form.photo.errors.uploadFailed'));
+
+        return locallySavedEntryId;
+      }
+
       return null;
     } finally {
       submitInProgressRef.current = false;
     }
   }, [
     clearErrors,
+    connectionState,
     createMutation,
     entry,
     hasPhoto,
     isPhotoBusy,
+    isEntrySynchronizing,
     markPhotoSaved,
     mode,
+    onClose,
     onSaved,
     photoAction,
     photoDraftUri,
     resetCreateDraft,
+    repository,
+    t,
     updateMutation,
+    userId,
     useCurrentDateTime,
     values,
   ]);
@@ -474,7 +605,9 @@ const useDiaryEntryForm = ({
     useCurrentDateTime,
     validationError,
     submissionError: activeMutation.error,
-    isSubmitting: activeMutation.isPending,
+    isSubmitting: activeMutation.isPending || preparationState !== null,
+    preparationState,
+    isEntrySynchronizing,
     photoUri,
     photoError,
     hasTemporaryPhoto,

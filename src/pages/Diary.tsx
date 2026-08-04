@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BackHandler, Pressable, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  BackHandler,
+  Pressable,
+  Text,
+  View,
+} from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -8,9 +14,18 @@ import { PageWrapper } from '@entities/layout/ui';
 import { ConfirmModal, Loader, LoadingView } from '@entities/shared/ui';
 import { useAuthData } from '@features/auth/api';
 import { UserRole } from '@features/auth/model';
-import { useDeleteDiaryEntries, useDiaryPage } from '@features/diary/api';
-import type { DiaryEntry } from '@features/diary/model';
-import { useDiaryListStore } from '@features/diary/model';
+import {
+  queueForcedDiaryEntriesForSync,
+  queuePendingDiaryEntriesForSync,
+  useDeleteDiaryEntries,
+  useDiaryPage,
+  useReadyDiaryDatabase,
+} from '@features/diary/api';
+import {
+  type DiaryEntry,
+  useDiaryListStore,
+  useDiarySyncStore,
+} from '@features/diary/model';
 import useDiaryEntryFormController from '@features/diary/model/hooks/useDiaryEntryFormController';
 import * as styles from '@features/diary/styles/Diary';
 import {
@@ -47,6 +62,10 @@ const LocalDiaryOwnerContent = () => {
 
   const currentPage = useDiaryListStore((state) => state.currentPage);
   const expandAllDays = useDiaryListStore((state) => state.expandAllDays);
+  const syncingEntryIds = useDiarySyncStore((state) => state.syncingEntryIds);
+  const batchProgress = useDiarySyncStore((state) => state.batchProgress);
+
+  const { userId, repository } = useReadyDiaryDatabase();
 
   const pageQuery = useDiaryPage(currentPage);
   const deleteEntries = useDeleteDiaryEntries();
@@ -60,6 +79,7 @@ const LocalDiaryOwnerContent = () => {
   );
   const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
     useState(false);
+  const [manualSyncPending, setManualSyncPending] = useState(false);
 
   const {
     formState,
@@ -72,9 +92,10 @@ const LocalDiaryOwnerContent = () => {
   const availableEntries = useMemo(
     () =>
       (pageQuery.data?.items ?? []).filter(
-        (entry) => entry.syncStatus !== 'pendingDelete'
+        (entry) =>
+          entry.syncStatus !== 'pendingDelete' && !syncingEntryIds.has(entry.id)
       ),
-    [pageQuery.data?.items]
+    [pageQuery.data?.items, syncingEntryIds]
   );
 
   const availableEntryIds = useMemo(
@@ -110,11 +131,40 @@ const LocalDiaryOwnerContent = () => {
     setSelectionMode(true);
   }, [expandAllDays]);
 
+  const handleManualSync = useCallback(async () => {
+    if (manualSyncPending || batchProgress !== null) {
+      return;
+    }
+
+    setManualSyncPending(true);
+
+    try {
+      await queuePendingDiaryEntriesForSync({
+        userId,
+        repository,
+        batchType: 'manual',
+      });
+    } catch (error) {
+      console.error('Manual diary synchronization failed', error);
+      showNotification('error', t('diary.sync.failed'));
+    } finally {
+      setManualSyncPending(false);
+    }
+  }, [batchProgress, manualSyncPending, repository, t, userId]);
+
   const headerMenuItems = useMemo(
     () =>
       selectionMode
         ? []
         : [
+            {
+              key: 'diary-synchronize',
+              labelKey: 'diary.menu.synchronize',
+              onPress: () => {
+                void handleManualSync();
+              },
+              disabled: manualSyncPending || batchProgress !== null,
+            },
             {
               key: 'diary-select-entries',
               labelKey: 'diary.menu.selectEntries',
@@ -122,7 +172,14 @@ const LocalDiaryOwnerContent = () => {
               disabled: availableEntryIds.size === 0,
             },
           ],
-    [availableEntryIds.size, handleEnterSelection, selectionMode]
+    [
+      availableEntryIds.size,
+      batchProgress,
+      handleEnterSelection,
+      handleManualSync,
+      manualSyncPending,
+      selectionMode,
+    ]
   );
 
   useHeaderMenu(headerMenuItems, [headerMenuItems]);
@@ -158,23 +215,29 @@ const LocalDiaryOwnerContent = () => {
     });
   }, [availableEntryIds, selectionMode]);
 
-  const handleToggleSelection = useCallback((entry: DiaryEntry) => {
-    if (entry.syncStatus === 'pendingDelete') {
-      return;
-    }
-
-    setSelectedIds((currentIds) => {
-      const nextIds = new Set(currentIds);
-
-      if (nextIds.has(entry.id)) {
-        nextIds.delete(entry.id);
-      } else {
-        nextIds.add(entry.id);
+  const handleToggleSelection = useCallback(
+    (entry: DiaryEntry) => {
+      if (
+        entry.syncStatus === 'pendingDelete' ||
+        syncingEntryIds.has(entry.id)
+      ) {
+        return;
       }
 
-      return nextIds;
-    });
-  }, []);
+      setSelectedIds((currentIds) => {
+        const nextIds = new Set(currentIds);
+
+        if (nextIds.has(entry.id)) {
+          nextIds.delete(entry.id);
+        } else {
+          nextIds.add(entry.id);
+        }
+
+        return nextIds;
+      });
+    },
+    [syncingEntryIds]
+  );
 
   const handleToggleSelectAll = useCallback(() => {
     setSelectedIds(
@@ -199,6 +262,25 @@ const LocalDiaryOwnerContent = () => {
     }
   }, [deleteEntries, handleExitSelection, selectedIds, t]);
 
+  const handleSynchronizeSelected = useCallback(() => {
+    if (selectedIds.size === 0) {
+      return;
+    }
+
+    const entryIds = Array.from(selectedIds);
+
+    handleExitSelection();
+
+    void queueForcedDiaryEntriesForSync({
+      userId,
+      entryIds,
+      repository,
+    }).catch((error) => {
+      console.error('Forced diary synchronization failed', error);
+      showNotification('error', t('diary.sync.failed'));
+    });
+  }, [handleExitSelection, repository, selectedIds, t, userId]);
+
   const renderLocalEntry = useCallback(
     (entry: DiaryEntry, isVisible: boolean) => {
       if (!selectionMode) {
@@ -206,13 +288,15 @@ const LocalDiaryOwnerContent = () => {
           <DiaryEntryCard
             entry={entry}
             isVisible={isVisible}
+            synchronizing={syncingEntryIds.has(entry.id)}
             onPress={handleOpenEditForm}
             onOpenPhoto={handleOpenPhoto}
           />
         );
       }
 
-      const unavailable = entry.syncStatus === 'pendingDelete';
+      const synchronizing = syncingEntryIds.has(entry.id);
+      const unavailable = entry.syncStatus === 'pendingDelete' || synchronizing;
       const selected = selectedIds.has(entry.id);
 
       return (
@@ -245,7 +329,11 @@ const LocalDiaryOwnerContent = () => {
             pointerEvents="none"
             style={styles.SelectionCard(theme, selected)}
           >
-            <DiaryEntryCard entry={entry} isVisible={isVisible} />
+            <DiaryEntryCard
+              entry={entry}
+              isVisible={isVisible}
+              synchronizing={synchronizing}
+            />
           </View>
         </Pressable>
       );
@@ -256,6 +344,7 @@ const LocalDiaryOwnerContent = () => {
       handleToggleSelection,
       selectedIds,
       selectionMode,
+      syncingEntryIds,
       t,
       theme,
     ]
@@ -263,6 +352,19 @@ const LocalDiaryOwnerContent = () => {
 
   return (
     <View style={styles.OwnerContent}>
+      {batchProgress !== null && (
+        <View style={styles.SyncProgress(theme)}>
+          <ActivityIndicator size="small" color={theme.colors.primary} />
+
+          <Text style={styles.SyncProgressText(theme)}>
+            {t('diary.sync.progress', {
+              current: batchProgress.current,
+              total: batchProgress.total,
+            })}
+          </Text>
+        </View>
+      )}
+
       {selectionMode ? (
         <View style={styles.SelectionToolbar(theme)}>
           <Pressable
@@ -310,6 +412,29 @@ const LocalDiaryOwnerContent = () => {
               count: selectedIds.size,
             })}
           </Text>
+
+          <Pressable
+            disabled={selectedIds.size === 0}
+            accessibilityRole="button"
+            accessibilityLabel={t('diary.selection.synchronize')}
+            accessibilityState={{ disabled: selectedIds.size === 0 }}
+            onPress={handleSynchronizeSelected}
+            style={styles.SelectionAction(
+              theme,
+              'primary',
+              selectedIds.size === 0
+            )}
+          >
+            <Ionicons
+              name="cloud-upload-outline"
+              size={theme.size.base}
+              color={theme.colors.white}
+            />
+
+            <Text style={styles.SelectionActionText(theme, 'primary')}>
+              {t('diary.selection.synchronize')}
+            </Text>
+          </Pressable>
 
           <Pressable
             disabled={selectedIds.size === 0 || deleteEntries.isPending}
