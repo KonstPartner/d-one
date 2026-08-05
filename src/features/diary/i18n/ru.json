@@ -14,7 +14,9 @@
     },
     "menu": {
       "synchronize": "Синхронизировать",
-      "selectEntries": "Выбрать записи"
+      "selectEntries": "Выбрать записи",
+      "collapseAllDays": "Свернуть все дни",
+      "expandAllDays": "Развернуть все дни"
     },
     "selection": {
       "selectAll": "Выбрать все",
@@ -54,6 +56,20 @@
     "pagination": {
       "previousPage": "Предыдущая страница",
       "nextPage": "Следующая страница"
+    },
+    "search": {
+      "placeholder": "Поиск записей",
+      "inputAccessibilityLabel": "Поиск по записям дневника",
+      "fieldAccessibilityLabel": "Выбрать поле поиска по дневнику",
+      "clearAccessibilityLabel": "Очистить поиск по дневнику",
+      "fields": {
+        "comment": "Искать в комментариях",
+        "aiAnalysis": "Искать в AI-анализе",
+        "glucose": "Искать по глюкозе",
+        "shortInsulin": "Искать по короткому инсулину",
+        "longInsulin": "Искать по длинному инсулину",
+        "carbsGram": "Искать по углеводам"
+      }
     },
     "entry": {
       "more": "Подробнее",
@@ -164,6 +180,46 @@
         "title": "Отменить изменения?",
         "description": "Введённые данные не будут сохранены.",
         "confirm": "Отменить изменения"
+      }
+    },
+    "filters": {
+      "title": "Фильтры",
+      "openAccessibilityLabel": "Открыть фильтры дневника",
+      "closeAccessibilityLabel": "Закрыть фильтры дневника",
+      "reset": "Сбросить",
+      "clear": "Очистить",
+      "apply": "Применить",
+      "applied": "Применено",
+      "notSet": "Не указано",
+      "photo": "Фотография",
+      "aiAnalysis": "AI-анализ",
+      "date": {
+        "title": "Период",
+        "from": "От",
+        "to": "До",
+        "reset": "Сбросить период",
+        "clearBoundary": "Очистить границу «{{boundary}}»"
+      },
+      "range": {
+        "null": "null",
+        "from": "От",
+        "to": "До",
+        "invalid": "Минимальное значение не может быть больше максимального.",
+        "fixBeforeApply": "Исправьте некорректные диапазоны перед применением фильтров."
+      },
+      "mealRelation": {
+        "title": "Отношение к приёму пищи",
+        "placeholder": "Выберите варианты",
+        "selected_one": "Выбран {{count}} вариант",
+        "selected_few": "Выбрано {{count}} варианта",
+        "selected_many": "Выбрано {{count}} вариантов",
+        "selected_other": "Выбрано {{count}} варианта",
+        "accessibilityLabel": "Выбрать отношение к приёму пищи"
+      },
+      "presence": {
+        "ignore": "Не важно",
+        "has": "Есть",
+        "doesNotHave": "Нет"
       }
     }
   }

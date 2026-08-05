@@ -22,7 +22,10 @@ import {
   useReadyDiaryDatabase,
 } from '@features/diary/api';
 import {
+  areDiaryFilterControlsEqual,
+  createDefaultDiaryFilters,
   type DiaryEntry,
+  getDiaryDayKey,
   useDiaryListStore,
   useDiarySyncStore,
 } from '@features/diary/model';
@@ -34,7 +37,9 @@ import {
   DiaryPhotoViewer,
   LocalDiaryContent,
 } from '@features/diary/ui';
-import { useHeaderMenu } from '@features/header/model';
+import DiaryFiltersModal from '@features/diary/ui/DiaryFiltersModal';
+import DiarySearchBar from '@features/diary/ui/DiarySearchBar';
+import { type HeaderMenuItem, useHeaderMenu } from '@features/header/model';
 import { PlatformOS } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
 import { showNotification } from '@features/shared/ui';
@@ -61,13 +66,20 @@ const LocalDiaryOwnerContent = () => {
   const { t } = useTranslation();
 
   const currentPage = useDiaryListStore((state) => state.currentPage);
+  const appliedFilters = useDiaryListStore((state) => state.appliedFilters);
+  const filterModalVisible = useDiaryListStore(
+    (state) => state.filterModalVisible
+  );
+  const collapsedDayKeys = useDiaryListStore((state) => state.collapsedDayKeys);
+  const collapseAllDays = useDiaryListStore((state) => state.collapseAllDays);
   const expandAllDays = useDiaryListStore((state) => state.expandAllDays);
+  const openFilterModal = useDiaryListStore((state) => state.openFilterModal);
   const syncingEntryIds = useDiarySyncStore((state) => state.syncingEntryIds);
   const batchProgress = useDiarySyncStore((state) => state.batchProgress);
 
   const { userId, repository } = useReadyDiaryDatabase();
 
-  const pageQuery = useDiaryPage(currentPage);
+  const pageQuery = useDiaryPage(currentPage, appliedFilters);
   const deleteEntries = useDeleteDiaryEntries();
 
   const [openedPhotoEntry, setOpenedPhotoEntry] = useState<DiaryEntry | null>(
@@ -101,6 +113,28 @@ const LocalDiaryOwnerContent = () => {
   const availableEntryIds = useMemo(
     () => new Set(availableEntries.map((entry) => entry.id)),
     [availableEntries]
+  );
+
+  const currentPageDayKeys = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (pageQuery.data?.items ?? []).map((entry) =>
+            getDiaryDayKey(entry.eventAt)
+          )
+        )
+      ),
+    [pageQuery.data?.items]
+  );
+
+  const allCurrentPageDaysCollapsed =
+    currentPageDayKeys.length > 0 &&
+    currentPageDayKeys.every((dayKey) => collapsedDayKeys.has(dayKey));
+
+  const filtersApplied = useMemo(
+    () =>
+      !areDiaryFilterControlsEqual(appliedFilters, createDefaultDiaryFilters()),
+    [appliedFilters]
   );
 
   const allAvailableSelected =
@@ -152,35 +186,73 @@ const LocalDiaryOwnerContent = () => {
     }
   }, [batchProgress, manualSyncPending, repository, t, userId]);
 
-  const headerMenuItems = useMemo(
-    () =>
-      selectionMode
-        ? []
-        : [
-            {
-              key: 'diary-synchronize',
-              labelKey: 'diary.menu.synchronize',
-              onPress: () => {
-                void handleManualSync();
-              },
-              disabled: manualSyncPending || batchProgress !== null,
-            },
-            {
-              key: 'diary-select-entries',
-              labelKey: 'diary.menu.selectEntries',
-              onPress: handleEnterSelection,
-              disabled: availableEntryIds.size === 0,
-            },
-          ],
-    [
-      availableEntryIds.size,
-      batchProgress,
-      handleEnterSelection,
-      handleManualSync,
-      manualSyncPending,
-      selectionMode,
-    ]
-  );
+  const handleCollapseAllDays = useCallback(() => {
+    if (currentPageDayKeys.length > 0) {
+      collapseAllDays(currentPageDayKeys);
+    }
+  }, [collapseAllDays, currentPageDayKeys]);
+
+  const handleExpandAllDays = useCallback(() => {
+    if (currentPageDayKeys.length > 0) {
+      expandAllDays();
+    }
+  }, [currentPageDayKeys.length, expandAllDays]);
+
+  const headerMenuItems = useMemo<HeaderMenuItem[]>(() => {
+    if (selectionMode) {
+      return [];
+    }
+
+    const items: HeaderMenuItem[] = [
+      {
+        key: 'diary-synchronize',
+        labelKey: 'diary.menu.synchronize',
+        icon: 'sync-outline',
+        onPress: () => {
+          void handleManualSync();
+        },
+        disabled: manualSyncPending || batchProgress !== null,
+      },
+      {
+        key: 'diary-select-entries',
+        labelKey: 'diary.menu.selectEntries',
+        icon: 'checkbox-outline',
+        onPress: handleEnterSelection,
+        disabled: availableEntryIds.size === 0,
+      },
+    ];
+
+    if (currentPageDayKeys.length > 0) {
+      if (allCurrentPageDaysCollapsed) {
+        items.push({
+          key: 'diary-expand-all-days',
+          labelKey: 'diary.menu.expandAllDays',
+          icon: 'expand-outline',
+          onPress: handleExpandAllDays,
+        });
+      } else {
+        items.push({
+          key: 'diary-collapse-all-days',
+          labelKey: 'diary.menu.collapseAllDays',
+          icon: 'contract-outline',
+          onPress: handleCollapseAllDays,
+        });
+      }
+    }
+
+    return items;
+  }, [
+    allCurrentPageDaysCollapsed,
+    availableEntryIds.size,
+    batchProgress,
+    currentPageDayKeys,
+    handleCollapseAllDays,
+    handleEnterSelection,
+    handleExpandAllDays,
+    handleManualSync,
+    manualSyncPending,
+    selectionMode,
+  ]);
 
   useHeaderMenu(headerMenuItems, [headerMenuItems]);
 
@@ -467,18 +539,12 @@ const LocalDiaryOwnerContent = () => {
         </View>
       ) : (
         <View style={styles.Toolbar(theme)}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('diary.form.openCreateAccessibilityLabel')}
-            onPress={handleOpenCreateForm}
-            style={styles.CreateButton(theme)}
-          >
-            <Ionicons
-              name="add"
-              size={theme.size.lg}
-              color={theme.colors.white}
-            />
-          </Pressable>
+          <DiarySearchBar
+            filterModalVisible={filterModalVisible}
+            filtersApplied={filtersApplied}
+            onOpenFilters={openFilterModal}
+            onCreateEntry={handleOpenCreateForm}
+          />
         </View>
       )}
 
@@ -486,6 +552,8 @@ const LocalDiaryOwnerContent = () => {
         selectionMode={selectionMode}
         renderEntry={renderLocalEntry}
       />
+
+      <DiaryFiltersModal />
 
       <DiaryPhotoViewer entry={openedPhotoEntry} onClose={handleClosePhoto} />
 

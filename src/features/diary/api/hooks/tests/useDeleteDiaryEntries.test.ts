@@ -1,8 +1,12 @@
+import { useDiaryListStore } from '../../../model/store';
+import { createDefaultDiaryFilters } from '../../../model/types';
 import useDeleteDiaryEntries from '../useDeleteDiaryEntries';
 
 const mockUseMutation = jest.fn();
 const mockInvalidateQueries = jest.fn();
 const mockMarkPendingDelete = jest.fn();
+const mockFindPage = jest.fn();
+const mockQueueDiaryEntriesForSync = jest.fn();
 const mockUseReadyDiaryDatabase = jest.fn();
 
 const mockMutationResult = {
@@ -30,6 +34,11 @@ jest.mock('../../sqlite/DiaryDatabaseProvider', () => ({
   useReadyDiaryDatabase: () => mockUseReadyDiaryDatabase(),
 }));
 
+jest.mock('../../diarySyncCoordinator', () => ({
+  queueDiaryEntriesForSync: (...args: unknown[]) =>
+    mockQueueDiaryEntriesForSync(...args),
+}));
+
 jest.mock('firebase/firestore', () => ({
   collection: jest.fn(),
   doc: jest.fn(),
@@ -42,7 +51,7 @@ jest.mock('@features/auth/api/firebase/config', () => ({
 type MutationOptions = {
   mutationKey: readonly unknown[];
   mutationFn: (ids: ReadonlyArray<string>) => Promise<string[]>;
-  onSuccess: () => Promise<unknown>;
+  onSuccess: (entryIds: string[]) => void;
   networkMode: string;
   retry: boolean;
 };
@@ -58,11 +67,26 @@ describe('useDeleteDiaryEntries', () => {
       userId: 'user-1',
       repository: {
         markPendingDelete: mockMarkPendingDelete,
+        findPage: mockFindPage,
       },
     });
 
     mockUseMutation.mockReturnValue(mockMutationResult);
+    useDiaryListStore.getState().resetListState();
+
     mockMarkPendingDelete.mockResolvedValue(undefined);
+    mockFindPage.mockResolvedValue({
+      items: [],
+      pagination: {
+        page: 1,
+        pageSize: 30,
+        totalItems: 0,
+        totalPages: 0,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      },
+    });
+    mockQueueDiaryEntriesForSync.mockResolvedValue([]);
     mockInvalidateQueries.mockResolvedValue(undefined);
   });
 
@@ -102,13 +126,138 @@ describe('useDeleteDiaryEntries', () => {
     );
   });
 
-  it('invalidates local pages after deletion is marked', async () => {
+  it('invalidates local pages after deletion is marked', () => {
     useDeleteDiaryEntries();
 
-    await getMutationOptions().onSuccess();
+    getMutationOptions().onSuccess(['entry-1']);
 
     expect(mockInvalidateQueries).toHaveBeenCalledWith({
       queryKey: ['diary', 'local', 'user-1', 'pages'],
     });
+  });
+
+  it('recalculates the last page with the applied filters after physical deletion', async () => {
+    const appliedFilters = createDefaultDiaryFilters();
+
+    appliedFilters.glucose = {
+      min: 5,
+      max: 8,
+    };
+    appliedFilters.photo = 'has';
+
+    useDiaryListStore.setState({
+      currentPage: 3,
+      appliedFilters,
+    });
+
+    mockQueueDiaryEntriesForSync.mockResolvedValue([
+      {
+        entryId: 'entry-1',
+        status: 'deleted',
+      },
+    ]);
+    mockFindPage.mockResolvedValue({
+      items: [],
+      pagination: {
+        page: 3,
+        pageSize: 30,
+        totalItems: 60,
+        totalPages: 2,
+        hasPreviousPage: true,
+        hasNextPage: false,
+      },
+    });
+
+    useDeleteDiaryEntries();
+
+    getMutationOptions().onSuccess(['entry-1']);
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(mockFindPage).toHaveBeenCalledWith(3, appliedFilters);
+    expect(useDiaryListStore.getState().currentPage).toBe(2);
+    expect(mockInvalidateQueries).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps the current page when it is still valid for the applied filters', async () => {
+    const appliedFilters = createDefaultDiaryFilters();
+
+    appliedFilters.aiAnalysis = 'doesNotHave';
+
+    useDiaryListStore.setState({
+      currentPage: 2,
+      appliedFilters,
+    });
+
+    mockQueueDiaryEntriesForSync.mockResolvedValue([
+      {
+        entryId: 'entry-1',
+        status: 'deleted',
+      },
+    ]);
+    mockFindPage.mockResolvedValue({
+      items: [],
+      pagination: {
+        page: 2,
+        pageSize: 30,
+        totalItems: 31,
+        totalPages: 2,
+        hasPreviousPage: true,
+        hasNextPage: false,
+      },
+    });
+
+    useDeleteDiaryEntries();
+
+    getMutationOptions().onSuccess(['entry-1']);
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(mockFindPage).toHaveBeenCalledWith(2, appliedFilters);
+    expect(useDiaryListStore.getState().currentPage).toBe(2);
+  });
+
+  it('moves to the first page when the filtered result becomes empty', async () => {
+    const appliedFilters = createDefaultDiaryFilters();
+
+    appliedFilters.mealRelations = ['night'];
+
+    useDiaryListStore.setState({
+      currentPage: 2,
+      appliedFilters,
+    });
+
+    mockQueueDiaryEntriesForSync.mockResolvedValue([
+      {
+        entryId: 'entry-1',
+        status: 'deleted',
+      },
+    ]);
+    mockFindPage.mockResolvedValue({
+      items: [],
+      pagination: {
+        page: 1,
+        pageSize: 30,
+        totalItems: 0,
+        totalPages: 0,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      },
+    });
+
+    useDeleteDiaryEntries();
+
+    getMutationOptions().onSuccess(['entry-1']);
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(mockFindPage).toHaveBeenCalledWith(2, appliedFilters);
+    expect(useDiaryListStore.getState().currentPage).toBe(1);
   });
 });

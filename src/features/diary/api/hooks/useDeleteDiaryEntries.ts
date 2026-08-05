@@ -33,8 +33,8 @@ const useDeleteDiaryEntries = () => {
             return;
           }
 
-          const currentPage = useDiaryListStore.getState().currentPage;
-          const page = await repository.findPage(currentPage);
+          const { currentPage, appliedFilters } = useDiaryListStore.getState();
+          const page = await repository.findPage(currentPage, appliedFilters);
           const lastPage = Math.max(page.pagination.totalPages, 1);
 
           if (currentPage > lastPage) {

@@ -10,6 +10,7 @@ import useDiaryPage from '../../api/hooks/useDiaryPage';
 import { useReadyDiaryDatabase } from '../../api/sqlite/DiaryDatabaseProvider';
 import type { DiaryListItem } from '../list';
 import { buildDiaryListItems } from '../list';
+import { useDiaryListStore } from '../store';
 import { useDiaryList } from '../useDiaryList';
 
 const VIEWABILITY_CONFIG = {
@@ -50,6 +51,8 @@ const useLocalDiaryContent = () => {
   const { currentPage, collapsedDayKeys, setCurrentPage, toggleDay } =
     useDiaryList();
 
+  const appliedFilters = useDiaryListStore((state) => state.appliedFilters);
+
   const listRef = useRef<FlatList<DiaryListItem>>(null);
   const navigationInProgressRef = useRef(false);
 
@@ -58,7 +61,7 @@ const useLocalDiaryContent = () => {
     () => new Set()
   );
 
-  const query = useDiaryPage(currentPage);
+  const query = useDiaryPage(currentPage, appliedFilters);
   const page = query.data;
 
   const listItems = useMemo(
@@ -99,7 +102,7 @@ const useLocalDiaryContent = () => {
       offset: 0,
       animated: false,
     });
-  }, [currentPage, page?.pagination.page]);
+  }, [appliedFilters, currentPage, page?.pagination.page]);
 
   const handleChangePage = useCallback(
     async (nextPage: number): Promise<void> => {
@@ -119,6 +122,7 @@ const useLocalDiaryContent = () => {
           diaryApi.getLocalPageOptions({
             userId,
             page: nextPage,
+            filters: appliedFilters,
             repository,
           })
         );
@@ -134,6 +138,7 @@ const useLocalDiaryContent = () => {
       }
     },
     [
+      appliedFilters,
       currentPage,
       query.isFetching,
       queryClient,

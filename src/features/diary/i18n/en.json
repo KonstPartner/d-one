@@ -14,7 +14,9 @@
     },
     "menu": {
       "synchronize": "Synchronize",
-      "selectEntries": "Select entries"
+      "selectEntries": "Select entries",
+      "collapseAllDays": "Collapse all days",
+      "expandAllDays": "Expand all days"
     },
     "selection": {
       "selectAll": "Select all",
@@ -48,6 +50,20 @@
     "pagination": {
       "previousPage": "Previous page",
       "nextPage": "Next page"
+    },
+    "search": {
+      "placeholder": "Search entries",
+      "inputAccessibilityLabel": "Search diary entries",
+      "fieldAccessibilityLabel": "Select diary search field",
+      "clearAccessibilityLabel": "Clear diary search",
+      "fields": {
+        "comment": "Search in comments",
+        "aiAnalysis": "Search in AI analysis",
+        "glucose": "Search by glucose",
+        "shortInsulin": "Search by short insulin",
+        "longInsulin": "Search by long insulin",
+        "carbsGram": "Search by carbohydrates"
+      }
     },
     "entry": {
       "more": "More",
@@ -158,6 +174,44 @@
         "title": "Discard changes?",
         "description": "The entered data will not be saved.",
         "confirm": "Discard"
+      }
+    },
+    "filters": {
+      "title": "Filters",
+      "openAccessibilityLabel": "Open diary filters",
+      "closeAccessibilityLabel": "Close diary filters",
+      "reset": "Reset",
+      "clear": "Clear",
+      "apply": "Apply",
+      "applied": "Applied",
+      "notSet": "Not set",
+      "photo": "Photo",
+      "aiAnalysis": "AI analysis",
+      "date": {
+        "title": "Date range",
+        "from": "From",
+        "to": "To",
+        "reset": "Reset date range",
+        "clearBoundary": "Clear {{boundary}}"
+      },
+      "range": {
+        "null": "null",
+        "from": "From",
+        "to": "To",
+        "invalid": "The minimum value cannot be greater than the maximum value.",
+        "fixBeforeApply": "Correct the invalid ranges before applying the filters."
+      },
+      "mealRelation": {
+        "title": "Meal relation",
+        "placeholder": "Select meal relations",
+        "selected_one": "{{count}} selected",
+        "selected_other": "{{count}} selected",
+        "accessibilityLabel": "Select meal relations"
+      },
+      "presence": {
+        "ignore": "Any",
+        "has": "Has",
+        "doesNotHave": "Does not have"
       }
     }
   }

@@ -17,7 +17,9 @@ const mockFindById = jest.fn();
 const mockUseDiaryPage = jest.fn();
 const mockDeleteMutateAsync = jest.fn();
 const mockUseHeaderMenu = jest.fn();
+const mockCollapseAllDays = jest.fn();
 const mockExpandAllDays = jest.fn();
+const mockOpenFilterModal = jest.fn();
 
 const mockQueueDiaryEntriesForSync = jest.fn();
 const mockQueuePendingDiaryEntriesForSync = jest.fn();
@@ -31,6 +33,39 @@ const mockRepository = {
 let mockCurrentDiaryEntry: DiaryEntry;
 let mockSyncingEntryIds: ReadonlySet<string> = new Set();
 let mockBatchProgress: unknown = null;
+
+const mockCollapsedDayKeys: ReadonlySet<string> = new Set();
+
+const mockCreateDefaultFilters = () => ({
+  search: {
+    field: 'comment' as const,
+    query: null,
+  },
+  date: {
+    from: null,
+    to: null,
+    activeBoundary: 'from' as const,
+  },
+  glucose: {
+    min: null,
+    max: null,
+  },
+  shortInsulin: {
+    min: null,
+    max: null,
+  },
+  longInsulin: {
+    min: null,
+    max: null,
+  },
+  carbsGram: {
+    min: null,
+    max: null,
+  },
+  mealRelations: [],
+  photo: 'ignore' as const,
+  aiAnalysis: 'ignore' as const,
+});
 
 const createDiaryEntry = (): DiaryEntry => ({
   id: 'entry-1',
@@ -179,15 +214,29 @@ jest.mock('../../api/diarySyncCoordinator', () => ({
 }));
 
 jest.mock('@features/diary/model', () => ({
+  areDiaryFilterControlsEqual: () => true,
+  createDefaultDiaryFilters: () => mockCreateDefaultFilters(),
+  getDiaryDayKey: (eventAt: Date) => eventAt.toISOString().slice(0, 10),
+
   useDiaryListStore: (
     selector: (state: {
       currentPage: number;
+      appliedFilters: ReturnType<typeof mockCreateDefaultFilters>;
+      filterModalVisible: boolean;
+      collapsedDayKeys: ReadonlySet<string>;
+      collapseAllDays: typeof mockCollapseAllDays;
       expandAllDays: typeof mockExpandAllDays;
+      openFilterModal: typeof mockOpenFilterModal;
     }) => unknown
   ) =>
     selector({
       currentPage: 1,
+      appliedFilters: mockCreateDefaultFilters(),
+      filterModalVisible: false,
+      collapsedDayKeys: mockCollapsedDayKeys,
+      collapseAllDays: mockCollapseAllDays,
       expandAllDays: mockExpandAllDays,
+      openFilterModal: mockOpenFilterModal,
     }),
 
   useDiarySyncStore: (
@@ -315,6 +364,31 @@ jest.mock('@features/diary/ui/DiaryTextModal', () => ({
   __esModule: true,
   default: () => null,
 }));
+
+jest.mock('@features/diary/ui/DiaryFiltersModal', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
+jest.mock('@features/diary/ui/DiarySearchBar', () => {
+  const React = jest.requireActual('react');
+  const { Pressable: NativePressable, Text: NativeText } =
+    jest.requireActual('react-native');
+
+  return {
+    __esModule: true,
+    default: ({ onCreateEntry }: { onCreateEntry: () => void }) =>
+      React.createElement(
+        NativePressable,
+        {
+          accessibilityRole: 'button',
+          accessibilityLabel: 'diary.form.openCreateAccessibilityLabel',
+          onPress: onCreateEntry,
+        },
+        React.createElement(NativeText, null, 'create')
+      ),
+  };
+});
 
 jest.mock('@features/diary/ui', () => {
   const React = jest.requireActual('react');

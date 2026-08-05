@@ -9,7 +9,7 @@ import {
 } from '@testing-library/react-native';
 
 import { useDiaryListStore } from '../../model/store';
-import type { DiaryEntry } from '../../model/types';
+import { createDefaultDiaryFilters, type DiaryEntry } from '../../model/types';
 import DiaryEntryCard from '../DiaryEntryCard';
 import LocalDiaryContent from '../LocalDiaryContent';
 
@@ -421,6 +421,7 @@ describe('LocalDiaryContent', () => {
     expect(mockGetLocalPageOptions).toHaveBeenCalledWith({
       userId: 'user-1',
       page: 2,
+      filters: createDefaultDiaryFilters(),
       repository: mockRepository,
     });
 

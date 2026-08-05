@@ -8,7 +8,8 @@ import Popover from 'react-native-popover-view';
 
 import * as globalStyles from '@features/shared/styles/global';
 
-import { HeaderMenuItem, useHeaderMenuContext } from '../model/context/menu';
+import type { HeaderMenuItem } from '../model/context/menu';
+import { useHeaderMenuContext } from '../model/context/menu';
 import useHeaderBaseMenu from '../model/hooks/useBaseMenu';
 import * as styles from '../styles/Menu';
 
@@ -59,6 +60,11 @@ const HeaderMenu = ({ color }: { color?: string }) => {
         <View style={styles.MenuContainer}>
           {items.map((item, idx) => {
             const isLast = idx === items.length - 1;
+            const itemColor = item.destructive
+              ? theme.colors.danger
+              : item.disabled
+                ? theme.colors.muted
+                : theme.colors.text;
 
             return (
               <Pressable
@@ -75,9 +81,17 @@ const HeaderMenu = ({ color }: { color?: string }) => {
                   }),
                 ]}
               >
-                <Text style={styles.MenuText(theme, item.destructive)}>
-                  {t(item.labelKey)}
-                </Text>
+                <View
+                  style={globalStyles.Row(theme, 'center', 'flex-start', 'sm')}
+                >
+                  {item.icon && (
+                    <Ionicons name={item.icon} size={18} color={itemColor} />
+                  )}
+
+                  <Text style={styles.MenuText(theme, item.destructive)}>
+                    {t(item.labelKey)}
+                  </Text>
+                </View>
 
                 <Ionicons
                   name="chevron-forward"

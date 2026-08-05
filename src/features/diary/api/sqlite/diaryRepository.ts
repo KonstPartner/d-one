@@ -3,12 +3,24 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type {
   CreateDiaryEntryInput,
   DiaryEntry,
+  DiaryFilterNumericRange,
+  DiaryFilters,
   DiaryPageResult,
+  DiarySearchField,
   DiarySyncStatus,
   MealRelation,
   UpdateDiaryEntryData,
 } from '../../model/types';
-import { DIARY_SYNC_STATUSES, MEAL_RELATIONS } from '../../model/types';
+import {
+  areDiaryFilterRangesValid,
+  createDefaultDiaryFilters,
+  DIARY_FILTER_PRESENCE_VALUES,
+  DIARY_SEARCH_FIELDS,
+  DIARY_SYNC_STATUSES,
+  isDiaryTextSearchField,
+  MEAL_RELATIONS,
+  normalizeDiaryFilters,
+} from '../../model/types';
 
 import type { DiaryDatabaseOperationGate } from './diaryDatabaseOperationGate';
 
@@ -48,6 +60,11 @@ type UpdateDiaryEntryInput = UpdateDiaryEntryData & {
   photo?: DiaryEntryPhotoUpdate;
 };
 
+type DiaryFilterSql = {
+  whereSql: string;
+  parameters: Record<string, string | number>;
+};
+
 const CREATE_DIARY_ENTRY_SQL = `
   INSERT INTO diary_entries (
     id,
@@ -83,7 +100,7 @@ const CREATE_DIARY_ENTRY_SQL = `
   )
 `;
 
-const FIND_DIARY_ENTRY_BY_ID_SQL = `
+const DIARY_ENTRY_SELECT_SQL = `
   SELECT
     id,
     user_id,
@@ -100,6 +117,10 @@ const FIND_DIARY_ENTRY_BY_ID_SQL = `
     event_at,
     sync_status
   FROM diary_entries
+`;
+
+const FIND_DIARY_ENTRY_BY_ID_SQL = `
+  ${DIARY_ENTRY_SELECT_SQL}
   WHERE id = $id
     AND user_id = $userId
   LIMIT 1
@@ -146,33 +167,221 @@ const UPDATE_DIARY_ENTRY_WITH_PHOTO_SQL = `
     AND sync_status IN ('synced', 'pendingCreate', 'pendingUpdate')
 `;
 
-const FIND_DIARY_PAGE_SQL = `
-  SELECT
-    id,
-    user_id,
-    glucose,
-    meal_relation,
-    short_insulin,
-    long_insulin,
-    carbs_gram,
-    comment,
-    ai_analysis,
-    local_photo_uri,
-    photo_path,
-    photo_url,
-    event_at,
-    sync_status
-  FROM diary_entries
-  WHERE user_id = $userId
-  ORDER BY event_at DESC, id DESC
-  LIMIT $limit OFFSET $offset
-`;
-
 const isMealRelation = (value: string): value is MealRelation =>
   MEAL_RELATIONS.some((mealRelation) => mealRelation === value);
 
 const isDiarySyncStatus = (value: string): value is DiarySyncStatus =>
   DIARY_SYNC_STATUSES.some((syncStatus) => syncStatus === value);
+
+const isDiaryFilterPresence = (value: string): boolean =>
+  DIARY_FILTER_PRESENCE_VALUES.some((presence) => presence === value);
+
+const isDiarySearchField = (value: string): value is DiarySearchField =>
+  DIARY_SEARCH_FIELDS.some((field) => field === value);
+
+const DIARY_SEARCH_COLUMNS: Record<DiarySearchField, string> = {
+  comment: 'comment',
+  aiAnalysis: 'ai_analysis',
+  glucose: 'glucose',
+  shortInsulin: 'short_insulin',
+  longInsulin: 'long_insulin',
+  carbsGram: 'carbs_gram',
+};
+
+const escapeLikeQuery = (query: string): string =>
+  query.replace(/[\\%_]/g, '\\$&');
+
+const appendSearchCondition = (
+  conditions: string[],
+  parameters: Record<string, string | number>,
+  filters: DiaryFilters
+): void => {
+  const { field, query } = filters.search;
+
+  if (!isDiarySearchField(field)) {
+    throw new Error('Invalid diary search field');
+  }
+
+  if (query === null) {
+    return;
+  }
+
+  const column = DIARY_SEARCH_COLUMNS[field];
+
+  if (isDiaryTextSearchField(field)) {
+    if (typeof query !== 'string' || query.trim().length < 2) {
+      throw new Error('Invalid diary text search query');
+    }
+
+    conditions.push(`LOWER(${column}) LIKE LOWER($searchQuery) ESCAPE '\\'`);
+    parameters.$searchQuery = `%${escapeLikeQuery(query.trim())}%`;
+
+    return;
+  }
+
+  if (
+    typeof query !== 'number' ||
+    !Number.isFinite(query) ||
+    query < 0 ||
+    !Number.isInteger(query * 10)
+  ) {
+    throw new Error('Invalid diary numeric search query');
+  }
+
+  conditions.push(`${column} = $searchQuery`);
+  parameters.$searchQuery = query;
+};
+
+const getLocalDayBoundary = (dateValue: string, endOfDay: boolean): number => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
+
+  if (match === null) {
+    throw new Error(`Invalid diary filter date: ${dateValue}`);
+  }
+
+  const [, yearValue, monthValue, dayValue] = match;
+  const year = Number(yearValue);
+  const month = Number(monthValue);
+  const day = Number(dayValue);
+  const date = new Date(0);
+
+  date.setFullYear(year, month - 1, day);
+  date.setHours(
+    endOfDay ? 23 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 999 : 0
+  );
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    throw new Error(`Invalid diary filter date: ${dateValue}`);
+  }
+
+  return date.getTime();
+};
+
+const appendNumericRange = (
+  conditions: string[],
+  parameters: Record<string, string | number>,
+  column: string,
+  parameterName: string,
+  range: DiaryFilterNumericRange
+): void => {
+  if (range.min !== null) {
+    conditions.push(`${column} >= $${parameterName}Min`);
+    parameters[`$${parameterName}Min`] = range.min;
+  }
+
+  if (range.max !== null) {
+    conditions.push(`${column} <= $${parameterName}Max`);
+    parameters[`$${parameterName}Max`] = range.max;
+  }
+};
+
+const buildDiaryFilterSql = (
+  userId: string,
+  filters: DiaryFilters
+): DiaryFilterSql => {
+  if (!areDiaryFilterRangesValid(filters)) {
+    throw new Error('Invalid diary filter range');
+  }
+
+  if (
+    filters.mealRelations.some(
+      (mealRelation) => !isMealRelation(mealRelation)
+    ) ||
+    !isDiaryFilterPresence(filters.photo) ||
+    !isDiaryFilterPresence(filters.aiAnalysis)
+  ) {
+    throw new Error('Invalid diary filter value');
+  }
+
+  const normalizedFilters = normalizeDiaryFilters(filters);
+  const conditions = ['user_id = $userId'];
+  const parameters: Record<string, string | number> = {
+    $userId: userId,
+  };
+
+  appendSearchCondition(conditions, parameters, normalizedFilters);
+
+  if (normalizedFilters.date.from !== null) {
+    conditions.push('event_at >= $eventAtFrom');
+    parameters.$eventAtFrom = getLocalDayBoundary(
+      normalizedFilters.date.from,
+      false
+    );
+  }
+
+  if (normalizedFilters.date.to !== null) {
+    conditions.push('event_at <= $eventAtTo');
+    parameters.$eventAtTo = getLocalDayBoundary(
+      normalizedFilters.date.to,
+      true
+    );
+  }
+
+  appendNumericRange(
+    conditions,
+    parameters,
+    'glucose',
+    'glucose',
+    normalizedFilters.glucose
+  );
+  appendNumericRange(
+    conditions,
+    parameters,
+    'short_insulin',
+    'shortInsulin',
+    normalizedFilters.shortInsulin
+  );
+  appendNumericRange(
+    conditions,
+    parameters,
+    'long_insulin',
+    'longInsulin',
+    normalizedFilters.longInsulin
+  );
+  appendNumericRange(
+    conditions,
+    parameters,
+    'carbs_gram',
+    'carbsGram',
+    normalizedFilters.carbsGram
+  );
+
+  if (normalizedFilters.mealRelations.length > 0) {
+    const placeholders = normalizedFilters.mealRelations.map(
+      (_, index) => `$mealRelation${index}`
+    );
+
+    normalizedFilters.mealRelations.forEach((mealRelation, index) => {
+      parameters[`$mealRelation${index}`] = mealRelation;
+    });
+
+    conditions.push(`meal_relation IN (${placeholders.join(', ')})`);
+  }
+
+  if (normalizedFilters.photo === 'has') {
+    conditions.push('(local_photo_uri IS NOT NULL OR photo_url IS NOT NULL)');
+  } else if (normalizedFilters.photo === 'doesNotHave') {
+    conditions.push('(local_photo_uri IS NULL AND photo_url IS NULL)');
+  }
+
+  if (normalizedFilters.aiAnalysis === 'has') {
+    conditions.push("TRIM(ai_analysis) != ''");
+  } else if (normalizedFilters.aiAnalysis === 'doesNotHave') {
+    conditions.push("TRIM(ai_analysis) = ''");
+  }
+
+  return {
+    whereSql: `WHERE ${conditions.join('\n    AND ')}`,
+    parameters,
+  };
+};
 
 const mapDiaryEntryRow = (row: DiaryEntryRow): DiaryEntry => {
   if (row.meal_relation !== null && !isMealRelation(row.meal_relation)) {
@@ -439,9 +648,20 @@ export class DiaryRepository {
     });
   }
 
-  public findPage(page: number): Promise<DiaryPageResult> {
+  public findPage(
+    page: number,
+    filters: DiaryFilters = createDefaultDiaryFilters()
+  ): Promise<DiaryPageResult> {
     if (!Number.isInteger(page) || page < 1) {
       return Promise.reject(new Error(`Invalid diary page: ${page}`));
+    }
+
+    let filterSql: DiaryFilterSql;
+
+    try {
+      filterSql = buildDiaryFilterSql(this.userId, filters);
+    } catch (error) {
+      return Promise.reject(error);
     }
 
     return this.operationGate.run(async () => {
@@ -449,9 +669,9 @@ export class DiaryRepository {
         `
           SELECT COUNT(*) AS total_items
           FROM diary_entries
-          WHERE user_id = ?
+          ${filterSql.whereSql}
         `,
-        this.userId
+        filterSql.parameters
       );
 
       const totalItems = countRow?.total_items ?? 0;
@@ -474,9 +694,14 @@ export class DiaryRepository {
       const offset = (page - 1) * DIARY_PAGE_SIZE;
 
       const rows = await this.database.getAllAsync<DiaryEntryRow>(
-        FIND_DIARY_PAGE_SQL,
+        `
+          ${DIARY_ENTRY_SELECT_SQL}
+          ${filterSql.whereSql}
+          ORDER BY event_at DESC, id DESC
+          LIMIT $limit OFFSET $offset
+        `,
         {
-          $userId: this.userId,
+          ...filterSql.parameters,
           $limit: DIARY_PAGE_SIZE,
           $offset: offset,
         }

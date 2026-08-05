@@ -20,6 +20,7 @@ const useHeaderBaseMenu = () => {
     {
       key: 'settings',
       labelKey: 'header.menu.settings',
+      icon: 'settings-outline',
       onPress: settings.open,
     },
   ];

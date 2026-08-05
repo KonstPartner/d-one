@@ -4,8 +4,10 @@ export { default as DiaryEntryDateTimeFields } from './DiaryEntryDateTimeFields'
 export { default as DiaryEntryForm } from './DiaryEntryForm';
 export { default as DiaryEntryFormPhoto } from './DiaryEntryFormPhoto';
 export { default as DiaryEntryPhoto } from './DiaryEntryPhoto';
+export { default as DiaryFiltersModal } from './DiaryFiltersModal';
 export { default as DiaryPagination } from './DiaryPagination';
 export { default as DiaryPhotoViewer } from './DiaryPhotoViewer';
+export { default as DiarySearchBar } from './DiarySearchBar';
 export { default as DiaryTextModal } from './DiaryTextModal';
 export { default as DiaryTextPreview } from './DiaryTextPreview';
 export { default as LocalDiaryContent } from './LocalDiaryContent';

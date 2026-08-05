@@ -1,8 +1,10 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type {
-  CreateDiaryEntryInput,
-  UpdateDiaryEntryData,
+import {
+  createDefaultDiaryFilters,
+  type CreateDiaryEntryInput,
+  type DiaryFilters,
+  type UpdateDiaryEntryData,
 } from '../../../model/types';
 import { DiaryDatabaseOperationGate } from '../diaryDatabaseOperationGate';
 import { DiaryRepository } from '../diaryRepository';
@@ -25,6 +27,32 @@ type DiaryEntryRowFixture = {
 };
 
 const eventAt = Date.UTC(2026, 6, 31, 18, 30);
+
+const getLocalDayBoundary = (
+  year: number,
+  monthIndex: number,
+  day: number,
+  endOfDay: boolean
+): number => {
+  const date = new Date(0);
+
+  date.setFullYear(year, monthIndex, day);
+  date.setHours(
+    endOfDay ? 23 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 999 : 0
+  );
+
+  return date.getTime();
+};
+
+const createFilters = (
+  overrides: Partial<DiaryFilters> = {}
+): DiaryFilters => ({
+  ...createDefaultDiaryFilters(),
+  ...overrides,
+});
 
 const createInput = (
   overrides: Partial<CreateDiaryEntryInput> = {}
@@ -421,7 +449,9 @@ describe('DiaryRepository', () => {
 
       expect(getFirstAsync).toHaveBeenCalledWith(
         expect.stringContaining('SELECT COUNT(*) AS total_items'),
-        'user-1'
+        {
+          $userId: 'user-1',
+        }
       );
 
       expect(getAllAsync).toHaveBeenCalledWith(
@@ -432,6 +462,156 @@ describe('DiaryRepository', () => {
           $offset: 30,
         }
       );
+    });
+
+    it('uses the same parameterized filters for COUNT and page rows', async () => {
+      const filters = createFilters({
+        date: {
+          from: '2026-07-30',
+          to: '2026-07-31',
+          activeBoundary: 'to',
+        },
+        glucose: {
+          min: 5.2,
+          max: 8.4,
+        },
+        shortInsulin: {
+          min: 2,
+          max: null,
+        },
+        longInsulin: {
+          min: null,
+          max: 18,
+        },
+        carbsGram: {
+          min: 20,
+          max: 60,
+        },
+        mealRelations: ['afterMeal', 'beforeMeal', 'afterMeal'],
+        photo: 'has',
+        aiAnalysis: 'doesNotHave',
+      });
+
+      getFirstAsync.mockResolvedValue({
+        total_items: 1,
+      });
+      getAllAsync.mockResolvedValue([createRow()]);
+
+      await repository.findPage(1, filters);
+
+      const [countSql, countParameters] = getFirstAsync.mock.calls[0];
+      const [pageSql, pageParameters] = getAllAsync.mock.calls[0];
+      const expectedConditions = [
+        'event_at >= $eventAtFrom',
+        'event_at <= $eventAtTo',
+        'glucose >= $glucoseMin',
+        'glucose <= $glucoseMax',
+        'short_insulin >= $shortInsulinMin',
+        'long_insulin <= $longInsulinMax',
+        'carbs_gram >= $carbsGramMin',
+        'carbs_gram <= $carbsGramMax',
+        'meal_relation IN ($mealRelation0, $mealRelation1)',
+        '(local_photo_uri IS NOT NULL OR photo_url IS NOT NULL)',
+        "TRIM(ai_analysis) = ''",
+      ];
+
+      expectedConditions.forEach((condition) => {
+        expect(countSql).toContain(condition);
+        expect(pageSql).toContain(condition);
+      });
+
+      expect(countParameters).toEqual({
+        $userId: 'user-1',
+        $eventAtFrom: getLocalDayBoundary(2026, 6, 30, false),
+        $eventAtTo: getLocalDayBoundary(2026, 6, 31, true),
+        $glucoseMin: 5.2,
+        $glucoseMax: 8.4,
+        $shortInsulinMin: 2,
+        $longInsulinMax: 18,
+        $carbsGramMin: 20,
+        $carbsGramMax: 60,
+        $mealRelation0: 'beforeMeal',
+        $mealRelation1: 'afterMeal',
+      });
+      expect(pageParameters).toEqual({
+        ...countParameters,
+        $limit: 30,
+        $offset: 0,
+      });
+    });
+
+    it('normalizes reversed date boundaries before querying SQLite', async () => {
+      const filters = createFilters({
+        date: {
+          from: '2026-08-05',
+          to: '2026-08-01',
+          activeBoundary: 'to',
+        },
+      });
+
+      getFirstAsync.mockResolvedValue({
+        total_items: 0,
+      });
+
+      await repository.findPage(1, filters);
+
+      expect(getFirstAsync).toHaveBeenCalledWith(expect.any(String), {
+        $userId: 'user-1',
+        $eventAtFrom: getLocalDayBoundary(2026, 7, 1, false),
+        $eventAtTo: getLocalDayBoundary(2026, 7, 5, true),
+      });
+      expect(getAllAsync).not.toHaveBeenCalled();
+    });
+
+    it('filters entries that do not have a photo and have AI analysis', async () => {
+      const filters = createFilters({
+        photo: 'doesNotHave',
+        aiAnalysis: 'has',
+      });
+
+      getFirstAsync.mockResolvedValue({
+        total_items: 0,
+      });
+
+      await repository.findPage(1, filters);
+
+      const [sql] = getFirstAsync.mock.calls[0];
+
+      expect(sql).toContain('(local_photo_uri IS NULL AND photo_url IS NULL)');
+      expect(sql).toContain("TRIM(ai_analysis) != ''");
+    });
+
+    it('rejects invalid numeric filter ranges before accessing SQLite', async () => {
+      const filters = createFilters({
+        glucose: {
+          min: 10,
+          max: 5,
+        },
+      });
+
+      await expect(repository.findPage(1, filters)).rejects.toThrow(
+        'Invalid diary filter range'
+      );
+
+      expect(getFirstAsync).not.toHaveBeenCalled();
+      expect(getAllAsync).not.toHaveBeenCalled();
+    });
+
+    it('rejects an invalid filter date before accessing SQLite', async () => {
+      const filters = createFilters({
+        date: {
+          from: '2026-02-30',
+          to: null,
+          activeBoundary: 'from',
+        },
+      });
+
+      await expect(repository.findPage(1, filters)).rejects.toThrow(
+        'Invalid diary filter date: 2026-02-30'
+      );
+
+      expect(getFirstAsync).not.toHaveBeenCalled();
+      expect(getAllAsync).not.toHaveBeenCalled();
     });
 
     it.each([0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY])(
