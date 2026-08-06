@@ -3,10 +3,10 @@ import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Input } from '@entities/shared/ui';
 import { errorMapper, validateInput } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
 import { PortalModal, showNotification } from '@features/shared/ui';
+import { Button, Input } from '@entities/shared/ui';
 
 import { requestPasswordReset } from '../api/firebase/services/requestPasswordReset';
 import * as styles from '../styles/ResetPassword';

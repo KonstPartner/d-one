@@ -1,7 +1,7 @@
-import TabsRoot from '@entities/layout/ui/tabs/Root';
+import { AppTabs } from '@app/routes';
 
-const tabs_root = () => {
-  return <TabsRoot />;
+const TabsLayout = () => {
+  return <AppTabs />;
 };
 
-export default tabs_root;
+export default TabsLayout;

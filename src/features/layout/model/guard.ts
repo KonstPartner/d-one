@@ -1,4 +1,5 @@
 import { UserRole } from '@features/auth/model';
+import { isPathAllowed, normalizePath } from '@shared/routes';
 
 import {
   AUTH_PATH,
@@ -10,7 +11,6 @@ import {
   UNVERIFIED_PATHS,
   USER_PATHS,
 } from './constants';
-import { isPathAllowed, normalizePath } from './path';
 
 type GetGuardRedirectPathParams = {
   pathname: string;

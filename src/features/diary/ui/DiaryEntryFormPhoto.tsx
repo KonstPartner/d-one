@@ -4,8 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 
-import Button from '@entities/shared/ui/Button';
 import * as globalStyles from '@features/shared/styles/global';
+import Button from '@entities/shared/ui/Button';
 
 import * as styles from '../styles/DiaryEntryFormPhoto';
 

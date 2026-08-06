@@ -5,8 +5,8 @@ import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 import { DateData } from 'react-native-calendars';
 
-import { calendarThemeStyles } from '@entities/shared/constants';
 import { i18n } from '@features/i18n/model';
+import { calendarThemeStyles } from '@entities/shared/constants';
 
 import { dateKit } from '../constants/date';
 import { CalendarComponentProps } from '../types/calendar';

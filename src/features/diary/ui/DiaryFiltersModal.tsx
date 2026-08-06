@@ -13,9 +13,9 @@ import { useTranslation } from 'react-i18next';
 import { Calendar, type DateData } from 'react-native-calendars';
 import { ScrollView } from 'react-native-gesture-handler';
 
-import Button from '@entities/shared/ui/Button';
 import * as globalStyles from '@features/shared/styles/global';
 import PortalModal from '@features/shared/ui/PortalModal';
+import Button from '@entities/shared/ui/Button';
 
 import useDiaryFilters from '../model/hooks/useDiaryFilters';
 import type {

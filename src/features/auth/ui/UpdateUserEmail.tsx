@@ -1,8 +1,8 @@
 import { Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 
-import { Button, Input } from '@entities/shared/ui';
 import * as globalStyles from '@features/shared/styles/global';
+import { Button, Input } from '@entities/shared/ui';
 
 import useAuthData from '../api/hooks/useAuthData';
 import useUpdateUserEmail from '../api/hooks/useUpdateUserEmail';

@@ -1,4 +1,12 @@
-export const normalizePath = (pathname: string) => {
+const createPathPattern = (allowedPath: string): RegExp => {
+  const escapedPath = allowedPath
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    .replace(/\\\[([^\]]+)\\\]/g, '[^/]+');
+
+  return new RegExp(`^${escapedPath}$`);
+};
+
+export const normalizePath = (pathname: string): string => {
   if (!pathname || pathname === '/') {
     return '/';
   }
@@ -8,18 +16,10 @@ export const normalizePath = (pathname: string) => {
   return pathWithoutQuery.replace(/\/+$/, '') || '/';
 };
 
-const createPathPattern = (allowedPath: string) => {
-  const escapedPath = allowedPath
-    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    .replace(/\\\[([^\]]+)\\\]/g, '[^/]+');
-
-  return new RegExp(`^${escapedPath}$`);
-};
-
 export const isPathAllowed = (
   pathname: string,
   allowedPaths: readonly string[]
-) => {
+): boolean => {
   const normalizedPathname = normalizePath(pathname);
 
   return allowedPaths.some((allowedPath) => {
@@ -30,5 +30,6 @@ export const isPathAllowed = (
   });
 };
 
-export const isSamePath = (firstPath: string, secondPath: string) =>
-  normalizePath(firstPath) === normalizePath(secondPath);
+export const isSamePath = (firstPath: string, secondPath: string): boolean => {
+  return normalizePath(firstPath) === normalizePath(secondPath);
+};

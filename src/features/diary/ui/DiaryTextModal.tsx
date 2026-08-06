@@ -4,8 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@entities/shared/ui';
 import * as globalStyles from '@features/shared/styles/global';
+import { Button } from '@entities/shared/ui';
 
 import * as styles from '../styles/DiaryTextModal';
 

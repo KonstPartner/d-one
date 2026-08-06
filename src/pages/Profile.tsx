@@ -4,8 +4,6 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import { PageWrapper } from '@entities/layout/ui';
-import { Loader, LoadingView } from '@entities/shared/ui';
 import { useAuthData } from '@features/auth/api/hooks';
 import { UserRole } from '@features/auth/model';
 import * as styles from '@features/auth/styles/Profile';
@@ -15,6 +13,8 @@ import {
   UpdateUserEmail,
 } from '@features/auth/ui';
 import { PortalModal } from '@features/shared/ui';
+import { PageWrapper } from '@entities/layout/ui';
+import { Loader, LoadingView } from '@entities/shared/ui';
 
 const Profile = () => {
   const theme = useTheme();

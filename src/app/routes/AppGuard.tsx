@@ -1,16 +1,20 @@
-import { ReactNode, useEffect, useState } from 'react';
-import { View } from 'react-native';
-import { useTheme } from '@emotion/react';
-import { Href, router, usePathname } from 'expo-router';
+import { type ReactNode, useEffect, useState } from 'react';
+import styled from '@emotion/native';
+import { type Href, router, usePathname } from 'expo-router';
 
-import { LoadingView } from '@entities/shared/ui';
 import useAuthData from '@features/auth/api/hooks/useAuthData';
 import { useAuth } from '@features/auth/model/context/AuthContext';
-import { getGuardRedirectPath, isSamePath } from '@features/layout/model';
+import { LoadingView } from '@entities/shared/ui';
+import { isSamePath } from '@shared/routes';
 
-const AppGuard = ({ children }: { children: ReactNode }) => {
+import { getGuardRedirectPath } from './model/getGuardRedirectPath';
+
+type AppGuardProps = {
+  children: ReactNode;
+};
+
+export const AppGuard = ({ children }: AppGuardProps) => {
   const pathname = usePathname();
-  const theme = useTheme();
 
   const { authUser, emailVerified } = useAuth();
 
@@ -52,48 +56,40 @@ const AppGuard = ({ children }: { children: ReactNode }) => {
 
   if (isAuthLoading || isRedirecting) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: theme.colors.bg,
-        }}
-      >
-        <View style={{ display: 'none' }}>{children}</View>
+      <GuardContainer>
+        <HiddenContent>{children}</HiddenContent>
 
         <LoadingView loading />
-      </View>
+      </GuardContainer>
     );
   }
 
   if (isAuthDataError) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: theme.colors.bg,
-        }}
-      >
+      <GuardContainer>
         <LoadingView loading />
-      </View>
+      </GuardContainer>
     );
   }
 
   if (redirectPath && !isSamePath(redirectPath, pathname)) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: theme.colors.bg,
-        }}
-      >
-        <View style={{ display: 'none' }}>{children}</View>
+      <GuardContainer>
+        <HiddenContent>{children}</HiddenContent>
 
         <LoadingView loading />
-      </View>
+      </GuardContainer>
     );
   }
 
   return <>{children}</>;
 };
 
-export default AppGuard;
+const GuardContainer = styled.View`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colors.bg};
+`;
+
+const HiddenContent = styled.View`
+  display: none;
+`;

@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 
-import { Button, PasswordInput } from '@entities/shared/ui';
 import * as globalStyles from '@features/shared/styles/global';
+import { Button, PasswordInput } from '@entities/shared/ui';
 
 import useChangePasswordForm from '../api/hooks/useChangePasswordForm';
 

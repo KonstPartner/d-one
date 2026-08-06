@@ -3,8 +3,8 @@ import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Edges, SafeAreaView } from 'react-native-safe-area-context';
 
-import { AvoidKeyboardView } from '@entities/shared/ui';
 import * as globalStyles from '@features/shared/styles/global';
+import { AvoidKeyboardView } from '@entities/shared/ui';
 
 const PageWrapper = ({
   children,

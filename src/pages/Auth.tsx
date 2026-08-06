@@ -1,12 +1,12 @@
 import { ScrollView, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 
-import { PageWrapper } from '@entities/layout/ui';
-import { Loader, LoadingView } from '@entities/shared/ui';
 import { useAuthData } from '@features/auth/api';
 import { useAuth } from '@features/auth/model';
 import * as styles from '@features/auth/styles/Auth';
 import { AuthForms, LogoutButton, VerifyEmail } from '@features/auth/ui';
+import { PageWrapper } from '@entities/layout/ui';
+import { Loader, LoadingView } from '@entities/shared/ui';
 
 const Auth = () => {
   const theme = useTheme();

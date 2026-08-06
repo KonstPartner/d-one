@@ -5,12 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { ScrollView } from 'react-native-gesture-handler';
 
-import BigInput from '@entities/shared/ui/BigInput';
-import Button from '@entities/shared/ui/Button';
-import SelectDropdown from '@entities/shared/ui/SelectDropdown';
 import type { SelectDropdownOption } from '@features/shared/model/types/dropdown';
 import * as globalStyles from '@features/shared/styles/global';
 import PortalModal from '@features/shared/ui/PortalModal';
+import BigInput from '@entities/shared/ui/BigInput';
+import Button from '@entities/shared/ui/Button';
+import SelectDropdown from '@entities/shared/ui/SelectDropdown';
 
 import useDiaryEntryForm from '../model/hooks/useDiaryEntryForm';
 import { MEAL_RELATION_PRESENTATION } from '../model/mealRelationPresentation';
