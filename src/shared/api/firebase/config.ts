@@ -1,9 +1,13 @@
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { Auth, getAuth, initializeAuth, Persistence } from 'firebase/auth';
+import {
+  type Auth,
+  getAuth,
+  initializeAuth,
+  type Persistence,
+} from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-
-import { PlatformOS } from '@features/shared/model/constants';
 
 const { getReactNativePersistence } = require('firebase/auth') as {
   getReactNativePersistence: (storage: typeof AsyncStorage) => Persistence;
@@ -26,8 +30,12 @@ const getNativeAuth = (): Auth => {
     return initializeAuth(app, {
       persistence: getReactNativePersistence(AsyncStorage),
     });
-  } catch (error) {
-    const errorCode = (error as { code?: string }).code;
+  } catch (error: unknown) {
+    const errorCode = (
+      error as {
+        code?: string;
+      }
+    ).code;
 
     if (errorCode === 'auth/already-initialized') {
       return getAuth(app);
@@ -37,7 +45,7 @@ const getNativeAuth = (): Auth => {
   }
 };
 
-const auth = PlatformOS.WEB ? getAuth(app) : getNativeAuth();
+const auth = Platform.OS === 'web' ? getAuth(app) : getNativeAuth();
 
 const db = getFirestore(app);
 

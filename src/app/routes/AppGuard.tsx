@@ -3,7 +3,7 @@ import styled from '@emotion/native';
 import { type Href, router, usePathname } from 'expo-router';
 
 import useAuthData from '@features/auth/api/hooks/useAuthData';
-import { useAuth } from '@features/auth/model/context/AuthContext';
+import { useSession } from '@entities/session';
 import { LoadingView } from '@entities/shared/ui';
 import { isSamePath } from '@shared/routes';
 
@@ -16,21 +16,23 @@ type AppGuardProps = {
 export const AppGuard = ({ children }: AppGuardProps) => {
   const pathname = usePathname();
 
-  const { authUser, emailVerified } = useAuth();
+  const { sessionUser, emailVerified } = useSession();
 
   const { authData, isAuthLoading, isError: isAuthDataError } = useAuthData();
 
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  const hasAuthUser = Boolean(authUser);
+  const hasSessionUser = sessionUser !== null;
 
   const canResolveRoute =
-    !isAuthLoading && !isAuthDataError && (!hasAuthUser || Boolean(authData));
+    !isAuthLoading &&
+    !isAuthDataError &&
+    (!hasSessionUser || Boolean(authData));
 
   const redirectPath = canResolveRoute
     ? getGuardRedirectPath({
         pathname,
-        hasAuthUser,
+        hasSessionUser,
         emailVerified,
         authRole: authData?.role ?? null,
       })

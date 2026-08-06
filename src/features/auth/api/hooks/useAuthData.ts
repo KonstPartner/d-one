@@ -1,11 +1,12 @@
 import { useIsMutating, useQuery } from '@tanstack/react-query';
 
-import { useAuth } from '../../model/context/AuthContext';
+import { useSession } from '@entities/session';
+
 import { authApi } from '../authApi';
 import { userQueryKeys } from '../constants';
 
 const useAuthData = () => {
-  const { authUser, isAuthReady } = useAuth();
+  const { sessionUser, isSessionReady } = useSession();
 
   const isAuthMutating =
     useIsMutating({
@@ -13,13 +14,14 @@ const useAuthData = () => {
     }) > 0;
 
   const query = useQuery({
-    ...authApi.getUserDataOptions(authUser),
+    ...authApi.getUserDataOptions(sessionUser),
 
-    enabled: isAuthReady && Boolean(authUser) && !isAuthMutating,
+    enabled: isSessionReady && Boolean(sessionUser) && !isAuthMutating,
   });
 
   const isAuthLoading =
-    !isAuthReady || (Boolean(authUser) && (isAuthMutating || query.isPending));
+    !isSessionReady ||
+    (Boolean(sessionUser) && (isAuthMutating || query.isPending));
 
   return {
     authData: query.data,

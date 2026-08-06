@@ -5,18 +5,18 @@ import { ROUTE_ACCESS } from './accessPolicy';
 
 type GetGuardRedirectPathParams = {
   pathname: string;
-  hasAuthUser: boolean;
+  hasSessionUser: boolean;
   emailVerified: boolean;
   authRole: UserRole | null;
 };
 
 export const getGuardRedirectPath = ({
   pathname,
-  hasAuthUser,
+  hasSessionUser,
   emailVerified,
   authRole,
 }: GetGuardRedirectPathParams): RoutePath | null => {
-  if (!hasAuthUser) {
+  if (!hasSessionUser) {
     return isPathAllowed(pathname, ROUTE_ACCESS.guest) ? null : ROUTES.auth;
   }
 

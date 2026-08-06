@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { errorMapper } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
-
-import { auth } from '../firebase/config';
+import { auth } from '@shared/api/firebase';
 
 const useCheckVerifiedEmail = () => {
   const { t } = useTranslation();

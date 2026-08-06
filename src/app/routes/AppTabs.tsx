@@ -5,10 +5,11 @@ import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { useAuthData } from '@features/auth/api';
-import { useAuth, UserRole } from '@features/auth/model';
+import { UserRole } from '@features/auth/model';
 import { HeaderMenu } from '@features/header/ui';
 import { useNetwork } from '@features/network/model';
 import * as globalStyles from '@features/shared/styles/global';
+import { useSession } from '@entities/session';
 
 import { DiaryRuntimeBoundary } from '../providers/DiaryRuntimeBoundary';
 
@@ -18,7 +19,7 @@ export const AppTabs = () => {
   const theme = useTheme();
   const { t } = useTranslation();
 
-  const { authUser } = useAuth();
+  const { sessionUser } = useSession();
   const { authData } = useAuthData();
   const { status: networkStatus } = useNetwork();
 
@@ -36,7 +37,7 @@ export const AppTabs = () => {
         : 'help-circle-outline';
 
   return (
-    <DiaryRuntimeBoundary enabled={isUser} userId={authUser?.uid ?? null}>
+    <DiaryRuntimeBoundary enabled={isUser} userId={sessionUser?.uid ?? null}>
       <Tabs
         screenOptions={createTabScreenOptions({
           theme,
