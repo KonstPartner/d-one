@@ -1,0 +1,105 @@
+{
+  "auth": {
+    "brand": "Diabetes Diary",
+    "forms": {
+      "signInTitle": "Sign in",
+      "signUpTitle": "Registration",
+      "or": "or",
+      "labels": {
+        "nickname": "Nickname",
+        "email": "Email",
+        "password": "Password",
+        "repeatPassword": "Repeat password"
+      },
+      "placeholders": {
+        "enterNickname": "Enter nickname",
+        "enterEmail": "Enter email",
+        "enterPassword": "Enter password",
+        "confirmPassword": "Repeat password"
+      },
+      "buttons": {
+        "logIn": "Sign in",
+        "signUp": "Register",
+        "googleSignIn": "Sign in with Google"
+      },
+      "links": {
+        "noAccount": "Don't have an account?",
+        "signUp": "Register",
+        "haveAccount": "Already have an account?",
+        "logIn": "Sign in",
+        "forgotPassword": "Forgot password?"
+      }
+    },
+    "notifications": {
+      "loginSuccess": "You have signed in successfully.",
+      "registerSuccess": "Your account has been created.",
+      "passwordMismatch": "Passwords do not match.",
+      "alreadyLoggedIn": "You are already signed in.",
+      "logoutSuccess": "You have successfully signed out.",
+      "email": {
+        "verificationMessageSent": "Verification email sent.",
+        "notVerified": "The email has not been verified yet.",
+        "verifiedSuccess": "Email verified successfully.",
+        "logoutSuccess": "You have signed out successfully.",
+        "same": "The new email is the same as the current email",
+        "verificationSentToNew": "A verification email was sent to the new address",
+        "notVerifiedYet": "The new email has not been verified yet",
+        "verifiedRelogin": "The email was changed. Sign in again"
+      },
+      "notAuthenticated": "The user is not authenticated",
+      "password": {
+        "newMismatch": "The new passwords do not match",
+        "changedSuccess": "The password was changed successfully"
+      }
+    },
+    "verifyEmail": {
+      "title": "Verify email",
+      "description": "Email verification is required to access the application.",
+      "sentDescription": "Open the verification link sent to your email.",
+      "sentMessage": "Verification email sent.",
+      "buttons": {
+        "send": "Send verification link",
+        "check": "Check verification"
+      }
+    },
+    "buttons": {
+      "logout": "Sign out"
+    },
+    "forgotPassword": {
+      "title": "Reset password",
+      "description": "Enter the email address used during registration. We will send you a link to create a new password.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter email",
+      "successText": "A password reset link has been sent to your email."
+    },
+    "profile": {
+      "title": "Profile",
+      "changePasswordTitle": "Change password",
+      "email": {
+        "title": "Email",
+        "warningRelogin": "You will need to sign in again after changing your email",
+        "sentTo": "The verification email was sent to:"
+      },
+      "placeholders": {
+        "enterNewEmail": "Enter a new email",
+        "currentPassword": "Current password",
+        "newPassword": "New password",
+        "confirmNewPassword": "Confirm new password"
+      },
+      "buttons": {
+        "changeEmail": "Change email",
+        "sendVerification": "Send verification",
+        "confirmDone": "I verified my email",
+        "changePassword": "Change password",
+        "cancel": "Cancel"
+      },
+      "nickname": "Nickname",
+      "role": "Role",
+      "roles": {
+        "user": "User",
+        "follower": "Follower",
+        "pending": "Access not granted"
+      }
+    }
+  }
+}

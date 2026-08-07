@@ -3,7 +3,7 @@ import { useTheme } from '@emotion/react';
 import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { HeaderMenu } from '@features/header/ui';
+import { HeaderMenu } from '@widgets/header-menu';
 
 import { createStackScreenOptions } from './config/stackScreenOptions';
 

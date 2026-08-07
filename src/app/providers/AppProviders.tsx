@@ -4,12 +4,13 @@ import type { ReactNode } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Host } from 'react-native-portalize';
 
-import { HeaderMenuProvider } from '@features/header/model';
+import { HeaderMenuProvider } from '@widgets/header-menu';
 import { queryClient } from '@features/shared/api';
 import { Notification } from '@features/shared/ui';
-import { AppThemeProvider } from '@features/theme/model';
 import { SessionProvider } from '@entities/session';
 import { removeLocalUserProfile, userProfileQueryKeys } from '@entities/user';
+
+import { AppThemeProvider } from './theme/AppThemeProvider';
 
 type AppProvidersProps = {
   children: ReactNode;

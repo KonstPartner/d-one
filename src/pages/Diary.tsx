@@ -10,6 +10,7 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
+import { type HeaderMenuItem, useHeaderMenu } from '@widgets/header-menu';
 import { useAuthData } from '@features/auth/api';
 import { UserRole } from '@features/auth/model';
 import {
@@ -37,7 +38,6 @@ import {
 } from '@features/diary/ui';
 import DiaryFiltersModal from '@features/diary/ui/DiaryFiltersModal';
 import DiarySearchBar from '@features/diary/ui/DiarySearchBar';
-import { type HeaderMenuItem, useHeaderMenu } from '@features/header/model';
 import { PlatformOS } from '@features/shared/model';
 import * as globalStyles from '@features/shared/styles/global';
 import { showNotification } from '@features/shared/ui';

@@ -4,8 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { HeaderMenu } from '@widgets/header-menu';
 import { useCurrentUserProfile } from '@features/auth/model';
-import { HeaderMenu } from '@features/header/ui';
 import { useNetwork } from '@features/network/model';
 import * as globalStyles from '@features/shared/styles/global';
 import { useSession } from '@entities/session';

@@ -1,0 +1,105 @@
+{
+  "auth": {
+    "brand": "Дневник диабета",
+    "forms": {
+      "signInTitle": "Вход",
+      "signUpTitle": "Регистрация",
+      "or": "или",
+      "labels": {
+        "nickname": "Никнейм",
+        "email": "Email",
+        "password": "Пароль",
+        "repeatPassword": "Повторите пароль"
+      },
+      "placeholders": {
+        "enterNickname": "Введите никнейм",
+        "enterEmail": "Введите email",
+        "enterPassword": "Введите пароль",
+        "confirmPassword": "Повторите пароль"
+      },
+      "buttons": {
+        "logIn": "Войти",
+        "signUp": "Зарегистрироваться",
+        "googleSignIn": "Войти через Google"
+      },
+      "links": {
+        "noAccount": "Нет аккаунта?",
+        "signUp": "Регистрация",
+        "haveAccount": "Уже есть аккаунт?",
+        "logIn": "Войти",
+        "forgotPassword": "Забыли пароль?"
+      }
+    },
+    "notifications": {
+      "loginSuccess": "Вход выполнен успешно.",
+      "registerSuccess": "Аккаунт успешно создан.",
+      "passwordMismatch": "Пароли не совпадают.",
+      "alreadyLoggedIn": "Вы уже вошли в аккаунт.",
+      "logoutSuccess": "Вы успешно вышли из аккаунта.",
+      "email": {
+        "verificationMessageSent": "Письмо для подтверждения отправлено.",
+        "notVerified": "Email пока не подтверждён.",
+        "verifiedSuccess": "Email успешно подтверждён.",
+        "logoutSuccess": "Вы успешно вышли из аккаунта.",
+        "same": "Новый email совпадает с текущим",
+        "verificationSentToNew": "Письмо для подтверждения отправлено на новый email",
+        "notVerifiedYet": "Новый email ещё не подтверждён",
+        "verifiedRelogin": "Email изменён. Войдите в аккаунт повторно"
+      },
+      "notAuthenticated": "Пользователь не авторизован",
+      "password": {
+        "newMismatch": "Новые пароли не совпадают",
+        "changedSuccess": "Пароль успешно изменён"
+      },
+      "nickname": "Никнейм",
+      "role": "Роль",
+      "roles": {
+        "user": "Пользователь",
+        "follower": "Подписчик",
+        "pending": "Доступ не предоставлен"
+      }
+    },
+    "verifyEmail": {
+      "title": "Подтверждение email",
+      "description": "Для доступа к приложению необходимо подтвердить email.",
+      "sentDescription": "Откройте ссылку для подтверждения, отправленную на ваш email.",
+      "sentMessage": "Письмо для подтверждения отправлено.",
+      "buttons": {
+        "send": "Отправить ссылку",
+        "check": "Проверить подтверждение"
+      }
+    },
+    "buttons": {
+      "logout": "Выйти"
+    },
+    "forgotPassword": {
+      "title": "Сброс пароля",
+      "description": "Введите email, указанный при регистрации. Мы отправим ссылку для создания нового пароля.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Введите email",
+      "successText": "Ссылка для сброса пароля отправлена на ваш email."
+    },
+    "profile": {
+      "title": "Профиль",
+      "changePasswordTitle": "Изменение пароля",
+      "email": {
+        "title": "Email",
+        "warningRelogin": "После изменения email потребуется повторно войти в аккаунт",
+        "sentTo": "Письмо для подтверждения отправлено на:"
+      },
+      "placeholders": {
+        "enterNewEmail": "Введите новый email",
+        "currentPassword": "Текущий пароль",
+        "newPassword": "Новый пароль",
+        "confirmNewPassword": "Повторите новый пароль"
+      },
+      "buttons": {
+        "changeEmail": "Изменить email",
+        "sendVerification": "Отправить подтверждение",
+        "confirmDone": "Я подтвердил email",
+        "changePassword": "Изменить пароль",
+        "cancel": "Отмена"
+      }
+    }
+  }
+}
