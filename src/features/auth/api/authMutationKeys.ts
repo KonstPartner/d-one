@@ -1,13 +1,13 @@
-const AUTH_MUTATION_ROOT = ['auth', 'mutation'] as const;
+import { sessionMutationKeys } from '@entities/session';
 
 export const authMutationKeys = {
-  root: AUTH_MUTATION_ROOT,
+  root: sessionMutationKeys.root,
 
-  login: [...AUTH_MUTATION_ROOT, 'login'] as const,
+  login: sessionMutationKeys.operation('login'),
 
-  register: [...AUTH_MUTATION_ROOT, 'register'] as const,
+  register: sessionMutationKeys.operation('register'),
 
-  googleLogin: [...AUTH_MUTATION_ROOT, 'google-login'] as const,
+  googleLogin: sessionMutationKeys.operation('google-sign-in'),
 
-  logout: [...AUTH_MUTATION_ROOT, 'logout'] as const,
+  logout: sessionMutationKeys.operation('logout'),
 };
