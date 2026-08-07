@@ -1,4 +1,3 @@
-export { default as useAuthData } from './useAuthData';
 export { default as useChangePasswordForm } from './useChangePasswordForm';
 export { default as useCheckVerifiedEmail } from './useCheckVerifiedEmail';
 export { default as useGoogleAuth } from './useGoogleAuth';

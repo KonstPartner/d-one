@@ -4,18 +4,19 @@ import { useTranslation } from 'react-i18next';
 
 import { errorMapper } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
+import { type UserProfile, userProfileQueryKeys } from '@entities/user';
 
-import type { UserData } from '../../model/types/auth';
 import { getIdTokenFromResponse } from '../../model/utils/googleAuth';
-import { userQueryKeys } from '../constants';
-import { loginWithGoogle } from '../firebase/services/loginWithGoogle';
+import { authMutationKeys } from '../authMutationKeys';
+import { loginWithGoogle } from '../loginWithGoogle';
 
 const useGoogleAuth = () => {
   const { t } = useTranslation();
+
   const queryClient = useQueryClient();
 
-  return useMutation<UserData, Error, AuthSessionResult>({
-    mutationKey: userQueryKeys.googleLogin,
+  return useMutation<UserProfile, Error, AuthSessionResult>({
+    mutationKey: authMutationKeys.googleLogin,
 
     mutationFn: (response: AuthSessionResult) => {
       const idToken = getIdTokenFromResponse(response);
@@ -27,8 +28,8 @@ const useGoogleAuth = () => {
       return loginWithGoogle(idToken);
     },
 
-    onSuccess: (userData) => {
-      queryClient.setQueryData(userQueryKeys.userData(userData.uid), userData);
+    onSuccess: (profile) => {
+      queryClient.setQueryData(userProfileQueryKeys.byId(profile.uid), profile);
 
       showNotification('success', t('auth.notifications.loginSuccess'));
     },

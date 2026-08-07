@@ -1,28 +1,25 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { errorMapper } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
 
-import { userQueryKeys } from '../constants';
-import { logoutUser } from '../firebase/services/logoutUser';
+import { authMutationKeys } from '../authMutationKeys';
+import { logout } from '../logout';
 
 const useLogout = () => {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: logoutUser,
+    mutationKey: authMutationKeys.logout,
+
+    mutationFn: logout,
 
     onSuccess: () => {
-      queryClient.removeQueries({
-        queryKey: userQueryKeys.all,
-      });
-
       showNotification('success', t('auth.notifications.logoutSuccess'));
     },
 
-    onError: (error) => {
+    onError: (error: unknown) => {
       showNotification('error', errorMapper(error, 'firebase'));
     },
   });

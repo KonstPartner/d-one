@@ -3,28 +3,29 @@ import { useTranslation } from 'react-i18next';
 
 import { errorMapper } from '@features/shared/model';
 import { showNotification } from '@features/shared/ui';
+import { userProfileQueryKeys } from '@entities/user';
 
-import { RegisterUserPayload } from '../../model/types/auth';
-import { authApi } from '../authApi';
-import { userQueryKeys } from '../constants';
+import type { RegisterUserPayload } from '../../model/types/auth';
+import { registerWithEmail } from '../authApi';
+import { authMutationKeys } from '../authMutationKeys';
 
 const useRegister = () => {
   const { t } = useTranslation();
+
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: userQueryKeys.register,
+    mutationKey: authMutationKeys.register,
 
-    mutationFn: (payload: RegisterUserPayload) =>
-      authApi.registerWithEmail(payload),
+    mutationFn: (payload: RegisterUserPayload) => registerWithEmail(payload),
 
-    onSuccess: (userData) => {
-      queryClient.setQueryData(userQueryKeys.userData(userData.uid), userData);
+    onSuccess: (profile) => {
+      queryClient.setQueryData(userProfileQueryKeys.byId(profile.uid), profile);
 
       showNotification('success', t('auth.notifications.registerSuccess'));
     },
 
-    onError: (error) => {
+    onError: (error: unknown) => {
       showNotification('error', errorMapper(error, 'firebase'));
     },
   });

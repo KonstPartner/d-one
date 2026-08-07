@@ -3,7 +3,7 @@ import { useIsMutating, useQuery } from '@tanstack/react-query';
 import { useSession } from '@entities/session';
 
 import { authApi } from '../authApi';
-import { userQueryKeys } from '../constants';
+import { userQueryKeys } from '../authMutationKeys';
 
 const useAuthData = () => {
   const { sessionUser, isSessionReady } = useSession();

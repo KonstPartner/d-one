@@ -1,17 +1,3 @@
-export enum UserRole {
-  User = 'user',
-  Follower = 'follower',
-}
-
-export type UserData = {
-  uid: string;
-  email: string;
-  nickname: string;
-  role: UserRole | null;
-  followerUserIds: string[];
-  followedUserId: string | null;
-};
-
 export type AuthFormMode = 'log-in' | 'sign-up';
 
 export type LoginUserFormValues = {

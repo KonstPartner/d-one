@@ -1,6 +1,6 @@
 import { queryClient } from '@features/shared/api';
 
-import { userQueryKeys } from '../../api/constants';
+import { userQueryKeys } from '../../api/authMutationKeys';
 import { removeLocalUserProfile } from '../context/localProfileStorage';
 import { clearAuthSessionData } from '../utils/clearAuthSessionData';
 

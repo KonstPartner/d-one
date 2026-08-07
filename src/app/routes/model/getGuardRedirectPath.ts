@@ -1,4 +1,4 @@
-import type { UserRole } from '@features/auth/model';
+import type { UserRole } from '@entities/user';
 import { isPathAllowed, type RoutePath, ROUTES } from '@shared/routes';
 
 import { ROUTE_ACCESS } from './accessPolicy';
@@ -7,14 +7,14 @@ type GetGuardRedirectPathParams = {
   pathname: string;
   hasSessionUser: boolean;
   emailVerified: boolean;
-  authRole: UserRole | null;
+  role: UserRole | null;
 };
 
 export const getGuardRedirectPath = ({
   pathname,
   hasSessionUser,
   emailVerified,
-  authRole,
+  role,
 }: GetGuardRedirectPathParams): RoutePath | null => {
   if (!hasSessionUser) {
     return isPathAllowed(pathname, ROUTE_ACCESS.guest) ? null : ROUTES.auth;
@@ -26,11 +26,11 @@ export const getGuardRedirectPath = ({
       : ROUTES.auth;
   }
 
-  if (authRole === null) {
+  if (role === null) {
     return isPathAllowed(pathname, ROUTE_ACCESS.pending)
       ? null
       : ROUTES.pending;
   }
 
-  return isPathAllowed(pathname, ROUTE_ACCESS[authRole]) ? null : ROUTES.diary;
+  return isPathAllowed(pathname, ROUTE_ACCESS[role]) ? null : ROUTES.diary;
 };

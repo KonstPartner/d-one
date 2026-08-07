@@ -4,12 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { useAuthData } from '@features/auth/api';
-import { UserRole } from '@features/auth/model';
+import { useCurrentUserProfile } from '@features/auth/model';
 import { HeaderMenu } from '@features/header/ui';
 import { useNetwork } from '@features/network/model';
 import * as globalStyles from '@features/shared/styles/global';
 import { useSession } from '@entities/session';
+import { UserRole } from '@entities/user';
 
 import { DiaryRuntimeBoundary } from '../providers/DiaryRuntimeBoundary';
 
@@ -20,13 +20,17 @@ export const AppTabs = () => {
   const { t } = useTranslation();
 
   const { sessionUser } = useSession();
-  const { authData } = useAuthData();
+
+  const { profile } = useCurrentUserProfile();
+
   const { status: networkStatus } = useNetwork();
 
-  const role = authData?.role ?? null;
+  const role = profile?.role ?? null;
 
   const isPending = role === null;
+
   const isUser = role === UserRole.User;
+
   const isFollower = role === UserRole.Follower;
 
   const networkIconName: keyof typeof Ionicons.glyphMap =
@@ -61,6 +65,7 @@ export const AppTabs = () => {
           name="diary"
           options={{
             title: t('layout.tabs.diary'),
+
             href: isUser || isFollower ? undefined : null,
 
             tabBarIcon: ({ color, size, focused }) => (
@@ -77,6 +82,7 @@ export const AppTabs = () => {
           name="cloud"
           options={{
             title: t('layout.tabs.cloud'),
+
             href: isUser ? undefined : null,
 
             tabBarIcon: ({ color, size, focused }) => (
@@ -93,6 +99,7 @@ export const AppTabs = () => {
           name="pending"
           options={{
             title: t('layout.tabs.pending'),
+
             href: isPending ? undefined : null,
 
             tabBarIcon: ({ color, size, focused }) => (

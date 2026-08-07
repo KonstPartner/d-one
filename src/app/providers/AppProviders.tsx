@@ -4,15 +4,27 @@ import type { ReactNode } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Host } from 'react-native-portalize';
 
-import { clearAuthSessionData } from '@features/auth/model';
 import { HeaderMenuProvider } from '@features/header/model';
 import { queryClient } from '@features/shared/api';
 import { Notification } from '@features/shared/ui';
 import { AppThemeProvider } from '@features/theme/model';
 import { SessionProvider } from '@entities/session';
+import { removeLocalUserProfile, userProfileQueryKeys } from '@entities/user';
 
 type AppProvidersProps = {
   children: ReactNode;
+};
+
+const clearSessionData = async (): Promise<void> => {
+  await queryClient.cancelQueries({
+    queryKey: userProfileQueryKeys.root,
+  });
+
+  queryClient.removeQueries({
+    queryKey: userProfileQueryKeys.root,
+  });
+
+  await removeLocalUserProfile();
 };
 
 export const AppProviders = ({ children }: AppProvidersProps) => {
@@ -20,7 +32,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
     <GestureHandlerRootView style={styles.root}>
       <AppThemeProvider>
         <QueryClientProvider client={queryClient}>
-          <SessionProvider onUnauthenticated={clearAuthSessionData}>
+          <SessionProvider onUnauthenticated={clearSessionData}>
             <Host>
               <HeaderMenuProvider>{children}</HeaderMenuProvider>
             </Host>
