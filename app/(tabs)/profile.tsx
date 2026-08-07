@@ -1,7 +1,7 @@
-import Profile from '@pages/Profile';
+import { ProfilePage } from '@pages/profile';
 
-const profile = () => {
-  return <Profile />;
+const ProfileRoute = () => {
+  return <ProfilePage />;
 };
 
-export default profile;
+export default ProfileRoute;

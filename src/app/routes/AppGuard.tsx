@@ -1,11 +1,12 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import styled from '@emotion/native';
+import { useIsMutating, useQuery } from '@tanstack/react-query';
 import { type Href, router, usePathname } from 'expo-router';
 
-import { useCurrentUserProfile } from '@features/auth/model';
-import { useSession } from '@entities/session';
-import { LoadingView } from '@entities/shared/ui';
+import { sessionMutationKeys, useSession } from '@entities/session';
+import { userProfileQueryOptions } from '@entities/user';
 import { isSamePath } from '@shared/routes';
+import { LoadingView } from '@shared/ui';
 
 import { getGuardRedirectPath } from './model/getGuardRedirectPath';
 
@@ -16,17 +17,33 @@ type AppGuardProps = {
 export const AppGuard = ({ children }: AppGuardProps) => {
   const pathname = usePathname();
 
-  const { sessionUser, emailVerified } = useSession();
-
-  const {
-    profile,
-    isProfileLoading,
-    isError: isProfileError,
-  } = useCurrentUserProfile();
+  const { sessionUser, emailVerified, isSessionReady } = useSession();
 
   const [isRedirecting, setIsRedirecting] = useState(false);
 
+  const activeSessionMutations = useIsMutating({
+    mutationKey: sessionMutationKeys.root,
+  });
+
+  const isSessionMutating = activeSessionMutations > 0;
+
+  const userId = sessionUser?.uid ?? null;
+
+  const profileQuery = useQuery({
+    ...userProfileQueryOptions(userId),
+
+    enabled: isSessionReady && userId !== null && !isSessionMutating,
+  });
+
   const hasSessionUser = sessionUser !== null;
+
+  const isProfileLoading =
+    !isSessionReady ||
+    (hasSessionUser && (isSessionMutating || profileQuery.isPending));
+
+  const isProfileError = hasSessionUser && profileQuery.isError;
+
+  const profile = profileQuery.data ?? null;
 
   const canResolveRoute =
     !isProfileLoading &&
@@ -84,6 +101,7 @@ export const AppGuard = ({ children }: AppGuardProps) => {
 
 const GuardContainer = styled.View`
   flex: 1;
+
   background-color: ${({ theme }) => theme.colors.bg};
 `;
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import { useSession } from '@entities/session';
+import { sessionMutationKeys, useSession } from '@entities/session';
 import { userProfileQueryKeys } from '@entities/user';
 import { errorMapper } from '@shared/lib/errors';
 import { showNotification } from '@shared/lib/notifications';
@@ -20,6 +20,8 @@ export const useLogin = () => {
   const [password, setPassword] = useState('');
 
   const mutation = useMutation({
+    mutationKey: sessionMutationKeys.operation('login'),
+
     mutationFn: loginWithEmail,
 
     onSuccess: (profile) => {

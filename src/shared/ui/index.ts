@@ -4,4 +4,5 @@ export { Loader } from './Loader';
 export { LoadingView } from './LoadingView';
 export { PageLayout } from './PageLayout';
 export { PasswordInput } from './PasswordInput';
+export { PortalModal } from './PortalModal';
 export { Spinner } from './Spinner';

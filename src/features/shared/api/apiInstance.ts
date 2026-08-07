@@ -1,4 +1,4 @@
-import { getAuthToken } from '@features/auth/api/firebase/services/getAuthToken';
+import { getAuthToken } from '@shared/api/firebase';
 
 import { deepTrim } from '../model/utils/deepTrim';
 

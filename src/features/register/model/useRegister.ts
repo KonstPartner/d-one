@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import { useSession } from '@entities/session';
+import { sessionMutationKeys, useSession } from '@entities/session';
 import { userProfileQueryKeys } from '@entities/user';
 import { errorMapper } from '@shared/lib/errors';
 import { showNotification } from '@shared/lib/notifications';
@@ -27,8 +27,11 @@ export const useRegister = ({ prefill }: UseRegisterOptions = {}) => {
   const queryClient = useQueryClient();
 
   const [nickname, setNickname] = useState('');
+
   const [email, setEmail] = useState('');
+
   const [password, setPassword] = useState('');
+
   const [repeatedPassword, setRepeatedPassword] = useState('');
 
   const [validationVisible, setValidationVisible] = useState(false);
@@ -43,6 +46,8 @@ export const useRegister = ({ prefill }: UseRegisterOptions = {}) => {
   }, [prefill]);
 
   const mutation = useMutation({
+    mutationKey: sessionMutationKeys.operation('register'),
+
     mutationFn: registerWithEmail,
 
     onSuccess: (profile) => {
