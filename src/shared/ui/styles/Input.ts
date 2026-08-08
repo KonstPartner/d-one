@@ -34,7 +34,3 @@ export const getFocusedFieldStyle = (theme: Theme): TextStyle => ({
   backgroundColor: theme.colors.card,
   borderColor: theme.colors.primary,
 });
-
-export const ValidationMessage = styled.Text`
-  color: red;
-`;

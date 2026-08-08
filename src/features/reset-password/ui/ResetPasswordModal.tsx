@@ -67,8 +67,7 @@ export const ResetPasswordModal = () => {
           <Button
             style={gs.ButtonStyles(theme, isPending)}
             onPress={submit}
-            disabled={isPending}
-            onDisableSpinner
+            loading={isPending}
           >
             <Text style={gs.TextWhite}>{t('common.send')}</Text>
           </Button>

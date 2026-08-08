@@ -1,71 +1,84 @@
-import {
-  Pressable,
-  type PressableProps,
-  type StyleProp,
-  StyleSheet,
-  type TextStyle,
-  type ViewStyle,
-} from 'react-native';
-import styled from '@emotion/native';
+import { useTheme } from '@emotion/react';
+import type { PressableProps } from 'react-native';
 
 import { Spinner } from './Spinner';
+import * as s from './styles/Button';
 
-type ButtonStyle = StyleProp<ViewStyle & TextStyle>;
+export type ButtonProps = Omit<PressableProps, 'onPress' | 'style'> & {
+  onPress: NonNullable<PressableProps['onPress']>;
 
-type ButtonProps = Omit<PressableProps, 'onPress' | 'style'> & {
-  onPress: () => void;
-  style?: ButtonStyle;
+  style?: PressableProps['style'];
+
+  tone?: s.ButtonTone;
+  variant?: s.ButtonVariant;
+  size?: s.ButtonSize;
+
+  loading?: boolean;
+
   className?: string;
-  onDisableSpinner?: boolean;
 };
+
+export type { ButtonSize, ButtonTone, ButtonVariant } from './styles/Button';
 
 export const Button = ({
   onPress,
   children,
   style,
-  className,
+
+  tone = 'primary',
+  variant = 'solid',
+  size = 'md',
+
+  loading = false,
   disabled = false,
-  onDisableSpinner = false,
+
+  className,
+
+  accessibilityLabel,
+  accessibilityState,
+
+  testID,
+
   ...props
 }: ButtonProps) => {
-  const flattenedStyle = StyleSheet.flatten(style) as
-    | (ViewStyle & TextStyle)
-    | undefined;
+  const theme = useTheme();
+
+  const isDisabled = disabled || loading;
+
+  const foregroundColor = s.getButtonForegroundColor(
+    theme,
+    tone,
+    variant,
+    isDisabled
+  );
 
   return (
-    <ButtonRoot
-      style={style}
-      className={className}
-      testID="button"
-      accessibilityLabel={typeof children === 'string' ? children : ''}
-      onPress={onPress}
-      disabled={disabled}
+    <s.Root
       {...props}
+      className={className}
+      testID={testID ?? 'button'}
+      disabled={isDisabled}
+      accessibilityLabel={
+        accessibilityLabel ??
+        (typeof children === 'string' ? children : undefined)
+      }
+      accessibilityState={{
+        ...accessibilityState,
+        disabled: isDisabled,
+        busy: loading,
+      }}
+      onPress={onPress}
+      style={(state) => [
+        s.getButtonStyle(theme, tone, variant, size, isDisabled),
+
+        typeof style === 'function' ? style(state) : style,
+      ]}
     >
-      {onDisableSpinner && disabled ? (
-        <Spinner
-          color={
-            typeof flattenedStyle?.color === 'string'
-              ? flattenedStyle.color
-              : '#ffffff'
-          }
-          size={
-            typeof flattenedStyle?.fontSize === 'number'
-              ? flattenedStyle.fontSize
-              : 18
-          }
-        />
+      {loading ? (
+        <Spinner color={foregroundColor} size={s.getSpinnerSize(size)} />
       ) : (
         children
       )}
-    </ButtonRoot>
+    </s.Root>
   );
 };
-
-const ButtonRoot = styled(Pressable)`
-  border-radius: 3px;
-  padding: 12px 16px;
-  color: #ffffff;
-  justify-content: center;
-  align-items: center;
-`;

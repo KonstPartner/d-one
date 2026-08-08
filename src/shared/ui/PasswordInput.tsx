@@ -5,7 +5,8 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import { Input, InputLabel, type InputProps } from './Input';
+import { Input, type InputProps } from './Input';
+import * as inputStyles from './styles/Input';
 
 export const PasswordInput = ({
   withLabel,
@@ -21,7 +22,9 @@ export const PasswordInput = ({
 
   return (
     <>
-      {withLabel && <InputLabel>{labelPlaceholder || placeholder}</InputLabel>}
+      {withLabel && (
+        <inputStyles.Label>{labelPlaceholder || placeholder}</inputStyles.Label>
+      )}
 
       <PasswordContainer>
         <Input
@@ -61,10 +64,13 @@ const PasswordContainer = styled.View`
 
 const PasswordToggle = styled.Pressable`
   position: absolute;
+
   top: 0;
   right: 0;
   bottom: 0;
+
   width: 52px;
+
   align-items: center;
   justify-content: center;
 `;

@@ -7,8 +7,9 @@ import {
 } from 'react-native';
 import { useTheme } from '@emotion/react';
 
-import { validateInput, type ValidateInputType } from '@shared/lib/validation';
+import type { ValidateInputType } from '@shared/lib/validation';
 
+import { InvalidMessageText } from './InvalidMessageText';
 import * as s from './styles/Input';
 
 export type InputProps = TextInputProps & {
@@ -50,13 +51,6 @@ export const Input = ({
 
   const [isFocused, setIsFocused] = useState(false);
 
-  const validationMessage =
-    enableInvalidMessageText && isActiveInvalidMessageText && field
-      ? validateInput(field, String(value ?? ''), {
-          returnErrorMessage: true,
-        })
-      : null;
-
   return (
     <>
       {withLabel && <s.Label>{labelPlaceholder || placeholder}</s.Label>}
@@ -85,8 +79,12 @@ export const Input = ({
         {...inputProps}
       />
 
-      {typeof validationMessage === 'string' && (
-        <s.ValidationMessage>{validationMessage}</s.ValidationMessage>
+      {enableInvalidMessageText && field && (
+        <InvalidMessageText
+          field={field}
+          value={String(value ?? '')}
+          isActive={isActiveInvalidMessageText}
+        />
       )}
     </>
   );

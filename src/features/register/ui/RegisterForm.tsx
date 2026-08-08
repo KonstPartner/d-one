@@ -94,7 +94,7 @@ export const RegisterForm = ({ prefill, footer }: RegisterFormProps) => {
         onSubmitEditing={submit}
       />
 
-      <s.SubmitButton onPress={submit} disabled={isPending} onDisableSpinner>
+      <s.SubmitButton onPress={submit} loading={isPending}>
         <s.SubmitButtonText>
           {t('auth.forms.buttons.signUp')}
         </s.SubmitButtonText>

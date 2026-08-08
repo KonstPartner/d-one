@@ -98,9 +98,8 @@ export const PortalModal = ({
               {!withoutCloseBtn && (
                 <s.CloseButton
                   style={s.getCloseButtonStyle(theme, withoutPadding)}
-                  disabled={isDisabled}
+                  loading={isDisabled}
                   onPress={onClose}
-                  onDisableSpinner
                 >
                   <s.CloseButtonText>{t('common.close')}</s.CloseButtonText>
                 </s.CloseButton>

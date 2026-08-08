@@ -9,7 +9,12 @@ export const LogoutButton = () => {
   const { logout, isPending } = useLogout();
 
   return (
-    <s.Root onPress={logout} disabled={isPending} onDisableSpinner>
+    <s.Root
+      tone="danger"
+      variant="outline"
+      loading={isPending}
+      onPress={logout}
+    >
       <s.Text>{t('auth.buttons.logout')}</s.Text>
     </s.Root>
   );

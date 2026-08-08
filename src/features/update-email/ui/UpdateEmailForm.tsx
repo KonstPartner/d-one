@@ -73,19 +73,14 @@ export const UpdateEmailForm = () => {
           <s.ActionsRow>
             <s.FlexiblePrimaryButton
               onPress={sendVerification}
-              disabled={disableSend}
-              onDisableSpinner
+              loading={disableSend}
             >
               <s.PrimaryButtonText>
                 {t('auth.profile.buttons.sendVerification')}
               </s.PrimaryButtonText>
             </s.FlexiblePrimaryButton>
 
-            <s.FlexibleSecondaryButton
-              onPress={cancel}
-              disabled={isLoading}
-              onDisableSpinner
-            >
+            <s.FlexibleSecondaryButton onPress={cancel} loading={isLoading}>
               <s.SecondaryButtonText>
                 {t('auth.profile.buttons.cancel')}
               </s.SecondaryButtonText>
@@ -101,21 +96,13 @@ export const UpdateEmailForm = () => {
           <s.Text>{pendingEmail}</s.Text>
 
           <s.ActionsStack>
-            <s.PrimaryButton
-              onPress={confirmVerified}
-              disabled={!canConfirm}
-              onDisableSpinner
-            >
+            <s.PrimaryButton onPress={confirmVerified} loading={!canConfirm}>
               <s.PrimaryButtonText>
                 {t('auth.profile.buttons.confirmDone')}
               </s.PrimaryButtonText>
             </s.PrimaryButton>
 
-            <s.SecondaryButton
-              onPress={cancel}
-              disabled={isLoading}
-              onDisableSpinner
-            >
+            <s.SecondaryButton onPress={cancel} loading={isLoading}>
               <s.SecondaryButtonText>
                 {t('auth.profile.buttons.cancel')}
               </s.SecondaryButtonText>

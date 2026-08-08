@@ -53,7 +53,7 @@ export const LoginForm = ({ passwordAction }: LoginFormProps) => {
 
       {passwordAction && <s.PasswordAction>{passwordAction}</s.PasswordAction>}
 
-      <s.SubmitButton onPress={submit} disabled={isPending} onDisableSpinner>
+      <s.SubmitButton onPress={submit} loading={isPending}>
         <s.SubmitButtonText>{t('auth.forms.buttons.logIn')}</s.SubmitButtonText>
       </s.SubmitButton>
     </s.Form>

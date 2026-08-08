@@ -33,8 +33,7 @@ export const VerifyEmail = () => {
       <Button
         style={gs.ButtonStyles(theme, isPending)}
         onPress={verificationEmailSent ? check : send}
-        disabled={isPending}
-        onDisableSpinner
+        loading={isPending}
       >
         <s.ButtonText>
           {verificationEmailSent
