@@ -51,8 +51,8 @@ export const Content = styled.View`
 `;
 
 export const CloseButton = styled(Button)`
-  padding-top: ${({ theme }) => theme.spacing.md}px;
-  padding-bottom: ${({ theme }) => theme.spacing.md}px;
+  padding-top: ${({ theme }) => ss.px(theme.spacing.md)};
+  padding-bottom: ${({ theme }) => ss.px(theme.spacing.md)};
 
   background-color: ${({ theme }) => theme.colors.muted};
 `;
@@ -65,18 +65,18 @@ export const CloseButtonText = styled.Text`
 
 export const getSheetStyle = (theme: Theme, withoutPadding: boolean) =>
   css`
-    padding: ${withoutPadding ? 0 : theme.spacing.lg}px;
+    padding: ${withoutPadding ? 0 : ss.px(theme.spacing.lg)};
   ` as ViewStyle;
 
 export const getCloseButtonStyle = (theme: Theme, withoutPadding: boolean) =>
   css`
-    margin-top: ${theme.spacing.lg}px;
+    margin-top: ${ss.px(theme.spacing.lg)};
 
     ${withoutPadding
       ? `
-        margin-left: ${theme.spacing.lg}px;
-        margin-right: ${theme.spacing.lg}px;
-        margin-bottom: ${theme.spacing.lg}px;
+        margin-left: ${ss.px(theme.spacing.lg)};
+        margin-right: ${ss.px(theme.spacing.lg)};
+        margin-bottom: ${ss.px(theme.spacing.lg)};
       `
       : ''}
   ` as ViewStyle;

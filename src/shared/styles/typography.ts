@@ -2,6 +2,7 @@ import { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
 import type { TextStyle } from 'react-native';
 
+import { px } from './toPX';
 import type {
   TextTone,
   ThemeLineHeight,
@@ -43,9 +44,9 @@ export const Text = (
 ) =>
   css`
     color: ${getTextColor(theme, tone)};
-    font-size: ${theme.size[size]}px;
+    font-size: ${px(theme.size[size])};
     font-weight: ${theme.weight[weight]};
-    line-height: ${theme.lineHeight[lineHeight]}px;
+    line-height: ${px(theme.lineHeight[lineHeight])};
   ` as TextStyle;
 
 export const Heading = (theme: Theme) =>
@@ -72,5 +73,5 @@ export const Label = (theme: Theme) =>
   css`
     ${Text(theme, 'sm', 'medium', 'muted', 'sm')};
 
-    margin-bottom: ${theme.spacing.xs}px;
+    margin-bottom: ${px(theme.spacing.xs)};
   ` as TextStyle;

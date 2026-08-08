@@ -1,97 +1,103 @@
-import styled, { css } from '@emotion/native';
+import { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
-import type { ViewStyle } from 'react-native';
+import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 
 import * as ss from '@shared/styles';
 
-export const ManagerContainer = (theme: Theme) =>
+export const ManagerContainer = (theme: Theme): StyleProp<ViewStyle> =>
+  ss.InsetX(theme, 'sm');
+
+export const AnimatedWrap: StyleProp<ViewStyle> = [
+  ss.FullWidth,
   css`
-    ${ss.InsetX(theme, 'sm')};
-  ` as ViewStyle;
+    max-width: 500px;
+  ` as ViewStyle,
+];
 
-export const AnimatedWrap = css`
-  ${ss.FullWidth};
+export const ToastWrapper: StyleProp<ViewStyle> = ss.FullWidth;
 
-  max-width: 500px;
-` as ViewStyle;
+export const Container = (theme: Theme): StyleProp<ViewStyle> => [
+  ss.Surface(theme, 'background'),
+  ss.Rounded(theme, 'md'),
 
-export const ToastWrapper = styled.Pressable`
-  ${ss.FullWidth};
-`;
-
-export const Container = styled.View`
-  ${ss.FullWidth};
-
-  ${({ theme }) => ss.Surface(theme, 'background')};
-  ${({ theme }) => ss.Rounded(theme, 'md')};
-
-  align-self: stretch;
-
-  flex-direction: row;
-  align-items: stretch;
-
-  overflow: hidden;
-`;
-
-export const Stripe = (theme: Theme, accent: string) =>
   css`
-    width: ${theme.spacing.sm}px;
+    width: 100%;
+
+    align-self: stretch;
+
+    flex-direction: row;
+    align-items: stretch;
+
+    overflow: hidden;
+  ` as ViewStyle,
+];
+
+export const Stripe = (theme: Theme, accent: string): StyleProp<ViewStyle> =>
+  css`
+    width: ${ss.px(theme.spacing.sm)};
 
     background-color: ${accent};
   ` as ViewStyle;
 
-export const Content = styled.View`
-  ${({ theme }) => ss.Inset(theme, 'md')};
+export const Content = (theme: Theme): StyleProp<ViewStyle> => [
+  ss.Inset(theme, 'md'),
 
-  flex: 1;
-`;
-
-export const HeaderRow = styled.View`
-  ${({ theme }) => ss.Row(theme, 'center', 'space-between', 'sm')};
-`;
-
-export const TitleRow = styled.View`
-  ${ss.FlexItem};
-
-  ${({ theme }) => ss.Row(theme, 'center', 'flex-start', 'sm')};
-`;
-
-export const Title = styled.Text`
-  ${({ theme }) => ss.Text(theme, 'md', 'heavy', 'default', 'md')};
-
-  flex: 1;
-  min-width: 0px;
-`;
-
-export const Message = styled.Text`
-  ${({ theme }) => ss.Body(theme)};
-
-  margin-top: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-export const CloseButton = styled.Pressable`
-  ${ss.CenterContent};
-`;
-
-export const ProgressTrack = styled.View`
-  ${ss.FullWidth};
-
-  ${({ theme }) => ss.Rounded(theme, 'full')};
-
-  height: ${({ theme }) => theme.spacing.xs}px;
-
-  margin-top: ${({ theme }) => theme.spacing.md}px;
-
-  background-color: ${({ theme }) => theme.colors.card};
-
-  overflow: hidden;
-`;
-
-export const ProgressFill = (theme: Theme, accent: string) =>
   css`
-    ${ss.Rounded(theme, 'full')};
+    flex: 1;
+  ` as ViewStyle,
+];
 
-    height: ${theme.spacing.xs}px;
+export const HeaderRow = (theme: Theme): StyleProp<ViewStyle> =>
+  ss.Row(theme, 'center', 'space-between', 'sm');
+
+export const TitleRow = (theme: Theme): StyleProp<ViewStyle> => [
+  ss.FlexItem,
+  ss.Row(theme, 'center', 'flex-start', 'sm'),
+];
+
+export const Title = (theme: Theme): StyleProp<TextStyle> => [
+  ss.Text(theme, 'md', 'heavy', 'default', 'md'),
+
+  css`
+    flex: 1;
+    min-width: 0px;
+  ` as TextStyle,
+];
+
+export const Message = (theme: Theme): StyleProp<TextStyle> => [
+  ss.Body(theme),
+
+  css`
+    margin-top: ${ss.px(theme.spacing.sm)};
+  ` as TextStyle,
+];
+
+export const CloseButton: StyleProp<ViewStyle> = ss.CenterContent;
+
+export const ProgressTrack = (theme: Theme): StyleProp<ViewStyle> => [
+  ss.FullWidth,
+  ss.Rounded(theme, 'full'),
+
+  css`
+    height: ${ss.px(theme.spacing.xs)};
+
+    margin-top: ${ss.px(theme.spacing.md)};
+
+    background-color: ${theme.colors.card};
+
+    overflow: hidden;
+  ` as ViewStyle,
+];
+
+export const ProgressFill = (
+  theme: Theme,
+  accent: string
+): StyleProp<ViewStyle> => [
+  ss.Rounded(theme, 'full'),
+
+  css`
+    height: ${ss.px(theme.spacing.xs)};
 
     background-color: ${accent};
-  ` as ViewStyle;
+  ` as ViewStyle,
+];

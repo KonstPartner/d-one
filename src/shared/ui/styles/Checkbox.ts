@@ -8,7 +8,7 @@ export const Root = styled.Pressable`
 
   gap: 10px;
 
-  padding: 6px ${({ theme }) => theme.spacing.md}px;
+  padding: 6px ${({ theme }) => ss.px(theme.spacing.md)};
 
   border-radius: 10px;
 `;
@@ -21,7 +21,7 @@ export const Indicator = styled.View<{
   width: 30px;
   height: 30px;
 
-  border-width: ${({ theme }) => theme.border.width.md}px;
+  border-width: ${({ theme }) => ss.px(theme.border.width.md)};
   border-color: ${({ theme, $checked }) =>
     $checked ? theme.colors.primary : theme.colors.border};
 

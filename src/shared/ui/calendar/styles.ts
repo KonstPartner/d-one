@@ -30,7 +30,7 @@ export const WeekHeader = styled.View`
 export const WeekHeaderText = styled.Text`
   color: ${({ theme }) => theme.colors.text};
 
-  font-size: ${({ theme }) => theme.size.base}px;
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
 
   font-weight: ${({ theme }) => theme.weight.semibold};
 `;
@@ -49,7 +49,7 @@ export const DayContainer = styled.View<DayContainerProps>`
     $highlightSelected && $selected ? theme.colors.primary : 'transparent'};
 
   border-width: ${({ theme, $today }) =>
-    $today ? theme.border.width.md : 0}px;
+    ss.px($today ? theme.border.width.md : 0)};
 
   border-color: ${({ theme, $today }) =>
     $today ? theme.colors.primary : 'transparent'};
@@ -70,7 +70,7 @@ export const DayText = styled.Text<DayTextProps>`
     return theme.colors.text;
   }};
 
-  font-size: ${({ theme }) => theme.size.base}px;
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
 
   font-weight: ${({ theme, $selected }) =>
     $selected ? theme.weight.bold : theme.weight.medium};
@@ -107,7 +107,7 @@ export const BackToToday = styled.View`
   left: 0;
   right: 0;
 
-  bottom: ${({ theme }) => theme.spacing.md}px;
+  bottom: ${({ theme }) => ss.px(theme.spacing.md)};
 
   align-items: center;
 `;

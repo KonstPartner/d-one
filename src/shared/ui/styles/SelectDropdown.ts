@@ -76,7 +76,7 @@ const getDropdownPosition = (hasLabel: boolean, inlineOptions: boolean) => {
   return css`
     position: absolute;
 
-    top: ${hasLabel ? 74 : 52}px;
+    top: ${ss.px(hasLabel ? 74 : 52)};
     left: 0;
     right: 0;
 
@@ -162,7 +162,7 @@ export const Option = styled.Pressable<SelectedProps>`
   padding: 7px 9px;
 
   border-width: ${({ theme, $selected }) =>
-    $selected ? theme.border.width.md : theme.border.width.sm}px;
+    ss.px($selected ? theme.border.width.md : theme.border.width.sm)};
 
   border-color: ${({ theme, $selected }) =>
     $selected ? theme.colors.primary : theme.colors.border};

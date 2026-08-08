@@ -1,17 +1,19 @@
 import styled from '@emotion/native';
 
+import * as ss from '@shared/styles';
+
 export const Root = styled.View`
   width: 100%;
   max-width: 420px;
   align-self: center;
-  gap: ${({ theme }) => theme.spacing.lg}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.lg)};
 `;
 
 export const Brand = styled.View`
   align-items: center;
   justify-content: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
+  margin-bottom: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const Logo = styled.Image`
@@ -37,14 +39,14 @@ export const ScreenTitle = styled.Text`
 
 export const LoginContent = styled.View`
   width: 100%;
-  gap: ${({ theme }) => theme.spacing.md}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.md)};
 `;
 
 export const Divider = styled.View`
   width: 100%;
   flex-direction: row;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const DividerLine = styled.View`
@@ -64,19 +66,19 @@ export const SwitchRow = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: ${({ theme }) => theme.spacing.xs}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.xs)};
 `;
 
 export const SwitchText = styled.Text`
   color: ${({ theme }) => theme.colors.muted};
-  font-size: ${({ theme }) => theme.size.base}px;
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
   font-weight: ${({ theme }) => theme.weight.regular};
-  line-height: ${({ theme }) => theme.lineHeight.md}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
 `;
 
 export const SwitchLink = styled.Text`
   color: ${({ theme }) => theme.colors.primary};
-  font-size: ${({ theme }) => theme.size.base}px;
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
   font-weight: ${({ theme }) => theme.weight.bold};
-  line-height: ${({ theme }) => theme.lineHeight.md}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
 `;

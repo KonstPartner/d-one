@@ -13,7 +13,7 @@ export const Field = styled(Input)`
 
   height: 220px;
 
-  padding: ${({ theme }) => theme.spacing.md}px;
+  padding: ${({ theme }) => ss.px(theme.spacing.md)};
 
   background-color: ${({ theme }) => theme.colors.bg};
 

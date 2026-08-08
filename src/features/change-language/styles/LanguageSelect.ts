@@ -2,6 +2,8 @@ import styled from '@emotion/native';
 import type { Theme } from '@emotion/react';
 import type { TextStyle, ViewStyle } from 'react-native';
 
+import * as ss from '@shared/styles';
+
 export const Wrapper = styled.View`
   width: 100%;
 `;
@@ -22,7 +24,7 @@ export const Field = styled.Pressable`
 
   border-width: 1px;
   border-color: ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
   background-color: ${({ theme }) => theme.colors.input};
 `;
@@ -66,7 +68,7 @@ export const ApplyButton = styled.Pressable`
   align-items: center;
   justify-content: center;
 
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
   background-color: ${({ theme }) => theme.colors.primary};
 `;
@@ -98,7 +100,7 @@ export const ModalCard = styled.Pressable`
 
   border-width: 1px;
   border-color: ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.radius.lg}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.lg)};
 
   background-color: ${({ theme }) => theme.colors.bg};
 `;
@@ -123,7 +125,7 @@ export const ModalItem = styled.Pressable`
   padding: 12px;
 
   border-width: 1px;
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
   background-color: ${({ theme }) => theme.colors.bg};
 `;
@@ -167,7 +169,7 @@ export const CancelButton = styled.Pressable`
 
   padding: 12px;
 
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
   background-color: ${({ theme }) => theme.colors.muted};
 `;

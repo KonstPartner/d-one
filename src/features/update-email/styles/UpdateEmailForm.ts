@@ -1,40 +1,41 @@
 import styled from '@emotion/native';
 
+import * as ss from '@shared/styles';
 import { Button, Input } from '@shared/ui';
 
 export const Form = styled.View`
   width: 100%;
-  gap: ${({ theme }) => theme.spacing.sm}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const Title = styled.Text`
   color: ${({ theme }) => theme.colors.text};
 
-  font-size: ${({ theme }) => theme.size.lg}px;
+  font-size: ${({ theme }) => ss.px(theme.size.lg)};
 
   font-weight: ${({ theme }) => theme.weight.semibold};
 
-  line-height: ${({ theme }) => theme.lineHeight.xl}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.xl)};
 `;
 
 export const Text = styled.Text`
   color: ${({ theme }) => theme.colors.text};
 
-  font-size: ${({ theme }) => theme.size.base}px;
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
 
   font-weight: ${({ theme }) => theme.weight.regular};
 
-  line-height: ${({ theme }) => theme.lineHeight.md}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
 `;
 
 export const MutedText = styled.Text`
   color: ${({ theme }) => theme.colors.muted};
 
-  font-size: ${({ theme }) => theme.size.base}px;
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
 
   font-weight: ${({ theme }) => theme.weight.regular};
 
-  line-height: ${({ theme }) => theme.lineHeight.md}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
 `;
 
 export const EmailInput = styled(Input)`
@@ -48,21 +49,21 @@ export const ActionsRow = styled.View`
   align-items: center;
   justify-content: space-between;
 
-  gap: ${({ theme }) => theme.spacing.sm}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const ActionsStack = styled.View`
   width: 100%;
-  gap: ${({ theme }) => theme.spacing.sm}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const PrimaryButton = styled(Button)`
-  min-height: ${({ theme }) => theme.control.height.md}px;
+  min-height: ${({ theme }) => ss.px(theme.control.height.md)};
 
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
-  padding: ${({ theme }) => theme.spacing.md}px
-    ${({ theme }) => theme.spacing.lg}px;
+  padding: ${({ theme }) =>
+    `${ss.px(theme.spacing.md)} ${ss.px(theme.spacing.lg)}`};
 
   background-color: ${({ theme, disabled }) =>
     disabled ? theme.colors.shades.primary.md : theme.colors.primary};
@@ -77,16 +78,16 @@ export const FlexiblePrimaryButton = styled(PrimaryButton)`
 `;
 
 export const SecondaryButton = styled(Button)`
-  min-height: ${({ theme }) => theme.control.height.md}px;
+  min-height: ${({ theme }) => ss.px(theme.control.height.md)};
 
-  border-width: ${({ theme }) => theme.border.width.sm}px;
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
 
   border-color: ${({ theme }) => theme.colors.border};
 
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
-  padding: ${({ theme }) => theme.spacing.md}px
-    ${({ theme }) => theme.spacing.lg}px;
+  padding: ${({ theme }) =>
+    `${ss.px(theme.spacing.md)} ${ss.px(theme.spacing.lg)}`};
 
   background-color: ${({ theme }) => theme.colors.input};
 
@@ -103,11 +104,11 @@ export const FlexibleSecondaryButton = styled(SecondaryButton)`
 export const PrimaryButtonText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
 
-  font-size: ${({ theme }) => theme.size.md}px;
+  font-size: ${({ theme }) => ss.px(theme.size.md)};
 
   font-weight: ${({ theme }) => theme.weight.bold};
 
-  line-height: ${({ theme }) => theme.lineHeight.md}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
 
   text-align: center;
 `;
@@ -115,11 +116,11 @@ export const PrimaryButtonText = styled.Text`
 export const SecondaryButtonText = styled.Text`
   color: ${({ theme }) => theme.colors.text};
 
-  font-size: ${({ theme }) => theme.size.md}px;
+  font-size: ${({ theme }) => ss.px(theme.size.md)};
 
   font-weight: ${({ theme }) => theme.weight.bold};
 
-  line-height: ${({ theme }) => theme.lineHeight.md}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
 
   text-align: center;
 `;

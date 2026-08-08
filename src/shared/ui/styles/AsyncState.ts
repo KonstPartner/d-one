@@ -7,6 +7,6 @@ export const Center = styled.View`
 
   flex: 1;
 
-  margin-top: ${({ theme }) => theme.spacing['5xl']}px;
-  margin-bottom: ${({ theme }) => theme.spacing['5xl']}px;
+  margin-top: ${({ theme }) => ss.px(theme.spacing['5xl'])};
+  margin-bottom: ${({ theme }) => ss.px(theme.spacing['5xl'])};
 `;

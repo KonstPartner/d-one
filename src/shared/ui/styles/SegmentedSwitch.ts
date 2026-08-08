@@ -34,7 +34,7 @@ export const Container = styled.View`
 
   overflow: hidden;
 
-  padding: ${({ theme }) => theme.spacing.xs}px;
+  padding: ${({ theme }) => ss.px(theme.spacing.xs)};
 `;
 
 export const Segment = styled.Pressable<SegmentStateProps>`
@@ -44,7 +44,7 @@ export const Segment = styled.Pressable<SegmentStateProps>`
 
   flex: 1;
 
-  min-height: ${({ theme }) => theme.control.height.sm}px;
+  min-height: ${({ theme }) => ss.px(theme.control.height.sm)};
 
   background-color: ${({ theme, $active }) =>
     $active ? theme.colors.primary : 'transparent'};

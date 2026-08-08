@@ -40,11 +40,12 @@ export const Field = styled(Input)`
 
   padding-left: 44px;
 
-  padding-right: ${({ value }) => (String(value ?? '').length > 0 ? 44 : 16)}px;
+  padding-right: ${({ value }) =>
+    ss.px(String(value ?? '').length > 0 ? 44 : 16)};
 
-  padding-top: ${({ withLabel }) => (withLabel ? 30 : 12)}px;
+  padding-top: ${({ withLabel }) => ss.px(withLabel ? 30 : 12)};
 
-  border-radius: ${({ theme }) => theme.radius.full}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.full)};
 `;
 
 export const getSearchButtonStyle = (
@@ -53,12 +54,12 @@ export const getSearchButtonStyle = (
   focused: boolean
 ) =>
   css`
-    top: ${withLabel ? 36 : 10}px;
+    top: ${ss.px(withLabel ? 36 : 10)};
 
     background-color: ${focused ? theme.colors.card : theme.colors.input};
   ` as ViewStyle;
 
 export const getClearButtonStyle = (withLabel: boolean) =>
   css`
-    top: ${withLabel ? 37 : 15}px;
+    top: ${ss.px(withLabel ? 37 : 15)};
   ` as ViewStyle;

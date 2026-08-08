@@ -17,7 +17,7 @@ export const Card = styled.View`
 
   align-items: center;
 
-  gap: ${({ theme }) => theme.spacing.xl}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.xl)};
 `;
 
 export const Icon = styled.View`
@@ -25,9 +25,9 @@ export const Icon = styled.View`
 
   ${({ theme }) => ss.Rounded(theme, 'full')};
 
-  width: ${({ theme }) => theme.spacing['5xl'] + theme.spacing['2xl']}px;
+  width: ${({ theme }) => ss.px(theme.spacing['5xl'] + theme.spacing['2xl'])};
 
-  height: ${({ theme }) => theme.spacing['5xl'] + theme.spacing['2xl']}px;
+  height: ${({ theme }) => ss.px(theme.spacing['5xl'] + theme.spacing['2xl'])};
 
   background-color: ${({ theme }) => theme.colors.shades.primary.sm};
 `;

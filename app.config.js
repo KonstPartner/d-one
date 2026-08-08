@@ -49,7 +49,12 @@ export default {
     },
 
     plugins: [
-      'expo-router',
+      [
+        'expo-router',
+        {
+          root: './app',
+        },
+      ],
 
       [
         'expo-splash-screen',

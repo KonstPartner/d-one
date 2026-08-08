@@ -1,41 +1,43 @@
 import styled from '@emotion/native';
 
+import * as ss from '@shared/styles';
+
 export const Scroll = styled.ScrollView`
   flex: 1;
 `;
 
 export const Content = styled.View`
-  gap: ${({ theme }) => theme.spacing.md}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.md)};
 
-  padding-top: ${({ theme }) => theme.spacing.sm}px;
+  padding-top: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const Title = styled.Text`
   color: ${({ theme }) => theme.colors.text};
 
-  font-size: ${({ theme }) => theme.size.lg}px;
+  font-size: ${({ theme }) => ss.px(theme.size.lg)};
 
   font-weight: ${({ theme }) => theme.weight.bold};
 
-  line-height: ${({ theme }) => theme.lineHeight.xl}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.xl)};
 `;
 
 export const SectionTitle = styled.Text`
   color: ${({ theme }) => theme.colors.text};
 
-  font-size: ${({ theme }) => theme.size.md}px;
+  font-size: ${({ theme }) => ss.px(theme.size.md)};
 
   font-weight: ${({ theme }) => theme.weight.semibold};
 
-  line-height: ${({ theme }) => theme.lineHeight.lg}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.lg)};
 `;
 
 export const Subtitle = styled.Text`
   color: ${({ theme }) => theme.colors.muted};
 
-  font-size: ${({ theme }) => theme.size.sm}px;
+  font-size: ${({ theme }) => ss.px(theme.size.sm)};
 
   font-weight: ${({ theme }) => theme.weight.regular};
 
-  line-height: ${({ theme }) => theme.lineHeight.sm}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.sm)};
 `;

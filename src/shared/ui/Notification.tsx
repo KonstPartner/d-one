@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
@@ -71,7 +71,6 @@ const CustomToast = (props: CustomToastProps) => {
   const progressWidth = useSharedValue(0);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const startedAtRef = useRef(0);
   const remainingRef = useRef(durationMs);
   const isClosedRef = useRef(false);
@@ -205,21 +204,28 @@ const CustomToast = (props: CustomToastProps) => {
 
   return (
     <Animated.View style={[s.AnimatedWrap, wrapperAnimationStyle]}>
-      <s.ToastWrapper onPressIn={pauseAll} onPressOut={resumeAll}>
-        <s.Container>
+      <Pressable
+        onPressIn={pauseAll}
+        onPressOut={resumeAll}
+        style={s.ToastWrapper}
+      >
+        <View style={s.Container(theme)}>
           <View style={s.Stripe(theme, accent)} />
 
-          <s.Content>
-            <s.HeaderRow>
-              <s.TitleRow>
+          <View style={s.Content(theme)}>
+            <View style={s.HeaderRow(theme)}>
+              <View style={s.TitleRow(theme)}>
                 <Ionicons name={iconName} size={theme.size.lg} color={accent} />
 
-                <s.Title numberOfLines={1}>{props.text1}</s.Title>
-              </s.TitleRow>
+                <Text numberOfLines={1} style={s.Title(theme)}>
+                  {props.text1}
+                </Text>
+              </View>
 
-              <s.CloseButton
+              <Pressable
                 onPress={safeHide}
                 hitSlop={theme.spacing.md}
+                style={s.CloseButton}
                 accessibilityRole="button"
                 accessibilityLabel="Close notification"
               >
@@ -228,12 +234,15 @@ const CustomToast = (props: CustomToastProps) => {
                   size={theme.size.md}
                   color={theme.colors.text}
                 />
-              </s.CloseButton>
-            </s.HeaderRow>
+              </Pressable>
+            </View>
 
-            {!!props.text2 && <s.Message>{props.text2}</s.Message>}
+            {!!props.text2 && (
+              <Text style={s.Message(theme)}>{props.text2}</Text>
+            )}
 
-            <s.ProgressTrack
+            <View
+              style={s.ProgressTrack(theme)}
               onLayout={(event) => {
                 setTrackWidth(event.nativeEvent.layout.width);
               }}
@@ -241,10 +250,10 @@ const CustomToast = (props: CustomToastProps) => {
               <Animated.View
                 style={[s.ProgressFill(theme, accent), progressAnimationStyle]}
               />
-            </s.ProgressTrack>
-          </s.Content>
-        </s.Container>
-      </s.ToastWrapper>
+            </View>
+          </View>
+        </View>
+      </Pressable>
     </Animated.View>
   );
 };

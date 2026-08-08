@@ -2,6 +2,7 @@ import { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
 import type { TextStyle, ViewStyle } from 'react-native';
 
+import { px } from './toPX';
 import type {
   SurfaceShadowLevel,
   SurfaceTone,
@@ -32,32 +33,30 @@ export const Surface = (
 ) =>
   css`
     background-color: ${getSurfaceBackground(theme, tone)};
-
-    border-width: ${withBorder ? theme.border.width.sm : 0}px;
-
+    border-width: ${px(withBorder ? theme.border.width.sm : 0)};
     border-color: ${theme.colors.border};
   ` as ViewStyle;
 
 export const Rounded = (theme: Theme, radius: ThemeRadius = 'lg') =>
   css`
-    border-radius: ${theme.radius[radius]}px;
+    border-radius: ${px(theme.radius[radius])};
   ` as ViewStyle & TextStyle;
 
 export const Inset = (theme: Theme, size: ThemeSpacing = 'lg') =>
   css`
-    padding: ${theme.spacing[size]}px;
+    padding: ${px(theme.spacing[size])};
   ` as ViewStyle;
 
 export const InsetX = (theme: Theme, size: ThemeSpacing = 'lg') =>
   css`
-    padding-left: ${theme.spacing[size]}px;
-    padding-right: ${theme.spacing[size]}px;
+    padding-left: ${px(theme.spacing[size])};
+    padding-right: ${px(theme.spacing[size])};
   ` as ViewStyle;
 
 export const InsetY = (theme: Theme, size: ThemeSpacing = 'lg') =>
   css`
-    padding-top: ${theme.spacing[size]}px;
-    padding-bottom: ${theme.spacing[size]}px;
+    padding-top: ${px(theme.spacing[size])};
+    padding-bottom: ${px(theme.spacing[size])};
   ` as ViewStyle;
 
 export const CardContainer = (
@@ -77,7 +76,7 @@ export const Shadow = (theme: Theme, level: SurfaceShadowLevel = 'soft') => {
   return css`
     shadow-color: ${theme.colors.black};
 
-    shadow-offset: 0px ${strong ? 18 : 10}px;
+    shadow-offset: 0px ${px(strong ? 18 : 10)};
 
     shadow-opacity: ${theme.mode === 'dark'
       ? strong
@@ -87,7 +86,7 @@ export const Shadow = (theme: Theme, level: SurfaceShadowLevel = 'soft') => {
         ? 0.08
         : 0.055};
 
-    shadow-radius: ${strong ? 44 : 24}px;
+    shadow-radius: ${px(strong ? 44 : 24)};
 
     elevation: ${strong ? 8 : 3};
   ` as ViewStyle;
@@ -95,7 +94,7 @@ export const Shadow = (theme: Theme, level: SurfaceShadowLevel = 'soft') => {
 
 export const Divider = (theme: Theme) =>
   css`
-    height: ${theme.border.width.sm}px;
+    height: ${px(theme.border.width.sm)};
 
     background-color: ${theme.colors.border};
 

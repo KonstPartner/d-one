@@ -2,6 +2,8 @@ import styled from '@emotion/native';
 import type { Theme } from '@emotion/react';
 import type { TextStyle, ViewStyle } from 'react-native';
 
+import * as ss from '@shared/styles';
+
 export const Trigger = styled.Pressable`
   height: 44px;
 
@@ -15,7 +17,7 @@ export const MenuContainer = styled.View`
 
   overflow: hidden;
 
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
   background-color: ${({ theme }) => theme.colors.bg};
 `;
@@ -34,11 +36,11 @@ export const MenuItemContent = styled.View`
   flex-direction: row;
   align-items: center;
 
-  gap: ${({ theme }) => theme.spacing.sm}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const MenuText = styled.Text`
-  font-size: ${({ theme }) => theme.size.base}px;
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
 `;
 
 export const getMenuRowStyle = (

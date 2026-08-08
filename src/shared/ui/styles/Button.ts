@@ -121,16 +121,16 @@ export const getButtonStyle = (
   const horizontalPadding = getHorizontalPadding(theme, size);
 
   return css`
-    min-height: ${theme.control.height[size]}px;
+    min-height: ${ss.px(theme.control.height[size])};
 
-    padding-top: ${theme.spacing.sm}px;
-    padding-bottom: ${theme.spacing.sm}px;
-    padding-left: ${horizontalPadding}px;
-    padding-right: ${horizontalPadding}px;
+    padding-top: ${ss.px(theme.spacing.sm)};
+    padding-bottom: ${ss.px(theme.spacing.sm)};
+    padding-left: ${ss.px(horizontalPadding)};
+    padding-right: ${ss.px(horizontalPadding)};
 
-    border-radius: ${size === 'sm' ? theme.radius.sm : theme.radius.md}px;
+    border-radius: ${ss.px(size === 'sm' ? theme.radius.sm : theme.radius.md)};
 
-    border-width: ${hasBorder ? theme.border.width.sm : 0}px;
+    border-width: ${ss.px(hasBorder ? theme.border.width.sm : 0)};
 
     border-color: ${borderColor};
 

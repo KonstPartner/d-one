@@ -1,20 +1,21 @@
 import styled from '@emotion/native';
 
+import * as ss from '@shared/styles';
 import { Button, Input, PasswordInput } from '@shared/ui';
 
 export const Form = styled.View`
   width: 100%;
-  gap: ${({ theme }) => theme.spacing.md}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.md)};
 `;
 
 export const TextInput = styled(Input)`
   min-height: 48px;
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 `;
 
 export const PasswordField = styled(PasswordInput)`
   min-height: 48px;
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 `;
 
 export const PasswordAction = styled.View`
@@ -26,7 +27,7 @@ export const PasswordAction = styled.View`
 export const SubmitButton = styled(Button)`
   min-height: 48px;
 
-  border-radius: ${({ theme }) => theme.radius.md}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
   background-color: ${({ theme, disabled }) =>
     disabled ? theme.colors.shades.primary.md : theme.colors.primary};
@@ -37,8 +38,8 @@ export const SubmitButton = styled(Button)`
 
 export const SubmitButtonText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  font-size: ${({ theme }) => theme.size.md}px;
+  font-size: ${({ theme }) => ss.px(theme.size.md)};
   font-weight: ${({ theme }) => theme.weight.bold};
-  line-height: ${({ theme }) => theme.lineHeight.md}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
   text-align: center;
 `;

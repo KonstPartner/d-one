@@ -6,16 +6,16 @@ import type {
   ViewStyle,
 } from 'react-native';
 
+import * as ss from '@shared/styles';
+
 export const Content = styled.View`
   width: 100%;
-  max-width: 560px;
 
   align-self: center;
 
-  gap: ${({ theme }) => theme.spacing.lg}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.lg)};
 
-  padding: ${({ theme }) => theme.spacing.md}px;
-  padding-bottom: ${({ theme }) => theme.spacing.xl}px;
+  padding-bottom: ${({ theme }) => ss.px(theme.spacing.xl)};
 `;
 
 export const ProfileCard = styled.View`
@@ -23,11 +23,11 @@ export const ProfileCard = styled.View`
 
   overflow: hidden;
 
-  border-width: ${({ theme }) => theme.border.width.sm}px;
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
 
   border-color: ${({ theme }) => theme.colors.border};
 
-  border-radius: ${({ theme }) => theme.radius.lg}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.lg)};
 
   background-color: ${({ theme }) => theme.colors.card};
 `;
@@ -35,28 +35,29 @@ export const ProfileCard = styled.View`
 export const ProfileRow = styled.View`
   width: 100%;
 
-  min-height: ${({ theme }) => theme.control.height.lg + theme.spacing.sm}px;
+  min-height: ${({ theme }) =>
+    ss.px(theme.control.height.lg + theme.spacing.sm)};
 
   flex-direction: row;
   align-items: center;
 
-  padding-horizontal: ${({ theme }) => theme.spacing.lg}px;
+  padding-horizontal: ${({ theme }) => ss.px(theme.spacing.lg)};
 
-  padding-vertical: ${({ theme }) => theme.spacing.sm}px;
+  padding-vertical: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const ProfileLabel = styled.Text`
   width: 32%;
 
-  padding-right: ${({ theme }) => theme.spacing.md}px;
+  padding-right: ${({ theme }) => ss.px(theme.spacing.md)};
 
   color: ${({ theme }) => theme.colors.muted};
 
-  font-size: ${({ theme }) => theme.size.base}px;
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
 
   font-weight: ${({ theme }) => theme.weight.regular};
 
-  line-height: ${({ theme }) => theme.lineHeight.md}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
 `;
 
 export const ProfileValue = styled.Text`
@@ -64,17 +65,17 @@ export const ProfileValue = styled.Text`
 
   color: ${({ theme }) => theme.colors.text};
 
-  font-size: ${({ theme }) => theme.size.md}px;
+  font-size: ${({ theme }) => ss.px(theme.size.md)};
 
   font-weight: ${({ theme }) => theme.weight.bold};
 
-  line-height: ${({ theme }) => theme.lineHeight.lg}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.lg)};
 `;
 
 export const Separator = styled.View`
   width: 100%;
 
-  height: ${({ theme }) => theme.border.width.sm}px;
+  height: ${({ theme }) => ss.px(theme.border.width.sm)};
 
   background-color: ${({ theme }) => theme.colors.border};
 `;
@@ -87,19 +88,19 @@ export const RoleValue = styled.View`
 `;
 
 export const RoleBadge = styled.View`
-  padding-horizontal: ${({ theme }) => theme.spacing.md}px;
+  padding-horizontal: ${({ theme }) => ss.px(theme.spacing.md)};
 
-  padding-vertical: ${({ theme }) => theme.spacing.sm}px;
+  padding-vertical: ${({ theme }) => ss.px(theme.spacing.sm)};
 
-  border-radius: ${({ theme }) => theme.radius.full}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.full)};
 `;
 
 export const RoleBadgeText = styled.Text`
-  font-size: ${({ theme }) => theme.size.sm}px;
+  font-size: ${({ theme }) => ss.px(theme.size.sm)};
 
   font-weight: ${({ theme }) => theme.weight.bold};
 
-  line-height: ${({ theme }) => theme.lineHeight.sm}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.sm)};
 `;
 
 export const getRoleBadgeStyle = (
@@ -122,24 +123,24 @@ export const getRoleBadgeTextStyle = (
 
 export const Actions = styled.View`
   width: 100%;
-  gap: ${({ theme }) => theme.spacing.md}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.md)};
 `;
 
 export const ActionButton = styled.Pressable`
   width: 100%;
 
-  min-height: ${({ theme }) => theme.control.height.lg}px;
+  min-height: ${({ theme }) => ss.px(theme.control.height.lg)};
 
   align-items: center;
   justify-content: center;
 
-  padding-horizontal: ${({ theme }) => theme.spacing.lg}px;
+  padding-horizontal: ${({ theme }) => ss.px(theme.spacing.lg)};
 
-  border-width: ${({ theme }) => theme.border.width.sm}px;
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
 
   border-color: ${({ theme }) => theme.colors.border};
 
-  border-radius: ${({ theme }) => theme.radius.lg}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.lg)};
 
   background-color: ${({ theme }) => theme.colors.card};
 `;
@@ -155,15 +156,15 @@ export const ActionContent = styled.View`
   align-items: center;
   justify-content: center;
 
-  gap: ${({ theme }) => theme.spacing.md}px;
+  gap: ${({ theme }) => ss.px(theme.spacing.md)};
 `;
 
 export const ActionText = styled.Text`
   color: ${({ theme }) => theme.colors.text};
 
-  font-size: ${({ theme }) => theme.size.md}px;
+  font-size: ${({ theme }) => ss.px(theme.size.md)};
 
   font-weight: ${({ theme }) => theme.weight.bold};
 
-  line-height: ${({ theme }) => theme.lineHeight.lg}px;
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.lg)};
 `;

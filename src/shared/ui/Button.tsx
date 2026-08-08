@@ -1,5 +1,10 @@
+import {
+  type PressableProps,
+  type RegisteredStyle,
+  StyleSheet,
+  type ViewStyle,
+} from 'react-native';
 import { useTheme } from '@emotion/react';
-import type { PressableProps } from 'react-native';
 
 import { Spinner } from './Spinner';
 import * as s from './styles/Button';
@@ -68,11 +73,10 @@ export const Button = ({
         busy: loading,
       }}
       onPress={onPress}
-      style={(state) => [
+      style={StyleSheet.flatten([
         s.getButtonStyle(theme, tone, variant, size, isDisabled),
-
-        typeof style === 'function' ? style(state) : style,
-      ]}
+        style as RegisteredStyle<ViewStyle>,
+      ])}
     >
       {loading ? (
         <Spinner color={foregroundColor} size={s.getSpinnerSize(size)} />

@@ -13,16 +13,16 @@ export const Field = styled.TextInput`
 
   background-color: ${({ theme }) => theme.colors.input};
 
-  border-width: ${({ theme }) => theme.border.width.sm}px;
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
   border-style: solid;
   border-color: transparent;
-  border-radius: ${({ theme }) => theme.radius.sm}px;
+  border-radius: ${({ theme }) => ss.px(theme.radius.sm)};
 
-  padding: ${({ theme }) => theme.spacing.md}px
-    ${({ theme }) => theme.spacing.lg}px;
+  padding: ${({ theme }) =>
+    `${ss.px(theme.spacing.md)} ${ss.px(theme.spacing.lg)}`};
 
   color: ${({ theme }) => theme.colors.text};
-  font-size: ${({ theme }) => theme.size.md}px;
+  font-size: ${({ theme }) => ss.px(theme.size.md)};
 
   outline-width: 0;
   outline-style: none;

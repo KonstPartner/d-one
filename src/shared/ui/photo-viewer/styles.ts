@@ -57,7 +57,7 @@ export const StateText = styled.Text`
 
   max-width: 80%;
 
-  margin-top: ${({ theme }) => theme.spacing.md}px;
+  margin-top: ${({ theme }) => ss.px(theme.spacing.md)};
 
   text-align: center;
 `;
@@ -71,7 +71,7 @@ export const Controls = styled(SafeAreaView)`
 
   align-items: flex-end;
 
-  padding: ${({ theme }) => theme.spacing.md}px;
+  padding: ${({ theme }) => ss.px(theme.spacing.md)};
 `;
 
 export const CloseButton = styled.Pressable`
@@ -79,9 +79,9 @@ export const CloseButton = styled.Pressable`
 
   ${({ theme }) => ss.Rounded(theme, 'full')};
 
-  width: ${({ theme }) => theme.control.height.md}px;
+  width: ${({ theme }) => ss.px(theme.control.height.md)};
 
-  height: ${({ theme }) => theme.control.height.md}px;
+  height: ${({ theme }) => ss.px(theme.control.height.md)};
 
   background-color: ${({ theme }) => theme.colors.blackAlpha.xl};
 `;
@@ -99,14 +99,14 @@ export const HintArea = styled(SafeAreaView)`
 
   align-items: center;
 
-  padding: ${({ theme }) => theme.spacing.md}px;
+  padding: ${({ theme }) => ss.px(theme.spacing.md)};
 `;
 
 export const HintText = styled.Text`
   ${({ theme }) => ss.Text(theme, 'sm', 'regular', 'inverse', 'sm')};
 
-  padding: ${({ theme }) => theme.spacing.sm}px
-    ${({ theme }) => theme.spacing.md}px;
+  padding: ${({ theme }) =>
+    `${ss.px(theme.spacing.sm)} ${ss.px(theme.spacing.md)}`};
 
   overflow: hidden;
 

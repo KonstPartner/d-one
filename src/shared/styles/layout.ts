@@ -2,11 +2,12 @@ import { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
 import type { TextStyle, ViewStyle } from 'react-native';
 
+import { px } from './toPX';
 import type { FlexAlign, FlexJustify, ThemeSpacing } from './types';
 
 export const Stack = (theme: Theme, gap: ThemeSpacing = 'sm') =>
   css`
-    gap: ${theme.spacing[gap]}px;
+    gap: ${px(theme.spacing[gap])};
   ` as ViewStyle;
 
 export const Row = (
@@ -19,7 +20,7 @@ export const Row = (
     flex-direction: row;
     align-items: ${align};
     justify-content: ${justify};
-    gap: ${theme.spacing[gap]}px;
+    gap: ${px(theme.spacing[gap])};
   ` as ViewStyle;
 
 export const Cluster = (
@@ -31,7 +32,7 @@ export const Cluster = (
     flex-direction: row;
     flex-wrap: wrap;
     align-items: ${align};
-    gap: ${theme.spacing[gap]}px;
+    gap: ${px(theme.spacing[gap])};
   ` as ViewStyle;
 
 export const ActionsRow = (theme: Theme, gap: ThemeSpacing = 'md') =>
@@ -41,7 +42,7 @@ export const ActionsRow = (theme: Theme, gap: ThemeSpacing = 'md') =>
 
 export const GapContainer = (gap = 8) =>
   css`
-    gap: ${gap}px;
+    gap: ${px(gap)};
   ` as ViewStyle;
 
 export const FullWidth = css`
@@ -74,8 +75,8 @@ export const PageRoot = (theme: Theme) =>
 export const PageContainer = (theme: Theme) =>
   css`
     flex: 1;
-    padding-left: ${theme.spacing.md}px;
-    padding-right: ${theme.spacing.md}px;
+    padding-left: ${px(theme.spacing.md)};
+    padding-right: ${px(theme.spacing.md)};
   ` as ViewStyle;
 
 export const PageContent = (theme: Theme) =>

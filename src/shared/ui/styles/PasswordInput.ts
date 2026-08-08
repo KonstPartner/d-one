@@ -23,10 +23,10 @@ export const Toggle = styled.Pressable`
   right: 0;
   bottom: 0;
 
-  width: ${({ theme }) => theme.control.height.lg}px;
+  width: ${({ theme }) => ss.px(theme.control.height.lg)};
 `;
 
 export const getFieldStyle = (theme: Theme) =>
   css`
-    padding-right: ${theme.control.height.lg}px;
+    padding-right: ${ss.px(theme.control.height.lg)};
   ` as TextStyle;
