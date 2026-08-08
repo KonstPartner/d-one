@@ -1,6 +1,10 @@
-import styled from '@emotion/native';
+import styled, { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
-import type { TextStyle, ViewStyle } from 'react-native';
+import type { ViewStyle } from 'react-native';
+
+import * as ss from '@shared/styles';
+
+import { Input } from '../Input';
 
 export const Root = styled.View`
   position: relative;
@@ -10,54 +14,51 @@ export const Root = styled.View`
 `;
 
 export const SearchButton = styled.Pressable`
-  position: absolute;
+  ${ss.CenterContent};
 
+  ${({ theme }) => ss.Rounded(theme, 'full')};
+
+  position: absolute;
   left: 14px;
 
   z-index: 1;
 
-  align-items: center;
-  justify-content: center;
-
   padding: 2px;
-
-  border-radius: 9999px;
 `;
 
 export const ClearButton = styled.Pressable`
-  position: absolute;
+  ${ss.CenterContent};
 
+  position: absolute;
   right: 14px;
 
   z-index: 1;
-
-  align-items: center;
-  justify-content: center;
 `;
 
-export const getInputStyle = (
-  withLabel: boolean,
-  hasValue: boolean
-): TextStyle => ({
-  width: '100%',
+export const Field = styled(Input)`
+  ${ss.FullWidth};
 
-  paddingLeft: 44,
-  paddingRight: hasValue ? 44 : 16,
-  paddingTop: withLabel ? 30 : 12,
+  padding-left: 44px;
 
-  borderRadius: 9999,
-});
+  padding-right: ${({ value }) => (String(value ?? '').length > 0 ? 44 : 16)}px;
+
+  padding-top: ${({ withLabel }) => (withLabel ? 30 : 12)}px;
+
+  border-radius: ${({ theme }) => theme.radius.full}px;
+`;
 
 export const getSearchButtonStyle = (
   theme: Theme,
   withLabel: boolean,
   focused: boolean
-): ViewStyle => ({
-  top: withLabel ? 36 : 10,
+) =>
+  css`
+    top: ${withLabel ? 36 : 10}px;
 
-  backgroundColor: focused ? theme.colors.card : theme.colors.input,
-});
+    background-color: ${focused ? theme.colors.card : theme.colors.input};
+  ` as ViewStyle;
 
-export const getClearButtonStyle = (withLabel: boolean): ViewStyle => ({
-  top: withLabel ? 37 : 15,
-});
+export const getClearButtonStyle = (withLabel: boolean) =>
+  css`
+    top: ${withLabel ? 37 : 15}px;
+  ` as ViewStyle;

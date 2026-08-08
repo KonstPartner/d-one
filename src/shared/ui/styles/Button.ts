@@ -1,6 +1,8 @@
-import styled from '@emotion/native';
+import styled, { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
 import type { ViewStyle } from 'react-native';
+
+import * as ss from '@shared/styles';
 
 export type ButtonTone = 'primary' | 'secondary' | 'success' | 'danger';
 
@@ -9,8 +11,7 @@ export type ButtonVariant = 'solid' | 'outline' | 'ghost';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export const Root = styled.Pressable`
-  align-items: center;
-  justify-content: center;
+  ${ss.CenterContent};
 `;
 
 const getToneColor = (theme: Theme, tone: ButtonTone): string => {
@@ -74,10 +75,6 @@ export const getButtonForegroundColor = (
   return disabled ? theme.colors.shades.primary.text : theme.colors.white;
 };
 
-const getHeight = (theme: Theme, size: ButtonSize): number => {
-  return theme.control.height[size];
-};
-
 const getHorizontalPadding = (theme: Theme, size: ButtonSize): number => {
   switch (size) {
     case 'sm':
@@ -97,41 +94,50 @@ export const getButtonStyle = (
   variant: ButtonVariant,
   size: ButtonSize,
   disabled: boolean
-): ViewStyle => {
+) => {
   const isSecondarySolid = tone === 'secondary' && variant === 'solid';
 
   const hasBorder = variant === 'outline' || isSecondarySolid;
 
   const toneColor = getToneColor(theme, tone);
 
-  return {
-    minHeight: getHeight(theme, size),
+  const borderColor =
+    variant === 'outline'
+      ? tone === 'secondary'
+        ? theme.colors.border
+        : toneColor
+      : isSecondarySolid
+        ? theme.colors.border
+        : 'transparent';
 
-    paddingHorizontal: getHorizontalPadding(theme, size),
+  const backgroundColor =
+    variant === 'solid'
+      ? getSolidBackground(theme, tone, disabled)
+      : 'transparent';
 
-    paddingVertical: theme.spacing.sm,
+  const opacity =
+    disabled && (variant !== 'solid' || tone === 'secondary') ? 0.55 : 1;
 
-    borderRadius: size === 'sm' ? theme.radius.sm : theme.radius.md,
+  const horizontalPadding = getHorizontalPadding(theme, size);
 
-    borderWidth: hasBorder ? theme.border.width.sm : 0,
+  return css`
+    min-height: ${theme.control.height[size]}px;
 
-    borderColor:
-      variant === 'outline'
-        ? tone === 'secondary'
-          ? theme.colors.border
-          : toneColor
-        : isSecondarySolid
-          ? theme.colors.border
-          : 'transparent',
+    padding-top: ${theme.spacing.sm}px;
+    padding-bottom: ${theme.spacing.sm}px;
+    padding-left: ${horizontalPadding}px;
+    padding-right: ${horizontalPadding}px;
 
-    backgroundColor:
-      variant === 'solid'
-        ? getSolidBackground(theme, tone, disabled)
-        : 'transparent',
+    border-radius: ${size === 'sm' ? theme.radius.sm : theme.radius.md}px;
 
-    opacity:
-      disabled && (variant !== 'solid' || tone === 'secondary') ? 0.55 : 1,
-  };
+    border-width: ${hasBorder ? theme.border.width.sm : 0}px;
+
+    border-color: ${borderColor};
+
+    background-color: ${backgroundColor};
+
+    opacity: ${opacity};
+  ` as ViewStyle;
 };
 
 export const getSpinnerSize = (size: ButtonSize): number => {

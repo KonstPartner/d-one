@@ -1,37 +1,39 @@
-import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Modal } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
-import { Image, type ImageLoadEventData } from 'expo-image';
+import type { ImageLoadEventData } from 'expo-image';
 import { useTranslation } from 'react-i18next';
-import {
-  GestureDetector,
-  GestureHandlerRootView,
-} from 'react-native-gesture-handler';
+import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import usePhotoViewer from '../model/hooks/usePhotoViewer';
-import * as styles from '../styles/PhotoViewer';
+import * as s from './styles';
+import { usePhotoViewer } from './usePhotoViewer';
 
 type FallbackIcon = 'image-outline' | 'cloud-offline-outline';
 
 type PhotoViewerProps = {
   visible: boolean;
+
   sourceUri: string | null;
   sourceKey: string | null;
   sourceIsLocal: boolean;
+
   recyclingKey: string | null;
+
   loading: boolean;
+
   fallbackText: string | null;
   fallbackIcon?: FallbackIcon;
+
   accessibilityLabel: string;
+
   onLoadStart: () => void;
   onLoad: () => void;
   onError: () => void;
   onClose: () => void;
 };
 
-const PhotoViewer = ({
+export const PhotoViewer = ({
   visible,
   sourceUri,
   sourceKey,
@@ -77,35 +79,32 @@ const PhotoViewer = ({
       hardwareAccelerated
       onRequestClose={onClose}
     >
-      <GestureHandlerRootView style={styles.Root(theme)}>
-        <View
+      <s.GestureRoot>
+        <s.Root
           testID="photo-viewer-root"
           accessibilityViewIsModal
           onAccessibilityEscape={onClose}
-          style={styles.Root(theme)}
         >
           <GestureDetector gesture={gesture}>
-            <View
+            <s.Viewport
               testID="photo-viewer-viewport"
-              style={styles.Viewport}
               onLayout={handleViewportLayout}
             >
               {sourceUri !== null && (
                 <Animated.View
                   testID="photo-viewer-image-frame"
                   style={[
-                    styles.ImageFrame,
-                    imageLayout ?? styles.UnmeasuredImageFrame,
+                    s.ImageFrame,
+                    imageLayout ?? s.UnmeasuredImageFrame,
                     animatedImageStyle,
                   ]}
                 >
-                  <Image
+                  <s.Photo
                     testID="photo-viewer-image"
                     source={{
                       uri: sourceUri,
                       cacheKey: sourceKey ?? sourceUri,
                     }}
-                    style={styles.Image}
                     contentFit="contain"
                     cachePolicy={sourceIsLocal ? 'none' : 'memory-disk'}
                     priority="high"
@@ -114,16 +113,16 @@ const PhotoViewer = ({
                     accessible
                     accessibilityLabel={accessibilityLabel}
                     onLoadStart={onLoadStart}
-                    onLoad={(event: ImageLoadEventData) =>
-                      handleImageLoad(event)
-                    }
+                    onLoad={(event: ImageLoadEventData) => {
+                      handleImageLoad(event);
+                    }}
                     onError={onError}
                   />
                 </Animated.View>
               )}
 
               {sourceUri === null && (
-                <View pointerEvents="none" style={styles.StateOverlay}>
+                <s.StateOverlay pointerEvents="none">
                   <Ionicons
                     name={fallbackIcon}
                     size={theme.size['2xl']}
@@ -131,57 +130,42 @@ const PhotoViewer = ({
                   />
 
                   {fallbackText !== null && (
-                    <Text style={styles.StateText(theme)}>{fallbackText}</Text>
+                    <s.StateText>{fallbackText}</s.StateText>
                   )}
-                </View>
+                </s.StateOverlay>
               )}
 
               {loading && (
-                <View pointerEvents="none" style={styles.StateOverlay}>
+                <s.StateOverlay pointerEvents="none">
                   <ActivityIndicator size="large" color={theme.colors.white} />
-                </View>
+                </s.StateOverlay>
               )}
-            </View>
+            </s.Viewport>
           </GestureDetector>
 
-          <SafeAreaView
-            edges={['top']}
-            pointerEvents="box-none"
-            style={styles.Controls(theme)}
-          >
-            <Pressable
+          <s.Controls edges={['top']} pointerEvents="box-none">
+            <s.CloseButton
               accessibilityRole="button"
               accessibilityLabel={t('common.close')}
-              hitSlop={8}
+              hitSlop={theme.spacing.sm}
               onPress={onClose}
-              style={({ pressed }) => [
-                styles.CloseButton(theme),
-                pressed && styles.Pressed,
-              ]}
+              style={({ pressed }) => (pressed ? s.Pressed : undefined)}
             >
               <Ionicons
                 name="close"
                 size={theme.size.xl}
                 color={theme.colors.white}
               />
-            </Pressable>
-          </SafeAreaView>
+            </s.CloseButton>
+          </s.Controls>
 
           {sourceUri !== null && !loading && (
-            <SafeAreaView
-              edges={['bottom']}
-              pointerEvents="none"
-              style={styles.HintArea(theme)}
-            >
-              <Text style={styles.HintText(theme)}>
-                {t('common.photoViewer.hint')}
-              </Text>
-            </SafeAreaView>
+            <s.HintArea edges={['bottom']} pointerEvents="none">
+              <s.HintText>{t('common.photoViewer.hint')}</s.HintText>
+            </s.HintArea>
           )}
-        </View>
-      </GestureHandlerRootView>
+        </s.Root>
+      </s.GestureRoot>
     </Modal>
   );
 };
-
-export default PhotoViewer;

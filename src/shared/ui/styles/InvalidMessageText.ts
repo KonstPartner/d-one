@@ -1,11 +1,7 @@
 import styled from '@emotion/native';
 
+import * as ss from '@shared/styles';
+
 export const Message = styled.Text`
-  color: ${({ theme }) => theme.colors.danger};
-
-  font-size: ${({ theme }) => theme.size.sm}px;
-
-  font-weight: ${({ theme }) => theme.weight.regular};
-
-  line-height: ${({ theme }) => theme.lineHeight.sm}px;
+  ${({ theme }) => ss.Text(theme, 'sm', 'regular', 'danger', 'sm')};
 `;

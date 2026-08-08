@@ -3,6 +3,7 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 
 import { PlatformOS } from '@shared/lib/platform';
+import * as ss from '@shared/styles';
 
 type WebRefreshButtonProps = {
   onRefresh: () => void;
@@ -17,9 +18,13 @@ export const WebRefreshButton = ({ onRefresh }: WebRefreshButtonProps) => {
 
   return (
     <Root>
-      <Button accessibilityRole="button" onPress={onRefresh}>
-        <Ionicons name="refresh-circle" size={32} color={theme.colors.text} />
-      </Button>
+      <RefreshButton accessibilityRole="button" onPress={onRefresh}>
+        <Ionicons
+          name="refresh-circle"
+          size={theme.control.height.sm}
+          color={theme.colors.text}
+        />
+      </RefreshButton>
     </Root>
   );
 };
@@ -29,7 +34,6 @@ const Root = styled.View`
   justify-content: center;
 `;
 
-const Button = styled.Pressable`
-  align-items: center;
-  justify-content: center;
+const RefreshButton = styled.Pressable`
+  ${ss.CenterContent};
 `;

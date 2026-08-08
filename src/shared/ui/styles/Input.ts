@@ -1,36 +1,36 @@
-import styled from '@emotion/native';
+import styled, { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
 import type { TextStyle } from 'react-native';
 
+import * as ss from '@shared/styles';
+
 export const Label = styled.Text`
-  color: ${({ theme }) => theme.colors.muted};
-  font-size: ${({ theme }) => theme.size.sm}px;
-  font-weight: ${({ theme }) => theme.weight.medium};
-  line-height: ${({ theme }) => theme.lineHeight.sm}px;
-  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
+  ${({ theme }) => ss.Label(theme)};
 `;
 
 export const Field = styled.TextInput`
-  width: 100%;
+  ${ss.FullWidth};
 
   background-color: ${({ theme }) => theme.colors.input};
 
-  border-width: 1px;
+  border-width: ${({ theme }) => theme.border.width.sm}px;
   border-style: solid;
   border-color: transparent;
-  border-radius: 6px;
+  border-radius: ${({ theme }) => theme.radius.sm}px;
 
-  padding: 12px 16px;
+  padding: ${({ theme }) => theme.spacing.md}px
+    ${({ theme }) => theme.spacing.lg}px;
 
-  font-size: 16px;
   color: ${({ theme }) => theme.colors.text};
+  font-size: ${({ theme }) => theme.size.md}px;
 
   outline-width: 0;
   outline-style: none;
   box-shadow: none;
 `;
 
-export const getFocusedFieldStyle = (theme: Theme): TextStyle => ({
-  backgroundColor: theme.colors.card,
-  borderColor: theme.colors.primary,
-});
+export const getFocusedFieldStyle = (theme: Theme) =>
+  css`
+    background-color: ${theme.colors.card};
+    border-color: ${theme.colors.primary};
+  ` as TextStyle;

@@ -1,99 +1,97 @@
-import { css } from '@emotion/native';
+import styled, { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
-import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
+import type { ViewStyle } from 'react-native';
 
-import * as sharedStyles from '@shared/styles';
+import * as ss from '@shared/styles';
 
-export const ManagerContainer = (theme: Theme): StyleProp<ViewStyle> =>
-  sharedStyles.InsetX(theme, 'sm');
-
-export const AnimatedWrap: StyleProp<ViewStyle> = [
-  sharedStyles.FullWidth,
+export const ManagerContainer = (theme: Theme) =>
   css`
-    max-width: 500px;
-  `,
-];
+    ${ss.InsetX(theme, 'sm')};
+  ` as ViewStyle;
 
-export const ToastWrapper: StyleProp<ViewStyle> = sharedStyles.FullWidth;
+export const AnimatedWrap = css`
+  ${ss.FullWidth};
 
-export const Container = (theme: Theme): StyleProp<ViewStyle> => [
-  sharedStyles.Surface(theme, 'background'),
-  sharedStyles.Rounded(theme, 'md'),
-  css`
-    width: 100%;
+  max-width: 500px;
+` as ViewStyle;
 
-    align-self: stretch;
-
-    flex-direction: row;
-    align-items: stretch;
-
-    overflow: hidden;
-  `,
-];
-
-export const Stripe = (
-  theme: Theme,
-  accent: string
-): StyleProp<ViewStyle> => css`
-  width: ${theme.spacing.sm}px;
-
-  background-color: ${accent};
+export const ToastWrapper = styled.Pressable`
+  ${ss.FullWidth};
 `;
 
-export const Content = (theme: Theme): StyleProp<ViewStyle> => [
-  sharedStyles.Inset(theme, 'md'),
+export const Container = styled.View`
+  ${ss.FullWidth};
+
+  ${({ theme }) => ss.Surface(theme, 'background')};
+  ${({ theme }) => ss.Rounded(theme, 'md')};
+
+  align-self: stretch;
+
+  flex-direction: row;
+  align-items: stretch;
+
+  overflow: hidden;
+`;
+
+export const Stripe = (theme: Theme, accent: string) =>
   css`
-    flex: 1;
-  `,
-];
+    width: ${theme.spacing.sm}px;
 
-export const HeaderRow = (theme: Theme): StyleProp<ViewStyle> =>
-  sharedStyles.Row(theme, 'center', 'space-between', 'sm');
+    background-color: ${accent};
+  ` as ViewStyle;
 
-export const TitleRow = (theme: Theme): StyleProp<ViewStyle> => [
-  sharedStyles.Row(theme, 'center', 'flex-start', 'sm'),
-  sharedStyles.FlexItem,
-];
+export const Content = styled.View`
+  ${({ theme }) => ss.Inset(theme, 'md')};
 
-export const Title = (theme: Theme): StyleProp<TextStyle> => [
-  sharedStyles.Text(theme, 'md', 'heavy', 'default', 'md'),
+  flex: 1;
+`;
+
+export const HeaderRow = styled.View`
+  ${({ theme }) => ss.Row(theme, 'center', 'space-between', 'sm')};
+`;
+
+export const TitleRow = styled.View`
+  ${ss.FlexItem};
+
+  ${({ theme }) => ss.Row(theme, 'center', 'flex-start', 'sm')};
+`;
+
+export const Title = styled.Text`
+  ${({ theme }) => ss.Text(theme, 'md', 'heavy', 'default', 'md')};
+
+  flex: 1;
+  min-width: 0px;
+`;
+
+export const Message = styled.Text`
+  ${({ theme }) => ss.Body(theme)};
+
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+`;
+
+export const CloseButton = styled.Pressable`
+  ${ss.CenterContent};
+`;
+
+export const ProgressTrack = styled.View`
+  ${ss.FullWidth};
+
+  ${({ theme }) => ss.Rounded(theme, 'full')};
+
+  height: ${({ theme }) => theme.spacing.xs}px;
+
+  margin-top: ${({ theme }) => theme.spacing.md}px;
+
+  background-color: ${({ theme }) => theme.colors.card};
+
+  overflow: hidden;
+`;
+
+export const ProgressFill = (theme: Theme, accent: string) =>
   css`
-    flex: 1;
-    min-width: 0px;
-  `,
-];
+    ${ss.Rounded(theme, 'full')};
 
-export const Message = (theme: Theme): StyleProp<TextStyle> => [
-  sharedStyles.Body(theme),
-  css`
-    margin-top: ${theme.spacing.sm}px;
-  `,
-];
-
-export const CloseButton: StyleProp<ViewStyle> = sharedStyles.CenterContent;
-
-export const ProgressTrack = (theme: Theme): StyleProp<ViewStyle> => [
-  sharedStyles.FullWidth,
-  sharedStyles.Rounded(theme, 'full'),
-  css`
-    height: ${theme.spacing.xs}px;
-
-    margin-top: ${theme.spacing.md}px;
-
-    background-color: ${theme.colors.card};
-
-    overflow: hidden;
-  `,
-];
-
-export const ProgressFill = (
-  theme: Theme,
-  accent: string
-): StyleProp<ViewStyle> => [
-  sharedStyles.Rounded(theme, 'full'),
-  css`
     height: ${theme.spacing.xs}px;
 
     background-color: ${accent};
-  `,
-];
+  ` as ViewStyle;

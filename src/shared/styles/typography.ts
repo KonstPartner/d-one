@@ -1,6 +1,6 @@
 import { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
-import type { StyleProp, TextStyle } from 'react-native';
+import type { TextStyle } from 'react-native';
 
 import type {
   TextTone,
@@ -43,35 +43,34 @@ export const Text = (
 ) =>
   css`
     color: ${getTextColor(theme, tone)};
-
     font-size: ${theme.size[size]}px;
-
     font-weight: ${theme.weight[weight]};
-
     line-height: ${theme.lineHeight[lineHeight]}px;
-  ` as StyleProp<TextStyle>;
+  ` as TextStyle;
 
 export const Heading = (theme: Theme) =>
-  Text(theme, 'lg', 'semibold', 'default', 'xl');
+  css`
+    ${Text(theme, 'lg', 'semibold', 'default', 'xl')};
+  ` as TextStyle;
 
 export const Subheading = (theme: Theme) =>
-  Text(theme, 'md', 'semibold', 'default', 'lg');
+  css`
+    ${Text(theme, 'md', 'semibold', 'default', 'lg')};
+  ` as TextStyle;
 
 export const Body = (theme: Theme) =>
-  Text(theme, 'base', 'regular', 'default', 'md');
+  css`
+    ${Text(theme, 'base', 'regular', 'default', 'md')};
+  ` as TextStyle;
 
 export const Caption = (theme: Theme) =>
-  Text(theme, 'sm', 'medium', 'muted', 'sm');
+  css`
+    ${Text(theme, 'sm', 'medium', 'muted', 'sm')};
+  ` as TextStyle;
 
 export const Label = (theme: Theme) =>
   css`
-    color: ${theme.colors.muted};
-
-    font-size: ${theme.size.sm}px;
-
-    font-weight: ${theme.weight.medium};
-
-    line-height: ${theme.lineHeight.sm}px;
+    ${Text(theme, 'sm', 'medium', 'muted', 'sm')};
 
     margin-bottom: ${theme.spacing.xs}px;
-  ` as StyleProp<TextStyle>;
+  ` as TextStyle;

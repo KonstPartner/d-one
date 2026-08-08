@@ -28,7 +28,7 @@ export const Checkbox = ({
       }}
       onPress={onPress}
     >
-      <s.Indicator style={s.getIndicatorStyle(theme, checked)}>
+      <s.Indicator $checked={checked}>
         {checked ? (
           <Ionicons name="checkmark" size={24} color={theme.colors.white} />
         ) : null}

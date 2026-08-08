@@ -1,5 +1,8 @@
-import { type ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native';
+import styled from '@emotion/native';
+import type { ReactNode } from 'react';
+
+import { PlatformOS } from '@shared/lib/platform';
 
 type KeyboardAvoidingContentProps = {
   children: ReactNode;
@@ -10,17 +13,20 @@ export const KeyboardAvoidingContent = ({
   children,
   keyboardVerticalOffset = 0,
 }: KeyboardAvoidingContentProps) => {
-  if (Platform.OS === 'web') {
+  if (PlatformOS.WEB) {
     return <>{children}</>;
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <Root
+      behavior={PlatformOS.IOS ? 'padding' : 'height'}
       keyboardVerticalOffset={keyboardVerticalOffset}
     >
       {children}
-    </KeyboardAvoidingView>
+    </Root>
   );
 };
+
+const Root = styled(KeyboardAvoidingView)`
+  flex: 1;
+`;

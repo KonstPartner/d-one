@@ -39,7 +39,7 @@ const lockOrientation = (
   });
 };
 
-const usePhotoViewer = ({
+export const usePhotoViewer = ({
   visible,
   enabled,
   sourceKey,
@@ -50,13 +50,19 @@ const usePhotoViewer = ({
   const [sourceSize, setSourceSize] = useState<Size | null>(null);
 
   const scale = useSharedValue(MIN_SCALE);
+
   const translationX = useSharedValue(0);
+
   const translationY = useSharedValue(0);
 
   const startScale = useSharedValue(MIN_SCALE);
+
   const startTranslationX = useSharedValue(0);
+
   const startTranslationY = useSharedValue(0);
+
   const startFocalX = useSharedValue(0);
+
   const startFocalY = useSharedValue(0);
 
   const imageLayout = useMemo<Size | null>(() => {
@@ -121,7 +127,10 @@ const usePhotoViewer = ({
         return currentSize;
       }
 
-      return { width, height };
+      return {
+        width,
+        height,
+      };
     });
   }, []);
 
@@ -138,8 +147,11 @@ const usePhotoViewer = ({
   );
 
   const displayedWidth = imageLayout?.width ?? 0;
+
   const displayedHeight = imageLayout?.height ?? 0;
+
   const viewportWidth = viewportSize?.width ?? 0;
+
   const viewportHeight = viewportSize?.height ?? 0;
 
   const gesturesEnabled =
@@ -155,6 +167,7 @@ const usePhotoViewer = ({
     .maxPointers(1)
     .onStart(() => {
       startTranslationX.value = translationX.value;
+
       startTranslationY.value = translationY.value;
     })
     .onUpdate((event) => {
@@ -190,9 +203,13 @@ const usePhotoViewer = ({
     .enabled(gesturesEnabled)
     .onStart((event) => {
       startScale.value = scale.value;
+
       startTranslationX.value = translationX.value;
+
       startTranslationY.value = translationY.value;
+
       startFocalX.value = event.focalX;
+
       startFocalY.value = event.focalY;
     })
     .onUpdate((event) => {
@@ -203,7 +220,9 @@ const usePhotoViewer = ({
       );
 
       const scaleRatio = nextScale / startScale.value;
+
       const centerX = viewportWidth / 2;
+
       const centerY = viewportHeight / 2;
 
       const nextTranslationX =
@@ -235,7 +254,9 @@ const usePhotoViewer = ({
     .onEnd(() => {
       if (scale.value <= MIN_SCALE + 0.01) {
         scale.value = withTiming(MIN_SCALE);
+
         translationX.value = withTiming(0);
+
         translationY.value = withTiming(0);
 
         return;
@@ -271,7 +292,9 @@ const usePhotoViewer = ({
 
       if (scale.value > MIN_SCALE + 0.01) {
         scale.value = withTiming(MIN_SCALE);
+
         translationX.value = withTiming(0);
+
         translationY.value = withTiming(0);
 
         return;
@@ -332,5 +355,3 @@ const usePhotoViewer = ({
     handleImageLoad,
   };
 };
-
-export default usePhotoViewer;

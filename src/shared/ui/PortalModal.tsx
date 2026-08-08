@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect } from 'react';
-import { BackHandler, KeyboardAvoidingView, Platform } from 'react-native';
+import { BackHandler, Platform } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 import { Portal } from 'react-native-portalize';
@@ -27,13 +27,12 @@ const KeyboardAwareContent = ({ children }: KeyboardAwareContentProps) => {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
+    <s.KeyboardAware
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={0}
     >
       {children}
-    </KeyboardAvoidingView>
+    </s.KeyboardAware>
   );
 };
 

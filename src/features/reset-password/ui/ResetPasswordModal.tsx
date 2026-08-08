@@ -1,15 +1,11 @@
-import { Text } from 'react-native';
-import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
-import * as sharedStyles from '@shared/styles';
-import { Button, Input, PortalModal } from '@shared/ui';
+import { Input, PortalModal } from '@shared/ui';
 
 import { useResetPassword } from '../model/useResetPassword';
 import * as s from '../styles/ResetPassword';
 
 export const ResetPasswordModal = () => {
-  const theme = useTheme();
   const { t } = useTranslation();
 
   const {
@@ -26,9 +22,7 @@ export const ResetPasswordModal = () => {
   return (
     <>
       <s.Trigger onPress={open} accessibilityRole="button">
-        <Text style={sharedStyles.Text(theme, 'base', 'medium', 'primary')}>
-          {t('auth.forms.links.forgotPassword')}
-        </Text>
+        <s.TriggerText>{t('auth.forms.links.forgotPassword')}</s.TriggerText>
       </s.Trigger>
 
       <PortalModal
@@ -63,17 +57,9 @@ export const ResetPasswordModal = () => {
             onSubmitEditing={submit}
           />
 
-          <Button
-            style={sharedStyles.FullWidth}
-            onPress={submit}
-            loading={isPending}
-          >
-            <Text
-              style={sharedStyles.Text(theme, 'base', 'regular', 'inverse')}
-            >
-              {t('common.send')}
-            </Text>
-          </Button>
+          <s.SubmitButton onPress={submit} loading={isPending}>
+            <s.SubmitButtonText>{t('common.send')}</s.SubmitButtonText>
+          </s.SubmitButton>
         </s.Container>
       </PortalModal>
     </>

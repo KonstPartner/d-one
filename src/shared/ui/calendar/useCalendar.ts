@@ -1,46 +1,49 @@
-import { useMemo, useRef, useState } from 'react';
-import { useCallback } from 'react';
-import { Dimensions } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { Dimensions, type LayoutChangeEvent } from 'react-native';
 import { useTheme } from '@emotion/react';
-import { useTranslation } from 'react-i18next';
-import { DateData } from 'react-native-calendars';
+import type { DateData } from 'react-native-calendars';
 
 import { i18n } from '@shared/i18n';
 import { getCalendarTheme } from '@shared/lib/calendar';
 import { dateKit } from '@shared/lib/date';
 
-import type { CalendarComponentProps } from './types';
+import type { CalendarComponentProps, CalendarMarkedDates } from './types';
 
-const getSelectedDateFromMarkedDates = (markedDates: any | undefined) => {
+const getSelectedDateFromMarkedDates = (
+  markedDates: CalendarMarkedDates | undefined
+): string | null => {
   if (!markedDates) {
     return null;
   }
 
-  for (const key of Object.keys(markedDates)) {
-    if (markedDates?.[key]?.selected) {
-      return key;
+  for (const [dateString, marking] of Object.entries(markedDates)) {
+    if (marking.selected) {
+      return dateString;
     }
   }
 
   return null;
 };
 
-const formatMonthYear = (dateString: string, locale?: string) => {
-  const d = dateKit.local(dateString + 'T00:00:00');
+const formatMonthYear = (dateString: string, locale?: string): string => {
+  const date = dateKit.local(`${dateString}T00:00:00`);
 
   try {
     return new Intl.DateTimeFormat(locale || undefined, {
       month: 'long',
       year: 'numeric',
-    }).format(d);
+    }).format(date);
   } catch {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      '0'
+    )}`;
   }
 };
 
-const monthKeyFrom = (dateString: string) => dateString.slice(0, 7);
+const getMonthKey = (dateString: string): string => dateString.slice(0, 7);
 
-const useCalendar = ({
+export const useCalendar = ({
   showBackToCurrentMonth,
   current,
   onMonthChange,
@@ -49,11 +52,11 @@ const useCalendar = ({
   minDate,
   onDayPress,
 }: CalendarComponentProps) => {
-  const { t } = useTranslation();
   const theme = useTheme();
-  const themeKey = useMemo(() => String(theme.mode), [theme.mode]);
 
-  const calendarTheme = useMemo(() => getCalendarTheme(theme), [theme.colors]);
+  const themeKey = String(theme.mode);
+
+  const calendarTheme = useMemo(() => getCalendarTheme(theme), [theme]);
 
   const currentMonthKey = useMemo(() => {
     const fallback = dateKit.utc().slice(0, 7);
@@ -62,15 +65,16 @@ const useCalendar = ({
       return fallback;
     }
 
-    return monthKeyFrom(String(current));
+    return getMonthKey(current);
   }, [current]);
 
   const [calendarKey, setCalendarKey] = useState(0);
+
   const [isDifferentMonth, setIsDifferentMonth] = useState(false);
 
-  const lastVisibleMonthKeyRef = useRef<string>(currentMonthKey);
+  const lastVisibleMonthKeyRef = useRef(currentMonthKey);
 
-  const handleMonthChange = (month: { year: number; month: number }) => {
+  const handleMonthChange = (month: DateData): void => {
     const monthString = `${month.year}-${String(month.month).padStart(2, '0')}`;
 
     if (lastVisibleMonthKeyRef.current === monthString) {
@@ -80,15 +84,17 @@ const useCalendar = ({
     lastVisibleMonthKeyRef.current = monthString;
 
     setIsDifferentMonth(monthString !== currentMonthKey);
-    onMonthChange?.(month as any);
+
+    onMonthChange?.(month);
   };
 
-  const handleBackToCurrentMonth = () => {
-    setCalendarKey((k) => k + 1);
+  const handleBackToCurrentMonth = (): void => {
+    setCalendarKey((currentKey) => currentKey + 1);
+
     setIsDifferentMonth(false);
   };
 
-  const shouldShowButton = showBackToCurrentMonth && isDifferentMonth;
+  const shouldShowButton = Boolean(showBackToCurrentMonth && isDifferentMonth);
 
   const todayString = useMemo(() => dateKit.utc().slice(0, 10), []);
 
@@ -97,32 +103,36 @@ const useCalendar = ({
     [markedDates]
   );
 
-  const baseDate = useMemo(() => {
-    return selectedDateString ?? (current as string | undefined) ?? todayString;
-  }, [selectedDateString, current, todayString]);
+  const baseDate = useMemo(
+    () => selectedDateString ?? current ?? todayString,
+    [selectedDateString, current, todayString]
+  );
 
   const [isWeekMode, setIsWeekMode] = useState(false);
 
-  const handleToggleMode = (isWeek?: boolean) => {
-    if (isWeek !== undefined && isWeekMode === isWeek) {
+  const handleToggleMode = (nextWeekMode?: boolean): void => {
+    if (nextWeekMode === undefined) {
+      setIsWeekMode((currentMode) => !currentMode);
+
       return;
     }
 
-    setIsWeekMode((prev) => !prev);
+    setIsWeekMode(nextWeekMode);
   };
 
   const [calendarWidth, setCalendarWidth] = useState(
     Dimensions.get('window').width
   );
 
-  const handleLayout = useCallback((e: any) => {
-    const w = e?.nativeEvent?.layout?.width;
-    if (w && Number.isFinite(w) && w > 0) {
-      setCalendarWidth(w);
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    const width = event.nativeEvent.layout.width;
+
+    if (Number.isFinite(width) && width > 0) {
+      setCalendarWidth(width);
     }
   }, []);
 
-  const handleDayPressWrapper = (day: DateData) => {
+  const handleDayPressWrapper = (day: DateData): void => {
     if (blockMinDatePress && minDate && day.dateString < minDate) {
       return;
     }
@@ -139,9 +149,7 @@ const useCalendar = ({
     handleMonthChange,
     calendarTheme,
     shouldShowButton,
-    theme,
     handleBackToCurrentMonth,
-    t,
     handleLayout,
     handleToggleMode,
     isWeekMode,
@@ -155,5 +163,3 @@ const useCalendar = ({
     themeKey,
   };
 };
-
-export default useCalendar;

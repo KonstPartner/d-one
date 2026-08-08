@@ -1,0 +1,21 @@
+import styled from '@emotion/native';
+
+import * as ss from '@shared/styles';
+
+export const Root = styled.View`
+  ${ss.CenterContent};
+
+  ${({ theme }) => ss.Stack(theme, 'md')};
+`;
+
+export const Message = styled.Text`
+  ${({ theme }) => ss.Body(theme)};
+
+  text-align: center;
+`;
+
+export const RetryText = styled.Text`
+  ${({ theme }) => ss.Text(theme, 'md', 'bold', 'inverse', 'md')};
+
+  text-align: center;
+`;

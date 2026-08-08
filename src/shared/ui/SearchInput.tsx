@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Input, type InputProps } from './Input';
+import type { InputProps } from './Input';
 import * as s from './styles/SearchInput';
 
 export type SearchInputProps = InputProps & {
@@ -73,12 +73,12 @@ export const SearchInput = ({
         </s.ClearButton>
       ) : null}
 
-      <Input
+      <s.Field
         {...inputProps}
         value={value}
         onChangeText={onChangeText}
         withLabel={withLabel}
-        style={[s.getInputStyle(withLabel, hasValue), style]}
+        style={style}
         onFocusEvent={() => {
           setIsFocused(true);
           onFocusEvent?.();

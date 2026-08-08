@@ -1,6 +1,6 @@
 import { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
-import type { StyleProp, ViewStyle } from 'react-native';
+import type { TextStyle, ViewStyle } from 'react-native';
 
 import type {
   SurfaceShadowLevel,
@@ -36,39 +36,40 @@ export const Surface = (
     border-width: ${withBorder ? theme.border.width.sm : 0}px;
 
     border-color: ${theme.colors.border};
-  ` as StyleProp<ViewStyle>;
+  ` as ViewStyle;
 
 export const Rounded = (theme: Theme, radius: ThemeRadius = 'lg') =>
   css`
     border-radius: ${theme.radius[radius]}px;
-  ` as StyleProp<ViewStyle>;
+  ` as ViewStyle & TextStyle;
 
 export const Inset = (theme: Theme, size: ThemeSpacing = 'lg') =>
   css`
     padding: ${theme.spacing[size]}px;
-  ` as StyleProp<ViewStyle>;
+  ` as ViewStyle;
 
 export const InsetX = (theme: Theme, size: ThemeSpacing = 'lg') =>
   css`
     padding-left: ${theme.spacing[size]}px;
     padding-right: ${theme.spacing[size]}px;
-  ` as StyleProp<ViewStyle>;
+  ` as ViewStyle;
 
 export const InsetY = (theme: Theme, size: ThemeSpacing = 'lg') =>
   css`
     padding-top: ${theme.spacing[size]}px;
     padding-bottom: ${theme.spacing[size]}px;
-  ` as StyleProp<ViewStyle>;
+  ` as ViewStyle;
 
 export const CardContainer = (
   theme: Theme,
   padding: ThemeSpacing = 'lg',
   radius: ThemeRadius = 'lg'
-): StyleProp<ViewStyle> => [
-  Surface(theme),
-  Rounded(theme, radius),
-  Inset(theme, padding),
-];
+) =>
+  css`
+    ${Surface(theme)};
+    ${Rounded(theme, radius)};
+    ${Inset(theme, padding)};
+  ` as ViewStyle;
 
 export const Shadow = (theme: Theme, level: SurfaceShadowLevel = 'soft') => {
   const strong = level === 'strong';
@@ -89,7 +90,7 @@ export const Shadow = (theme: Theme, level: SurfaceShadowLevel = 'soft') => {
     shadow-radius: ${strong ? 44 : 24}px;
 
     elevation: ${strong ? 8 : 3};
-  ` as StyleProp<ViewStyle>;
+  ` as ViewStyle;
 };
 
 export const Divider = (theme: Theme) =>
@@ -99,4 +100,4 @@ export const Divider = (theme: Theme) =>
     background-color: ${theme.colors.border};
 
     opacity: 0.7;
-  ` as StyleProp<ViewStyle>;
+  ` as ViewStyle;

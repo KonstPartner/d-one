@@ -1,22 +1,22 @@
-import { Pressable, Text, View } from 'react-native';
-import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 import {
-  Calendar,
+  Calendar as RNCalendar,
   CalendarProvider,
   WeekCalendar,
 } from 'react-native-calendars';
 
-import * as sharedStyles from '@shared/styles';
-
-import { Button } from '../Button';
 import { SegmentedSwitch } from '../SegmentedSwitch';
 
-import * as styles from './styles';
+import * as s from './styles';
 import type { CalendarComponentProps } from './types';
-import useCalendar from './useCalendar';
+import { useCalendar } from './useCalendar';
 
-const CalendarComponent = ({
+type CalendarDot = {
+  key?: string;
+  color: string;
+};
+
+export const Calendar = ({
   showBackToCurrentMonth = false,
   showWeekToggle = false,
   current,
@@ -27,7 +27,6 @@ const CalendarComponent = ({
   ...props
 }: CalendarComponentProps) => {
   const { t, i18n } = useTranslation();
-  const theme = useTheme();
 
   const {
     calendarKey,
@@ -60,26 +59,25 @@ const CalendarComponent = ({
     const { date, marking, onPress } = dayProps;
 
     const dateString: string = date.dateString;
+
     const isToday = dateString === todayString;
 
     const markingForDate = markedDates?.[dateString] ?? marking;
-    const isSelected = !!markingForDate?.selected;
+
+    const isSelected = Boolean(markingForDate?.selected);
 
     const dots = (markedDates?.[dateString]?.dots ??
       markingForDate?.dots ??
-      []) as any[];
+      []) as CalendarDot[];
 
-    const disabledByMin = !!minDate && dateString < minDate;
-    const disabledByMarked = !!markingForDate?.disableTouchEvent;
+    const disabledByMin = Boolean(minDate && dateString < minDate);
 
-    const disabledForPress =
-      disabledByMarked || (blockMinDatePress && disabledByMin);
+    const disabledByMarked = Boolean(markingForDate?.disableTouchEvent);
 
-    const disabledForStyle =
-      disabledByMarked || (blockMinDatePress && disabledByMin);
+    const disabled = disabledByMarked || (blockMinDatePress && disabledByMin);
 
-    const handlePress = () => {
-      if (disabledForPress) {
+    const handlePress = (): void => {
+      if (disabled) {
         return;
       }
 
@@ -87,40 +85,41 @@ const CalendarComponent = ({
     };
 
     return (
-      <Pressable onPress={handlePress} style={styles.DayWrapper}>
-        <View
-          style={styles.DayContainer(theme, {
-            isSelected,
-            isToday,
-            disabled: disabledForStyle,
-            highlightSelected,
-          })}
+      <s.Day onPress={handlePress}>
+        <s.DayContainer
+          $selected={isSelected}
+          $today={isToday}
+          $disabled={disabled}
+          $highlightSelected={highlightSelected}
         >
-          <Text
-            style={styles.DayText(theme, {
-              isSelected: isSelected && highlightSelected,
-              disabled: disabledForStyle,
-            })}
+          <s.DayText
+            $selected={isSelected && highlightSelected}
+            $disabled={disabled}
           >
             {date.day}
-          </Text>
-        </View>
+          </s.DayText>
+        </s.DayContainer>
 
-        <View style={styles.DayDotsRow}>
-          {dots.map((dot: any) => (
-            <View key={dot.key} style={styles.DayDot(dot.color)} />
+        <s.DayDots>
+          {dots.map((dot, index) => (
+            <s.DayDot
+              key={dot.key ?? `${dot.color}-${index}`}
+              $color={dot.color}
+            />
           ))}
-        </View>
-      </Pressable>
+        </s.DayDots>
+      </s.Day>
     );
   };
 
   return (
-    <View style={sharedStyles.Stack(theme, 'md')} onLayout={handleLayout}>
+    <s.Root onLayout={handleLayout}>
       {showWeekToggle && (
         <SegmentedSwitch
           value={isWeekMode ? 'week' : 'month'}
-          onChange={(mode) => handleToggleMode(mode === 'week')}
+          onChange={(mode) => {
+            handleToggleMode(mode === 'week');
+          }}
           options={[
             {
               value: 'week',
@@ -135,10 +134,10 @@ const CalendarComponent = ({
       )}
 
       {isWeekMode ? (
-        <View style={styles.WeekWrapperRN}>
-          <View style={styles.WeekHeaderRN}>
-            <Text style={styles.WeekHeaderTextRN(theme)}>{weekHeader}</Text>
-          </View>
+        <>
+          <s.WeekHeader>
+            <s.WeekHeaderText>{weekHeader}</s.WeekHeaderText>
+          </s.WeekHeader>
 
           <CalendarProvider
             date={baseDate}
@@ -159,10 +158,10 @@ const CalendarComponent = ({
               calendarWidth={calendarWidth}
             />
           </CalendarProvider>
-        </View>
+        </>
       ) : (
         <>
-          <Calendar
+          <RNCalendar
             key={`${calendarKey}-${themeKey}`}
             markingType="multi-dot"
             enableSwipeMonths
@@ -178,21 +177,14 @@ const CalendarComponent = ({
           />
 
           {shouldShowButton && (
-            <Button
-              onPress={handleBackToCurrentMonth}
-              style={sharedStyles.Rounded(theme, 'full')}
-            >
-              <Text
-                style={sharedStyles.Text(theme, 'base', 'regular', 'inverse')}
-              >
+            <s.BackButton onPress={handleBackToCurrentMonth}>
+              <s.BackButtonText>
                 {t('common.actions.backToCurrentMonth')}
-              </Text>
-            </Button>
+              </s.BackButtonText>
+            </s.BackButton>
           )}
         </>
       )}
-    </View>
+    </s.Root>
   );
 };
-
-export default CalendarComponent;

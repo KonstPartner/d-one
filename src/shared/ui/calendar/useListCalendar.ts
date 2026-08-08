@@ -1,38 +1,38 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '@emotion/react';
-import { useTranslation } from 'react-i18next';
+import type { DateData } from 'react-native-calendars';
 
-import { calendarThemeStyles } from '@entities/shared/constants';
+import { getCalendarTheme } from '@shared/lib/calendar';
 
-const monthKey = (dateString: string) => dateString.slice(0, 7);
+const getMonthKey = (dateString: string): string => dateString.slice(0, 7);
 
-const diffMonths = (fromKey: string, toKey: string) => {
-  const [fy, fm] = fromKey.split('-').map(Number);
-  const [ty, tm] = toKey.split('-').map(Number);
+const getMonthsDifference = (fromKey: string, toKey: string): number => {
+  const [fromYear, fromMonth] = fromKey.split('-').map(Number);
 
-  return (ty - fy) * 12 + (tm - fm);
+  const [toYear, toMonth] = toKey.split('-').map(Number);
+
+  return (toYear - fromYear) * 12 + (toMonth - fromMonth);
 };
 
-const useListCalendar = ({
-  currentDateString,
-  showBackToTodayThresholdMonths,
-}: {
+type UseListCalendarParams = {
   currentDateString: string;
   showBackToTodayThresholdMonths: number;
-}) => {
-  const { t } = useTranslation();
+};
+
+export const useListCalendar = ({
+  currentDateString,
+  showBackToTodayThresholdMonths,
+}: UseListCalendarParams) => {
   const theme = useTheme();
+
   const listRef = useRef<any>(null);
 
   const currentMonthKey = useMemo(
-    () => monthKey(currentDateString),
+    () => getMonthKey(currentDateString),
     [currentDateString]
   );
 
-  const calendarTheme = useMemo(
-    () => calendarThemeStyles(theme),
-    [theme.colors]
-  );
+  const calendarTheme = useMemo(() => getCalendarTheme(theme), [theme]);
 
   const [visibleMonthKey, setVisibleMonthKey] = useState(currentMonthKey);
 
@@ -41,27 +41,34 @@ const useListCalendar = ({
       listRef.current?.scrollToMonth?.(currentDateString);
     });
 
-    return () => cancelAnimationFrame(id);
+    return () => {
+      cancelAnimationFrame(id);
+    };
   }, [currentDateString]);
 
-  const handleVisibleMonthsChange = (months: Array<{ dateString: string }>) => {
-    const first = months?.[0];
+  const handleVisibleMonthsChange = (months: DateData[]) => {
+    const first = months[0];
+
     if (!first?.dateString) {
       return;
     }
 
-    const key = monthKey(first.dateString);
+    const nextMonthKey = getMonthKey(first.dateString);
 
-    setVisibleMonthKey((prev) => (prev === key ? prev : key));
+    setVisibleMonthKey((current) =>
+      current === nextMonthKey ? current : nextMonthKey
+    );
   };
 
   const shouldShowBackToToday = useMemo(() => {
-    const d = Math.abs(diffMonths(currentMonthKey, visibleMonthKey));
+    const difference = Math.abs(
+      getMonthsDifference(currentMonthKey, visibleMonthKey)
+    );
 
-    return d > showBackToTodayThresholdMonths;
+    return difference > showBackToTodayThresholdMonths;
   }, [currentMonthKey, visibleMonthKey, showBackToTodayThresholdMonths]);
 
-  const scrollToToday = () => {
+  const scrollToToday = (): void => {
     listRef.current?.scrollToMonth?.(currentDateString);
   };
 
@@ -71,9 +78,5 @@ const useListCalendar = ({
     calendarTheme,
     shouldShowBackToToday,
     scrollToToday,
-    theme,
-    t,
   };
 };
-
-export default useListCalendar;

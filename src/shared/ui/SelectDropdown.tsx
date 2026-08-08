@@ -43,15 +43,15 @@ export const SelectDropdown = <T,>({
   };
 
   return (
-    <s.Root style={s.getRootStyle(opened)}>
+    <s.Root $opened={opened}>
       {label ? <s.Label>{label}</s.Label> : null}
 
       <s.Field
+        $opened={opened}
         accessibilityRole="button"
         accessibilityState={{
           expanded: opened,
         }}
-        style={s.getFieldStyle(theme, opened)}
         onPress={() => {
           setOpened((current) => !current);
         }}
@@ -59,11 +59,8 @@ export const SelectDropdown = <T,>({
         <s.FieldContent>
           {selectedOption?.icon ? (
             <s.IconBox
-              style={s.getIconBoxStyle(
-                theme,
-                selectedOption.tone ?? 'primary',
-                false
-              )}
+              $tone={selectedOption.tone ?? 'primary'}
+              $selected={false}
             >
               <Ionicons
                 name={selectedOption.icon}
@@ -73,10 +70,7 @@ export const SelectDropdown = <T,>({
             </s.IconBox>
           ) : null}
 
-          <s.FieldText
-            numberOfLines={1}
-            style={s.getFieldTextStyle(theme, hasValue)}
-          >
+          <s.FieldText $hasValue={hasValue} numberOfLines={1}>
             {selectedLabel || placeholder}
           </s.FieldText>
         </s.FieldContent>
@@ -89,7 +83,7 @@ export const SelectDropdown = <T,>({
       </s.Field>
 
       {opened ? (
-        <s.Dropdown style={s.getDropdownStyle(hasLabel, inlineOptions)}>
+        <s.Dropdown $hasLabel={hasLabel} $inlineOptions={inlineOptions}>
           <ScrollView
             testID="select-dropdown-options"
             disallowInterruption
@@ -126,18 +120,16 @@ export const SelectDropdown = <T,>({
                   return (
                     <s.Option
                       key={optionKey}
+                      $selected={selected}
                       accessibilityRole="button"
                       accessibilityState={{
                         selected,
                       }}
-                      style={s.getOptionStyle(theme, selected)}
                       onPress={onPress}
                     >
                       <s.OptionContent>
                         {option.icon ? (
-                          <s.IconBox
-                            style={s.getIconBoxStyle(theme, tone, selected)}
-                          >
+                          <s.IconBox $tone={tone} $selected={selected}>
                             <Ionicons
                               name={option.icon}
                               size={20}
@@ -150,9 +142,7 @@ export const SelectDropdown = <T,>({
                           </s.IconBox>
                         ) : null}
 
-                        <s.OptionText
-                          style={s.getOptionTextStyle(theme, selected)}
-                        >
+                        <s.OptionText $selected={selected}>
                           {option.label}
                         </s.OptionText>
                       </s.OptionContent>

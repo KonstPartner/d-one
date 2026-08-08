@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import { TextInput } from 'react-native';
 import { useTheme } from '@emotion/react';
 
-import { Input, type InputProps } from './Input';
+import type { InputProps } from './Input';
 import * as s from './styles/TextArea';
 
 export type TextAreaProps = Omit<
@@ -34,7 +34,7 @@ export const TextArea = forwardRef<TextInput, TextAreaProps>(
 
     return (
       <s.Container>
-        <Input
+        <s.Field
           {...inputProps}
           inputRef={ref}
           value={value}
@@ -42,9 +42,8 @@ export const TextArea = forwardRef<TextInput, TextAreaProps>(
           multiline
           scrollEnabled
           maxLength={maxLength}
-          textAlignVertical="top"
           selectionHandleColor={selectionHandleColor ?? theme.colors.primary}
-          style={[s.getInputStyle(theme), style]}
+          style={style}
         />
 
         {showCharacterCount && (

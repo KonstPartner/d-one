@@ -1,7 +1,3 @@
-import AuthCallback from '@pages/AuthCallback';
+import { AuthCallbackPage } from '@pages/auth-callback';
 
-const authCallback = () => {
-  return <AuthCallback />;
-};
-
-export default authCallback;
+export default AuthCallbackPage;

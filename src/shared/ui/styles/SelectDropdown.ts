@@ -1,110 +1,30 @@
-import styled from '@emotion/native';
+import styled, { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
-import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
+import type { ViewStyle } from 'react-native';
 
-import * as sharedStyles from '@shared/styles';
+import * as ss from '@shared/styles';
 
 import type { SelectDropdownTone } from '../SelectDropdown.types';
 
-export const Root = styled.View`
-  position: relative;
+type OpenedProps = {
+  $opened: boolean;
+};
 
-  gap: 6px;
-`;
+type FieldTextProps = {
+  $hasValue: boolean;
+};
 
-export const Label = styled.Text`
-  color: ${({ theme }) => theme.colors.muted};
+type DropdownProps = {
+  $hasLabel: boolean;
+  $inlineOptions: boolean;
+};
 
-  font-size: ${({ theme }) => theme.size.md}px;
-  font-weight: ${({ theme }) => theme.weight.semibold};
-  line-height: ${({ theme }) => theme.lineHeight.lg}px;
-`;
+type SelectedProps = {
+  $selected: boolean;
+};
 
-export const Field = styled.Pressable`
-  min-height: 46px;
-
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 10px;
-
-  padding: 11px 12px;
-
-  border-width: ${({ theme }) => theme.border.width.sm}px;
-  border-radius: ${({ theme }) => theme.radius.md}px;
-
-  background-color: ${({ theme }) => theme.colors.input};
-`;
-
-export const FieldContent = styled.View`
-  flex: 1;
-
-  flex-direction: row;
-  align-items: center;
-
-  gap: 8px;
-`;
-
-export const FieldText = styled.Text`
-  flex: 1;
-`;
-
-export const Dropdown = styled.View`
-  padding: 6px;
-
-  border-width: ${({ theme }) => theme.border.width.sm}px;
-  border-color: ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.radius.md}px;
-
-  background-color: ${({ theme }) => theme.colors.card};
-
-  z-index: 10000;
-  elevation: 30;
-`;
-
-export const Option = styled.Pressable`
-  min-height: 50px;
-
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 10px;
-
-  padding: 7px 9px;
-
-  border-color: ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.radius.md}px;
-
-  background-color: ${({ theme }) => theme.colors.card};
-`;
-
-export const OptionContent = styled.View`
-  flex: 1;
-
-  flex-direction: row;
-  align-items: center;
-
-  gap: 10px;
-`;
-
-export const IconBox = styled.View`
-  width: 34px;
-  height: 34px;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: ${({ theme }) => theme.radius.full}px;
-`;
-
-export const OptionText = styled.Text`
-  flex: 1;
-`;
-
-export const dropdownContent: ViewStyle = {
-  gap: 5,
+type IconBoxProps = SelectedProps & {
+  $tone: SelectDropdownTone;
 };
 
 export const getToneColor = (
@@ -145,66 +65,145 @@ const getToneSoftBackground = (
   }
 };
 
-export const getRootStyle = (opened: boolean): ViewStyle => ({
-  zIndex: opened ? 10000 : 1,
-  elevation: opened ? 30 : 1,
-});
-
-export const getFieldStyle = (theme: Theme, opened: boolean): ViewStyle => ({
-  borderColor: opened ? theme.colors.primary : theme.colors.border,
-});
-
-export const getFieldTextStyle = (
-  theme: Theme,
-  hasValue: boolean
-): StyleProp<TextStyle> =>
-  sharedStyles.Text(theme, 'base', 'regular', hasValue ? 'default' : 'muted');
-
-export const getDropdownStyle = (
-  hasLabel: boolean,
-  inlineOptions: boolean
-): ViewStyle => {
+const getDropdownPosition = (hasLabel: boolean, inlineOptions: boolean) => {
   if (inlineOptions) {
-    return {
-      position: 'relative',
-      maxHeight: 230,
-    };
+    return css`
+      position: relative;
+      max-height: 230px;
+    ` as ViewStyle;
   }
 
-  return {
-    position: 'absolute',
+  return css`
+    position: absolute;
 
-    top: hasLabel ? 74 : 52,
-    left: 0,
-    right: 0,
+    top: ${hasLabel ? 74 : 52}px;
+    left: 0;
+    right: 0;
 
-    maxHeight: 230,
-  };
+    max-height: 230px;
+  ` as ViewStyle;
 };
 
-export const getOptionStyle = (theme: Theme, selected: boolean): ViewStyle => ({
-  borderWidth: selected ? 2 : theme.border.width.sm,
+export const Root = styled.View<OpenedProps>`
+  position: relative;
 
-  borderColor: selected ? theme.colors.primary : theme.colors.border,
-});
+  gap: 6px;
 
-export const getIconBoxStyle = (
-  theme: Theme,
-  tone: SelectDropdownTone,
-  selected: boolean
-): ViewStyle => ({
-  backgroundColor: selected
-    ? getToneColor(theme, tone)
-    : getToneSoftBackground(theme, tone),
-});
+  z-index: ${({ $opened }) => ($opened ? 10000 : 1)};
 
-export const getOptionTextStyle = (
-  theme: Theme,
-  selected: boolean
-): StyleProp<TextStyle> =>
-  sharedStyles.Text(
-    theme,
-    'base',
-    selected ? 'semibold' : 'medium',
-    selected ? 'primary' : 'default'
-  );
+  elevation: ${({ $opened }) => ($opened ? 30 : 1)};
+`;
+
+export const Label = styled.Text`
+  ${({ theme }) => ss.Text(theme, 'md', 'semibold', 'muted', 'lg')};
+`;
+
+export const Field = styled.Pressable<OpenedProps>`
+  ${({ theme }) => ss.Surface(theme, 'input')};
+
+  ${({ theme }) => ss.Rounded(theme, 'md')};
+
+  min-height: 46px;
+
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding: 11px 12px;
+
+  border-color: ${({ theme, $opened }) =>
+    $opened ? theme.colors.primary : theme.colors.border};
+`;
+
+export const FieldContent = styled.View`
+  flex: 1;
+
+  flex-direction: row;
+  align-items: center;
+
+  gap: 8px;
+`;
+
+export const FieldText = styled.Text<FieldTextProps>`
+  ${({ theme, $hasValue }) =>
+    ss.Text(theme, 'base', 'regular', $hasValue ? 'default' : 'muted', 'md')};
+
+  flex: 1;
+`;
+
+export const Dropdown = styled.View<DropdownProps>`
+  ${({ theme }) => ss.Surface(theme)};
+
+  ${({ theme }) => ss.Rounded(theme, 'md')};
+
+  ${ss.PrimeLayer};
+
+  ${({ $hasLabel, $inlineOptions }) =>
+    getDropdownPosition($hasLabel, $inlineOptions)};
+
+  padding: 6px;
+`;
+
+export const Option = styled.Pressable<SelectedProps>`
+  ${({ theme }) => ss.Surface(theme)};
+
+  ${({ theme }) => ss.Rounded(theme, 'md')};
+
+  min-height: 50px;
+
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding: 7px 9px;
+
+  border-width: ${({ theme, $selected }) =>
+    $selected ? theme.border.width.md : theme.border.width.sm}px;
+
+  border-color: ${({ theme, $selected }) =>
+    $selected ? theme.colors.primary : theme.colors.border};
+`;
+
+export const OptionContent = styled.View`
+  flex: 1;
+
+  flex-direction: row;
+  align-items: center;
+
+  gap: 10px;
+`;
+
+export const IconBox = styled.View<IconBoxProps>`
+  ${ss.CenterContent};
+
+  ${({ theme }) => ss.Rounded(theme, 'full')};
+
+  width: 34px;
+  height: 34px;
+
+  background-color: ${({ theme, $tone, $selected }) =>
+    $selected
+      ? getToneColor(theme, $tone)
+      : getToneSoftBackground(theme, $tone)};
+`;
+
+export const OptionText = styled.Text<SelectedProps>`
+  ${({ theme, $selected }) =>
+    ss.Text(
+      theme,
+      'base',
+      $selected ? 'semibold' : 'medium',
+      $selected ? 'primary' : 'default',
+      'md'
+    )};
+
+  flex: 1;
+`;
+
+export const dropdownContent = css`
+  gap: 5px;
+` as ViewStyle;

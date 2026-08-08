@@ -1,5 +1,3 @@
-import { useTheme } from '@emotion/react';
-
 import * as s from './styles/SegmentedSwitch';
 
 export type SegmentedSwitchOption<T extends string> = {
@@ -26,8 +24,6 @@ export const SegmentedSwitch = <T extends string>({
   label,
   disabled = false,
 }: SegmentedSwitchProps<T>) => {
-  const theme = useTheme();
-
   return (
     <s.Wrapper>
       {label ? <s.Label>{label}</s.Label> : null}
@@ -41,22 +37,21 @@ export const SegmentedSwitch = <T extends string>({
           return (
             <s.Segment
               key={option.value}
+              $active={active}
+              $disabled={optionDisabled}
               disabled={optionDisabled}
               accessibilityRole="button"
               accessibilityState={{
                 selected: active,
                 disabled: optionDisabled,
               }}
-              style={s.getSegmentStyle(theme, active, optionDisabled)}
               onPress={() => {
                 if (!optionDisabled) {
                   onChange(option.value);
                 }
               }}
             >
-              <s.SegmentText
-                style={s.getSegmentTextStyle(theme, active, optionDisabled)}
-              >
+              <s.SegmentText $active={active} $disabled={optionDisabled}>
                 {option.label}
               </s.SegmentText>
             </s.Segment>

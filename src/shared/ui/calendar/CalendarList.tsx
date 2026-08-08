@@ -1,40 +1,11 @@
-import { Text, View } from 'react-native';
-import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
-import type { StyleProp, ViewStyle } from 'react-native';
-import { CalendarList } from 'react-native-calendars';
+import { CalendarList as RNCalendarList } from 'react-native-calendars';
 
-import * as sharedStyles from '@shared/styles';
+import * as s from './styles';
+import type { CalendarListComponentProps } from './types';
+import { useListCalendar } from './useListCalendar';
 
-import { Button } from '../Button';
-
-import useListCalendar from './useListCalendar';
-
-type CalendarListComponentProps = {
-  currentDateString: string;
-  markedDates: Record<string, any>;
-  onDayPress: (day: { dateString: string }) => void;
-  minDate?: string;
-  pastScrollRange?: number;
-  futureScrollRange?: number;
-  showBackToTodayThresholdMonths?: number;
-  style?: StyleProp<ViewStyle>;
-};
-
-const rootStyle: ViewStyle = {
-  position: 'relative',
-  flex: 1,
-};
-
-const backToTodayContainerStyle: ViewStyle = {
-  position: 'absolute',
-  left: 0,
-  right: 0,
-  bottom: 12,
-  alignItems: 'center',
-};
-
-const CalendarListComponent = ({
+export const CalendarList = ({
   currentDateString,
   markedDates,
   onDayPress,
@@ -44,7 +15,6 @@ const CalendarListComponent = ({
   showBackToTodayThresholdMonths = 0,
   style,
 }: CalendarListComponentProps) => {
-  const theme = useTheme();
   const { t } = useTranslation();
 
   const {
@@ -59,8 +29,8 @@ const CalendarListComponent = ({
   });
 
   return (
-    <View style={[rootStyle, style]}>
-      <CalendarList
+    <s.ListRoot style={style}>
+      <RNCalendarList
         ref={listRef}
         current={currentDateString}
         markingType="multi-dot"
@@ -78,21 +48,14 @@ const CalendarListComponent = ({
       />
 
       {shouldShowBackToToday && (
-        <View style={backToTodayContainerStyle} pointerEvents="box-none">
-          <Button
-            onPress={scrollToToday}
-            style={sharedStyles.Rounded(theme, 'full')}
-          >
-            <Text
-              style={sharedStyles.Text(theme, 'base', 'regular', 'inverse')}
-            >
+        <s.BackToToday pointerEvents="box-none">
+          <s.BackButton onPress={scrollToToday}>
+            <s.BackButtonText>
               {t('common.actions.backToToday')}
-            </Text>
-          </Button>
-        </View>
+            </s.BackButtonText>
+          </s.BackButton>
+        </s.BackToToday>
       )}
-    </View>
+    </s.ListRoot>
   );
 };
-
-export default CalendarListComponent;

@@ -1,10 +1,12 @@
 import styled from '@emotion/native';
 
+import * as ss from '@shared/styles';
+
 export const Center = styled.View`
+  ${ss.CenterContent};
+
   flex: 1;
 
-  align-items: center;
-  justify-content: center;
-
-  margin: 50px 0;
+  margin-top: ${({ theme }) => theme.spacing['5xl']}px;
+  margin-bottom: ${({ theme }) => theme.spacing['5xl']}px;
 `;

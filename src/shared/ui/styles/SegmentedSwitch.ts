@@ -1,9 +1,14 @@
 import styled from '@emotion/native';
-import type { Theme } from '@emotion/react';
-import type { TextStyle, ViewStyle } from 'react-native';
+
+import * as ss from '@shared/styles';
+
+type SegmentStateProps = {
+  $active: boolean;
+  $disabled: boolean;
+};
 
 export const Wrapper = styled.View`
-  width: 100%;
+  ${ss.FullWidth};
 
   align-items: center;
 
@@ -13,14 +18,15 @@ export const Wrapper = styled.View`
 `;
 
 export const Label = styled.Text`
-  color: ${({ theme }) => theme.colors.muted};
-
-  font-size: ${({ theme }) => theme.size.base}px;
-  font-weight: ${({ theme }) => theme.weight.medium};
+  ${({ theme }) => ss.Text(theme, 'base', 'medium', 'muted', 'md')};
 `;
 
 export const Container = styled.View`
-  width: 100%;
+  ${ss.FullWidth};
+
+  ${({ theme }) => ss.Surface(theme, 'input')};
+  ${({ theme }) => ss.Rounded(theme, 'lg')};
+
   min-height: 40px;
 
   flex-direction: row;
@@ -28,47 +34,29 @@ export const Container = styled.View`
 
   overflow: hidden;
 
-  padding: 4px;
-
-  border-width: ${({ theme }) => theme.border.width.sm}px;
-  border-color: ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.radius.lg}px;
-
-  background-color: ${({ theme }) => theme.colors.input};
+  padding: ${({ theme }) => theme.spacing.xs}px;
 `;
 
-export const Segment = styled.Pressable`
+export const Segment = styled.Pressable<SegmentStateProps>`
+  ${ss.CenterContent};
+
+  ${({ theme }) => ss.Rounded(theme, 'lg')};
+
   flex: 1;
 
-  min-height: 32px;
+  min-height: ${({ theme }) => theme.control.height.sm}px;
 
-  align-items: center;
-  justify-content: center;
+  background-color: ${({ theme, $active }) =>
+    $active ? theme.colors.primary : 'transparent'};
 
-  border-radius: ${({ theme }) => theme.radius.lg}px;
+  opacity: ${({ $disabled }) => ($disabled ? 0.55 : 1)};
 `;
 
-export const SegmentText = styled.Text`
-  font-size: ${({ theme }) => theme.size.md}px;
-  font-weight: ${({ theme }) => theme.weight.bold};
+export const SegmentText = styled.Text<SegmentStateProps>`
+  ${({ theme }) => ss.Text(theme, 'md', 'bold', 'default', 'md')};
+
+  color: ${({ theme, $active }) =>
+    $active ? theme.colors.white : theme.colors.text};
+
+  opacity: ${({ $disabled }) => ($disabled ? 0.75 : 1)};
 `;
-
-export const getSegmentStyle = (
-  theme: Theme,
-  active: boolean,
-  disabled: boolean
-): ViewStyle => ({
-  backgroundColor: active ? theme.colors.primary : 'transparent',
-
-  opacity: disabled ? 0.55 : 1,
-});
-
-export const getSegmentTextStyle = (
-  theme: Theme,
-  active: boolean,
-  disabled: boolean
-): TextStyle => ({
-  color: active ? theme.colors.white : theme.colors.text,
-
-  opacity: disabled ? 0.75 : 1,
-});

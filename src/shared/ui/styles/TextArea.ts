@@ -1,28 +1,29 @@
 import styled from '@emotion/native';
-import type { Theme } from '@emotion/react';
-import type { TextStyle } from 'react-native';
+
+import * as ss from '@shared/styles';
+
+import { Input } from '../Input';
 
 export const Container = styled.View`
-  width: 100%;
+  ${ss.FullWidth};
+`;
+
+export const Field = styled(Input)`
+  ${ss.FullWidth};
+
+  height: 220px;
+
+  padding: ${({ theme }) => theme.spacing.md}px;
+
+  background-color: ${({ theme }) => theme.colors.bg};
+
+  text-align-vertical: top;
 `;
 
 export const CharacterCount = styled.Text`
+  ${({ theme }) => ss.Text(theme, 'sm', 'regular', 'muted', 'sm')};
+
   padding: 5px;
-
-  color: ${({ theme }) => theme.colors.muted};
-
-  font-size: ${({ theme }) => theme.size.sm}px;
 
   text-align: right;
 `;
-
-export const getInputStyle = (theme: Theme): TextStyle => ({
-  width: '100%',
-  height: 220,
-
-  padding: theme.spacing.md,
-
-  backgroundColor: theme.colors.bg,
-
-  textAlignVertical: 'top',
-});

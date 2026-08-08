@@ -8,6 +8,8 @@ import styled from '@emotion/native';
 import type { PropsWithChildren } from 'react';
 import { type Edges, SafeAreaView } from 'react-native-safe-area-context';
 
+import * as ss from '@shared/styles';
+
 type PageLayoutProps = PropsWithChildren<{
   edges?: Edges;
   style?: StyleProp<ViewStyle>;
@@ -43,12 +45,9 @@ const KeyboardContainer = styled(KeyboardAvoidingView)`
 `;
 
 const PageRoot = styled(SafeAreaView)`
-  flex: 1;
-  background-color: ${({ theme }) => theme.colors.bg};
+  ${({ theme }) => ss.PageRoot(theme)};
 `;
 
 const PageContent = styled.View`
-  flex: 1;
-  padding-left: ${({ theme }) => theme.spacing.md}px;
-  padding-right: ${({ theme }) => theme.spacing.md}px;
+  ${({ theme }) => ss.PageContainer(theme)};
 `;

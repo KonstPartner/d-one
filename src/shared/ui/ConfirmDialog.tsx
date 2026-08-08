@@ -14,7 +14,6 @@ type ConfirmDialogProps = {
   confirmDisabled?: boolean;
 
   onConfirm: () => void | Promise<void>;
-
   onClose: () => void;
 };
 
@@ -54,25 +53,21 @@ export const ConfirmDialog = ({
           </s.Description>
 
           <s.Actions>
-            <s.ConfirmButton
-              $tone={confirmTone}
-              $disabled={confirmDisabled}
+            <s.ActionButton
+              tone={confirmTone}
               loading={confirmDisabled}
               onPress={() => {
                 void onConfirm();
               }}
             >
-              <s.ConfirmButtonText
-                $tone={confirmTone}
-                $disabled={confirmDisabled}
-              >
+              <s.ConfirmButtonText>
                 {confirmLabel ?? t('common.confirmModal.confirm')}
               </s.ConfirmButtonText>
-            </s.ConfirmButton>
+            </s.ActionButton>
 
-            <s.CancelButton onPress={onClose}>
+            <s.ActionButton tone="secondary" onPress={onClose}>
               <s.CancelButtonText>{t('common.cancel')}</s.CancelButtonText>
-            </s.CancelButton>
+            </s.ActionButton>
           </s.Actions>
         </s.Card>
       </s.Backdrop>

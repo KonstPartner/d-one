@@ -1,8 +1,5 @@
 import { useTranslation } from 'react-i18next';
 
-import * as sharedStyles from '@shared/styles';
-import { Button } from '@shared/ui';
-
 import { useVerifyEmail } from '../model/useVerifyEmail';
 import * as s from '../styles/VerifyEmail';
 
@@ -28,8 +25,7 @@ export const VerifyEmail = () => {
 
       <s.Email>{email}</s.Email>
 
-      <Button
-        style={sharedStyles.FullWidth}
+      <s.SubmitButton
         onPress={verificationEmailSent ? check : send}
         loading={isPending}
       >
@@ -38,7 +34,7 @@ export const VerifyEmail = () => {
             ? t('auth.verifyEmail.buttons.check')
             : t('auth.verifyEmail.buttons.send')}
         </s.ButtonText>
-      </Button>
+      </s.SubmitButton>
     </s.Container>
   );
 };

@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { StyleSheet } from 'react-native';
-import styled from '@emotion/native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import { Input, type InputProps } from './Input';
-import * as inputStyles from './styles/Input';
+import * as s from './styles/PasswordInput';
 
 export const PasswordInput = ({
   withLabel,
@@ -22,20 +20,18 @@ export const PasswordInput = ({
 
   return (
     <>
-      {withLabel && (
-        <inputStyles.Label>{labelPlaceholder || placeholder}</inputStyles.Label>
-      )}
+      {withLabel && <s.Label>{labelPlaceholder || placeholder}</s.Label>}
 
-      <PasswordContainer>
+      <s.Container>
         <Input
           {...inputProps}
           placeholder={placeholder}
-          style={[style, styles.passwordInput]}
+          style={[style, s.getFieldStyle(theme)]}
           secureTextEntry={hidePassword}
           withLabel={false}
         />
 
-        <PasswordToggle
+        <s.Toggle
           accessibilityRole="button"
           accessibilityLabel={
             hidePassword
@@ -51,32 +47,8 @@ export const PasswordInput = ({
             size={25}
             color={theme.colors.muted}
           />
-        </PasswordToggle>
-      </PasswordContainer>
+        </s.Toggle>
+      </s.Container>
     </>
   );
 };
-
-const PasswordContainer = styled.View`
-  position: relative;
-  width: 100%;
-`;
-
-const PasswordToggle = styled.Pressable`
-  position: absolute;
-
-  top: 0;
-  right: 0;
-  bottom: 0;
-
-  width: 52px;
-
-  align-items: center;
-  justify-content: center;
-`;
-
-const styles = StyleSheet.create({
-  passwordInput: {
-    paddingRight: 52,
-  },
-});

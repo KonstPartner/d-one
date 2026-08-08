@@ -1,6 +1,6 @@
 import styled from '@emotion/native';
-import type { Theme } from '@emotion/react';
-import type { ViewStyle } from 'react-native';
+
+import * as ss from '@shared/styles';
 
 export const Root = styled.Pressable`
   flex-direction: row;
@@ -8,35 +8,29 @@ export const Root = styled.Pressable`
 
   gap: 10px;
 
-  padding: 6px 12px;
+  padding: 6px ${({ theme }) => theme.spacing.md}px;
 
   border-radius: 10px;
 `;
 
-export const Indicator = styled.View`
+export const Indicator = styled.View<{
+  $checked: boolean;
+}>`
+  ${ss.CenterContent};
+
   width: 30px;
   height: 30px;
 
-  align-items: center;
-  justify-content: center;
+  border-width: ${({ theme }) => theme.border.width.md}px;
+  border-color: ${({ theme, $checked }) =>
+    $checked ? theme.colors.primary : theme.colors.border};
 
-  border-width: 2px;
   border-radius: 2px;
+
+  background-color: ${({ theme, $checked }) =>
+    $checked ? theme.colors.primary : theme.colors.bg};
 `;
 
 export const Label = styled.Text`
-  color: ${({ theme }) => theme.colors.text};
-
-  font-size: ${({ theme }) => theme.size.base}px;
-  font-weight: ${({ theme }) => theme.weight.regular};
-  line-height: ${({ theme }) => theme.lineHeight.md}px;
+  ${({ theme }) => ss.Body(theme)};
 `;
-
-export const getIndicatorStyle = (
-  theme: Theme,
-  checked: boolean
-): ViewStyle => ({
-  borderColor: checked ? theme.colors.primary : theme.colors.border,
-
-  backgroundColor: checked ? theme.colors.primary : theme.colors.bg,
-});

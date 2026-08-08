@@ -1,127 +1,121 @@
-import { StyleProp, TextStyle, ViewStyle } from 'react-native';
-import { css } from '@emotion/native';
-import { Theme } from '@emotion/react';
+import styled from '@emotion/native';
 
-export const WeekWrapperRN: ViewStyle = {};
+import * as ss from '@shared/styles';
 
-export const WeekHeaderRN: ViewStyle = {
-  paddingTop: 18,
-  paddingBottom: 6,
-  alignItems: 'center',
-  justifyContent: 'center',
+import { Button } from '../Button';
+
+type DayContainerProps = {
+  $selected: boolean;
+  $today: boolean;
+  $disabled: boolean;
+  $highlightSelected: boolean;
 };
 
-export const WeekHeaderTextRN = (theme: Theme): TextStyle => ({
-  color: theme.colors.text,
-  fontSize: 14,
-  fontWeight: '600',
-});
-
-export const BottomSlotRN: ViewStyle = {
-  height: 56,
-  justifyContent: 'center',
-  alignItems: 'center',
+type DayTextProps = {
+  $selected: boolean;
+  $disabled: boolean;
 };
 
-export const DayWrapper: ViewStyle = {};
+export const Root = styled.View`
+  ${({ theme }) => ss.Stack(theme, 'md')};
+`;
 
-export const DayContainer = (
-  theme: Theme,
-  {
-    isSelected,
-    isToday,
-    disabled,
-    highlightSelected,
-  }: {
-    isSelected: boolean;
-    isToday: boolean;
-    disabled: boolean;
-    highlightSelected: boolean;
-  }
-): ViewStyle => {
-  const bgColor =
-    highlightSelected && isSelected ? theme.colors.primary : 'transparent';
+export const WeekHeader = styled.View`
+  ${ss.CenterContent};
 
-  const borderWidth = isToday ? 2 : 0;
-  const borderColor = isToday ? theme.colors.primary : 'transparent';
+  padding-top: 18px;
+  padding-bottom: 6px;
+`;
 
-  return {
-    width: 40,
-    height: 40,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: bgColor,
-    borderWidth,
-    borderColor,
-    opacity: disabled ? 0.4 : 1,
-  };
-};
+export const WeekHeaderText = styled.Text`
+  color: ${({ theme }) => theme.colors.text};
 
-export const DayText = (
-  theme: Theme,
-  {
-    isSelected,
-    disabled,
-  }: {
-    isSelected: boolean;
-    disabled: boolean;
-  }
-): TextStyle => {
-  let color = theme.colors.text;
+  font-size: ${({ theme }) => theme.size.base}px;
 
-  if (disabled) {
-    color = theme.colors.muted;
-  } else if (isSelected) {
-    color = '#FFFFFF';
-  }
+  font-weight: ${({ theme }) => theme.weight.semibold};
+`;
 
-  return {
-    fontSize: 14,
-    fontWeight: isSelected ? '700' : '500',
-    color,
-  };
-};
+export const Day = styled.Pressable``;
 
-export const DayDotsRow: ViewStyle = {
-  flexDirection: 'row',
-  justifyContent: 'center',
-  gap: 3,
-  marginTop: -10,
-};
+export const DayContainer = styled.View<DayContainerProps>`
+  ${ss.CenterContent};
 
-export const DayDot = (color: string): ViewStyle => ({
-  width: 4,
-  height: 4,
-  borderRadius: 2,
-  backgroundColor: color,
-});
+  ${({ theme }) => ss.Rounded(theme, 'full')};
 
-export const ModeSwitch = (theme: Theme) =>
-  css`
-    flex-direction: row;
-    border-radius: 999px;
-    border: 1px solid ${theme.colors.border};
-    background-color: ${theme.colors.input};
-    padding: 3px;
-    gap: 3px;
-    width: 80%;
-    margin: 0 auto;
-  ` as StyleProp<ViewStyle>;
+  width: 40px;
+  height: 40px;
 
-export const ModeSwitchItem = (theme: Theme, isActive: boolean) =>
-  css`
-    flex: 1;
-    border-radius: 999px;
-    padding: 10px 12px;
-    align-items: center;
-    justify-content: center;
-    background-color: ${isActive ? theme.colors.primary : 'transparent'};
-  ` as StyleProp<ViewStyle>;
+  background-color: ${({ theme, $selected, $highlightSelected }) =>
+    $highlightSelected && $selected ? theme.colors.primary : 'transparent'};
 
-export const ModeSwitchText = (theme: Theme, isActive: boolean) =>
-  css`
-    color: ${isActive ? theme.colors.card : theme.colors.text};
-    font-weight: 900;
-    font-size: 13px;
-  ` as StyleProp<TextStyle>;
+  border-width: ${({ theme, $today }) =>
+    $today ? theme.border.width.md : 0}px;
+
+  border-color: ${({ theme, $today }) =>
+    $today ? theme.colors.primary : 'transparent'};
+
+  opacity: ${({ $disabled }) => ($disabled ? 0.4 : 1)};
+`;
+
+export const DayText = styled.Text<DayTextProps>`
+  color: ${({ theme, $selected, $disabled }) => {
+    if ($disabled) {
+      return theme.colors.muted;
+    }
+
+    if ($selected) {
+      return theme.colors.white;
+    }
+
+    return theme.colors.text;
+  }};
+
+  font-size: ${({ theme }) => theme.size.base}px;
+
+  font-weight: ${({ theme, $selected }) =>
+    $selected ? theme.weight.bold : theme.weight.medium};
+`;
+
+export const DayDots = styled.View`
+  flex-direction: row;
+  justify-content: center;
+
+  gap: 3px;
+
+  margin-top: -10px;
+`;
+
+export const DayDot = styled.View<{
+  $color: string;
+}>`
+  width: 4px;
+  height: 4px;
+
+  border-radius: 2px;
+
+  background-color: ${({ $color }) => $color};
+`;
+
+export const ListRoot = styled.View`
+  position: relative;
+  flex: 1;
+`;
+
+export const BackToToday = styled.View`
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  bottom: ${({ theme }) => theme.spacing.md}px;
+
+  align-items: center;
+`;
+
+export const BackButton = styled(Button)`
+  ${({ theme }) => ss.Rounded(theme, 'full')};
+`;
+
+export const BackButtonText = styled.Text`
+  ${({ theme }) => ss.Text(theme, 'base', 'regular', 'inverse', 'md')};
+`;
