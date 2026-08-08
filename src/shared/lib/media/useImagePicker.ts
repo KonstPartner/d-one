@@ -1,11 +1,11 @@
 import { useCallback, useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 
-import { i18n } from '@features/i18n/model';
+import { i18n } from '@shared/i18n';
 
-import { showNotification } from '../../ui/Notification';
-import { PlatformOS } from '../constants/platformOS';
-import { errorMapper } from '../utils/error';
+import { errorMapper } from '../errors';
+import { showNotification } from '../notifications';
+import { PlatformOS } from '../platform';
 
 type PickRoundOptions = {
   size?: number;

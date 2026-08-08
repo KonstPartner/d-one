@@ -1,6 +1,8 @@
 import styled from '@emotion/native';
 import type { Theme } from '@emotion/react';
-import type { TextStyle, ViewStyle } from 'react-native';
+import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
+
+import * as sharedStyles from '@shared/styles';
 
 import type { SelectDropdownTone } from '../SelectDropdown.types';
 
@@ -46,8 +48,6 @@ export const FieldContent = styled.View`
 
 export const FieldText = styled.Text`
   flex: 1;
-
-  font-size: ${({ theme }) => theme.size.base}px;
 `;
 
 export const Dropdown = styled.View`
@@ -101,8 +101,6 @@ export const IconBox = styled.View`
 
 export const OptionText = styled.Text`
   flex: 1;
-
-  font-size: ${({ theme }) => theme.size.base}px;
 `;
 
 export const dropdownContent: ViewStyle = {
@@ -159,9 +157,8 @@ export const getFieldStyle = (theme: Theme, opened: boolean): ViewStyle => ({
 export const getFieldTextStyle = (
   theme: Theme,
   hasValue: boolean
-): TextStyle => ({
-  color: hasValue ? theme.colors.text : theme.colors.muted,
-});
+): StyleProp<TextStyle> =>
+  sharedStyles.Text(theme, 'base', 'regular', hasValue ? 'default' : 'muted');
 
 export const getDropdownStyle = (
   hasLabel: boolean,
@@ -204,8 +201,10 @@ export const getIconBoxStyle = (
 export const getOptionTextStyle = (
   theme: Theme,
   selected: boolean
-): TextStyle => ({
-  color: selected ? theme.colors.primary : theme.colors.text,
-
-  fontWeight: selected ? theme.weight.semibold : theme.weight.medium,
-});
+): StyleProp<TextStyle> =>
+  sharedStyles.Text(
+    theme,
+    'base',
+    selected ? 'semibold' : 'medium',
+    selected ? 'primary' : 'default'
+  );

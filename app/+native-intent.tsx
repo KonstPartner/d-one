@@ -1,7 +1,5 @@
-import {
-  GOOGLE_AUTH_AFTER_REDIRECT_ROUTE,
-  GOOGLE_AUTH_REDIRECT_PATH,
-} from '@features/auth/model';
+import { GOOGLE_AUTH_REDIRECT_PATH } from '@features/google-sign-in';
+import { ROUTES } from '@shared/routes';
 
 const isGoogleOAuthRedirect = (path: string) => {
   try {
@@ -23,7 +21,7 @@ export const redirectSystemPath = ({
   initial: boolean;
 }) => {
   if (isGoogleOAuthRedirect(path)) {
-    return GOOGLE_AUTH_AFTER_REDIRECT_ROUTE;
+    return ROUTES.authCallback;
   }
 
   return path;

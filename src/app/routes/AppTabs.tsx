@@ -1,15 +1,15 @@
 import { View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { HeaderMenu } from '@widgets/header-menu';
-import { useCurrentUserProfile } from '@features/auth/model';
-import { useNetwork } from '@features/network/model';
-import * as globalStyles from '@features/shared/styles/global';
 import { useSession } from '@entities/session';
-import { UserRole } from '@entities/user';
+import { userProfileQueryOptions, UserRole } from '@entities/user';
+import { useNetwork } from '@shared/lib/network';
+import { Row } from '@shared/styles';
 
 import { DiaryRuntimeBoundary } from '../providers/DiaryRuntimeBoundary';
 
@@ -21,16 +21,16 @@ export const AppTabs = () => {
 
   const { sessionUser } = useSession();
 
-  const { profile } = useCurrentUserProfile();
+  const userId = sessionUser?.uid ?? null;
+
+  const { data: profile } = useQuery(userProfileQueryOptions(userId));
 
   const { status: networkStatus } = useNetwork();
 
   const role = profile?.role ?? null;
 
   const isPending = role === null;
-
   const isUser = role === UserRole.User;
-
   const isFollower = role === UserRole.Follower;
 
   const networkIconName: keyof typeof Ionicons.glyphMap =
@@ -41,15 +41,13 @@ export const AppTabs = () => {
         : 'help-circle-outline';
 
   return (
-    <DiaryRuntimeBoundary enabled={isUser} userId={sessionUser?.uid ?? null}>
+    <DiaryRuntimeBoundary enabled={isUser} userId={userId}>
       <Tabs
         screenOptions={createTabScreenOptions({
           theme,
 
           headerRight: () => (
-            <View
-              style={globalStyles.ContainerFlex('row', 'center', 'center', 10)}
-            >
+            <View style={Row(theme, 'center', 'center', 'sm')}>
               <Ionicons
                 name={networkIconName}
                 size={20}

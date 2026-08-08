@@ -1,4 +1,4 @@
-import { PlatformOS } from '../constants/platformOS';
+import { PlatformOS } from '../platform';
 
 export const buildImageFormData = async (uri: string) => {
   const fd = new FormData();

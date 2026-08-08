@@ -9,7 +9,7 @@ import { showNotification } from '@shared/lib/notifications';
 import { ROUTES } from '@shared/routes';
 
 import { checkUserExistsByEmail } from '../api/checkUserExistsByEmail';
-import useGoogleSignInMutation from '../api/useGoogleSignInMutation';
+import { useGoogleSignInMutation } from '../api/useGoogleSignInMutation';
 
 import {
   getGoogleClientId,

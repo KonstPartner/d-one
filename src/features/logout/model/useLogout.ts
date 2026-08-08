@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { errorMapper } from '@shared/lib/errors';
 import { showNotification } from '@shared/lib/notifications';
 
-import { logout } from '../api/logout';
+import { logout as logoutRequest } from '../api/logout';
 
 export const useLogout = () => {
   const { t } = useTranslation();
 
   const mutation = useMutation({
-    mutationFn: logout,
+    mutationFn: logoutRequest,
 
     onSuccess: () => {
       showNotification('success', t('auth.notifications.logoutSuccess'));
@@ -21,8 +21,12 @@ export const useLogout = () => {
     },
   });
 
+  const logout = () => {
+    mutation.mutate();
+  };
+
   return {
-    logout: mutation.mutate,
+    logout,
     isPending: mutation.isPending,
   };
 };

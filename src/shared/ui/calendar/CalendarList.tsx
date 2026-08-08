@@ -1,10 +1,16 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { useTheme } from '@emotion/react';
+import { useTranslation } from 'react-i18next';
+import type { StyleProp, ViewStyle } from 'react-native';
 import { CalendarList } from 'react-native-calendars';
 
-import useListCalendar from '../model/hooks/useListCalendar';
-import * as globalStyles from '../styles/global';
+import * as sharedStyles from '@shared/styles';
 
-type Props = {
+import { Button } from '../Button';
+
+import useListCalendar from './useListCalendar';
+
+type CalendarListComponentProps = {
   currentDateString: string;
   markedDates: Record<string, any>;
   onDayPress: (day: { dateString: string }) => void;
@@ -12,7 +18,20 @@ type Props = {
   pastScrollRange?: number;
   futureScrollRange?: number;
   showBackToTodayThresholdMonths?: number;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
+};
+
+const rootStyle: ViewStyle = {
+  position: 'relative',
+  flex: 1,
+};
+
+const backToTodayContainerStyle: ViewStyle = {
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  bottom: 12,
+  alignItems: 'center',
 };
 
 const CalendarListComponent = ({
@@ -24,19 +43,23 @@ const CalendarListComponent = ({
   futureScrollRange = 24,
   showBackToTodayThresholdMonths = 0,
   style,
-}: Props) => {
+}: CalendarListComponentProps) => {
+  const theme = useTheme();
+  const { t } = useTranslation();
+
   const {
     listRef,
     handleVisibleMonthsChange,
     calendarTheme,
     shouldShowBackToToday,
     scrollToToday,
-    theme,
-    t,
-  } = useListCalendar({ showBackToTodayThresholdMonths, currentDateString });
+  } = useListCalendar({
+    showBackToTodayThresholdMonths,
+    currentDateString,
+  });
 
   return (
-    <View style={[{ position: 'relative', flex: 1 }, style]}>
+    <View style={[rootStyle, style]}>
       <CalendarList
         ref={listRef}
         current={currentDateString}
@@ -55,27 +78,17 @@ const CalendarListComponent = ({
       />
 
       {shouldShowBackToToday && (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 12,
-            alignItems: 'center',
-          }}
-          pointerEvents="box-none"
-        >
-          <Pressable
+        <View style={backToTodayContainerStyle} pointerEvents="box-none">
+          <Button
             onPress={scrollToToday}
-            style={[
-              globalStyles.ButtonStyles(theme),
-              { borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10 },
-            ]}
+            style={sharedStyles.Rounded(theme, 'full')}
           >
-            <Text style={globalStyles.TextWhite}>
+            <Text
+              style={sharedStyles.Text(theme, 'base', 'regular', 'inverse')}
+            >
               {t('common.actions.backToToday')}
             </Text>
-          </Pressable>
+          </Button>
         </View>
       )}
     </View>

@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import { errorMapper, validateInput } from '@features/shared/model';
-import { showNotification } from '@features/shared/ui';
+import { errorMapper } from '@shared/lib/errors';
+import { showNotification } from '@shared/lib/notifications';
+import { validateInput } from '@shared/lib/validation';
 
 import { requestPasswordReset } from '../api/requestPasswordReset';
 

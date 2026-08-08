@@ -7,12 +7,14 @@ import {
   WeekCalendar,
 } from 'react-native-calendars';
 
-import { SegmentedSwitch } from '@entities/shared/ui';
+import * as sharedStyles from '@shared/styles';
 
-import useCalendar from '../model/hooks/useCalendar';
-import { CalendarComponentProps } from '../model/types/calendar';
-import * as styles from '../styles/Calendar';
-import * as globalStyles from '../styles/global';
+import { Button } from '../Button';
+import { SegmentedSwitch } from '../SegmentedSwitch';
+
+import * as styles from './styles';
+import type { CalendarComponentProps } from './types';
+import useCalendar from './useCalendar';
 
 const CalendarComponent = ({
   showBackToCurrentMonth = false,
@@ -80,6 +82,7 @@ const CalendarComponent = ({
       if (disabledForPress) {
         return;
       }
+
       onPress?.(date);
     };
 
@@ -113,7 +116,7 @@ const CalendarComponent = ({
   };
 
   return (
-    <View style={globalStyles.GapContainer(10)} onLayout={handleLayout}>
+    <View style={sharedStyles.Stack(theme, 'md')} onLayout={handleLayout}>
       {showWeekToggle && (
         <SegmentedSwitch
           value={isWeekMode ? 'week' : 'month'}
@@ -174,23 +177,18 @@ const CalendarComponent = ({
             dayComponent={renderDay}
           />
 
-          {shouldShowButton ? (
-            <Pressable
+          {shouldShowButton && (
+            <Button
               onPress={handleBackToCurrentMonth}
-              style={[
-                globalStyles.ButtonStyles(theme),
-                {
-                  borderRadius: 999,
-                  paddingHorizontal: 16,
-                  paddingVertical: 10,
-                },
-              ]}
+              style={sharedStyles.Rounded(theme, 'full')}
             >
-              <Text style={globalStyles.TextWhite}>
+              <Text
+                style={sharedStyles.Text(theme, 'base', 'regular', 'inverse')}
+              >
                 {t('common.actions.backToCurrentMonth')}
               </Text>
-            </Pressable>
-          ) : null}
+            </Button>
+          )}
         </>
       )}
     </View>

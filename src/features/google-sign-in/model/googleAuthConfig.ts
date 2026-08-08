@@ -1,7 +1,7 @@
 import { envConfig } from '@shared/config';
 import { PlatformOS } from '@shared/lib/platform';
 
-const GOOGLE_AUTH_REDIRECT_PATH = 'oauthredirect';
+export const GOOGLE_AUTH_REDIRECT_PATH = 'oauthredirect';
 
 const ANDROID_APP_SCHEME = 'done.android.app';
 

@@ -6,8 +6,8 @@ import {
   DiaryDatabaseProvider,
   useDiaryDatabase,
 } from '@features/diary/api/sqlite';
-import { PlatformOS } from '@features/shared/model';
-import { ErrorSection, LoadingView } from '@entities/shared/ui';
+import { PlatformOS } from '@shared/lib/platform';
+import { ErrorSection, LoadingView } from '@shared/ui';
 
 type DiaryRuntimeBoundaryProps = PropsWithChildren<{
   enabled: boolean;
@@ -27,8 +27,8 @@ const DiaryDatabaseStatusBoundary = ({ children }: PropsWithChildren) => {
   if (status === 'error') {
     return (
       <ErrorSection
-        callback={retry}
-        error={t('diary.database.initializationFailed')}
+        message={t('diary.database.initializationFailed')}
+        onRetry={retry}
       />
     );
   }

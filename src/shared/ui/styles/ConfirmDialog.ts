@@ -1,11 +1,12 @@
 import styled from '@emotion/native';
+import type { Theme } from '@emotion/react';
 
 import { Button } from '../Button';
 
 export type ConfirmDialogTone = 'primary' | 'danger';
 
 const getConfirmBackground = (
-  theme: ReactNativePaper.Theme | any,
+  theme: Theme | any,
   tone: ConfirmDialogTone,
   disabled: boolean
 ): string => {
@@ -17,7 +18,7 @@ const getConfirmBackground = (
 };
 
 const getConfirmTextColor = (
-  theme: ReactNativePaper.Theme | any,
+  theme: Theme | any,
   tone: ConfirmDialogTone,
   disabled: boolean
 ): string => {

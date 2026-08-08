@@ -2,9 +2,8 @@ import { Text } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
-import * as gs from '@features/shared/styles/global';
-import { PortalModal } from '@features/shared/ui';
-import { Button, Input } from '@entities/shared/ui';
+import * as sharedStyles from '@shared/styles';
+import { Button, Input, PortalModal } from '@shared/ui';
 
 import { useResetPassword } from '../model/useResetPassword';
 import * as s from '../styles/ResetPassword';
@@ -27,7 +26,7 @@ export const ResetPasswordModal = () => {
   return (
     <>
       <s.Trigger onPress={open} accessibilityRole="button">
-        <Text style={gs.Link(theme)}>
+        <Text style={sharedStyles.Text(theme, 'base', 'medium', 'primary')}>
           {t('auth.forms.links.forgotPassword')}
         </Text>
       </s.Trigger>
@@ -65,11 +64,15 @@ export const ResetPasswordModal = () => {
           />
 
           <Button
-            style={gs.ButtonStyles(theme, isPending)}
+            style={sharedStyles.FullWidth}
             onPress={submit}
             loading={isPending}
           >
-            <Text style={gs.TextWhite}>{t('common.send')}</Text>
+            <Text
+              style={sharedStyles.Text(theme, 'base', 'regular', 'inverse')}
+            >
+              {t('common.send')}
+            </Text>
           </Button>
         </s.Container>
       </PortalModal>

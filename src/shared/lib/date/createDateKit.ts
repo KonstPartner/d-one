@@ -1,6 +1,7 @@
 import { getLocales } from 'expo-localization';
 
-import i18n from '@shared/i18n';
+import { i18n } from '@shared/i18n';
+
 export type DateInput = string | number | Date | null | undefined;
 
 export type DateParts = {

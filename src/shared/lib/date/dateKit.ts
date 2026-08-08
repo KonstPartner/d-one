@@ -1,3 +1,3 @@
-import { createDateKit } from '../utils/date';
+import { createDateKit } from './createDateKit';
 
 export const dateKit = createDateKit();

@@ -1,14 +1,12 @@
-import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
-import * as gs from '@features/shared/styles/global';
-import { Button } from '@entities/shared/ui';
+import * as sharedStyles from '@shared/styles';
+import { Button } from '@shared/ui';
 
 import { useVerifyEmail } from '../model/useVerifyEmail';
 import * as s from '../styles/VerifyEmail';
 
 export const VerifyEmail = () => {
-  const theme = useTheme();
   const { t } = useTranslation();
 
   const { email, verificationEmailSent, isPending, send, check } =
@@ -31,7 +29,7 @@ export const VerifyEmail = () => {
       <s.Email>{email}</s.Email>
 
       <Button
-        style={gs.ButtonStyles(theme, isPending)}
+        style={sharedStyles.FullWidth}
         onPress={verificationEmailSent ? check : send}
         loading={isPending}
       >

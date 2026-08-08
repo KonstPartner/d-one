@@ -1,7 +1,7 @@
 import type { Theme } from '@emotion/react';
 import type { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 
-import { PlatformOS } from '@features/shared/model';
+import { PlatformOS } from '@shared/lib/platform';
 
 type CreateTabScreenOptionsParams = {
   theme: Theme;

@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import * as WebBrowser from 'expo-web-browser';
 
-import { startNetworkListener } from '@features/network/model';
-import { PlatformOS } from '@features/shared/model';
 import { initI18n } from '@shared/i18n';
+import { startNetworkListener } from '@shared/lib/network';
+import { PlatformOS } from '@shared/lib/platform';
 
 import { AppProviders } from '../providers';
 import { AppGuard, RootStack } from '../routes';

@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import { errorMapper } from '@features/shared/model';
-import { showNotification } from '@features/shared/ui';
 import { useSession } from '@entities/session';
+import { errorMapper } from '@shared/lib/errors';
+import { showNotification } from '@shared/lib/notifications';
 
 import {
   checkEmailVerification,
