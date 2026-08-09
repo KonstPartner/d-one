@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -18,6 +18,7 @@ export const SelectDropdown = <T,>({
   options,
 
   inlineOptions = false,
+  disabled = false,
 
   onSelect,
   isSelected,
@@ -30,14 +31,23 @@ export const SelectDropdown = <T,>({
 
   const [opened, setOpened] = useState(false);
 
-  const hasValue = Boolean(selectedLabel);
+  useEffect(() => {
+    if (disabled) {
+      setOpened(false);
+    }
+  }, [disabled]);
 
+  const hasValue = Boolean(selectedLabel);
   const hasLabel = Boolean(label);
 
   const selectedOption =
     options.find((option) => isSelected?.(option) ?? false) ?? null;
 
   const handleSelect = (option: SelectDropdownOption<T>): void => {
+    if (disabled) {
+      return;
+    }
+
     onSelect(option.value);
     setOpened(false);
   };
@@ -51,8 +61,14 @@ export const SelectDropdown = <T,>({
         accessibilityRole="button"
         accessibilityState={{
           expanded: opened,
+          disabled,
         }}
+        disabled={disabled}
         onPress={() => {
+          if (disabled) {
+            return;
+          }
+
           setOpened((current) => !current);
         }}
       >

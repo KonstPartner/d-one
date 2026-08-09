@@ -4,6 +4,7 @@ import {
   type DiaryEntryNumericRange,
   type DiaryEntryQuery,
   type DiaryEntrySearchField,
+  isDiaryEntryNumericRangeValid,
   isDiaryEntryPresence,
   isDiaryEntrySearchField,
   isDiaryEntryTextSearchField,
@@ -23,17 +24,12 @@ const SEARCH_COLUMNS: Record<DiaryEntrySearchField, string> = {
   carbsGram: 'carbs_gram',
 };
 
-const isNumericRangeValid = ({ min, max }: DiaryEntryNumericRange): boolean =>
-  (min === null || Number.isFinite(min)) &&
-  (max === null || Number.isFinite(max)) &&
-  (min === null || max === null || min <= max);
-
 const assertValidQuery = (query: DiaryEntryQuery): void => {
   if (
-    !isNumericRangeValid(query.glucose) ||
-    !isNumericRangeValid(query.shortInsulin) ||
-    !isNumericRangeValid(query.longInsulin) ||
-    !isNumericRangeValid(query.carbsGram)
+    !isDiaryEntryNumericRangeValid(query.glucose) ||
+    !isDiaryEntryNumericRangeValid(query.shortInsulin) ||
+    !isDiaryEntryNumericRangeValid(query.longInsulin) ||
+    !isDiaryEntryNumericRangeValid(query.carbsGram)
   ) {
     throw new Error('Invalid diary filter range');
   }

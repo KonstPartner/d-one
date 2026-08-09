@@ -32,6 +32,20 @@ export type DiaryEntryNumericRange = {
   max: number | null;
 };
 
+export const createEmptyDiaryEntryNumericRange =
+  (): DiaryEntryNumericRange => ({
+    min: null,
+    max: null,
+  });
+
+export const isDiaryEntryNumericRangeValid = ({
+  min,
+  max,
+}: DiaryEntryNumericRange): boolean =>
+  (min === null || Number.isFinite(min)) &&
+  (max === null || Number.isFinite(max)) &&
+  (min === null || max === null || min <= max);
+
 export const DIARY_ENTRY_PRESENCE_VALUES = [
   'ignore',
   'has',
@@ -45,9 +59,7 @@ export const isDiaryEntryPresence = (
 ): value is DiaryEntryPresence =>
   DIARY_ENTRY_PRESENCE_VALUES.some((presence) => presence === value);
 
-export type DiaryEntryQuery = {
-  search: DiaryEntrySearch;
-
+export type DiaryEntryFilterCriteria = {
   eventAt: {
     from: Date | null;
     to: Date | null;
@@ -62,6 +74,10 @@ export type DiaryEntryQuery = {
 
   photo: DiaryEntryPresence;
   aiAnalysis: DiaryEntryPresence;
+};
+
+export type DiaryEntryQuery = DiaryEntryFilterCriteria & {
+  search: DiaryEntrySearch;
 };
 
 export type DiaryRepositoryCreateInput = Pick<
@@ -97,10 +113,23 @@ export type DiaryRepositoryUpdateInput = Pick<
   photo?: DiaryEntryPhotoState;
 };
 
-const createEmptyRange = (): DiaryEntryNumericRange => ({
-  min: null,
-  max: null,
-});
+export const createDefaultDiaryEntryFilterCriteria =
+  (): DiaryEntryFilterCriteria => ({
+    eventAt: {
+      from: null,
+      to: null,
+    },
+
+    glucose: createEmptyDiaryEntryNumericRange(),
+    shortInsulin: createEmptyDiaryEntryNumericRange(),
+    longInsulin: createEmptyDiaryEntryNumericRange(),
+    carbsGram: createEmptyDiaryEntryNumericRange(),
+
+    mealRelations: [],
+
+    photo: 'ignore',
+    aiAnalysis: 'ignore',
+  });
 
 export const createDefaultDiaryEntryQuery = (): DiaryEntryQuery => ({
   search: {
@@ -108,18 +137,5 @@ export const createDefaultDiaryEntryQuery = (): DiaryEntryQuery => ({
     query: null,
   },
 
-  eventAt: {
-    from: null,
-    to: null,
-  },
-
-  glucose: createEmptyRange(),
-  shortInsulin: createEmptyRange(),
-  longInsulin: createEmptyRange(),
-  carbsGram: createEmptyRange(),
-
-  mealRelations: [],
-
-  photo: 'ignore',
-  aiAnalysis: 'ignore',
+  ...createDefaultDiaryEntryFilterCriteria(),
 });

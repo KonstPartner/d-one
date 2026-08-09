@@ -29,6 +29,7 @@ export type SelectDropdownProps<T> = {
   options: readonly SelectDropdownOption<T>[];
 
   inlineOptions?: boolean;
+  disabled?: boolean;
 
   onSelect: (value: T) => void;
 

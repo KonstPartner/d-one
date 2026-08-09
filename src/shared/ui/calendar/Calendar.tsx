@@ -24,6 +24,7 @@ export const Calendar = ({
   highlightSelected = false,
   minDate,
   blockMinDatePress = true,
+  markingType = 'multi-dot',
   ...props
 }: CalendarComponentProps) => {
   const { t, i18n } = useTranslation();
@@ -54,6 +55,10 @@ export const Calendar = ({
     minDate,
     onDayPress: props.onDayPress,
   });
+
+  const usesCustomDay = markingType === 'multi-dot';
+
+  const weekModeAvailable = usesCustomDay;
 
   const renderDay = (dayProps: any) => {
     const { date, marking, onPress } = dayProps;
@@ -112,9 +117,11 @@ export const Calendar = ({
     );
   };
 
+  const showWeekMode = weekModeAvailable && isWeekMode;
+
   return (
     <s.Root onLayout={handleLayout}>
-      {showWeekToggle && (
+      {showWeekToggle && weekModeAvailable && (
         <SegmentedSwitch
           value={isWeekMode ? 'week' : 'month'}
           onChange={(mode) => {
@@ -123,17 +130,19 @@ export const Calendar = ({
           options={[
             {
               value: 'week',
+
               label: t('common.actions.showWeek'),
             },
             {
               value: 'month',
+
               label: t('common.actions.showMonth'),
             },
           ]}
         />
       )}
 
-      {isWeekMode ? (
+      {showWeekMode ? (
         <>
           <s.WeekHeader>
             <s.WeekHeaderText>{weekHeader}</s.WeekHeaderText>
@@ -162,10 +171,9 @@ export const Calendar = ({
       ) : (
         <>
           <RNCalendar
-            key={`${calendarKey}-${themeKey}`}
-            markingType="multi-dot"
-            enableSwipeMonths
+            key={`${calendarKey}-${themeKey}-${markingType}`}
             {...props}
+            markingType={markingType}
             markedDates={markedDates}
             current={current}
             onMonthChange={handleMonthChange}
@@ -173,7 +181,7 @@ export const Calendar = ({
             theme={calendarTheme}
             firstDay={1}
             minDate={minDate}
-            dayComponent={renderDay}
+            dayComponent={usesCustomDay ? renderDay : undefined}
           />
 
           {shouldShowButton && (
