@@ -40,6 +40,7 @@ const haveSameIds = (
 
 export const useOwnerDiaryList = (diaryQuery: DiaryEntryQuery) => {
   const { t } = useTranslation();
+
   const queryClient = useQueryClient();
 
   const { userId, repository } = useReadyDiaryDatabase();
@@ -47,10 +48,13 @@ export const useOwnerDiaryList = (diaryQuery: DiaryEntryQuery) => {
   const {
     currentPage,
     collapsedDayKeys,
+
     setCurrentPage,
+
     toggleDay,
     collapseAllDays,
     expandAllDays,
+
     resetList,
   } = useOwnerDiaryListState();
 
@@ -79,6 +83,18 @@ export const useOwnerDiaryList = (diaryQuery: DiaryEntryQuery) => {
   const [visibleEntryIds, setVisibleEntryIds] = useState<ReadonlySet<string>>(
     () => new Set()
   );
+
+  useEffect(() => {
+    if (page === undefined) {
+      return;
+    }
+
+    const lastPage = Math.max(page.pagination.totalPages, 1);
+
+    if (currentPage > lastPage) {
+      setCurrentPage(lastPage);
+    }
+  }, [currentPage, page?.pagination.totalPages, setCurrentPage]);
 
   useEffect(() => {
     if (page?.pagination.page !== currentPage) {
@@ -111,6 +127,28 @@ export const useOwnerDiaryList = (diaryQuery: DiaryEntryQuery) => {
     }
   ).current;
 
+  const reconcileCurrentPage = useCallback(async (): Promise<boolean> => {
+    try {
+      const latestPage = await repository.findPage(currentPage, diaryQuery);
+
+      const lastPage = Math.max(latestPage.pagination.totalPages, 1);
+
+      if (currentPage <= lastPage) {
+        return false;
+      }
+
+      setCurrentPage(lastPage);
+
+      return true;
+    } catch (error) {
+      console.error('Failed to reconcile diary page', error);
+
+      showNotification('error', t('diary.list.loadFailed'));
+
+      return false;
+    }
+  }, [currentPage, diaryQuery, repository, setCurrentPage, t]);
+
   const handleChangePage = useCallback(
     async (nextPage: number): Promise<void> => {
       if (
@@ -129,8 +167,11 @@ export const useOwnerDiaryList = (diaryQuery: DiaryEntryQuery) => {
         await queryClient.fetchQuery(
           diaryLocalPageQueryOptions({
             userId,
+
             page: nextPage,
+
             query: diaryQuery,
+
             repository,
           })
         );
@@ -169,20 +210,27 @@ export const useOwnerDiaryList = (diaryQuery: DiaryEntryQuery) => {
     listItems,
 
     currentPage,
+
     visibleEntryIds,
     collapsedDayKeys,
 
     toggleDay,
+
     collapseAllDays,
     expandAllDays,
+
     resetList,
+
+    reconcileCurrentPage,
 
     getListItemKey: getOwnerDiaryListItemKey,
 
     viewabilityConfig: VIEWABILITY_CONFIG,
 
     handleViewableItemsChanged,
+
     handleChangePage,
+
     handleRetry,
 
     isInitialLoading: query.isLoading && page === undefined,

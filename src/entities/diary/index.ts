@@ -69,6 +69,9 @@ export {
 export type { DiaryPageResult, DiaryPagination } from './model/diaryPage';
 export type { MealRelation } from './model/mealRelation';
 export { isMealRelation, MEAL_RELATIONS } from './model/mealRelation';
+export { DiaryDayHeader } from './ui/DiaryDayHeader';
+export { DiaryEntryCard } from './ui/DiaryEntryCard';
 export { DiaryEntryEditorFields } from './ui/DiaryEntryEditorFields';
 export { DiaryEntryEditorModal } from './ui/DiaryEntryEditorModal';
 export { DiaryEntryPhotoField } from './ui/DiaryEntryPhotoField';
+export { DiaryPhotoViewer } from './ui/DiaryPhotoViewer';

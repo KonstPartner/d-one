@@ -15,7 +15,7 @@ import {
   DIARY_PAGE_SIZE,
   FIND_DIARY_ENTRY_BY_ID_SQL,
   FIND_PENDING_DIARY_ENTRY_IDS_SQL,
-  MARK_DIARY_ENTRY_SYNCED_SQL,
+  MARK_DIARY_ENTRY_SYNCED_IF_UNCHANGED_SQL,
   UPDATE_DIARY_ENTRY_SQL,
   UPDATE_DIARY_ENTRY_WITH_PHOTO_SQL,
   UPDATE_PENDING_PHOTO_STATE_SQL,
@@ -149,16 +149,56 @@ export class DiaryLocalRepository {
     });
   }
 
-  public markSynced(id: string): Promise<void> {
-    return this.operationGate.run(async () => {
-      const result = await this.database.runAsync(MARK_DIARY_ENTRY_SYNCED_SQL, {
-        $id: id,
-        $userId: this.userId,
-      });
+  public markSyncedIfUnchanged(entry: DiaryEntry): Promise<boolean> {
+    let eventAt: number;
 
-      if (result.changes !== 1) {
-        throw new Error(`Diary entry cannot be marked as synchronized: ${id}`);
+    try {
+      eventAt = getEventAtTimestamp(entry.eventAt);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+
+    return this.operationGate.run(async () => {
+      const result = await this.database.runAsync(
+        MARK_DIARY_ENTRY_SYNCED_IF_UNCHANGED_SQL,
+        {
+          $id: entry.id,
+
+          $userId: this.userId,
+
+          $glucose: entry.glucose,
+
+          $mealRelation: entry.mealRelation,
+
+          $shortInsulin: entry.shortInsulin,
+
+          $longInsulin: entry.longInsulin,
+
+          $carbsGram: entry.carbsGram,
+
+          $comment: entry.comment,
+
+          $aiAnalysis: entry.aiAnalysis,
+
+          $localPhotoUri: entry.localPhotoUri,
+
+          $photoPath: entry.photoPath,
+
+          $photoUrl: entry.photoUrl,
+
+          $eventAt: eventAt,
+
+          $syncStatus: entry.syncStatus,
+        }
+      );
+
+      if (result.changes > 1) {
+        throw new Error(
+          `Unexpected synchronized diary entry count: ${entry.id}`
+        );
       }
+
+      return result.changes === 1;
     });
   }
 

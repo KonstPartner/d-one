@@ -132,14 +132,27 @@ export const UPDATE_PENDING_PHOTO_STATE_SQL = `
     )
 `;
 
-export const MARK_DIARY_ENTRY_SYNCED_SQL = `
+export const MARK_DIARY_ENTRY_SYNCED_IF_UNCHANGED_SQL = `
   UPDATE diary_entries
   SET sync_status = 'synced'
   WHERE id = $id
     AND user_id = $userId
-    AND sync_status IN (
-      ${MUTABLE_SYNC_STATUSES_SQL}
-    )
+
+    AND glucose IS $glucose
+    AND meal_relation IS $mealRelation
+    AND short_insulin IS $shortInsulin
+    AND long_insulin IS $longInsulin
+    AND carbs_gram IS $carbsGram
+
+    AND comment IS $comment
+    AND ai_analysis IS $aiAnalysis
+
+    AND local_photo_uri IS $localPhotoUri
+    AND photo_path IS $photoPath
+    AND photo_url IS $photoUrl
+
+    AND event_at = $eventAt
+    AND sync_status = $syncStatus
 `;
 
 export const DELETE_PENDING_DIARY_ENTRY_SQL = `

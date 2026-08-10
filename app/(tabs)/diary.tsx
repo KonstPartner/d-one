@@ -1,3 +1,3 @@
-import { DiaryPage } from '@pages/Diary';
+import { DiaryPage } from '@pages/diary';
 
 export default DiaryPage;

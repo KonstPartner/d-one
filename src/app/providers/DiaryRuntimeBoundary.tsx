@@ -1,11 +1,9 @@
 import type { PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useDiarySyncRuntime } from '@features/diary/api';
-import {
-  DiaryDatabaseProvider,
-  useDiaryDatabase,
-} from '@features/diary/api/sqlite';
+import { useSyncDiaryRuntime } from '@features/sync-diary';
+import { DiaryDatabaseProvider, useDiaryDatabase } from '@entities/diary';
+import { useNetwork } from '@shared/lib/network';
 import { PlatformOS } from '@shared/lib/platform';
 import { ErrorSection, LoadingView } from '@shared/ui';
 
@@ -18,6 +16,7 @@ const supportsLocalDiary = PlatformOS.ANDROID || PlatformOS.IOS;
 
 const DiaryDatabaseStatusBoundary = ({ children }: PropsWithChildren) => {
   const { t } = useTranslation();
+
   const { status, retry } = useDiaryDatabase();
 
   if (status === 'opening') {
@@ -37,7 +36,11 @@ const DiaryDatabaseStatusBoundary = ({ children }: PropsWithChildren) => {
 };
 
 const DiarySyncRuntime = ({ children }: PropsWithChildren) => {
-  useDiarySyncRuntime();
+  const { status } = useNetwork();
+
+  useSyncDiaryRuntime({
+    connectionState: status,
+  });
 
   return <>{children}</>;
 };

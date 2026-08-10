@@ -23,6 +23,7 @@ export { Loader } from './Loader';
 export { LoadingView } from './LoadingView';
 export { Notification } from './Notification';
 export { PageLayout } from './PageLayout';
+export { Pagination } from './Pagination';
 export { PasswordInput } from './PasswordInput';
 export { PhotoViewer } from './photo-viewer';
 export { PortalModal } from './PortalModal';

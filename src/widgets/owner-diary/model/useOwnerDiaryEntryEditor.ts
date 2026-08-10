@@ -4,6 +4,7 @@ import { type DiaryEntry, useReadyDiaryDatabase } from '@entities/diary';
 
 export type OwnerDiarySavedEntry = {
   entryId: string;
+
   operation: 'create' | 'update';
 };
 
@@ -28,6 +29,7 @@ export const useOwnerDiaryEntryEditor = ({
     openEditRequestIdRef.current += 1;
 
     setEditingEntry(null);
+
     setCreateVisible(true);
   }, []);
 
@@ -42,6 +44,7 @@ export const useOwnerDiaryEntryEditor = ({
       openEditRequestIdRef.current = requestId;
 
       setCreateVisible(false);
+
       setIsOpeningEdit(true);
 
       try {
@@ -71,31 +74,44 @@ export const useOwnerDiaryEntryEditor = ({
     openEditRequestIdRef.current += 1;
 
     setIsOpeningEdit(false);
+
     setEditingEntry(null);
   }, []);
 
-  const handleCreated = useCallback(
-    (entryId: string) => {
+  const processSavedEntry = useCallback(
+    (savedEntry: OwnerDiarySavedEntry) => {
       setCreateVisible(false);
 
-      void onEntrySaved({
-        entryId,
-        operation: 'create',
+      setEditingEntry(null);
+
+      void Promise.resolve(onEntrySaved(savedEntry)).catch((error) => {
+        console.error(
+          `Failed to process saved diary entry: ${savedEntry.entryId}`,
+          error
+        );
       });
     },
     [onEntrySaved]
   );
 
+  const handleCreated = useCallback(
+    (entryId: string) => {
+      processSavedEntry({
+        entryId,
+        operation: 'create',
+      });
+    },
+    [processSavedEntry]
+  );
+
   const handleUpdated = useCallback(
     (entryId: string) => {
-      setEditingEntry(null);
-
-      void onEntrySaved({
+      processSavedEntry({
         entryId,
         operation: 'update',
       });
     },
-    [onEntrySaved]
+    [processSavedEntry]
   );
 
   return {
