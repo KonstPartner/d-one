@@ -1,7 +1,11 @@
 import { Text } from 'react-native';
 import { ThemeProvider } from '@emotion/react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  notifyManager,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
 import { act, render, waitFor } from '@testing-library/react-native';
 import { type User } from 'firebase/auth';
 
@@ -139,6 +143,18 @@ const renderGuard = () => {
 describe('AppGuard integration', () => {
   let queryClient: QueryClient | null = null;
 
+  beforeAll(() => {
+    notifyManager.setNotifyFunction((callback) => {
+      act(callback);
+    });
+  });
+
+  afterAll(() => {
+    notifyManager.setNotifyFunction((callback) => {
+      callback();
+    });
+  });
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -161,6 +177,7 @@ describe('AppGuard integration', () => {
 
   afterEach(() => {
     queryClient?.clear();
+
     queryClient = null;
   });
 

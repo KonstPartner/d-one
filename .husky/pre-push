@@ -1,4 +1,3 @@
 #!/usr/bin/env sh
-# NOTE: temporary
-# npm run lint:errors
-# npm run test-check
+npm run lint:errors
+npm run test-check
