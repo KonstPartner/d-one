@@ -1,0 +1,27 @@
+{
+  "plugins": ["simple-import-sort"],
+  "rules": {
+    "unused-imports/no-unused-imports": "error",
+    "simple-import-sort/imports": [
+      "error",
+      {
+        "groups": [
+          ["^\\u0000"],
+          ["^react$", "^react-native$", "^@?\\w"],
+          [
+            "^@app(/.*)?$",
+            "^@pages(/.*)?$",
+            "^@widgets(/.*)?$",
+            "^@features(/.*)?$",
+            "^@entities(/.*)?$",
+            "^@shared(/.*)?$",
+            "^@assets(/.*)?$"
+          ],
+          ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
+          ["^\\./(?!/?$)", "^\\./?$"]
+        ]
+      }
+    ],
+    "simple-import-sort/exports": "error"
+  }
+}

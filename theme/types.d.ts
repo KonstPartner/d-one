@@ -2,6 +2,12 @@ import '@emotion/react';
 
 export type ThemeMode = 'light' | 'dark';
 
+type MetricColor = {
+  text: string;
+  background: string;
+  border: string;
+};
+
 declare module '@emotion/react' {
   export interface Theme {
     mode: ThemeMode;
@@ -19,6 +25,13 @@ declare module '@emotion/react' {
       danger: string;
       white: string;
       black: string;
+
+      metrics: {
+        glucose: MetricColor;
+        carbsGram: MetricColor;
+        shortInsulin: MetricColor;
+        longInsulin: MetricColor;
+      };
 
       shades: {
         primary: {

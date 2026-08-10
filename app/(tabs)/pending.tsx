@@ -1,7 +1,3 @@
-import Pending from '@pages/Pending';
+import { PendingPage } from '@pages/pending';
 
-const pending = () => {
-  return <Pending />;
-};
-
-export default pending;
+export default PendingPage;

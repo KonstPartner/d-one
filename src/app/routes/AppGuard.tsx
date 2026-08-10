@@ -1,0 +1,110 @@
+import { type ReactNode, useEffect, useState } from 'react';
+import styled from '@emotion/native';
+import { useIsMutating, useQuery } from '@tanstack/react-query';
+import { type Href, router, usePathname } from 'expo-router';
+
+import { sessionMutationKeys, useSession } from '@entities/session';
+import { userProfileQueryOptions } from '@entities/user';
+import { isSamePath } from '@shared/routes';
+import { LoadingView } from '@shared/ui';
+
+import { getGuardRedirectPath } from './model/getGuardRedirectPath';
+
+type AppGuardProps = {
+  children: ReactNode;
+};
+
+export const AppGuard = ({ children }: AppGuardProps) => {
+  const pathname = usePathname();
+
+  const { sessionUser, emailVerified, isSessionReady } = useSession();
+
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  const activeSessionMutations = useIsMutating({
+    mutationKey: sessionMutationKeys.root,
+  });
+
+  const isSessionMutating = activeSessionMutations > 0;
+
+  const userId = sessionUser?.uid ?? null;
+
+  const profileQuery = useQuery({
+    ...userProfileQueryOptions(userId),
+
+    enabled: isSessionReady && userId !== null && !isSessionMutating,
+  });
+
+  const hasSessionUser = sessionUser !== null;
+
+  const isProfileLoading =
+    !isSessionReady ||
+    (hasSessionUser && (isSessionMutating || profileQuery.isPending));
+
+  const isProfileError = hasSessionUser && profileQuery.isError;
+
+  const profile = profileQuery.data ?? null;
+
+  const canResolveRoute =
+    !isProfileLoading &&
+    !isProfileError &&
+    (!hasSessionUser || profile !== null);
+
+  const redirectPath = canResolveRoute
+    ? getGuardRedirectPath({
+        pathname,
+        hasSessionUser,
+        emailVerified,
+        role: profile?.role ?? null,
+      })
+    : null;
+
+  const isRedirectRequired =
+    redirectPath !== null && !isSamePath(redirectPath, pathname);
+
+  useEffect(() => {
+    if (!isRedirectRequired) {
+      setIsRedirecting(false);
+
+      return;
+    }
+
+    setIsRedirecting(true);
+
+    const frame = requestAnimationFrame(() => {
+      router.replace(redirectPath as Href);
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [isRedirectRequired, redirectPath]);
+
+  if (
+    isProfileLoading ||
+    isProfileError ||
+    isRedirecting ||
+    !canResolveRoute ||
+    isRedirectRequired
+  ) {
+    return (
+      <GuardContainer>
+        <HiddenContent>{children}</HiddenContent>
+
+        <LoadingView loading />
+      </GuardContainer>
+    );
+  }
+
+  return <>{children}</>;
+};
+
+const GuardContainer = styled.View`
+  flex: 1;
+
+  background-color: ${({ theme }) => theme.colors.bg};
+`;
+
+const HiddenContent = styled.View`
+  display: none;
+`;

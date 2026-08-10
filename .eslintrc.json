@@ -17,7 +17,8 @@
     "react",
     "react-native",
     "@typescript-eslint",
-    "unused-imports"
+    "unused-imports",
+    "import"
   ],
   "extends": [
     "eslint:recommended",
@@ -49,6 +50,8 @@
     "react-native/no-raw-text": "off",
     "no-console": "warn",
     "eol-last": ["error", "always"],
+    "import/no-cycle": "error",
+    "import/no-self-import": "error",
     "padding-line-between-statements": [
       "error",
       { "blankLine": "always", "prev": "*", "next": "return" }
@@ -59,6 +62,15 @@
     "react": {
       "version": "detect"
     },
-    "react-native/style-sheet-object-names": ["StyleSheet", "EStyleSheet"]
+    "react-native/style-sheet-object-names": ["StyleSheet", "EStyleSheet"],
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "project": "./tsconfig.json",
+        "alwaysTryTypes": true
+      }
+    }
   }
 }

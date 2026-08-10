@@ -1,7 +1,7 @@
-import Auth from '@pages/Auth';
+import { AuthPage } from '@pages/auth';
 
-const auth = () => {
-  return <Auth />;
+const AuthRoute = () => {
+  return <AuthPage />;
 };
 
-export default auth;
+export default AuthRoute;

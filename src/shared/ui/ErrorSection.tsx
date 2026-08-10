@@ -1,0 +1,23 @@
+import { useTranslation } from 'react-i18next';
+
+import { Button } from './Button';
+import * as s from './styles/ErrorSection';
+
+type ErrorSectionProps = {
+  message: string;
+  onRetry: () => void;
+};
+
+export const ErrorSection = ({ message, onRetry }: ErrorSectionProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <s.Root>
+      <s.Message>{message}</s.Message>
+
+      <Button tone="primary" onPress={onRetry}>
+        <s.RetryText>{t('common.actions.tryAgain')}</s.RetryText>
+      </Button>
+    </s.Root>
+  );
+};

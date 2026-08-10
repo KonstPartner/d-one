@@ -1,10 +1,10 @@
 import 'react-native-gesture-handler';
 import '../global.css';
 
-import { RootLayout } from '@entities/layout/ui';
+import { AppRoot } from '@app/entrypoint';
 
-const root = () => {
-  return <RootLayout />;
+const RootLayout = () => {
+  return <AppRoot />;
 };
 
-export default root;
+export default RootLayout;

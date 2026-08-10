@@ -1,7 +1,5 @@
-import { App } from '@entities/layout/ui';
-
-const app = () => {
-  return <App />;
+const IndexRoute = () => {
+  return null;
 };
 
-export default app;
+export default IndexRoute;

@@ -16,9 +16,12 @@ module.exports = function (api) {
         {
           root: ['./'],
           alias: {
+            '@app': './src/app',
+            '@pages': './src/pages',
+            '@widgets': './src/widgets',
             '@features': './src/features',
             '@entities': './src/entities',
-            '@pages': './src/pages',
+            '@shared': './src/shared',
             '@assets': './src/assets',
           },
           extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],

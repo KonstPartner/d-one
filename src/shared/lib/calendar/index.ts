@@ -1,0 +1,1 @@
+export { getCalendarTheme } from './getCalendarTheme';

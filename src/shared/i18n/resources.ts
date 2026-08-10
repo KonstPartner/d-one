@@ -1,0 +1,30 @@
+import { authTranslations } from './resources/auth';
+import { commonTranslations } from './resources/common';
+import { diaryTranslations } from './resources/diary';
+import { headerTranslations } from './resources/header';
+import { layoutTranslations } from './resources/layout';
+
+const mergeTranslations = (...parts: Record<string, unknown>[]) =>
+  Object.assign({}, ...parts);
+
+export const resources = {
+  en: {
+    translation: mergeTranslations(
+      commonTranslations.en,
+      authTranslations.en,
+      layoutTranslations.en,
+      headerTranslations.en,
+      diaryTranslations.en
+    ),
+  },
+
+  ru: {
+    translation: mergeTranslations(
+      commonTranslations.ru,
+      authTranslations.ru,
+      layoutTranslations.ru,
+      headerTranslations.ru,
+      diaryTranslations.ru
+    ),
+  },
+} as const;
