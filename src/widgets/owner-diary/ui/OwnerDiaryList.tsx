@@ -58,6 +58,8 @@ export const OwnerDiaryList = ({
       const synchronizing = isEntrySyncing(entry.id);
 
       if (selectionMode) {
+        const disabled = entry.syncStatus === 'pendingDelete' || synchronizing;
+
         return (
           <s.SelectableEntry
             accessibilityRole="checkbox"
@@ -65,9 +67,9 @@ export const OwnerDiaryList = ({
             accessibilityState={{
               checked: selected,
 
-              disabled: entry.syncStatus === 'pendingDelete' || synchronizing,
+              disabled,
             }}
-            disabled={entry.syncStatus === 'pendingDelete' || synchronizing}
+            disabled={disabled}
             onPress={() => {
               onToggleSelection(entry.id);
             }}
@@ -82,7 +84,7 @@ export const OwnerDiaryList = ({
               )}
             </s.SelectionIndicator>
 
-            <s.EntryContent>
+            <s.EntryContent $selected={selected}>
               <DiaryEntryCard
                 entry={entry}
                 isVisible={list.visibleEntryIds.has(entry.id)}

@@ -154,8 +154,11 @@
       },
       "preparation": {
         "title": "Preparing entry",
+        "saved": "Entry created",
+        "savedLocally": "Saved safely on this device",
         "uploadingPhoto": "Uploading photo",
-        "savedLocally": "The entry is already saved locally. Keep this screen open while the cloud photo is prepared."
+        "finalizingPhoto": "Finalizing the photo...",
+        "photoPreparing": "The entry is already saved locally. The cloud photo is being prepared."
       },
       "errors": {
         "invalidEventAt": "Select a valid date and time.",

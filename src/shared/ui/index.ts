@@ -14,6 +14,13 @@ export { Calendar, CalendarList } from './calendar';
 export { Checkbox } from './Checkbox';
 export { ConfirmDialog } from './ConfirmDialog';
 export { ErrorSection } from './ErrorSection';
+export type {
+  IconButtonProps,
+  IconButtonSize,
+  IconButtonTone,
+  IconButtonVariant,
+} from './IconButton';
+export { IconButton } from './IconButton';
 export type { InputProps } from './Input';
 export { Input } from './Input';
 export type { InvalidMessageTextProps } from './InvalidMessageText';

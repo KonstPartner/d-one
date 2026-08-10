@@ -7,7 +7,7 @@ import {
   DIARY_ENTRY_PRESENCE_VALUES,
   type DiaryEntryPresence,
 } from '@entities/diary';
-import { Button, PortalModal, SegmentedSwitch } from '@shared/ui';
+import { Button, IconButton, PortalModal, SegmentedSwitch } from '@shared/ui';
 
 import { useDiaryFiltersModal } from '../model/useDiaryFiltersModal';
 import * as s from '../styles/DiaryFiltersModal';
@@ -93,20 +93,14 @@ export const DiaryFiltersModal = ({ onApply }: DiaryFiltersModalProps) => {
         <s.Header>
           <s.Title>{t('diary.filters.title')}</s.Title>
 
-          <Button
+          <IconButton
+            icon="close"
             accessibilityLabel={t('diary.filters.closeAccessibilityLabel')}
             tone="secondary"
             variant="ghost"
             size="sm"
-            style={s.headerButtonStyle}
             onPress={modal.handleClose}
-          >
-            <Ionicons
-              name="close"
-              size={theme.size.md}
-              color={theme.colors.text}
-            />
-          </Button>
+          />
         </s.Header>
 
         <s.Scroll

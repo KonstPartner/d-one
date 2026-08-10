@@ -1,4 +1,4 @@
-import styled, { css } from '@emotion/native';
+import styled from '@emotion/native';
 import type { Theme } from '@emotion/react';
 import type { ViewStyle } from 'react-native';
 
@@ -94,7 +94,7 @@ export const getButtonStyle = (
   variant: ButtonVariant,
   size: ButtonSize,
   disabled: boolean
-) => {
+): ViewStyle => {
   const isSecondarySolid = tone === 'secondary' && variant === 'solid';
 
   const hasBorder = variant === 'outline' || isSecondarySolid;
@@ -115,29 +115,31 @@ export const getButtonStyle = (
       ? getSolidBackground(theme, tone, disabled)
       : 'transparent';
 
-  const opacity =
-    disabled && (variant !== 'solid' || tone === 'secondary') ? 0.55 : 1;
+  const opacity = disabled ? 0.5 : 1;
 
   const horizontalPadding = getHorizontalPadding(theme, size);
 
-  return css`
-    min-height: ${ss.px(theme.control.height[size])};
+  return {
+    minHeight: theme.control.height[size],
 
-    padding-top: ${ss.px(theme.spacing.sm)};
-    padding-bottom: ${ss.px(theme.spacing.sm)};
-    padding-left: ${ss.px(horizontalPadding)};
-    padding-right: ${ss.px(horizontalPadding)};
+    paddingTop: theme.spacing.sm,
 
-    border-radius: ${ss.px(size === 'sm' ? theme.radius.sm : theme.radius.md)};
+    paddingBottom: theme.spacing.sm,
 
-    border-width: ${ss.px(hasBorder ? theme.border.width.sm : 0)};
+    paddingLeft: horizontalPadding,
 
-    border-color: ${borderColor};
+    paddingRight: horizontalPadding,
 
-    background-color: ${backgroundColor};
+    borderRadius: size === 'sm' ? theme.radius.sm : theme.radius.md,
 
-    opacity: ${opacity};
-  ` as ViewStyle;
+    borderWidth: hasBorder ? theme.border.width.sm : 0,
+
+    borderColor,
+
+    backgroundColor,
+
+    opacity,
+  };
 };
 
 export const getSpinnerSize = (size: ButtonSize): number => {

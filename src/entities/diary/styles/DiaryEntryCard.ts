@@ -18,10 +18,13 @@ type MetricProps = {
 };
 
 export const Card = styled.Pressable<CardProps>`
-  ${({ theme, $pendingDelete }) =>
-    ss.Surface(theme, $pendingDelete ? 'input' : 'card')};
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
 
-  ${({ theme }) => ss.Rounded(theme, 'md')};
+  border-color: ${({ theme }) => theme.colors.border};
+
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
+
+  background-color: ${({ theme }) => theme.colors.input};
 
   overflow: hidden;
 `;
@@ -45,7 +48,6 @@ export const Time = styled.View`
   flex: 1;
 
   flex-direction: row;
-
   align-items: center;
 
   gap: ${({ theme }) => ss.px(theme.spacing.sm)};
@@ -146,23 +148,10 @@ export const MetricValue = styled.Text<MetricProps>`
 `;
 
 export const Status = styled.View`
-  flex-direction: row;
+  min-height: ${({ theme }) => ss.px(theme.control.height.sm)};
+
+  align-self: flex-start;
 
   align-items: center;
-
-  gap: ${({ theme }) => ss.px(theme.spacing.xs)};
-
-  padding-horizontal: ${({ theme }) => ss.px(theme.spacing.md)};
-
-  padding-vertical: ${({ theme }) => ss.px(theme.spacing.sm)};
-
-  border-top-width: ${({ theme }) => ss.px(theme.border.width.sm)};
-
-  border-top-color: ${({ theme }) => theme.colors.border};
-
-  background-color: ${({ theme }) => theme.colors.input};
-`;
-
-export const StatusText = styled.Text`
-  ${({ theme }) => ss.Caption(theme)};
+  justify-content: center;
 `;

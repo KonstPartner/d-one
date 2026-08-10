@@ -109,6 +109,8 @@ export const getInputStyle = (
 
   paddingTop: 0,
   paddingBottom: 0,
+  paddingRight: 0,
+  paddingLeft: 0,
   paddingHorizontal: theme.spacing.xs,
 
   color: theme.colors.metrics[metricKey].text,

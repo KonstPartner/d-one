@@ -186,21 +186,19 @@ const DiaryEntryCardComponent = ({
               onOpen={handleOpenAiAnalysis}
             />
           )}
+
+          <s.Status accessible accessibilityLabel={syncStatus.label}>
+            {syncStatus.loading ? (
+              <ActivityIndicator size="small" color={syncStatus.color} />
+            ) : (
+              <Ionicons
+                name={syncStatus.icon}
+                size={theme.size.md}
+                color={syncStatus.color}
+              />
+            )}
+          </s.Status>
         </s.Body>
-
-        <s.Status>
-          {syncStatus.loading ? (
-            <ActivityIndicator size="small" color={syncStatus.color} />
-          ) : (
-            <Ionicons
-              name={syncStatus.icon}
-              size={theme.size.md}
-              color={syncStatus.color}
-            />
-          )}
-
-          <s.StatusText>{syncStatus.label}</s.StatusText>
-        </s.Status>
       </s.Card>
 
       <DiaryTextModal

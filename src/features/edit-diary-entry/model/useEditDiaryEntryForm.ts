@@ -18,6 +18,7 @@ import { useEditDiaryEntryPhoto } from './useEditDiaryEntryPhoto';
 
 type UseEditDiaryEntryFormParams = {
   visible: boolean;
+
   entry: DiaryEntry | null;
 
   disabled?: boolean;
@@ -47,6 +48,16 @@ export const useEditDiaryEntryForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    if (visible) {
+      return;
+    }
+
+    submitInProgressRef.current = false;
+
+    setIsSubmitting(false);
+  }, [visible]);
+
+  useEffect(() => {
     if (photo.photoError === null) {
       return;
     }
@@ -57,22 +68,25 @@ export const useEditDiaryEntryForm = ({
   }, [photo.clearPhotoError, photo.photoError, t]);
 
   const handleSubmit = useCallback(async (): Promise<string | null> => {
+    const currentValues = draft.values;
+
     if (
       disabled ||
       submitInProgressRef.current ||
       photo.isPhotoBusy ||
       entry === null ||
-      draft.values === null
+      currentValues === null
     ) {
       return null;
     }
 
     const eventAt = draft.useCurrentDateTime
       ? new Date()
-      : draft.values.eventAt;
+      : currentValues.eventAt;
 
     const normalizedValues = normalizeDiaryEntryEditableValues({
-      ...draft.values,
+      ...currentValues,
+
       eventAt,
     });
 
@@ -104,6 +118,7 @@ export const useEditDiaryEntryForm = ({
     ) {
       photoChange = {
         type: 'replace',
+
         draftUri: photo.photoDraftUri,
       };
     }
@@ -127,13 +142,13 @@ export const useEditDiaryEntryForm = ({
     } catch (error) {
       console.error('Failed to update diary entry', error);
 
-      showNotification('error', t('diary.form.errors.updateFailed'));
-
-      return null;
-    } finally {
       submitInProgressRef.current = false;
 
       setIsSubmitting(false);
+
+      showNotification('error', t('diary.form.errors.updateFailed'));
+
+      return null;
     }
   }, [disabled, draft, entry, mutation, photo, t]);
 

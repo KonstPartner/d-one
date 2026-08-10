@@ -79,24 +79,26 @@ export const useOwnerDiaryEntryEditor = ({
   }, []);
 
   const processSavedEntry = useCallback(
-    (savedEntry: OwnerDiarySavedEntry) => {
-      setCreateVisible(false);
-
-      setEditingEntry(null);
-
-      void Promise.resolve(onEntrySaved(savedEntry)).catch((error) => {
+    async (savedEntry: OwnerDiarySavedEntry): Promise<void> => {
+      try {
+        await onEntrySaved(savedEntry);
+      } catch (error) {
         console.error(
           `Failed to process saved diary entry: ${savedEntry.entryId}`,
           error
         );
-      });
+      } finally {
+        setCreateVisible(false);
+
+        setEditingEntry(null);
+      }
     },
     [onEntrySaved]
   );
 
   const handleCreated = useCallback(
     (entryId: string) => {
-      processSavedEntry({
+      void processSavedEntry({
         entryId,
         operation: 'create',
       });
@@ -106,7 +108,7 @@ export const useOwnerDiaryEntryEditor = ({
 
   const handleUpdated = useCallback(
     (entryId: string) => {
-      processSavedEntry({
+      void processSavedEntry({
         entryId,
         operation: 'update',
       });

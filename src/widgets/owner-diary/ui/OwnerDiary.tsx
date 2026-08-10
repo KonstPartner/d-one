@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { CreateDiaryEntryModal } from '@features/create-diary-entry';
 import { EditDiaryEntryModal } from '@features/edit-diary-entry';
 import { DiaryFiltersModal } from '@features/filter-diary-entries';
+import { DiarySearch } from '@features/search-diary-entries';
 import {
   type DiaryDayKey,
   type DiaryEntry,
@@ -11,7 +12,7 @@ import {
   getDiaryDayKey,
 } from '@entities/diary';
 import { showNotification } from '@shared/lib/notifications';
-import { ConfirmDialog } from '@shared/ui';
+import { ConfirmDialog, Spinner } from '@shared/ui';
 
 import { useOwnerDiary } from '../model/useOwnerDiary';
 import { useOwnerDiaryEntryEditor } from '../model/useOwnerDiaryEntryEditor';
@@ -23,7 +24,6 @@ import * as s from '../styles/OwnerDiary';
 import { OwnerDiaryList } from './OwnerDiaryList';
 import { OwnerDiaryPreparationModal } from './OwnerDiaryPreparationModal';
 import { OwnerDiarySelectionToolbar } from './OwnerDiarySelectionToolbar';
-import { OwnerDiaryToolbar } from './OwnerDiaryToolbar';
 
 export const OwnerDiary = () => {
   const { t } = useTranslation();
@@ -124,6 +124,30 @@ export const OwnerDiary = () => {
     }
   }, [diary.list.reconcileCurrentPage, diarySync.handleManualSync]);
 
+  const handleForcedSync = useCallback(async (): Promise<void> => {
+    const entryIds = Array.from(selection.selectedEntryIds);
+
+    if (entryIds.length === 0) {
+      return;
+    }
+
+    selection.exitSelection();
+
+    const synchronized = await diarySync.handleForcedSync(entryIds);
+
+    if (synchronized) {
+      await diary.list.reconcileCurrentPage();
+    }
+  }, [
+    diary.list.reconcileCurrentPage,
+
+    diarySync.handleForcedSync,
+
+    selection.exitSelection,
+
+    selection.selectedEntryIds,
+  ]);
+
   useOwnerDiaryHeaderMenu({
     selectionMode: selection.selectionMode,
 
@@ -156,25 +180,48 @@ export const OwnerDiary = () => {
             selectedCount={selection.selectedCount}
             allSelected={selection.allSelected}
             deleting={selection.isDeleting}
+            synchronizing={diarySync.forcedSyncPending}
+            synchronizeDisabled={
+              selection.selectedCount === 0 ||
+              diarySync.connectionState !== 'online' ||
+              diarySync.batchProgress !== null ||
+              diarySync.forcedSyncPending ||
+              selection.isDeleting
+            }
             onToggleAll={selection.toggleAll}
+            onSynchronize={handleForcedSync}
             onDelete={selection.requestDelete}
             onClose={selection.exitSelection}
           />
         ) : (
-          <OwnerDiaryToolbar
-            searchText={diary.search.text}
-            searchField={diary.search.search.field}
+          <DiarySearch
+            text={diary.search.text}
+            field={diary.search.search.field}
+            onTextChange={diary.search.setText}
+            onApplyText={diary.search.applyText}
+            onFieldChange={diary.search.setField}
+            onClear={diary.search.clear}
             filtersVisible={diary.filters.visible}
             filtersApplied={diary.filters.hasAppliedFilters}
-            onSearchTextChange={diary.search.setText}
-            onApplySearchText={diary.search.applyText}
-            onSearchFieldChange={diary.search.setField}
-            onClearSearch={diary.search.clear}
             onOpenFilters={diary.filters.open}
             onCreateEntry={entryEditor.openCreate}
           />
         )}
       </s.ToolbarArea>
+
+      {diarySync.batchProgress !== null && (
+        <s.SyncProgress>
+          <Spinner size={18} />
+
+          <s.SyncProgressText>
+            {t('diary.sync.progress', {
+              current: diarySync.batchProgress.current,
+
+              total: diarySync.batchProgress.total,
+            })}
+          </s.SyncProgressText>
+        </s.SyncProgress>
+      )}
 
       <s.ListArea>
         <OwnerDiaryList

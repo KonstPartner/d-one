@@ -28,36 +28,44 @@ const MEAL_RELATION_PRESENTATION: Record<
 > = {
   beforeMeal: {
     icon: 'restaurant-outline',
+
     tone: 'warning',
   },
 
   afterMeal: {
     icon: 'checkmark-circle-outline',
+
     tone: 'success',
   },
 
   fasting: {
     icon: 'leaf-outline',
+
     tone: 'success',
   },
 
   bedtime: {
     icon: 'bed-outline',
+
     tone: 'primary',
   },
 
   night: {
     icon: 'moon-outline',
+
     tone: 'primary',
   },
 };
 
 export const DiaryMealRelationSelect = ({
   value,
+
   label,
   placeholder,
   noneLabel,
+
   disabled = false,
+
   onChange,
 }: DiaryMealRelationSelectProps) => {
   const { t } = useTranslation();
@@ -66,16 +74,23 @@ export const DiaryMealRelationSelect = ({
     () => [
       {
         key: 'none',
+
         value: null,
+
         label: noneLabel,
+
         icon: 'remove-circle-outline',
+
         tone: 'danger',
       },
 
       ...MEAL_RELATIONS.map((mealRelation) => ({
         key: mealRelation,
+
         value: mealRelation,
+
         label: t(`diary.entry.mealRelation.${mealRelation}`),
+
         ...MEAL_RELATION_PRESENTATION[mealRelation],
       })),
     ],
@@ -83,7 +98,7 @@ export const DiaryMealRelationSelect = ({
   );
 
   const selectedLabel =
-    value === null ? null : t(`diary.entry.mealRelation.${value}`);
+    value === null ? noneLabel : t(`diary.entry.mealRelation.${value}`);
 
   return (
     <SelectDropdown

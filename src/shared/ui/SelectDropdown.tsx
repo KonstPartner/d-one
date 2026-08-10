@@ -38,6 +38,7 @@ export const SelectDropdown = <T,>({
   }, [disabled]);
 
   const hasValue = Boolean(selectedLabel);
+
   const hasLabel = Boolean(label);
 
   const selectedOption =
@@ -49,6 +50,7 @@ export const SelectDropdown = <T,>({
     }
 
     onSelect(option.value);
+
     setOpened(false);
   };
 
@@ -61,6 +63,7 @@ export const SelectDropdown = <T,>({
         accessibilityRole="button"
         accessibilityState={{
           expanded: opened,
+
           disabled,
         }}
         disabled={disabled}
@@ -77,11 +80,25 @@ export const SelectDropdown = <T,>({
             <s.IconBox
               $tone={selectedOption.tone ?? 'primary'}
               $selected={false}
+              style={
+                selectedOption.colors
+                  ? {
+                      backgroundColor: selectedOption.colors.background,
+
+                      borderColor: selectedOption.colors.border,
+
+                      borderWidth: theme.border.width.sm,
+                    }
+                  : undefined
+              }
             >
               <Ionicons
                 name={selectedOption.icon}
                 size={18}
-                color={s.getToneColor(theme, selectedOption.tone ?? 'primary')}
+                color={
+                  selectedOption.colors?.text ??
+                  s.getToneColor(theme, selectedOption.tone ?? 'primary')
+                }
               />
             </s.IconBox>
           ) : null}

@@ -2,20 +2,26 @@ import styled from '@emotion/native';
 
 import * as ss from '@shared/styles';
 
-type FieldSelectorProps = {
-  $opened: boolean;
+type SearchOptionProps = {
+  $selected: boolean;
+  $backgroundColor: string;
+  $borderColor: string;
 };
 
-type OptionProps = {
+type SearchOptionIconProps = {
+  $backgroundColor: string;
+  $borderColor: string;
+};
+
+type SearchOptionTextProps = {
   $selected: boolean;
+  $color: string;
 };
 
 export const Root = styled.View`
-  position: relative;
-
-  z-index: 20;
-
   width: 100%;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.xs)};
 
   min-width: 0;
 `;
@@ -82,86 +88,103 @@ export const EndActions = styled.View`
   gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
-export const FieldSelector = styled.Pressable<FieldSelectorProps>`
-  min-height: ${({ theme }) => ss.px(theme.control.height.lg)};
+export const Row = styled.View`
+  ${({ theme }) => ss.Row(theme, 'center')};
+`;
 
-  flex-direction: row;
+export const SelectView = styled.View`
+  flex: 1;
+`;
 
-  align-items: center;
-  justify-content: space-between;
+export const Filter = styled.View`
+  border-width: 1px;
+  border-style: solid;
 
-  gap: ${({ theme }) => ss.px(theme.spacing.xs)};
-
-  margin-top: ${({ theme }) => ss.px(theme.spacing.xs)};
-
-  padding-horizontal: ${({ theme }) => ss.px(theme.spacing.sm)};
-
-  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
-
-  border-color: ${({ theme, $opened }) =>
-    $opened ? theme.colors.primary : theme.colors.border};
+  border-color: ${({ theme }) => theme.colors.primary};
 
   border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
-  background-color: ${({ theme }) => theme.colors.input};
+  padding: 10px;
 `;
 
-export const FieldSelectorText = styled.Text`
-  ${({ theme }) => ss.Body(theme)};
+export const Add = styled.View`
+  background-color: ${({ theme }) => theme.colors.primary};
 
-  flex: 1;
+  border-radius: ${({ theme }) => ss.px(theme.radius.full)};
 
-  color: ${({ theme }) => theme.colors.muted};
-
-  font-weight: ${({ theme }) => theme.weight.bold};
+  padding: 15px;
 `;
 
-export const Options = styled.View`
-  ${({ theme }) => ss.Surface(theme, 'card')};
+export const SearchOption = styled.Pressable<SearchOptionProps>`
+  width: 100%;
 
-  ${({ theme }) => ss.Rounded(theme, 'md')};
-
-  ${({ theme }) => ss.Shadow(theme, 'soft')};
-
-  position: absolute;
-
-  z-index: 50;
-
-  top: ${({ theme }) =>
-    ss.px(
-      theme.control.height.lg + theme.spacing.xs + theme.control.height.lg
-    )};
-
-  left: 0;
-  right: 0;
-
-  padding: ${({ theme }) => ss.px(theme.spacing.xs)};
-`;
-
-export const Option = styled.Pressable<OptionProps>`
-  min-height: ${({ theme }) => ss.px(theme.control.height.lg)};
+  min-height: 50px;
 
   flex-direction: row;
 
   align-items: center;
   justify-content: space-between;
 
-  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
+  gap: 10px;
 
-  padding-horizontal: ${({ theme }) => ss.px(theme.spacing.sm)};
+  padding: 7px 9px;
 
-  border-radius: ${({ theme }) => ss.px(theme.radius.sm)};
+  border-width: ${({ theme, $selected }) =>
+    ss.px($selected ? theme.border.width.md : theme.border.width.sm)};
 
-  background-color: ${({ theme, $selected }) =>
-    $selected ? theme.colors.shades.primary.sm : theme.colors.card};
+  border-color: ${({ $borderColor }) => $borderColor};
+
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
+
+  background-color: ${({ $backgroundColor }) => $backgroundColor};
 `;
 
-export const OptionText = styled.Text<OptionProps>`
-  ${({ theme }) => ss.Body(theme)};
+export const SearchOptionContent = styled.View`
+  flex: 1;
 
-  color: ${({ theme, $selected }) =>
-    $selected ? theme.colors.primary : theme.colors.text};
+  min-width: 0;
 
-  font-weight: ${({ theme, $selected }) =>
-    $selected ? theme.weight.bold : theme.weight.regular};
+  flex-direction: row;
+  align-items: center;
+
+  gap: 10px;
+`;
+
+export const SearchOptionIcon = styled.View<SearchOptionIconProps>`
+  width: 34px;
+  height: 34px;
+
+  flex-shrink: 0;
+
+  align-items: center;
+  justify-content: center;
+
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
+
+  border-color: ${({ $borderColor }) => $borderColor};
+
+  border-radius: ${({ theme }) => ss.px(theme.radius.full)};
+
+  background-color: ${({ $backgroundColor }) => $backgroundColor};
+`;
+
+export const SearchOptionText = styled.Text<SearchOptionTextProps>`
+  ${({ theme, $selected }) =>
+    ss.Text(theme, 'base', $selected ? 'semibold' : 'medium', 'default', 'md')};
+
+  flex: 1;
+
+  min-width: 0;
+
+  color: ${({ $color }) => $color};
+`;
+
+export const SearchOptionCheck = styled.View`
+  width: 20px;
+  height: 20px;
+
+  flex-shrink: 0;
+
+  align-items: center;
+  justify-content: center;
 `;

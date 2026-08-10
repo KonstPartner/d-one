@@ -31,13 +31,6 @@ export const Title = styled.Text`
   ${({ theme }) => ss.Heading(theme)};
 `;
 
-export const headerButtonStyle: ViewStyle = {
-  width: 40,
-
-  paddingHorizontal: 0,
-  paddingVertical: 0,
-};
-
 export const Scroll = styled(ScrollView)`
   flex: 1;
 `;

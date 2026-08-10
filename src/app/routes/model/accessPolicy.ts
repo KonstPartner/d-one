@@ -20,5 +20,5 @@ export const ROUTE_ACCESS = {
 
   [UserRole.User]: [ROUTES.diary, ROUTES.cloud, ROUTES.profile],
 
-  [UserRole.Follower]: [ROUTES.diary, ROUTES.profile],
+  [UserRole.Follower]: [ROUTES.profile],
 } as const satisfies RouteAccessPolicy;

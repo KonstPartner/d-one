@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { DiaryEntryEditorModal } from '@entities/diary';
+import { ConfirmDialog } from '@shared/ui';
 
 import { useCreateDiaryEntryForm } from '../model/useCreateDiaryEntryForm';
 
@@ -9,6 +11,7 @@ type CreateDiaryEntryModalProps = {
   visible: boolean;
 
   onClose: () => void;
+
   onCreated: (entryId: string) => void;
 };
 
@@ -18,6 +21,8 @@ export const CreateDiaryEntryModal = ({
   onCreated,
 }: CreateDiaryEntryModalProps) => {
   const { t } = useTranslation();
+
+  const [discardConfirmVisible, setDiscardConfirmVisible] = useState(false);
 
   const {
     values,
@@ -64,25 +69,21 @@ export const CreateDiaryEntryModal = ({
       return;
     }
 
-    Alert.alert(
-      t('diary.form.photo.discardTitle'),
-      t('diary.form.photo.discardMessage'),
-      [
-        {
-          text: t('common.cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('diary.form.photo.discard'),
-          style: 'destructive',
-          onPress: () => {
-            if (discardPhoto()) {
-              onClose();
-            }
-          },
-        },
-      ]
-    );
+    setDiscardConfirmVisible(true);
+  };
+
+  const handleCloseDiscardConfirm = () => {
+    setDiscardConfirmVisible(false);
+  };
+
+  const handleConfirmDiscard = () => {
+    if (!discardPhoto()) {
+      return;
+    }
+
+    setDiscardConfirmVisible(false);
+
+    onClose();
   };
 
   const handleChoosePhoto = () => {
@@ -125,33 +126,45 @@ export const CreateDiaryEntryModal = ({
   };
 
   return (
-    <DiaryEntryEditorModal
-      visible={visible}
-      title={t('diary.form.createTitle')}
-      submitLabel={t(
-        isSubmitting ? 'diary.form.creating' : 'diary.form.create'
-      )}
-      submitIcon="add"
-      values={values}
-      useCurrentDateTime={useCurrentDateTime}
-      photoUri={photoUri}
-      isSubmitting={isSubmitting}
-      isPhotoBusy={isPhotoBusy}
-      onClose={handleRequestClose}
-      onSubmit={() => {
-        void handleSave();
-      }}
-      onChoosePhoto={handleChoosePhoto}
-      onDeletePhoto={deletePhoto}
-      onCurrentDateTimeChange={handleCurrentDateTimeChange}
-      onEventDateChange={handleEventDateChange}
-      onEventTimeChange={handleEventTimeChange}
-      onGlucoseChange={handleGlucoseChange}
-      onCarbsGramChange={handleCarbsGramChange}
-      onShortInsulinChange={handleShortInsulinChange}
-      onLongInsulinChange={handleLongInsulinChange}
-      onMealRelationChange={handleMealRelationChange}
-      onCommentChange={handleCommentChange}
-    />
+    <>
+      <DiaryEntryEditorModal
+        visible={visible}
+        title={t('diary.form.createTitle')}
+        submitLabel={t(
+          isSubmitting ? 'diary.form.creating' : 'diary.form.create'
+        )}
+        submitIcon="add"
+        values={values}
+        useCurrentDateTime={useCurrentDateTime}
+        photoUri={photoUri}
+        isSubmitting={isSubmitting}
+        isPhotoBusy={isPhotoBusy}
+        onClose={handleRequestClose}
+        onSubmit={() => {
+          void handleSave();
+        }}
+        onChoosePhoto={handleChoosePhoto}
+        onDeletePhoto={deletePhoto}
+        onCurrentDateTimeChange={handleCurrentDateTimeChange}
+        onEventDateChange={handleEventDateChange}
+        onEventTimeChange={handleEventTimeChange}
+        onGlucoseChange={handleGlucoseChange}
+        onCarbsGramChange={handleCarbsGramChange}
+        onShortInsulinChange={handleShortInsulinChange}
+        onLongInsulinChange={handleLongInsulinChange}
+        onMealRelationChange={handleMealRelationChange}
+        onCommentChange={handleCommentChange}
+      />
+
+      <ConfirmDialog
+        visible={discardConfirmVisible}
+        title={t('diary.form.photo.discardTitle')}
+        description={t('diary.form.photo.discardMessage')}
+        confirmLabel={t('diary.form.photo.discard')}
+        confirmTone="danger"
+        onConfirm={handleConfirmDiscard}
+        onClose={handleCloseDiscardConfirm}
+      />
+    </>
   );
 };

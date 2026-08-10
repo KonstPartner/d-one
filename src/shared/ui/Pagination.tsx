@@ -1,6 +1,4 @@
-import { useTheme } from '@emotion/react';
-import { Ionicons } from '@expo/vector-icons';
-
+import { IconButton } from './IconButton';
 import * as s from './styles/Pagination';
 
 type PaginationProps = {
@@ -10,6 +8,7 @@ type PaginationProps = {
   loading?: boolean;
 
   previousPageAccessibilityLabel: string;
+
   nextPageAccessibilityLabel: string;
 
   onChangePage: (page: number) => void;
@@ -35,8 +34,6 @@ export const Pagination = ({
 
   onChangePage,
 }: PaginationProps) => {
-  const theme = useTheme();
-
   if (totalPages <= 1) {
     return null;
   }
@@ -53,7 +50,8 @@ export const Pagination = ({
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={s.contentStyle}
     >
-      <s.NavigationButton
+      <IconButton
+        icon="chevron-back"
         accessibilityLabel={previousPageAccessibilityLabel}
         disabled={previousDisabled}
         tone="secondary"
@@ -62,13 +60,7 @@ export const Pagination = ({
         onPress={() => {
           onChangePage(currentPage - 1);
         }}
-      >
-        <Ionicons
-          name="chevron-back"
-          size={theme.size.md}
-          color={previousDisabled ? theme.colors.muted : theme.colors.text}
-        />
-      </s.NavigationButton>
+      />
 
       {pages.map((page) => {
         const isCurrent = page === currentPage;
@@ -95,7 +87,8 @@ export const Pagination = ({
         );
       })}
 
-      <s.NavigationButton
+      <IconButton
+        icon="chevron-forward"
         accessibilityLabel={nextPageAccessibilityLabel}
         disabled={nextDisabled}
         tone="secondary"
@@ -104,13 +97,7 @@ export const Pagination = ({
         onPress={() => {
           onChangePage(currentPage + 1);
         }}
-      >
-        <Ionicons
-          name="chevron-forward"
-          size={theme.size.md}
-          color={nextDisabled ? theme.colors.muted : theme.colors.text}
-        />
-      </s.NavigationButton>
+      />
     </s.Scroll>
   );
 };

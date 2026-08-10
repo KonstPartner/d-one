@@ -36,6 +36,16 @@ export const useCreateDiaryEntryForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    if (visible) {
+      return;
+    }
+
+    submitInProgressRef.current = false;
+
+    setIsSubmitting(false);
+  }, [visible]);
+
+  useEffect(() => {
     if (photo.photoError === null) {
       return;
     }
@@ -56,6 +66,7 @@ export const useCreateDiaryEntryForm = ({
 
     const normalizedValues = normalizeDiaryEntryEditableValues({
       ...draft.values,
+
       eventAt,
     });
 
@@ -92,13 +103,13 @@ export const useCreateDiaryEntryForm = ({
     } catch (error) {
       console.error('Failed to create diary entry', error);
 
-      showNotification('error', t('diary.form.errors.creationFailed'));
-
-      return null;
-    } finally {
       submitInProgressRef.current = false;
 
       setIsSubmitting(false);
+
+      showNotification('error', t('diary.form.errors.creationFailed'));
+
+      return null;
     }
   }, [draft, mutation, photo, t]);
 

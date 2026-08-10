@@ -168,29 +168,14 @@ export const DiaryEntryEditorFields = ({
         ))}
       </s.Metrics>
 
-      <s.MetaField $disabled={disabled}>
-        <s.MetaIcon
-          $backgroundColor={theme.colors.shades.warning.sm}
-          $borderColor={theme.colors.shades.warning.lg}
-        >
-          <Ionicons
-            name="restaurant-outline"
-            size={theme.size.lg}
-            color={theme.colors.warning}
-          />
-        </s.MetaIcon>
-
-        <s.MetaContent>
-          <DiaryMealRelationSelect
-            value={mealRelation}
-            label={t('diary.form.mealRelation')}
-            placeholder={t('diary.form.mealRelationPlaceholder')}
-            noneLabel={t('diary.form.mealRelationNone')}
-            disabled={disabled}
-            onChange={onMealRelationChange}
-          />
-        </s.MetaContent>
-      </s.MetaField>
+      <DiaryMealRelationSelect
+        value={mealRelation}
+        label={t('diary.form.mealRelation')}
+        placeholder={t('diary.form.mealRelationPlaceholder')}
+        noneLabel={t('diary.form.mealRelationNone')}
+        disabled={disabled}
+        onChange={onMealRelationChange}
+      />
 
       <s.CommentField $disabled={disabled}>
         <s.CommentHeader>

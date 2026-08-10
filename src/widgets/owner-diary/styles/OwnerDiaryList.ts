@@ -3,7 +3,7 @@ import styled from '@emotion/native';
 import * as ss from '@shared/styles';
 
 export const ItemSeparator = styled.View`
-  height: ${({ theme }) => ss.px(theme.spacing.md)};
+  height: ${({ theme }) => ss.px(theme.spacing.lg)};
 `;
 
 export const Footer = styled.View`
@@ -71,6 +71,20 @@ export const SelectionIndicator = styled.View<SelectionIndicatorProps>`
     $selected ? theme.colors.primary : theme.colors.card};
 `;
 
-export const EntryContent = styled.View`
+type EntryContentProps = {
+  $selected: boolean;
+};
+
+export const EntryContent = styled.View<EntryContentProps>`
   flex: 1;
+
+  border-width: ${({ theme, $selected }) =>
+    ss.px($selected ? theme.border.width.md : 0)};
+
+  border-color: ${({ theme }) => theme.colors.primary};
+
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
+
+  background-color: ${({ theme, $selected }) =>
+    $selected ? theme.colors.shades.primary.sm : 'transparent'};
 `;

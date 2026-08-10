@@ -7,23 +7,33 @@ import { Button } from '../Button';
 export type ConfirmDialogTone = 'primary' | 'danger';
 
 export const Backdrop = styled.Pressable`
-  ${({ theme }) => ss.Inset(theme, 'lg')};
-  ${ss.CenterContent};
-
   flex: 1;
 
-  background-color: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+
+  padding: ${({ theme }) => ss.px(theme.spacing.lg)};
+
+  background-color: rgba(0, 0, 0, 0.72);
 `;
 
 export const Card = styled.Pressable`
-  ${ss.FullWidth};
-
-  ${({ theme }) => ss.Stack(theme, 'md')};
-  ${({ theme }) => ss.Inset(theme, 'lg')};
-  ${({ theme }) => ss.Surface(theme, 'background')};
-  ${({ theme }) => ss.Rounded(theme, 'md')};
-
+  width: 100%;
   max-width: 500px;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.lg)};
+
+  padding: ${({ theme }) => ss.px(theme.spacing.lg)};
+
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
+
+  border-color: ${({ theme }) => theme.colors.border};
+
+  border-radius: ${({ theme }) => ss.px(theme.radius.lg)};
+
+  background-color: ${({ theme }) => theme.colors.card};
+
+  ${({ theme }) => ss.Shadow(theme, 'strong')};
 `;
 
 export const Title = styled.Text`
@@ -32,10 +42,15 @@ export const Title = styled.Text`
 
 export const Description = styled.Text`
   ${({ theme }) => ss.Body(theme)};
+
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 export const Actions = styled.View`
-  ${({ theme }) => ss.Row(theme, 'center', 'flex-start', 'md')};
+  flex-direction: row;
+  align-items: stretch;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.md)};
 `;
 
 export const ActionButton = styled(Button)`

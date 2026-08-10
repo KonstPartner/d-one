@@ -3,6 +3,12 @@ import type { ComponentProps, ReactNode } from 'react';
 
 export type SelectDropdownTone = 'primary' | 'success' | 'warning' | 'danger';
 
+export type SelectDropdownOptionColors = {
+  text: string;
+  background: string;
+  border: string;
+};
+
 export type SelectDropdownOption<T> = {
   value: T;
   label: string;
@@ -12,6 +18,8 @@ export type SelectDropdownOption<T> = {
   icon?: ComponentProps<typeof Ionicons>['name'];
 
   tone?: SelectDropdownTone;
+
+  colors?: SelectDropdownOptionColors;
 };
 
 export type SelectDropdownRenderOptionParams<T> = {

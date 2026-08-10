@@ -31,7 +31,6 @@ export const AppTabs = () => {
 
   const isPending = role === null;
   const isUser = role === UserRole.User;
-  const isFollower = role === UserRole.Follower;
 
   const networkIconName: keyof typeof Ionicons.glyphMap =
     networkStatus === 'online'
@@ -64,7 +63,7 @@ export const AppTabs = () => {
           options={{
             title: t('layout.tabs.diary'),
 
-            href: isUser || isFollower ? undefined : null,
+            href: isUser ? undefined : null,
 
             tabBarIcon: ({ color, size, focused }) => (
               <Ionicons

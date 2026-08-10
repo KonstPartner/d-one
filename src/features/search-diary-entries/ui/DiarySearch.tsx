@@ -1,10 +1,4 @@
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -14,16 +8,56 @@ import {
   type DiaryEntrySearchField,
   isDiaryEntryTextSearchField,
 } from '@entities/diary';
+import {
+  IconButton,
+  SelectDropdown,
+  type SelectDropdownOption,
+} from '@shared/ui';
 
 import { isDiarySearchInputAllowed } from '../model/search';
 import * as s from '../styles/DiarySearch';
 
 const SEARCH_DEBOUNCE_MS = 400;
 
+const SEARCH_FIELD_PRESENTATION: Record<
+  DiaryEntrySearchField,
+  Pick<SelectDropdownOption<DiaryEntrySearchField>, 'icon' | 'tone'>
+> = {
+  comment: {
+    icon: 'chatbubble-outline',
+    tone: 'primary',
+  },
+
+  aiAnalysis: {
+    icon: 'sparkles-outline',
+    tone: 'primary',
+  },
+
+  glucose: {
+    icon: 'water-outline',
+    tone: 'primary',
+  },
+
+  shortInsulin: {
+    icon: 'medical-outline',
+    tone: 'warning',
+  },
+
+  longInsulin: {
+    icon: 'shield-checkmark-outline',
+    tone: 'success',
+  },
+
+  carbsGram: {
+    icon: 'leaf-outline',
+    tone: 'success',
+  },
+};
+
 type DiarySearchProps = {
   text: string;
+
   field: DiaryEntrySearchField;
-  endActions?: ReactNode;
 
   onTextChange: (text: string) => void;
 
@@ -32,23 +66,36 @@ type DiarySearchProps = {
   onFieldChange: (field: DiaryEntrySearchField) => void;
 
   onClear: () => void;
+
+  filtersVisible: boolean;
+  filtersApplied: boolean;
+
+  onOpenFilters: () => void;
+  onCreateEntry: () => void;
 };
 
 export const DiarySearch = ({
   text,
   field,
-  endActions,
+
   onTextChange,
   onApplyText,
   onFieldChange,
   onClear,
+
+  filtersVisible,
+  filtersApplied,
+
+  onOpenFilters,
+  onCreateEntry,
 }: DiarySearchProps) => {
   const theme = useTheme();
+
   const { t } = useTranslation();
 
-  const [selectorOpened, setSelectorOpened] = useState(false);
-
   const applyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const selectedFieldLabel = t(`diary.search.fields.${field}`);
 
   const clearApplyTimer = useCallback(() => {
     if (applyTimerRef.current === null) {
@@ -96,8 +143,6 @@ export const DiarySearch = ({
     (nextField: DiaryEntrySearchField) => {
       clearApplyTimer();
 
-      setSelectorOpened(false);
-
       onFieldChange(nextField);
     },
     [clearApplyTimer, onFieldChange]
@@ -109,8 +154,130 @@ export const DiarySearch = ({
     onClear();
   }, [clearApplyTimer, onClear]);
 
+  const getFieldColors = useCallback(
+    (searchField: DiaryEntrySearchField) => {
+      if (isDiaryEntryTextSearchField(searchField)) {
+        return {
+          background: theme.colors.shades.primary.sm,
+
+          border: theme.colors.shades.primary.lg,
+
+          text: theme.colors.primary,
+        };
+      }
+
+      return theme.colors.metrics[searchField];
+    },
+    [theme]
+  );
+
+  const fieldOptions = useMemo<SelectDropdownOption<DiaryEntrySearchField>[]>(
+    () =>
+      DIARY_ENTRY_SEARCH_FIELDS.map((option) => ({
+        key: option,
+
+        value: option,
+
+        label: t(`diary.search.fields.${option}`),
+
+        ...SEARCH_FIELD_PRESENTATION[option],
+
+        colors: getFieldColors(option),
+      })),
+    [getFieldColors, t]
+  );
+
   return (
     <s.Root>
+      <s.Row>
+        <s.SelectView>
+          <SelectDropdown
+            placeholder={selectedFieldLabel}
+            selectedLabel={selectedFieldLabel}
+            options={fieldOptions}
+            inlineOptions
+            isSelected={(option) => option.value === field}
+            onSelect={handleFieldChange}
+            renderOption={({ option, selected, onPress }) => {
+              const colors = getFieldColors(option.value);
+
+              return (
+                <s.SearchOption
+                  $selected={selected}
+                  $backgroundColor={colors.background}
+                  $borderColor={colors.border}
+                  accessibilityRole="button"
+                  accessibilityState={{
+                    selected,
+                  }}
+                  onPress={onPress}
+                >
+                  <s.SearchOptionContent>
+                    <s.SearchOptionIcon
+                      $backgroundColor={colors.background}
+                      $borderColor={colors.border}
+                    >
+                      <Ionicons
+                        name={option.icon ?? 'search-outline'}
+                        size={20}
+                        color={colors.text}
+                      />
+                    </s.SearchOptionIcon>
+
+                    <s.SearchOptionText
+                      $selected={selected}
+                      $color={colors.text}
+                    >
+                      {option.label}
+                    </s.SearchOptionText>
+                  </s.SearchOptionContent>
+
+                  <s.SearchOptionCheck>
+                    {selected && (
+                      <Ionicons
+                        name="checkmark"
+                        size={18}
+                        color={colors.text}
+                      />
+                    )}
+                  </s.SearchOptionCheck>
+                </s.SearchOption>
+              );
+            }}
+          />
+        </s.SelectView>
+
+        <s.Row>
+          <s.Filter>
+            <IconButton
+              icon="filter-outline"
+              accessibilityLabel={t('diary.filters.openAccessibilityLabel')}
+              accessibilityState={{
+                expanded: filtersVisible,
+
+                selected: filtersApplied,
+              }}
+              tone="primary"
+              variant={filtersApplied ? 'solid' : 'outline'}
+              size="lg"
+              onPress={onOpenFilters}
+            />
+          </s.Filter>
+
+          <s.Add>
+            <IconButton
+              icon="add"
+              accessibilityLabel={t('diary.form.openCreateAccessibilityLabel')}
+              tone="primary"
+              variant="solid"
+              size="lg"
+              iconSize={24}
+              onPress={onCreateEntry}
+            />
+          </s.Add>
+        </s.Row>
+      </s.Row>
+
       <s.TopRow>
         <s.InputShell>
           <Ionicons
@@ -149,65 +316,7 @@ export const DiarySearch = ({
             </s.ClearButton>
           )}
         </s.InputShell>
-
-        {endActions !== undefined && <s.EndActions>{endActions}</s.EndActions>}
       </s.TopRow>
-
-      <s.FieldSelector
-        $opened={selectorOpened}
-        accessibilityRole="button"
-        accessibilityLabel={t('diary.search.fieldAccessibilityLabel')}
-        accessibilityState={{
-          expanded: selectorOpened,
-        }}
-        onPress={() => {
-          setSelectorOpened((opened) => !opened);
-        }}
-      >
-        <s.FieldSelectorText numberOfLines={1}>
-          {t(`diary.search.fields.${field}`)}
-        </s.FieldSelectorText>
-
-        <Ionicons
-          name={selectorOpened ? 'chevron-up' : 'chevron-down'}
-          size={theme.size.sm}
-          color={theme.colors.muted}
-        />
-      </s.FieldSelector>
-
-      {selectorOpened && (
-        <s.Options>
-          {DIARY_ENTRY_SEARCH_FIELDS.map((option) => {
-            const selected = option === field;
-
-            return (
-              <s.Option
-                key={option}
-                $selected={selected}
-                accessibilityRole="radio"
-                accessibilityState={{
-                  checked: selected,
-                }}
-                onPress={() => {
-                  handleFieldChange(option);
-                }}
-              >
-                <s.OptionText $selected={selected}>
-                  {t(`diary.search.fields.${option}`)}
-                </s.OptionText>
-
-                {selected && (
-                  <Ionicons
-                    name="checkmark"
-                    size={theme.size.sm}
-                    color={theme.colors.primary}
-                  />
-                )}
-              </s.Option>
-            );
-          })}
-        </s.Options>
-      )}
     </s.Root>
   );
 };
