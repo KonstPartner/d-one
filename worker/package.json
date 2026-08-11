@@ -14,6 +14,8 @@
     "wrangler": "^4.120.1"
   },
   "dependencies": {
-    "@google/genai": "^2.16.0"
+    "@google/genai": "^2.16.0",
+    "jose": "^6.2.8",
+    "zod": "^4.4.3"
   }
 }
