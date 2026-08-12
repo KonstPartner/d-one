@@ -13,7 +13,7 @@ import {
   FOOD_ANALYSIS_SYSTEM_INSTRUCTION,
 } from '../foodAnalysisPrompt';
 
-const GEMINI_TIMEOUT_MS = 45_000;
+const GEMINI_TIMEOUT_MS = 120_000;
 
 export type GeminiAnalysisErrorCode =
   | 'IMAGE_NOT_ANALYZABLE'
@@ -94,6 +94,10 @@ export const analyzeFoodWithGemini = async ({
             type: 'url_context',
           },
         ],
+
+        generation_config: {
+          thinking_level: 'low',
+        },
 
         response_format: {
           type: 'text',

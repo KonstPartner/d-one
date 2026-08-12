@@ -186,16 +186,11 @@ export const handleAnalyzeFood = async (
   try {
     const analysis = await analyzeFoodWithGemini({
       apiKey: env.GEMINI_API_KEY,
-
       model: env.GEMINI_MODEL,
-
       photoUrl: validatedPhoto.url,
-
       comment: input.comment,
-
       language: input.language,
     });
-
     return Response.json({
       ok: true,
       data: analysis,
