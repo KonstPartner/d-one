@@ -2,17 +2,20 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { DiaryEntryEditorModal } from '@entities/diary';
+import { DiaryEntryEditorFields, DiaryEntryEditorModal } from '@entities/diary';
 import { ConfirmDialog } from '@shared/ui';
 
-import { useCreateDiaryEntryForm } from '../model/useCreateDiaryEntryForm';
+import {
+  type CreateDiaryEntrySubmitResult,
+  useCreateDiaryEntryForm,
+} from '../model/useCreateDiaryEntryForm';
 
 type CreateDiaryEntryModalProps = {
   visible: boolean;
 
   onClose: () => void;
 
-  onCreated: (entryId: string) => void;
+  onCreated: (result: CreateDiaryEntrySubmitResult) => void;
 };
 
 export const CreateDiaryEntryModal = ({
@@ -34,6 +37,9 @@ export const CreateDiaryEntryModal = ({
     isPhotoBusy,
     isSubmitting,
 
+    requestAi,
+    canRequestAi,
+
     handleGlucoseChange,
     handleCarbsGramChange,
     handleShortInsulinChange,
@@ -45,6 +51,8 @@ export const CreateDiaryEntryModal = ({
     handleCurrentDateTimeChange,
     handleEventDateChange,
     handleEventTimeChange,
+
+    handleRequestAiChange,
 
     selectPhoto,
     deletePhoto,
@@ -116,13 +124,13 @@ export const CreateDiaryEntryModal = ({
   };
 
   const handleSave = async () => {
-    const entryId = await handleSubmit();
+    const result = await handleSubmit();
 
-    if (entryId === null) {
+    if (result === null) {
       return;
     }
 
-    onCreated(entryId);
+    onCreated(result);
   };
 
   return (
@@ -134,27 +142,41 @@ export const CreateDiaryEntryModal = ({
           isSubmitting ? 'diary.form.creating' : 'diary.form.create'
         )}
         submitIcon="add"
-        values={values}
-        useCurrentDateTime={useCurrentDateTime}
-        photoUri={photoUri}
         isSubmitting={isSubmitting}
-        isPhotoBusy={isPhotoBusy}
+        isBusy={isBusy}
         onClose={handleRequestClose}
         onSubmit={() => {
           void handleSave();
         }}
-        onChoosePhoto={handleChoosePhoto}
-        onDeletePhoto={deletePhoto}
-        onCurrentDateTimeChange={handleCurrentDateTimeChange}
-        onEventDateChange={handleEventDateChange}
-        onEventTimeChange={handleEventTimeChange}
-        onGlucoseChange={handleGlucoseChange}
-        onCarbsGramChange={handleCarbsGramChange}
-        onShortInsulinChange={handleShortInsulinChange}
-        onLongInsulinChange={handleLongInsulinChange}
-        onMealRelationChange={handleMealRelationChange}
-        onCommentChange={handleCommentChange}
-      />
+      >
+        <DiaryEntryEditorFields
+          eventAt={values.eventAt}
+          useCurrentDateTime={useCurrentDateTime}
+          glucose={values.glucose}
+          carbsGram={values.carbsGram}
+          shortInsulin={values.shortInsulin}
+          longInsulin={values.longInsulin}
+          mealRelation={values.mealRelation}
+          comment={values.comment}
+          photoUri={photoUri}
+          isPhotoBusy={isPhotoBusy}
+          requestAi={requestAi}
+          canRequestAi={canRequestAi}
+          disabled={isSubmitting}
+          onCurrentDateTimeChange={handleCurrentDateTimeChange}
+          onEventDateChange={handleEventDateChange}
+          onEventTimeChange={handleEventTimeChange}
+          onGlucoseChange={handleGlucoseChange}
+          onCarbsGramChange={handleCarbsGramChange}
+          onShortInsulinChange={handleShortInsulinChange}
+          onLongInsulinChange={handleLongInsulinChange}
+          onMealRelationChange={handleMealRelationChange}
+          onCommentChange={handleCommentChange}
+          onChoosePhoto={handleChoosePhoto}
+          onDeletePhoto={deletePhoto}
+          onRequestAiChange={handleRequestAiChange}
+        />
+      </DiaryEntryEditorModal>
 
       <ConfirmDialog
         visible={discardConfirmVisible}

@@ -1,7 +1,11 @@
 import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { type DiaryEntry, DiaryEntryEditorModal } from '@entities/diary';
+import {
+  type DiaryEntry,
+  DiaryEntryEditorFields,
+  DiaryEntryEditorModal,
+} from '@entities/diary';
 
 import { useEditDiaryEntryForm } from '../model/useEditDiaryEntryForm';
 
@@ -59,6 +63,8 @@ export const EditDiaryEntryModal = ({
   });
 
   const isBusy = isSubmitting || isPhotoBusy;
+
+  const editorDisabled = disabled || isSubmitting;
 
   const handleRequestClose = () => {
     if (isBusy) {
@@ -121,27 +127,38 @@ export const EditDiaryEntryModal = ({
       title={t('diary.form.editTitle')}
       submitLabel={t(isSubmitting ? 'diary.form.saving' : 'diary.form.save')}
       submitIcon="checkmark"
-      values={values}
-      useCurrentDateTime={useCurrentDateTime}
-      photoUri={photoUri}
       disabled={disabled}
       isSubmitting={isSubmitting}
-      isPhotoBusy={isPhotoBusy}
+      isBusy={isBusy}
       onClose={handleRequestClose}
       onSubmit={() => {
         void handleSave();
       }}
-      onChoosePhoto={handleChoosePhoto}
-      onDeletePhoto={deletePhoto}
-      onCurrentDateTimeChange={handleCurrentDateTimeChange}
-      onEventDateChange={handleEventDateChange}
-      onEventTimeChange={handleEventTimeChange}
-      onGlucoseChange={handleGlucoseChange}
-      onCarbsGramChange={handleCarbsGramChange}
-      onShortInsulinChange={handleShortInsulinChange}
-      onLongInsulinChange={handleLongInsulinChange}
-      onMealRelationChange={handleMealRelationChange}
-      onCommentChange={handleCommentChange}
-    />
+    >
+      <DiaryEntryEditorFields
+        eventAt={values.eventAt}
+        useCurrentDateTime={useCurrentDateTime}
+        glucose={values.glucose}
+        carbsGram={values.carbsGram}
+        shortInsulin={values.shortInsulin}
+        longInsulin={values.longInsulin}
+        mealRelation={values.mealRelation}
+        comment={values.comment}
+        photoUri={photoUri}
+        isPhotoBusy={isPhotoBusy}
+        disabled={editorDisabled}
+        onCurrentDateTimeChange={handleCurrentDateTimeChange}
+        onEventDateChange={handleEventDateChange}
+        onEventTimeChange={handleEventTimeChange}
+        onGlucoseChange={handleGlucoseChange}
+        onCarbsGramChange={handleCarbsGramChange}
+        onShortInsulinChange={handleShortInsulinChange}
+        onLongInsulinChange={handleLongInsulinChange}
+        onMealRelationChange={handleMealRelationChange}
+        onCommentChange={handleCommentChange}
+        onChoosePhoto={handleChoosePhoto}
+        onDeletePhoto={deletePhoto}
+      />
+    </DiaryEntryEditorModal>
   );
 };

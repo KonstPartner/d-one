@@ -5,6 +5,7 @@ import {
   normalizeDiaryEntryEditableValues,
   validateDiaryEntryEditableValues,
 } from '@entities/diary';
+import { useNetwork } from '@shared/lib/network';
 import { showNotification } from '@shared/lib/notifications';
 
 import { useCreateDiaryEntryMutation } from '../api/useCreateDiaryEntryMutation';
@@ -16,10 +17,17 @@ type UseCreateDiaryEntryFormParams = {
   visible: boolean;
 };
 
+export type CreateDiaryEntrySubmitResult = {
+  entryId: string;
+  requestAi: boolean;
+};
+
 export const useCreateDiaryEntryForm = ({
   visible,
 }: UseCreateDiaryEntryFormParams) => {
   const { t } = useTranslation();
+
+  const { isOnline } = useNetwork();
 
   const mutation = useCreateDiaryEntryMutation();
 
@@ -35,15 +43,31 @@ export const useCreateDiaryEntryForm = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [requestAi, setRequestAi] = useState(false);
+
+  const canRequestAi =
+    photo.hasPhoto && isOnline && !isSubmitting && !photo.isPhotoBusy;
+
   useEffect(() => {
     if (visible) {
+      setRequestAi(false);
+
       return;
     }
 
     submitInProgressRef.current = false;
 
     setIsSubmitting(false);
+    setRequestAi(false);
   }, [visible]);
+
+  useEffect(() => {
+    if (photo.hasPhoto && isOnline) {
+      return;
+    }
+
+    setRequestAi(false);
+  }, [isOnline, photo.hasPhoto]);
 
   useEffect(() => {
     if (photo.photoError === null) {
@@ -55,63 +79,88 @@ export const useCreateDiaryEntryForm = ({
     photo.clearPhotoError();
   }, [photo.clearPhotoError, photo.photoError, t]);
 
-  const handleSubmit = useCallback(async (): Promise<string | null> => {
-    if (submitInProgressRef.current || photo.isPhotoBusy) {
-      return null;
-    }
+  const handleRequestAiChange = useCallback(
+    (value: boolean): void => {
+      if (value && !canRequestAi) {
+        return;
+      }
 
-    const eventAt = draft.useCurrentDateTime
-      ? new Date()
-      : draft.values.eventAt;
+      setRequestAi(value);
+    },
+    [canRequestAi]
+  );
 
-    const normalizedValues = normalizeDiaryEntryEditableValues({
-      ...draft.values,
+  const handleDeletePhoto = useCallback((): void => {
+    setRequestAi(false);
 
-      eventAt,
-    });
+    photo.deletePhoto();
+  }, [photo.deletePhoto]);
 
-    const validationError = validateDiaryEntryEditableValues({
-      values: normalizedValues,
+  const handleSubmit =
+    useCallback(async (): Promise<CreateDiaryEntrySubmitResult | null> => {
+      if (submitInProgressRef.current || photo.isPhotoBusy) {
+        return null;
+      }
 
-      hasPhoto: photo.hasPhoto,
-    });
+      const eventAt = draft.useCurrentDateTime
+        ? new Date()
+        : draft.values.eventAt;
 
-    if (validationError !== null) {
-      mutation.reset();
+      const normalizedValues = normalizeDiaryEntryEditableValues({
+        ...draft.values,
 
-      showNotification('error', t(`diary.form.errors.${validationError}`));
-
-      return null;
-    }
-
-    submitInProgressRef.current = true;
-
-    setIsSubmitting(true);
-
-    try {
-      const entryId = await mutation.mutateAsync({
-        ...normalizedValues,
-
-        photoDraftUri: photo.photoDraftUri,
+        eventAt,
       });
 
-      photo.markPhotoSaved();
+      const validationError = validateDiaryEntryEditableValues({
+        values: normalizedValues,
 
-      draft.resetDraft();
+        hasPhoto: photo.hasPhoto,
+      });
 
-      return entryId;
-    } catch (error) {
-      console.error('Failed to create diary entry', error);
+      if (validationError !== null) {
+        mutation.reset();
 
-      submitInProgressRef.current = false;
+        showNotification('error', t(`diary.form.errors.${validationError}`));
 
-      setIsSubmitting(false);
+        return null;
+      }
 
-      showNotification('error', t('diary.form.errors.creationFailed'));
+      submitInProgressRef.current = true;
 
-      return null;
-    }
-  }, [draft, mutation, photo, t]);
+      setIsSubmitting(true);
+
+      try {
+        const entryId = await mutation.mutateAsync({
+          ...normalizedValues,
+
+          photoDraftUri: photo.photoDraftUri,
+        });
+
+        const result: CreateDiaryEntrySubmitResult = {
+          entryId,
+          requestAi: requestAi && photo.hasPhoto && isOnline,
+        };
+
+        photo.markPhotoSaved();
+
+        draft.resetDraft();
+
+        setRequestAi(false);
+
+        return result;
+      } catch (error) {
+        console.error('Failed to create diary entry', error);
+
+        submitInProgressRef.current = false;
+
+        setIsSubmitting(false);
+
+        showNotification('error', t('diary.form.errors.creationFailed'));
+
+        return null;
+      }
+    }, [draft, isOnline, mutation, photo, requestAi, t]);
 
   return {
     values: draft.values,
@@ -125,6 +174,9 @@ export const useCreateDiaryEntryForm = ({
     isPhotoBusy: photo.isPhotoBusy,
 
     isSubmitting,
+
+    requestAi,
+    canRequestAi,
 
     handleGlucoseChange: draft.handleGlucoseChange,
 
@@ -144,9 +196,11 @@ export const useCreateDiaryEntryForm = ({
 
     handleEventTimeChange: draft.handleEventTimeChange,
 
+    handleRequestAiChange,
+
     selectPhoto: photo.selectPhoto,
 
-    deletePhoto: photo.deletePhoto,
+    deletePhoto: handleDeletePhoto,
 
     discardPhoto: photo.discardPhoto,
 

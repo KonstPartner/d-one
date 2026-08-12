@@ -16,6 +16,7 @@ import {
   FIND_DIARY_ENTRY_BY_ID_SQL,
   FIND_PENDING_DIARY_ENTRY_IDS_SQL,
   MARK_DIARY_ENTRY_SYNCED_IF_UNCHANGED_SQL,
+  UPDATE_DIARY_ENTRY_AI_ANALYSIS_SQL,
   UPDATE_DIARY_ENTRY_SQL,
   UPDATE_DIARY_ENTRY_WITH_PHOTO_SQL,
   UPDATE_PENDING_PHOTO_STATE_SQL,
@@ -39,6 +40,8 @@ type PendingPhotoStateUpdate = Pick<
   DiaryEntry,
   'id' | 'photoPath' | 'photoUrl'
 >;
+
+type AiAnalysisUpdate = Pick<DiaryEntry, 'id' | 'aiAnalysis'>;
 
 const getEventAtTimestamp = (eventAt: Date): number => {
   const timestamp = eventAt.getTime();
@@ -145,6 +148,24 @@ export class DiaryLocalRepository {
 
       if (result.changes !== 1) {
         throw new Error(`Diary photo state cannot be updated: ${id}`);
+      }
+    });
+  }
+
+  public updateAiAnalysis({ id, aiAnalysis }: AiAnalysisUpdate): Promise<void> {
+    return this.operationGate.run(async () => {
+      const result = await this.database.runAsync(
+        UPDATE_DIARY_ENTRY_AI_ANALYSIS_SQL,
+        {
+          $id: id,
+          $userId: this.userId,
+
+          $aiAnalysis: aiAnalysis,
+        }
+      );
+
+      if (result.changes !== 1) {
+        throw new Error(`Diary AI analysis cannot be updated: ${id}`);
       }
     });
   }

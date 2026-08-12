@@ -37,6 +37,17 @@ export const useSyncDiary = () => {
     }
   }, [queryClient, userId]);
 
+  const setEntryPreparing = useCallback(
+    (entryId: string, active: boolean): void => {
+      useSyncDiaryStore.getState().setEntryPreparing({
+        userId,
+        entryId,
+        active,
+      });
+    },
+    [userId]
+  );
+
   const prepareEntryPhoto = useCallback(
     async (entryId: string): Promise<DiaryEntry | null> => {
       const entry = await repository.findById(entryId);
@@ -142,6 +153,7 @@ export const useSyncDiary = () => {
 
     syncingEntryIds,
 
+    setEntryPreparing,
     prepareEntryPhoto,
 
     syncEntries,

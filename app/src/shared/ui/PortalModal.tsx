@@ -1,9 +1,12 @@
 import { type ReactNode, useEffect } from 'react';
-import { BackHandler, Platform } from 'react-native';
+import { BackHandler } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 import { Portal } from 'react-native-portalize';
 
+import { PlatformOS } from '@shared/lib/platform';
+
+import { KeyboardAvoidingContent } from './KeyboardAvoidingContent';
 import * as s from './styles/PortalModal';
 
 type PortalModalProps = {
@@ -17,28 +20,9 @@ type PortalModalProps = {
   withoutPadding?: boolean;
 };
 
-type KeyboardAwareContentProps = {
-  children: ReactNode;
-};
-
-const KeyboardAwareContent = ({ children }: KeyboardAwareContentProps) => {
-  if (Platform.OS === 'web') {
-    return <>{children}</>;
-  }
-
-  return (
-    <s.KeyboardAware
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}
-    >
-      {children}
-    </s.KeyboardAware>
-  );
-};
-
 const useAndroidBackToClose = (visible: boolean, onClose: () => void): void => {
   useEffect(() => {
-    if (Platform.OS !== 'android' || !visible) {
+    if (!PlatformOS.ANDROID || !visible) {
       return;
     }
 
@@ -82,7 +66,7 @@ export const PortalModal = ({
       <s.Container>
         <s.SafeArea edges={['top', 'bottom']}>
           <s.Sheet style={s.getSheetStyle(theme, withoutPadding)}>
-            <KeyboardAwareContent>
+            <KeyboardAvoidingContent>
               {withoutScroll ? (
                 <s.Content>{children}</s.Content>
               ) : (
@@ -103,7 +87,7 @@ export const PortalModal = ({
                   <s.CloseButtonText>{t('common.close')}</s.CloseButtonText>
                 </s.CloseButton>
               )}
-            </KeyboardAwareContent>
+            </KeyboardAvoidingContent>
           </s.Sheet>
         </s.SafeArea>
       </s.Container>

@@ -1,5 +1,5 @@
 import styled from '@emotion/native';
-import type { ImageStyle, ViewStyle } from 'react-native';
+import type { ImageStyle } from 'react-native';
 
 import * as ss from '@shared/styles';
 
@@ -8,39 +8,32 @@ type DisabledProps = {
 };
 
 export const Root = styled.View<DisabledProps>`
+  flex: 1;
+
+  width: 100%;
+
   min-width: 0;
-
-  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
-
-  padding: ${({ theme }) => ss.px(theme.spacing.sm)};
-
-  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
-
-  border-color: ${({ theme }) => theme.colors.border};
-
-  border-radius: ${({ theme }) => ss.px(theme.radius.lg)};
-
-  background-color: ${({ theme }) => theme.colors.card};
+  min-height: 0;
 
   opacity: ${({ $disabled }) => ($disabled ? 0.55 : 1)};
-`;
-
-export const Title = styled.Text`
-  ${({ theme }) => ss.Subheading(theme)};
 `;
 
 export const Preview = styled.View`
   position: relative;
 
-  width: 100%;
+  flex: 1;
 
-  aspect-ratio: 1.7777778;
+  width: 100%;
+  height: 100%;
 
   overflow: hidden;
 
-  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
+  border-color: ${({ theme }) => theme.colors.border};
 
-  background-color: ${({ theme }) => theme.colors.bg};
+  border-radius: ${({ theme }) => ss.px(theme.radius.lg)};
+
+  background-color: ${({ theme }) => theme.colors.input};
 `;
 
 export const imageStyle: ImageStyle = {
@@ -48,23 +41,47 @@ export const imageStyle: ImageStyle = {
   height: '100%',
 };
 
-export const EmptyState = styled.View`
-  flex: 1;
+export const EditButton = styled.Pressable`
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  width: ${ss.px(50)};
+  height: ${ss.px(50)};
 
   align-items: center;
   justify-content: center;
 
-  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
+  margin-top: ${ss.px(-25)};
+  margin-left: ${ss.px(-25)};
 
-  padding: ${({ theme }) => ss.px(theme.spacing.md)};
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
+  border-color: ${({ theme }) => theme.colors.card};
+
+  border-radius: ${ss.px(25)};
+
+  background-color: ${({ theme }) => theme.colors.text};
 `;
 
-export const EmptyText = styled.Text`
-  ${({ theme }) => ss.Caption(theme)};
+export const DeleteButton = styled.Pressable`
+  position: absolute;
 
-  color: ${({ theme }) => theme.colors.muted};
+  top: ${({ theme }) => ss.px(theme.spacing.xs)};
+  right: ${({ theme }) => ss.px(theme.spacing.xs)};
 
-  text-align: center;
+  width: ${ss.px(32)};
+  height: ${ss.px(32)};
+
+  align-items: center;
+  justify-content: center;
+
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
+  border-color: ${({ theme }) => theme.colors.card};
+
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
+
+  background-color: ${({ theme }) => theme.colors.text};
 `;
 
 export const LoadingOverlay = styled.View`
@@ -79,41 +96,4 @@ export const LoadingOverlay = styled.View`
   justify-content: center;
 
   background-color: ${({ theme }) => theme.colors.card};
-`;
-
-export const Actions = styled.View`
-  flex-direction: row;
-
-  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
-`;
-
-export const actionStyle: ViewStyle = {
-  flex: 1,
-};
-
-export const ButtonContent = styled.View`
-  flex-direction: row;
-
-  align-items: center;
-  justify-content: center;
-
-  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
-`;
-
-export const SecondaryButtonText = styled.Text<DisabledProps>`
-  color: ${({ theme, $disabled }) =>
-    $disabled ? theme.colors.muted : theme.colors.text};
-
-  font-size: ${({ theme }) => ss.px(theme.size.sm)};
-
-  font-weight: ${({ theme }) => theme.weight.semibold};
-`;
-
-export const DangerButtonText = styled.Text<DisabledProps>`
-  color: ${({ theme, $disabled }) =>
-    $disabled ? theme.colors.muted : theme.colors.white};
-
-  font-size: ${({ theme }) => ss.px(theme.size.sm)};
-
-  font-weight: ${({ theme }) => theme.weight.semibold};
 `;

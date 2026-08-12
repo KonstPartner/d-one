@@ -12,7 +12,9 @@ import {
 import type { MealRelation } from '../model/mealRelation';
 import * as s from '../styles/DiaryEntryEditorFields';
 
+import { DiaryEntryAiControl } from './DiaryEntryAiControl';
 import { DiaryEntryDateTimeFields } from './DiaryEntryDateTimeFields';
+import { DiaryEntryPhotoField } from './DiaryEntryPhotoField';
 import { DiaryMealRelationSelect } from './DiaryMealRelationSelect';
 import { DiaryMetricStepper } from './DiaryMetricStepper';
 
@@ -32,6 +34,12 @@ type DiaryEntryEditorFieldsProps = {
 
   comment: string;
 
+  photoUri: string | null;
+  isPhotoBusy?: boolean;
+
+  requestAi?: boolean;
+  canRequestAi?: boolean;
+
   disabled?: boolean;
 
   onCurrentDateTimeChange: (value: boolean) => void;
@@ -47,6 +55,11 @@ type DiaryEntryEditorFieldsProps = {
   onMealRelationChange: (value: MealRelation | null) => void;
 
   onCommentChange: (value: string) => void;
+
+  onChoosePhoto: () => void;
+  onDeletePhoto: () => void;
+
+  onRequestAiChange?: (value: boolean) => void;
 };
 
 type MetricField = {
@@ -72,6 +85,10 @@ export const DiaryEntryEditorFields = ({
   longInsulin,
   mealRelation,
   comment,
+  photoUri,
+  isPhotoBusy = false,
+  requestAi = false,
+  canRequestAi = false,
   disabled = false,
   onCurrentDateTimeChange,
   onEventDateChange,
@@ -82,6 +99,9 @@ export const DiaryEntryEditorFields = ({
   onLongInsulinChange,
   onMealRelationChange,
   onCommentChange,
+  onChoosePhoto,
+  onDeletePhoto,
+  onRequestAiChange,
 }: DiaryEntryEditorFieldsProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -168,14 +188,28 @@ export const DiaryEntryEditorFields = ({
         ))}
       </s.Metrics>
 
-      <DiaryMealRelationSelect
-        value={mealRelation}
-        label={t('diary.form.mealRelation')}
-        placeholder={t('diary.form.mealRelationPlaceholder')}
-        noneLabel={t('diary.form.mealRelationNone')}
-        disabled={disabled}
-        onChange={onMealRelationChange}
-      />
+      <s.MealPhotoRow>
+        <s.MealRelationArea>
+          <DiaryMealRelationSelect
+            value={mealRelation}
+            label={t('diary.form.mealRelation')}
+            placeholder={t('diary.form.mealRelationPlaceholder')}
+            noneLabel={t('diary.form.mealRelationNone')}
+            disabled={disabled}
+            onChange={onMealRelationChange}
+          />
+        </s.MealRelationArea>
+
+        <s.PhotoArea>
+          <DiaryEntryPhotoField
+            photoUri={photoUri}
+            disabled={disabled}
+            isBusy={isPhotoBusy}
+            onChoosePhoto={onChoosePhoto}
+            onDeletePhoto={onDeletePhoto}
+          />
+        </s.PhotoArea>
+      </s.MealPhotoRow>
 
       <s.CommentField $disabled={disabled}>
         <s.CommentHeader>
@@ -204,6 +238,20 @@ export const DiaryEntryEditorFields = ({
           style={s.getCommentInputStyle(theme)}
         />
       </s.CommentField>
+
+      {onRequestAiChange ? (
+        <s.ToggleRow>
+          <s.ToggleCell>
+            <DiaryEntryAiControl
+              value={requestAi}
+              disabled={!canRequestAi}
+              onValueChange={onRequestAiChange}
+            />
+          </s.ToggleCell>
+
+          <s.ToggleCell />
+        </s.ToggleRow>
+      ) : null}
     </s.Root>
   );
 };

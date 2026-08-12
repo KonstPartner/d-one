@@ -1,16 +1,11 @@
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button, PortalModal } from '@shared/ui';
 
-import type { DiaryEntryEditableValues } from '../model/diaryEntryEditable';
-import type { MealRelation } from '../model/mealRelation';
 import * as s from '../styles/DiaryEntryEditorModal';
-
-import { DiaryEntryEditorFields } from './DiaryEntryEditorFields';
-import { DiaryEntryPhotoField } from './DiaryEntryPhotoField';
 
 type DiaryEntryEditorModalProps = {
   visible: boolean;
@@ -19,34 +14,14 @@ type DiaryEntryEditorModalProps = {
   submitLabel: string;
   submitIcon: ComponentProps<typeof Ionicons>['name'];
 
-  values: DiaryEntryEditableValues;
-  useCurrentDateTime: boolean;
-
-  photoUri: string | null;
+  children: ReactNode;
 
   disabled?: boolean;
   isSubmitting?: boolean;
-  isPhotoBusy?: boolean;
+  isBusy?: boolean;
 
   onClose: () => void;
   onSubmit: () => void;
-
-  onChoosePhoto: () => void;
-  onDeletePhoto: () => void;
-
-  onCurrentDateTimeChange: (value: boolean) => void;
-
-  onEventDateChange: (value: Date) => void;
-  onEventTimeChange: (value: Date) => void;
-
-  onGlucoseChange: (value: number | null) => void;
-  onCarbsGramChange: (value: number | null) => void;
-  onShortInsulinChange: (value: number | null) => void;
-  onLongInsulinChange: (value: number | null) => void;
-
-  onMealRelationChange: (value: MealRelation | null) => void;
-
-  onCommentChange: (value: string) => void;
 };
 
 export const DiaryEntryEditorModal = ({
@@ -54,32 +29,15 @@ export const DiaryEntryEditorModal = ({
   title,
   submitLabel,
   submitIcon,
-  values,
-  useCurrentDateTime,
-  photoUri,
+  children,
   disabled = false,
   isSubmitting = false,
-  isPhotoBusy = false,
+  isBusy = false,
   onClose,
   onSubmit,
-  onChoosePhoto,
-  onDeletePhoto,
-  onCurrentDateTimeChange,
-  onEventDateChange,
-  onEventTimeChange,
-  onGlucoseChange,
-  onCarbsGramChange,
-  onShortInsulinChange,
-  onLongInsulinChange,
-  onMealRelationChange,
-  onCommentChange,
 }: DiaryEntryEditorModalProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
-
-  const isBusy = isSubmitting || isPhotoBusy;
-
-  const editorDisabled = disabled || isSubmitting;
 
   const submitDisabled = disabled || isBusy;
 
@@ -120,36 +78,7 @@ export const DiaryEntryEditorModal = ({
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
         >
-          <s.Content>
-            <DiaryEntryEditorFields
-              eventAt={values.eventAt}
-              useCurrentDateTime={useCurrentDateTime}
-              glucose={values.glucose}
-              carbsGram={values.carbsGram}
-              shortInsulin={values.shortInsulin}
-              longInsulin={values.longInsulin}
-              mealRelation={values.mealRelation}
-              comment={values.comment}
-              disabled={editorDisabled}
-              onCurrentDateTimeChange={onCurrentDateTimeChange}
-              onEventDateChange={onEventDateChange}
-              onEventTimeChange={onEventTimeChange}
-              onGlucoseChange={onGlucoseChange}
-              onCarbsGramChange={onCarbsGramChange}
-              onShortInsulinChange={onShortInsulinChange}
-              onLongInsulinChange={onLongInsulinChange}
-              onMealRelationChange={onMealRelationChange}
-              onCommentChange={onCommentChange}
-            />
-
-            <DiaryEntryPhotoField
-              photoUri={photoUri}
-              disabled={editorDisabled}
-              isBusy={isPhotoBusy}
-              onChoosePhoto={onChoosePhoto}
-              onDeletePhoto={onDeletePhoto}
-            />
-          </s.Content>
+          <s.Content>{children}</s.Content>
         </s.Scroll>
 
         <s.Footer>

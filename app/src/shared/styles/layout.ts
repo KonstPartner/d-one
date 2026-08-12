@@ -49,6 +49,8 @@ export const FullWidth = css`
   width: 100%;
 ` as ViewStyle & TextStyle;
 
+export const Flex = { flex: 1 };
+
 export const FlexItem = css`
   flex: 1;
   flex-basis: 0px;

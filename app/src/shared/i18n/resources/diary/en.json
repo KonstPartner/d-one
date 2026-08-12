@@ -152,6 +152,29 @@
           "uploadFailed": "The entry was saved locally, but the photo could not be uploaded."
         }
       },
+      "ai": {
+        "result": {
+          "ok": "Estimate.",
+          "partial": "Partial estimate.",
+          "food": "Food: {{value}}",
+          "calories": "Calories: {{value}}",
+          "protein": "Protein: {{value}}",
+          "fat": "Fat: {{value}}",
+          "carbohydrates": "Carbohydrates: {{value}}",
+          "confidenceLabel": "Confidence: {{value}}",
+          "couldNotDetermine": "could not be determined",
+          "range": "{{min}}–{{max}} {{unit}}",
+          "confidence": {
+            "low": "low",
+            "medium": "medium",
+            "high": "high"
+          },
+          "assumptions": "Assumptions: {{value}}"
+        },
+        "title": "AI food analysis",
+        "description": "Estimate calories and macronutrients from the selected photo.",
+        "warning": "The AI estimate is approximate. Do not use it to calculate an insulin dose."
+      },
       "preparation": {
         "title": "Preparing entry",
         "saved": "Entry created",

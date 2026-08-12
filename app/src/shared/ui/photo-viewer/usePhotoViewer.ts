@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { type LayoutChangeEvent, Platform } from 'react-native';
+import { type LayoutChangeEvent } from 'react-native';
 import type { ImageLoadEventData } from 'expo-image';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { Gesture } from 'react-native-gesture-handler';
@@ -8,6 +8,8 @@ import {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+
+import { PlatformOS } from '@shared/lib/platform';
 
 type Size = {
   width: number;
@@ -82,7 +84,7 @@ export const usePhotoViewer = ({
   }, [sourceSize, viewportSize]);
 
   useEffect(() => {
-    if (Platform.OS === 'web') {
+    if (PlatformOS.WEB) {
       return;
     }
 

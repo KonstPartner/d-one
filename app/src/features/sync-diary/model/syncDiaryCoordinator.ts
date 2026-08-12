@@ -73,6 +73,18 @@ const uniqueEntryIds = (
 ): ReadonlyArray<string> =>
   Array.from(new Set(entryIds.filter((entryId) => entryId.length > 0)));
 
+const isEntryPreparing = (userId: string, entryId: string): boolean => {
+  const state = useSyncDiaryStore.getState();
+
+  return state.activeUserId === userId && state.preparingEntryIds.has(entryId);
+};
+
+const excludePreparingEntryIds = (
+  userId: string,
+  entryIds: ReadonlyArray<string>
+): ReadonlyArray<string> =>
+  entryIds.filter((entryId) => !isEntryPreparing(userId, entryId));
+
 const assertSynchronizationSucceeded = (
   results: ReadonlyArray<DiarySyncResult>
 ): void => {
@@ -233,6 +245,17 @@ const queueBatchPass = async ({
   const results: DiarySyncResult[] = [];
 
   for (const [index, entryId] of entryIds.entries()) {
+    if (isEntryPreparing(userId, entryId)) {
+      useSyncDiaryStore.getState().updateBatchProgress({
+        userId,
+        operationId,
+        current: startIndex + index + 1,
+        total,
+      });
+
+      continue;
+    }
+
     const result = await enqueueEntry(
       {
         userId,
@@ -309,15 +332,20 @@ const readEntryFingerprints = async (
 };
 
 const findRecheckIds = async ({
+  userId,
   repository,
   originalIds,
   originalFingerprints,
 }: {
+  userId: string;
   repository: DiaryLocalRepository;
   originalIds: ReadonlySet<string>;
   originalFingerprints: ReadonlyMap<string, string | null>;
 }): Promise<ReadonlyArray<string>> => {
-  const pendingIds = uniqueEntryIds(await repository.findPendingIds());
+  const pendingIds = excludePreparingEntryIds(
+    userId,
+    uniqueEntryIds(await repository.findPendingIds())
+  );
 
   const currentFingerprints = await readEntryFingerprints(
     repository,
@@ -342,7 +370,10 @@ const runPendingBatch = async ({
 }: Required<QueuePendingInput>): Promise<DiarySyncResult[]> => {
   activateSyncDiaryUser(userId);
 
-  const originalEntryIds = uniqueEntryIds(await repository.findPendingIds());
+  const originalEntryIds = excludePreparingEntryIds(
+    userId,
+    uniqueEntryIds(await repository.findPendingIds())
+  );
 
   if (originalEntryIds.length === 0) {
     return [];
@@ -380,6 +411,7 @@ const runPendingBatch = async ({
     assertSynchronizationSucceeded(firstPassResults);
 
     const recheckEntryIds = await findRecheckIds({
+      userId,
       repository,
 
       originalIds: new Set(originalEntryIds),
@@ -430,7 +462,10 @@ const runForcedBatch = async ({
 }: QueueForcedInput): Promise<DiarySyncResult[]> => {
   activateSyncDiaryUser(userId);
 
-  const availableEntryIds = uniqueEntryIds(entryIds);
+  const availableEntryIds = excludePreparingEntryIds(
+    userId,
+    uniqueEntryIds(entryIds)
+  );
 
   if (availableEntryIds.length === 0) {
     return [];

@@ -24,6 +24,30 @@ export const Metrics = styled.View`
   gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
+export const MealPhotoRow = styled.View`
+  flex-direction: row;
+
+  align-items: stretch;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
+`;
+
+export const MealRelationArea = styled.View`
+  flex: 1;
+  flex-basis: 0;
+
+  min-width: 0;
+`;
+
+export const PhotoArea = styled.View`
+  flex: 1;
+  flex-basis: 0;
+
+  min-width: 0;
+
+  align-self: stretch;
+`;
+
 export const MetaField = styled.View<DisabledProps>`
   min-width: 0;
 
@@ -101,9 +125,24 @@ export const FieldLabel = styled.Text`
   font-weight: ${({ theme }) => theme.weight.semibold};
 `;
 
+export const ToggleRow = styled.View`
+  flex-direction: row;
+
+  align-items: stretch;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
+`;
+
+export const ToggleCell = styled.View`
+  flex: 1;
+  flex-basis: 0;
+
+  min-width: 0;
+`;
+
 export const getCommentInputStyle = (theme: Theme): TextStyle => ({
-  height: 120,
-  minHeight: 120,
+  height: 64,
+  minHeight: 64,
 
   backgroundColor: theme.colors.input,
 });

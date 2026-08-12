@@ -3,6 +3,7 @@
 .env.*
 .dev.vars
 .dev.vars.*
+!.dev.vars.sample
 
 # Dependencies
 node_modules/

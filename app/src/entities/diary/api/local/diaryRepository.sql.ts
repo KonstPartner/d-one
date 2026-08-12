@@ -120,6 +120,21 @@ export const UPDATE_DIARY_ENTRY_WITH_PHOTO_SQL = `
     )
 `;
 
+export const UPDATE_DIARY_ENTRY_AI_ANALYSIS_SQL = `
+  UPDATE diary_entries
+  SET
+    ai_analysis = $aiAnalysis,
+    sync_status = CASE sync_status
+      WHEN 'pendingCreate' THEN 'pendingCreate'
+      ELSE 'pendingUpdate'
+    END
+  WHERE id = $id
+    AND user_id = $userId
+    AND sync_status IN (
+      ${MUTABLE_SYNC_STATUSES_SQL}
+    )
+`;
+
 export const UPDATE_PENDING_PHOTO_STATE_SQL = `
   UPDATE diary_entries
   SET

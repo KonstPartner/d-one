@@ -35,6 +35,7 @@ type SyncDiaryState = {
   activeUserId: string | null;
 
   syncingEntryIds: ReadonlySet<string>;
+  preparingEntryIds: ReadonlySet<string>;
 
   batchProgress: DiarySyncBatchProgress | null;
   batchType: DiarySyncBatchType | null;
@@ -45,6 +46,7 @@ type SyncDiaryState = {
   activateUser: (userId: string) => void;
 
   setEntrySyncing: (input: EntryActivityInput) => void;
+  setEntryPreparing: (input: EntryActivityInput) => void;
 
   startBatch: (input: BatchStartInput) => void;
 
@@ -61,6 +63,7 @@ const createEmptySyncState = () => ({
   activeUserId: null as string | null,
 
   syncingEntryIds: new Set<string>() as ReadonlySet<string>,
+  preparingEntryIds: new Set<string>() as ReadonlySet<string>,
 
   batchProgress: null as DiarySyncBatchProgress | null,
 
@@ -111,6 +114,22 @@ export const useSyncDiaryStore = create<SyncDiaryState>((set) => ({
 
       return {
         syncingEntryIds: updateEntrySet(state.syncingEntryIds, entryId, active),
+      };
+    });
+  },
+
+  setEntryPreparing: ({ userId, entryId, active }) => {
+    set((state) => {
+      if (state.activeUserId !== userId) {
+        return state;
+      }
+
+      return {
+        preparingEntryIds: updateEntrySet(
+          state.preparingEntryIds,
+          entryId,
+          active
+        ),
       };
     });
   },

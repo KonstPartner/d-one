@@ -52,7 +52,41 @@ const firebaseErrorDictionary: ErrorDictionary = {
   'common.errors.currentUserEmailMissing': 'custom/no-current-user-email',
 };
 
-const apiErrorDictionary: ErrorDictionary = {};
+const apiErrorDictionary: ErrorDictionary = {
+  'common.errors.aiAccessFailed': [
+    'APP_CHECK_REQUIRED',
+    'INVALID_APP_CHECK_TOKEN',
+    'APP_NOT_ALLOWED',
+    'APP_CHECK_SERVICE_UNAVAILABLE',
+    'UNAUTHORIZED',
+    'EMAIL_NOT_VERIFIED',
+    'FORBIDDEN_ROLE',
+    'USER_PROFILE_NOT_FOUND',
+    'AUTH_SERVICE_UNAVAILABLE',
+  ],
+
+  'common.errors.aiInvalidRequest': ['INVALID_REQUEST', 'INVALID_IMAGE_URL'],
+
+  'common.errors.aiImageNotAnalyzable': 'IMAGE_NOT_ANALYZABLE',
+
+  'common.errors.aiImageTooLarge': 'IMAGE_TOO_LARGE',
+
+  'common.errors.aiRequestAlreadyActive': 'AI_REQUEST_ALREADY_ACTIVE',
+
+  'common.errors.aiUserDailyLimitReached': 'USER_DAILY_LIMIT_REACHED',
+
+  'common.errors.aiProjectDailyLimitReached': 'PROJECT_DAILY_LIMIT_REACHED',
+
+  'common.errors.aiRequestTooFrequent': 'REQUEST_TOO_FREQUENT',
+
+  'common.errors.aiProviderUnavailable': [
+    'AI_PROVIDER_ERROR',
+    'INVALID_AI_RESPONSE',
+    'INTERNAL_ERROR',
+  ],
+
+  'common.errors.aiTimeout': 'AI_TIMEOUT',
+};
 
 const getErrorDictionary = (type: ErrorType): ErrorDictionary => {
   switch (type) {

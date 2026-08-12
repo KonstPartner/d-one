@@ -23,7 +23,5 @@ export const Field = styled(Input)`
 export const CharacterCount = styled.Text`
   ${({ theme }) => ss.Text(theme, 'sm', 'regular', 'muted', 'sm')};
 
-  padding: 5px;
-
   text-align: right;
 `;

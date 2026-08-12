@@ -1,9 +1,9 @@
-import { Platform } from 'react-native';
+import { PlatformOS } from '../platform';
 
 export const copyToClipboard = async (text: string): Promise<void> => {
   const value = text || '';
 
-  if (Platform.OS === 'web') {
+  if (PlatformOS.WEB) {
     await navigator.clipboard.writeText(value);
 
     return;
