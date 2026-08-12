@@ -1,5 +1,5 @@
 export const AI_USAGE_POLICY = {
-  userDailyLimit: 5,
+  userDailyLimit: 15,
   requestCooldownSeconds: 30,
   activeLeaseSeconds: 90,
 } as const;

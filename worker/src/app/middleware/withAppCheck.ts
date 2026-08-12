@@ -2,20 +2,14 @@ import {
   FirebaseAppCheckError,
   getAppCheckToken,
   verifyFirebaseAppCheckToken,
-  type VerifiedFirebaseApp,
 } from '../../shared/security/firebaseAppCheck';
 
 import { jsonError } from '../../shared/http/jsonResponse';
-
-export type AppCheckContext = {
-  app: VerifiedFirebaseApp;
-};
 
 type AppRequestHandler = (
   request: Request,
   env: Env,
   context: ExecutionContext,
-  appCheckContext: AppCheckContext,
 ) => Response | Promise<Response>;
 
 type LocalDiagnosticsEnv = Env & {
@@ -67,17 +61,13 @@ export const withAppCheck =
     context: ExecutionContext,
   ): Promise<Response> => {
     if (isLocalDiagnosticsRequest(request, env)) {
-      return handler(request, env, context, {
-        app: {
-          appId: 'local-diagnostics',
-        },
-      });
+      return handler(request, env, context);
     }
 
     try {
       const token = getAppCheckToken(request);
 
-      const app = await verifyFirebaseAppCheckToken({
+      await verifyFirebaseAppCheckToken({
         token,
 
         projectNumber: env.FIREBASE_PROJECT_NUMBER,
@@ -85,9 +75,7 @@ export const withAppCheck =
         allowedAppIds: [env.FIREBASE_ANDROID_APP_ID, env.FIREBASE_IOS_APP_ID],
       });
 
-      return await handler(request, env, context, {
-        app,
-      });
+      return await handler(request, env, context);
     } catch (error) {
       if (error instanceof FirebaseAppCheckError) {
         return createAppCheckErrorResponse(error);

@@ -2,6 +2,8 @@ const MAX_CALORIES_KCAL = 20_000;
 
 const MAX_MACRONUTRIENT_GRAM = 5_000;
 
+const MAX_ASSUMPTIONS = 3;
+
 export type NumberRange = {
   min: number;
   max: number;
@@ -80,6 +82,9 @@ export const foodAnalysisResponseJsonSchema: Record<string, unknown> = {
           anyOf: [
             {
               type: 'string',
+
+              description:
+                'A concise description of the visible meal in one or two short sentences.',
             },
 
             {
@@ -113,8 +118,16 @@ export const foodAnalysisResponseJsonSchema: Record<string, unknown> = {
         assumptions: {
           type: 'array',
 
+          minItems: 1,
+          maxItems: MAX_ASSUMPTIONS,
+
+          description:
+            'One to three short assumptions that materially affect the nutritional estimate.',
+
           items: {
             type: 'string',
+
+            description: 'One short sentence describing a single assumption.',
           },
         },
       },
@@ -220,15 +233,17 @@ const sanitizeAssumptions = (value: unknown): string[] => {
     return [];
   }
 
-  return value.flatMap((item) => {
-    if (typeof item !== 'string') {
-      return [];
-    }
+  return value
+    .flatMap((item) => {
+      if (typeof item !== 'string') {
+        return [];
+      }
 
-    const normalized = item.trim();
+      const normalized = item.trim();
 
-    return normalized.length > 0 ? [normalized] : [];
-  });
+      return normalized.length > 0 ? [normalized] : [];
+    })
+    .slice(0, MAX_ASSUMPTIONS);
 };
 
 export const parseAnalyzeFoodResponse = (

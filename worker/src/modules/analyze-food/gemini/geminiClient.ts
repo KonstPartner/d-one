@@ -9,17 +9,14 @@ import {
 } from '../foodAnalysisResult';
 
 import {
-  buildFoodAnalysisContext,
+  buildFoodAnalysisInput,
   FOOD_ANALYSIS_SYSTEM_INSTRUCTION,
 } from '../foodAnalysisPrompt';
-
-const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 
 const GEMINI_TIMEOUT_MS = 45_000;
 
 export type GeminiAnalysisErrorCode =
   | 'IMAGE_NOT_ANALYZABLE'
-  | 'IMAGE_TOO_LARGE'
   | 'AI_PROVIDER_ERROR'
   | 'INVALID_AI_RESPONSE'
   | 'AI_TIMEOUT';
@@ -27,7 +24,6 @@ export type GeminiAnalysisErrorCode =
 export class GeminiAnalysisError extends Error {
   public constructor(public readonly code: GeminiAnalysisErrorCode) {
     super(code);
-
     this.name = 'GeminiAnalysisError';
   }
 }
@@ -40,74 +36,17 @@ type AnalyzeFoodWithGeminiParams = Pick<
   model: string;
 };
 
-const normalizeContentType = (value: string | null): string | null => {
-  if (value === null) {
+const normalizeUrl = (value: string): string | null => {
+  try {
+    const url = new URL(value);
+
+    url.hash = '';
+    url.searchParams.sort();
+
+    return url.toString();
+  } catch {
     return null;
   }
-
-  return value.split(';')[0]?.trim().toLowerCase() ?? null;
-};
-
-const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-  const bytes = new Uint8Array(buffer);
-
-  const chunkSize = 32_768;
-
-  let binary = '';
-
-  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-    const chunk = bytes.subarray(offset, offset + chunkSize);
-
-    binary += String.fromCharCode(...chunk);
-  }
-
-  return btoa(binary);
-};
-
-const downloadJpegAsBase64 = async (photoUrl: string): Promise<string> => {
-  let response: Response;
-
-  try {
-    response = await fetch(photoUrl, {
-      method: 'GET',
-      redirect: 'error',
-    });
-  } catch {
-    throw new GeminiAnalysisError('IMAGE_NOT_ANALYZABLE');
-  }
-
-  if (!response.ok) {
-    throw new GeminiAnalysisError('IMAGE_NOT_ANALYZABLE');
-  }
-
-  const contentType = normalizeContentType(
-    response.headers.get('content-type'),
-  );
-
-  if (contentType !== 'image/jpeg') {
-    throw new GeminiAnalysisError('IMAGE_NOT_ANALYZABLE');
-  }
-
-  const contentLengthHeader = response.headers.get('content-length');
-
-  if (contentLengthHeader !== null) {
-    const contentLength = Number(contentLengthHeader);
-
-    if (
-      Number.isFinite(contentLength) &&
-      contentLength > MAX_IMAGE_SIZE_BYTES
-    ) {
-      throw new GeminiAnalysisError('IMAGE_TOO_LARGE');
-    }
-  }
-
-  const buffer = await response.arrayBuffer();
-
-  if (buffer.byteLength > MAX_IMAGE_SIZE_BYTES) {
-    throw new GeminiAnalysisError('IMAGE_TOO_LARGE');
-  }
-
-  return arrayBufferToBase64(buffer);
 };
 
 export const analyzeFoodWithGemini = async ({
@@ -117,7 +56,11 @@ export const analyzeFoodWithGemini = async ({
   comment,
   language,
 }: AnalyzeFoodWithGeminiParams): Promise<AnalyzeFoodResponse> => {
-  const imageData = await downloadJpegAsBase64(photoUrl);
+  const expectedPhotoUrl = normalizeUrl(photoUrl);
+
+  if (expectedPhotoUrl === null) {
+    throw new GeminiAnalysisError('IMAGE_NOT_ANALYZABLE');
+  }
 
   const ai = new GoogleGenAI({
     apiKey,
@@ -134,22 +77,21 @@ export const analyzeFoodWithGemini = async ({
       {
         model,
 
+        stream: false,
+
+        store: false,
+
         system_instruction: FOOD_ANALYSIS_SYSTEM_INSTRUCTION,
 
-        input: [
-          {
-            type: 'text',
+        input: buildFoodAnalysisInput({
+          photoUrl,
+          comment,
+          language,
+        }),
 
-            text: buildFoodAnalysisContext({
-              comment,
-              language,
-            }),
-          },
-
+        tools: [
           {
-            type: 'image',
-            data: imageData,
-            mime_type: 'image/jpeg',
+            type: 'url_context',
           },
         ],
 
@@ -170,6 +112,24 @@ export const analyzeFoodWithGemini = async ({
         signal: abortController.signal,
       },
     );
+
+    const photoRetrieved = (interaction.steps ?? []).some((step) => {
+      if (step.type !== 'url_context_result') {
+        return false;
+      }
+
+      return step.result.some((result) => {
+        if (result.status !== 'success' || typeof result.url !== 'string') {
+          return false;
+        }
+
+        return normalizeUrl(result.url) === expectedPhotoUrl;
+      });
+    });
+
+    if (!photoRetrieved) {
+      throw new GeminiAnalysisError('IMAGE_NOT_ANALYZABLE');
+    }
 
     if (typeof interaction.output_text !== 'string') {
       throw new GeminiAnalysisError('INVALID_AI_RESPONSE');

@@ -5,9 +5,12 @@
   "compatibility_date": "2026-07-27",
   "vars": {
     "GEMINI_MODEL": "gemini-3.6-flash",
+    "AI_PROJECT_DAILY_LIMIT": "15",
+
     "FIREBASE_PROJECT_ID": "project-d-one",
     "FIREBASE_STORAGE_BUCKET": "project-d-one.firebasestorage.app",
     "FIREBASE_PROJECT_NUMBER": "130872563902",
+
     "FIREBASE_ANDROID_APP_ID": "1:130872563902:android:e9ed99b0b87988e55a26ef",
     "FIREBASE_IOS_APP_ID": "1:130872563902:ios:0cec8a0e9094cd965a26ef"
   },
