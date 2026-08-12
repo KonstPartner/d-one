@@ -3,7 +3,7 @@ import { FirebaseIdTokenError, verifyFirebaseIdToken } from './firebaseIdToken';
 import {
   getUserAuthorizationProfile,
   UserProfileError,
-} from '../firestore/userProfile';
+} from './userProfileRepository';
 
 export type AuthorizeUserErrorCode =
   | 'UNAUTHORIZED'

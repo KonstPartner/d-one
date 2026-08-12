@@ -3,19 +3,19 @@ import {
   getAppCheckToken,
   verifyFirebaseAppCheckToken,
   type VerifiedFirebaseApp,
-} from './firebaseAppCheck';
+} from '../../shared/security/firebaseAppCheck';
 
-import { jsonError } from '../http/jsonResponse';
+import { jsonError } from '../../shared/http/jsonResponse';
 
-export type AppCheckRequestContext = {
+export type AppCheckContext = {
   app: VerifiedFirebaseApp;
 };
 
-type ProtectedRequestHandler = (
+type AppRequestHandler = (
   request: Request,
   env: Env,
   context: ExecutionContext,
-  appCheckContext: AppCheckRequestContext,
+  appCheckContext: AppCheckContext,
 ) => Response | Promise<Response>;
 
 type LocalDiagnosticsEnv = Env & {
@@ -59,8 +59,8 @@ const createAppCheckErrorResponse = (
   }
 };
 
-export const withFirebaseAppCheck =
-  (handler: ProtectedRequestHandler) =>
+export const withAppCheck =
+  (handler: AppRequestHandler) =>
   async (
     request: Request,
     env: Env,

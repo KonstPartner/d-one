@@ -1,25 +1,6 @@
-import { z } from 'zod';
-
-const SAFE_IDENTIFIER_PATTERN = /^[A-Za-z0-9_-]+$/;
-
 const MAX_CALORIES_KCAL = 20_000;
+
 const MAX_MACRONUTRIENT_GRAM = 5_000;
-
-export const analyzeFoodRequestSchema = z
-  .object({
-    entryId: z.string().min(1).regex(SAFE_IDENTIFIER_PATTERN),
-
-    photoPath: z.string().min(1),
-
-    photoUrl: z.url(),
-
-    comment: z.string().max(1_000),
-
-    language: z.enum(['en', 'ru']),
-  })
-  .strict();
-
-export type AnalyzeFoodRequest = z.infer<typeof analyzeFoodRequestSchema>;
 
 export type NumberRange = {
   min: number;
@@ -34,7 +15,9 @@ export type FoodAnalysis = {
   caloriesKcal: NumberRange | null;
 
   proteinGram: NumberRange | null;
+
   fatGram: NumberRange | null;
+
   carbsGram: NumberRange | null;
 
   confidence: 'low' | 'medium' | 'high' | null;
@@ -74,6 +57,7 @@ const numberRangeJsonSchema = {
 const nullableRangeJsonSchema = {
   anyOf: [
     numberRangeJsonSchema,
+
     {
       type: 'null',
     },
@@ -88,6 +72,7 @@ export const foodAnalysisResponseJsonSchema: Record<string, unknown> = {
       properties: {
         status: {
           type: 'string',
+
           enum: ['ok', 'partial'],
         },
 
@@ -96,6 +81,7 @@ export const foodAnalysisResponseJsonSchema: Record<string, unknown> = {
             {
               type: 'string',
             },
+
             {
               type: 'null',
             },
@@ -114,8 +100,10 @@ export const foodAnalysisResponseJsonSchema: Record<string, unknown> = {
           anyOf: [
             {
               type: 'string',
+
               enum: ['low', 'medium', 'high'],
             },
+
             {
               type: 'null',
             },
@@ -166,6 +154,7 @@ export const foodAnalysisResponseJsonSchema: Record<string, unknown> = {
       properties: {
         status: {
           type: 'string',
+
           enum: ['insufficient_data'],
         },
       },

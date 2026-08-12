@@ -1,15 +1,15 @@
 import {
-  type AppCheckRequestContext,
-  withFirebaseAppCheck,
-} from './auth/withFirebaseAppCheck';
+  type AppCheckContext,
+  withAppCheck,
+} from './app/middleware/withAppCheck';
 
-import { jsonError } from './http/jsonResponse';
+import { jsonError } from './shared/http/jsonResponse';
 
 const handleRequest = (
   request: Request,
   _env: Env,
   _context: ExecutionContext,
-  _appCheckContext: AppCheckRequestContext,
+  _appCheckContext: AppCheckContext,
 ): Response => {
   const url = new URL(request.url);
 
@@ -24,5 +24,5 @@ const handleRequest = (
 };
 
 export default {
-  fetch: withFirebaseAppCheck(handleRequest),
+  fetch: withAppCheck(handleRequest),
 } satisfies ExportedHandler<Env>;

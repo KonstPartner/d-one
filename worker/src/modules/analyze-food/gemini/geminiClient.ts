@@ -1,18 +1,20 @@
 import { GoogleGenAI } from '@google/genai';
 
+import type { AnalyzeFoodRequest } from '../analyzeFoodRequest';
+
 import {
   foodAnalysisResponseJsonSchema,
   parseAnalyzeFoodResponse,
-  type AnalyzeFoodRequest,
   type AnalyzeFoodResponse,
-} from './analyzeFoodSchema';
+} from '../foodAnalysisResult';
 
 import {
   buildFoodAnalysisContext,
   FOOD_ANALYSIS_SYSTEM_INSTRUCTION,
-} from './foodAnalysisPrompt';
+} from '../foodAnalysisPrompt';
 
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
+
 const GEMINI_TIMEOUT_MS = 45_000;
 
 export type GeminiAnalysisErrorCode =
@@ -153,10 +155,13 @@ export const analyzeFoodWithGemini = async ({
 
         response_format: {
           type: 'text',
+
           mime_type: 'application/json',
+
           schema: foodAnalysisResponseJsonSchema,
         },
       },
+
       {
         retries: {
           strategy: 'none',

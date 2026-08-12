@@ -1,4 +1,4 @@
-import type { AnalyzeFoodRequest } from './analyzeFoodSchema';
+import type { AnalyzeFoodRequest } from './analyzeFoodRequest';
 
 export const FOOD_ANALYSIS_PROMPT_VERSION = '1';
 
