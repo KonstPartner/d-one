@@ -49,6 +49,8 @@ export default {
     },
 
     plugins: [
+      '@react-native-firebase/app',
+      '@react-native-firebase/app-check',
       [
         'expo-router',
         {
@@ -100,6 +102,7 @@ export default {
         {
           ios: {
             deploymentTarget: '15.5',
+            useFrameworks: 'static',
           },
         },
       ],
