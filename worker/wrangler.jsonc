@@ -11,6 +11,13 @@
     "FIREBASE_ANDROID_APP_ID": "1:130872563902:android:e9ed99b0b87988e55a26ef",
     "FIREBASE_IOS_APP_ID": "1:130872563902:ios:0cec8a0e9094cd965a26ef"
   },
+  "d1_databases": [
+    {
+      "binding": "AI_USAGE_DB",
+      "database_name": "done-ai-usage",
+      "database_id": "bf960a4c-e0cf-4f5e-b496-acd5dec856cc"
+    }
+  ],
   "secrets": {
     "required": ["GEMINI_API_KEY"]
   }
