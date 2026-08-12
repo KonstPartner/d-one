@@ -8,6 +8,14 @@
     "crons": ["0 3 * * *"]
   },
 
+  "observability": {
+  "enabled": true,
+  "head_sampling_rate": 1
+  },
+
+  "workers_dev": true,
+  "preview_urls": false,
+
   "vars": {
     "GEMINI_MODEL": "gemini-3.6-flash",
     "AI_PROJECT_DAILY_LIMIT": "15",

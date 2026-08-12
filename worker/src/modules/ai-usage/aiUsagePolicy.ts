@@ -1,7 +1,7 @@
 export const AI_USAGE_POLICY = {
   userDailyLimit: 15,
   requestCooldownSeconds: 30,
-  activeLeaseSeconds: 90,
+  activeLeaseSeconds: 150,
 } as const;
 
 export type AiUsageLimitErrorCode =
