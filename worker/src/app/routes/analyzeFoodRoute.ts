@@ -16,6 +16,8 @@ import {
   analyzeFoodWithGemini,
 } from '../../modules/analyze-food/gemini/geminiClient';
 
+import { createAnalyzeFoodTelemetry } from '../../modules/analyze-food/observability/analyzeFoodTelemetry';
+
 import {
   PhotoValidationError,
   validateDiaryPhoto,
@@ -107,6 +109,8 @@ export const handleAnalyzeFood = async (
   env: Env,
   context: ExecutionContext,
 ): Promise<Response> => {
+  const telemetry = createAnalyzeFoodTelemetry(env.GEMINI_MODEL);
+
   let uid: string;
 
   try {
@@ -115,8 +119,17 @@ export const handleAnalyzeFood = async (
     uid = user.uid;
   } catch (error) {
     if (error instanceof AuthorizeUserError) {
+      telemetry.requestError(
+        'auth',
+        error.code === 'INVALID_USER_PROFILE'
+          ? 'AUTH_SERVICE_UNAVAILABLE'
+          : error.code,
+      );
+
       return createAuthorizeUserErrorResponse(error);
     }
+
+    telemetry.requestError('auth', 'INTERNAL_ERROR');
 
     return jsonError('INTERNAL_ERROR', 500);
   }
@@ -126,12 +139,16 @@ export const handleAnalyzeFood = async (
   try {
     rawBody = await request.json();
   } catch {
+    telemetry.requestError('request_validation', 'INVALID_REQUEST');
+
     return jsonError('INVALID_REQUEST', 400);
   }
 
   const parsedRequest = analyzeFoodRequestSchema.safeParse(rawBody);
 
   if (!parsedRequest.success) {
+    telemetry.requestError('request_validation', 'INVALID_REQUEST');
+
     return jsonError('INVALID_REQUEST', 400);
   }
 
@@ -153,8 +170,12 @@ export const handleAnalyzeFood = async (
     });
   } catch (error) {
     if (error instanceof PhotoValidationError) {
+      telemetry.requestError('photo_validation', error.code);
+
       return createPhotoValidationErrorResponse(error);
     }
+
+    telemetry.requestError('photo_validation', 'INTERNAL_ERROR');
 
     return jsonError('INTERNAL_ERROR', 500);
   }
@@ -162,6 +183,8 @@ export const handleAnalyzeFood = async (
   const projectDailyLimit = parseProjectDailyLimit(env.AI_PROJECT_DAILY_LIMIT);
 
   if (projectDailyLimit === null) {
+    telemetry.requestError('usage_reservation', 'INTERNAL_ERROR');
+
     return jsonError('INTERNAL_ERROR', 500);
   }
 
@@ -175,33 +198,61 @@ export const handleAnalyzeFood = async (
 
       projectDailyLimit,
     });
+
+    telemetry.usageReserved();
   } catch (error) {
     if (error instanceof AiUsageLimitError) {
+      telemetry.usageRejected(error.code);
+
       return createAiUsageErrorResponse(error);
     }
+
+    telemetry.usageFailed('INTERNAL_ERROR');
 
     return jsonError('INTERNAL_ERROR', 500);
   }
 
+  const providerStartedAt = telemetry.startProvider();
+
   try {
     const analysis = await analyzeFoodWithGemini({
       apiKey: env.GEMINI_API_KEY,
+
       model: env.GEMINI_MODEL,
+
       photoUrl: validatedPhoto.url,
+
       comment: input.comment,
+
       language: input.language,
     });
+
+    telemetry.providerSuccess(analysis.status, providerStartedAt);
+
     return Response.json({
       ok: true,
+
       data: analysis,
     });
   } catch (error) {
     if (error instanceof GeminiAnalysisError) {
+      telemetry.providerError(error.code, providerStartedAt);
+
       return createGeminiErrorResponse(error);
     }
 
+    telemetry.providerError('INTERNAL_ERROR', providerStartedAt);
+
     return jsonError('INTERNAL_ERROR', 500);
   } finally {
-    context.waitUntil(releaseAiUsage(env.AI_USAGE_DB, reservation));
+    context.waitUntil(
+      releaseAiUsage(env.AI_USAGE_DB, reservation)
+        .then(() => {
+          telemetry.usageReleased();
+        })
+        .catch(() => {
+          telemetry.usageReleaseFailed();
+        }),
+    );
   }
 };
