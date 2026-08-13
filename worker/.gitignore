@@ -1,0 +1,28 @@
+# Environment variables and local secrets
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+!.dev.vars.sample
+
+# Dependencies
+node_modules/
+
+# Cloudflare Wrangler local state
+.wrangler/
+
+# Build and temporary files
+dist/
+.tmp/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# macOS
+.DS_Store

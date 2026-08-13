@@ -1,0 +1,59 @@
+{
+  "common": {
+    "brand": "DOne",
+    "language": "Язык",
+    "cancel": "Отмена",
+    "send": "Отправить",
+    "close": "Закрыть",
+    "actions": {
+      "tryAgain": "Повторить"
+    },
+    "validation": {
+      "required": "Это поле обязательно.",
+      "email": "Введите корректный email.",
+      "password": "Пароль должен содержать не менее 8 символов, включая заглавную букву, строчную букву и цифру.",
+      "nickname": "Никнейм должен содержать от 1 до 255 символов."
+    },
+    "errors": {
+      "wrongEmailOrPassword": "Неверный email или пароль",
+      "emailAlreadyExists": "Пользователь с таким email уже существует",
+      "alreadyLoggedIn": "Пользователь уже вошёл в аккаунт",
+      "notLoggedInYet": "Пользователь ещё не вошёл в аккаунт",
+      "wrongCurrentPassword": "Неверный текущий пароль",
+      "loginAgainToChangeEmail": "Для изменения email необходимо войти в аккаунт повторно",
+      "tooManyRequests": "Слишком много попыток. Повторите позже",
+      "googleAuthorizationFailed": "Не удалось получить данные авторизации Google",
+      "googleIdTokenMissing": "Google не вернул токен авторизации",
+      "googleEmailMissing": "Не удалось получить email из аккаунта Google",
+      "googleRedirectUriMissing": "Не настроен адрес возврата после авторизации Google",
+      "invalidGoogleIdToken": "Google вернул некорректный токен авторизации",
+      "unknown": "Произошла неизвестная ошибка",
+      "currentUserEmailMissing": "У текущего пользователя отсутствует email",
+      "aiAccessFailed": "AI-анализ недоступен для текущей учётной записи.",
+      "aiInvalidRequest": "Не удалось отправить фотографию на AI-анализ.",
+      "aiImageNotAnalyzable": "Эту фотографию невозможно проанализировать с помощью AI.",
+      "aiImageTooLarge": "Фотография слишком большая для AI-анализа.",
+      "aiRequestAlreadyActive": "Другой AI-анализ уже выполняется.",
+      "aiUserDailyLimitReached": "Дневной лимит AI-анализов исчерпан.",
+      "aiProjectDailyLimitReached": "AI-анализ временно недоступен: исчерпан дневной лимит сервиса.",
+      "aiRequestTooFrequent": "Подождите перед запуском следующего AI-анализа.",
+      "aiProviderUnavailable": "AI-анализ временно недоступен. Повторите позже.",
+      "aiTimeout": "AI-анализ занял слишком много времени. Повторите позже."
+    },
+    "notifications": {
+      "type": {
+        "success": "Успех",
+        "error": "Ошибка",
+        "info": "Информация",
+        "warn": "Предупреждение"
+      }
+    },
+    "photoViewer": {
+      "hint": "Масштабируйте жестом или двойным касанием"
+    },
+    "relativeDate": {
+      "today": "Сегодня",
+      "yesterday": "Вчера"
+    }
+  }
+}

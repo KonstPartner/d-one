@@ -1,0 +1,244 @@
+{
+  "diary": {
+    "pending": {
+      "title": "Access pending",
+      "roleNotAssigned": "No role has been assigned to your account yet.",
+      "description": "The main application features will become available after an administrator assigns you a role."
+    },
+    "database": {
+      "initializationFailed": "Failed to initialize the diary database."
+    },
+    "unsupportedPlatform": {
+      "title": "Diary is unavailable on Web",
+      "description": "Maintaining your diary is available only in the mobile application."
+    },
+    "menu": {
+      "synchronize": "Synchronize",
+      "selectEntries": "Select entries",
+      "collapseAllDays": "Collapse all days",
+      "expandAllDays": "Expand all days"
+    },
+    "selection": {
+      "selectAll": "Select all",
+      "clearAll": "Clear all",
+      "selected_one": "{{count}} selected",
+      "selected_other": "{{count}} selected",
+      "delete": "Delete",
+      "synchronize": "Synchronize",
+      "close": "Close selection mode",
+      "entryAccessibilityLabel": "Select diary entry",
+      "deleteConfirmTitle": "Delete selected entries?",
+      "deleteConfirmDescription_one": "{{count}} entry will remain visible as Deleting until synchronization completes.",
+      "deleteConfirmDescription_other": "{{count}} entries will remain visible as Deleting until synchronization completes.",
+      "deleteFailed": "Failed to delete the selected entries."
+    },
+    "sync": {
+      "progress": "Synchronizing: {{current}} of {{total}}",
+      "failed": "Failed to synchronize diary entries."
+    },
+    "list": {
+      "loadFailed": "Failed to load entries",
+      "empty": {
+        "title": "No entries yet",
+        "description": "Create your first entry with the “+” button."
+      },
+      "day": {
+        "entries_one": "{{count}} entry",
+        "entries_other": "{{count}} entries"
+      }
+    },
+    "pagination": {
+      "previousPage": "Previous page",
+      "nextPage": "Next page"
+    },
+    "search": {
+      "placeholder": "Search entries",
+      "inputAccessibilityLabel": "Search diary entries",
+      "fieldAccessibilityLabel": "Select diary search field",
+      "clearAccessibilityLabel": "Clear diary search",
+      "fields": {
+        "comment": "Search in comments",
+        "aiAnalysis": "Search in AI analysis",
+        "glucose": "Search by glucose",
+        "shortInsulin": "Search by short insulin",
+        "longInsulin": "Search by long insulin",
+        "carbsGram": "Search by carbohydrates"
+      }
+    },
+    "entry": {
+      "more": "More",
+      "editAccessibilityLabel": "Edit diary entry",
+      "openFullText": "Open full text: {{title}}",
+      "metrics": {
+        "glucose": "Glucose",
+        "shortInsulin": "Short insulin",
+        "longInsulin": "Long insulin",
+        "carbohydrates": "Carbohydrates"
+      },
+      "units": {
+        "glucose": "mmol/L",
+        "insulin": "U",
+        "carbohydrates": "g"
+      },
+      "mealRelation": {
+        "beforeMeal": "Before meal",
+        "afterMeal": "After meal",
+        "fasting": "Fasting",
+        "bedtime": "Bedtime",
+        "night": "Night"
+      },
+      "comment": "Comment",
+      "aiAnalysis": "AI analysis",
+      "sync": {
+        "synced": "Synchronized",
+        "pending": "Not synchronized",
+        "synchronizing": "Synchronizing…",
+        "deleting": "Deleting…"
+      },
+      "photo": {
+        "unavailableOffline": "Photo is unavailable offline",
+        "loadFailed": "Failed to load photo",
+        "localOnly": "Stored only on this device",
+        "cloudOnly": "Available only from the cloud",
+        "accessibilityLabel": "Diary entry photo",
+        "openAccessibilityLabel": "Open diary entry photo"
+      }
+    },
+    "form": {
+      "createTitle": "New entry",
+      "editTitle": "Edit entry",
+      "cancel": "Cancel",
+      "create": "Create",
+      "creating": "Creating…",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancelAccessibilityLabel": "Cancel entry form",
+      "dateAccessibilityLabel": "Select entry date",
+      "timeAccessibilityLabel": "Select entry time",
+      "useCurrentDateTime": "Now",
+      "mealRelation": "Meal relation",
+      "mealRelationPlaceholder": "Select",
+      "mealRelationNone": "Not specified",
+      "commentPlaceholder": "Add note…",
+      "commentAccessibilityLabel": "Entry comment",
+      "metric": {
+        "valueAccessibilityLabel": "{{metric}} value",
+        "decreaseAccessibilityLabel": "Decrease {{metric}}",
+        "increaseAccessibilityLabel": "Increase {{metric}}",
+        "clearAccessibilityLabel": "Clear {{metric}}"
+      },
+      "photo": {
+        "title": "Photo",
+        "empty": "No photo selected",
+        "add": "Add photo",
+        "replace": "Replace",
+        "delete": "Delete",
+        "addAccessibilityLabel": "Add a photo to the diary entry",
+        "replaceAccessibilityLabel": "Replace the diary entry photo",
+        "deleteAccessibilityLabel": "Delete the diary entry photo",
+        "previewAccessibilityLabel": "Selected diary entry photo",
+        "sourceTitle": "Add photo",
+        "sourceMessage": "Choose a photo source.",
+        "camera": "Camera",
+        "gallery": "Photo library",
+        "discardTitle": "Delete the added photo?",
+        "discardMessage": "The added photo will be deleted. Other entered data will remain in the draft.",
+        "discard": "Delete photo and close",
+        "errors": {
+          "processingFailed": "Failed to process the photo.",
+          "invalidFile": "The selected photo is invalid.",
+          "fileTooLarge": "The photo must not exceed 10 MB.",
+          "storageFailed": "Failed to save or delete the photo.",
+          "uploadFailed": "The entry was saved locally, but the photo could not be uploaded."
+        }
+      },
+      "ai": {
+        "result": {
+          "ok": "Estimate.",
+          "partial": "Partial estimate.",
+          "food": "Food: {{value}}",
+          "calories": "Calories: {{value}}",
+          "protein": "Protein: {{value}}",
+          "fat": "Fat: {{value}}",
+          "carbohydrates": "Carbohydrates: {{value}}",
+          "confidenceLabel": "Confidence: {{value}}",
+          "couldNotDetermine": "could not be determined",
+          "range": "{{min}}–{{max}} {{unit}}",
+          "confidence": {
+            "low": "low",
+            "medium": "medium",
+            "high": "high"
+          },
+          "assumptions": "Assumptions: {{value}}"
+        },
+        "title": "AI food analysis",
+        "description": "Estimate calories and macronutrients from the selected photo.",
+        "warning": "The AI estimate is approximate. Do not use it to calculate an insulin dose."
+      },
+      "preparation": {
+        "title": "Preparing entry",
+        "saved": "Entry created",
+        "savedLocally": "Saved safely on this device",
+        "uploadingPhoto": "Uploading photo",
+        "finalizingPhoto": "Finalizing the photo...",
+        "photoPreparing": "The entry is already saved locally. The cloud photo is being prepared."
+      },
+      "errors": {
+        "invalidEventAt": "Select a valid date and time.",
+        "invalidGlucose": "Glucose must be between 0 and 100 with no more than one decimal place.",
+        "invalidShortInsulin": "Short insulin must be between 0 and 1000 with no more than one decimal place.",
+        "invalidLongInsulin": "Long insulin must be between 0 and 1000 with no more than one decimal place.",
+        "invalidCarbsGram": "Carbohydrates must be between 0 and 1000 with no more than one decimal place.",
+        "commentTooLong": "The comment cannot exceed 5000 characters.",
+        "emptyEntry": "Fill in at least one entry field.",
+        "creationFailed": "Failed to create the entry.",
+        "updateFailed": "Failed to save the entry.",
+        "openFailed": "Failed to open the entry for editing."
+      },
+      "openCreateAccessibilityLabel": "Create diary entry",
+      "discard": {
+        "title": "Discard changes?",
+        "description": "The entered data will not be saved.",
+        "confirm": "Discard"
+      }
+    },
+    "filters": {
+      "title": "Filters",
+      "openAccessibilityLabel": "Open diary filters",
+      "closeAccessibilityLabel": "Close diary filters",
+      "reset": "Reset",
+      "clear": "Clear",
+      "apply": "Apply",
+      "applied": "Applied",
+      "notSet": "Not set",
+      "photo": "Photo",
+      "aiAnalysis": "AI analysis",
+      "date": {
+        "title": "Date range",
+        "from": "From",
+        "to": "To",
+        "reset": "Reset date range",
+        "clearBoundary": "Clear {{boundary}}"
+      },
+      "range": {
+        "null": "null",
+        "from": "From",
+        "to": "To",
+        "invalid": "The minimum value cannot be greater than the maximum value.",
+        "fixBeforeApply": "Correct the invalid ranges before applying the filters."
+      },
+      "mealRelation": {
+        "title": "Meal relation",
+        "placeholder": "Select meal relations",
+        "selected_one": "{{count}} selected",
+        "selected_other": "{{count}} selected",
+        "accessibilityLabel": "Select meal relations"
+      },
+      "presence": {
+        "ignore": "Any",
+        "has": "Has",
+        "doesNotHave": "Does not have"
+      }
+    }
+  }
+}

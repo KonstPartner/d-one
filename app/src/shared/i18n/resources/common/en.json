@@ -1,0 +1,59 @@
+{
+  "common": {
+    "brand": "DOne",
+    "language": "Language",
+    "cancel": "Cancel",
+    "send": "Send",
+    "close": "Close",
+    "actions": {
+      "tryAgain": "Try again"
+    },
+    "validation": {
+      "required": "This field is required.",
+      "email": "Enter a valid email address.",
+      "password": "The password must contain at least 8 characters, including an uppercase letter, a lowercase letter, and a number.",
+      "nickname": "Nickname must contain from 1 to 255 characters."
+    },
+    "errors": {
+      "wrongEmailOrPassword": "Incorrect email or password",
+      "emailAlreadyExists": "A user with this email already exists",
+      "alreadyLoggedIn": "The user is already signed in",
+      "notLoggedInYet": "The user is not signed in",
+      "wrongCurrentPassword": "The current password is incorrect",
+      "loginAgainToChangeEmail": "Sign in again to change your email",
+      "tooManyRequests": "Too many attempts. Try again later",
+      "googleAuthorizationFailed": "Failed to retrieve Google authorization data",
+      "googleIdTokenMissing": "Google did not return an authorization token",
+      "googleEmailMissing": "Failed to retrieve the email from the Google account",
+      "googleRedirectUriMissing": "The Google authorization redirect URI is not configured",
+      "invalidGoogleIdToken": "Google returned an invalid authorization token",
+      "unknown": "An unknown error occurred",
+      "currentUserEmailMissing": "The current user does not have an email address",
+      "aiAccessFailed": "AI analysis is unavailable for the current account.",
+      "aiInvalidRequest": "The photo could not be sent for AI analysis.",
+      "aiImageNotAnalyzable": "This photo cannot be analyzed by AI.",
+      "aiImageTooLarge": "The photo is too large for AI analysis.",
+      "aiRequestAlreadyActive": "Another AI analysis is already running.",
+      "aiUserDailyLimitReached": "Your daily AI analysis limit has been reached.",
+      "aiProjectDailyLimitReached": "AI analysis is temporarily unavailable because the service daily limit has been reached.",
+      "aiRequestTooFrequent": "Please wait before starting another AI analysis.",
+      "aiProviderUnavailable": "AI analysis is temporarily unavailable. Try again later.",
+      "aiTimeout": "AI analysis took too long. Try again later."
+    },
+    "notifications": {
+      "type": {
+        "success": "Success",
+        "error": "Error",
+        "info": "Information",
+        "warn": "Warning"
+      }
+    },
+    "photoViewer": {
+      "hint": "Pinch or double tap to zoom or reset"
+    },
+    "relativeDate": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    }
+  }
+}

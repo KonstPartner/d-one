@@ -1,0 +1,47 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "done-ai-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-27",
+
+  "triggers": {
+    "crons": ["0 3 * * *"]
+  },
+
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false
+    }
+  },
+
+  "workers_dev": true,
+  "preview_urls": false,
+
+  "vars": {
+    "GEMINI_MODEL": "gemini-3.6-flash",
+    "AI_PROJECT_DAILY_LIMIT": "15",
+
+    "FIREBASE_PROJECT_ID": "project-d-one",
+    "FIREBASE_STORAGE_BUCKET": "project-d-one.firebasestorage.app",
+    "FIREBASE_PROJECT_NUMBER": "130872563902",
+
+    "FIREBASE_ANDROID_APP_ID": "1:130872563902:android:e9ed99b0b87988e55a26ef",
+    "FIREBASE_IOS_APP_ID": "1:130872563902:ios:0cec8a0e9094cd965a26ef"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "AI_USAGE_DB",
+      "database_name": "done-ai-usage",
+      "database_id": "bf960a4c-e0cf-4f5e-b496-acd5dec856cc"
+    }
+  ],
+
+  "secrets": {
+    "required": ["GEMINI_API_KEY"]
+  }
+}
