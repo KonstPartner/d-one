@@ -4,7 +4,10 @@ import type { PropsWithChildren } from 'react';
 
 import { showNotification } from '@shared/lib/notifications';
 
-import { useCreateDiaryEntryForm } from '../useCreateDiaryEntryForm';
+import {
+  type CreateDiaryEntrySubmitResult,
+  useCreateDiaryEntryForm,
+} from '../useCreateDiaryEntryForm';
 
 const mockRepositoryCreate = jest.fn();
 
@@ -149,7 +152,7 @@ describe('useCreateDiaryEntryForm integration', () => {
       expect(result.current.values.glucose).toBe(6.5);
     });
 
-    let firstSubmit: Promise<string | null>;
+    let firstSubmit: Promise<CreateDiaryEntrySubmitResult | null>;
 
     act(() => {
       firstSubmit = result.current.handleSubmit();
@@ -159,7 +162,7 @@ describe('useCreateDiaryEntryForm integration', () => {
       expect(result.current.isSubmitting).toBe(true);
     });
 
-    let secondResult: string | null | undefined;
+    let secondResult: CreateDiaryEntrySubmitResult | null | undefined;
 
     await act(async () => {
       secondResult = await result.current.handleSubmit();
@@ -186,13 +189,16 @@ describe('useCreateDiaryEntryForm integration', () => {
       resolveCreate?.();
     });
 
-    let entryId: string | null = null;
+    let submitResult: CreateDiaryEntrySubmitResult | null = null;
 
     await act(async () => {
-      entryId = await firstSubmit;
+      submitResult = await firstSubmit;
     });
 
-    expect(entryId).toBe('entry-created');
+    expect(submitResult).toEqual({
+      entryId: 'entry-created',
+      requestAi: false,
+    });
 
     expect(result.current.isSubmitting).toBe(true);
 
@@ -230,13 +236,13 @@ describe('useCreateDiaryEntryForm integration', () => {
       expect(result.current.values.glucose).toBe(7.1);
     });
 
-    let entryId: string | null | undefined;
+    let submitResult: CreateDiaryEntrySubmitResult | null | undefined;
 
     await act(async () => {
-      entryId = await result.current.handleSubmit();
+      submitResult = await result.current.handleSubmit();
     });
 
-    expect(entryId).toBeNull();
+    expect(submitResult).toBeNull();
 
     expect(mockRepositoryCreate).toHaveBeenCalledTimes(1);
 

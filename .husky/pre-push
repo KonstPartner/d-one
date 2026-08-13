@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 cd app
 npm run lint:errors
-# npm run test-check
+npm run test-check

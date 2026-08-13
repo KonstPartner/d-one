@@ -445,6 +445,13 @@ jest.mock('../model/useOwnerDiarySync', () => ({
   }),
 }));
 
+jest.mock('../model/useOwnerDiaryPreparation', () => ({
+  useOwnerDiaryPreparation: () => ({
+    preparingEntry: null,
+    handleEntrySaved: jest.fn(),
+  }),
+}));
+
 jest.mock('../model/useOwnerDiaryEntryEditor', () => ({
   useOwnerDiaryEntryEditor: () => ({
     createVisible: false,
