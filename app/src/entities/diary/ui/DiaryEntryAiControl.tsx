@@ -1,9 +1,7 @@
-import { Switch } from 'react-native';
 import { useTheme } from '@emotion/react';
-import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import * as s from '../styles/DiaryEntryAiControl';
+import { ToggleSwitch } from '@shared/ui';
 
 type DiaryEntryAiControlProps = {
   value: boolean;
@@ -22,24 +20,15 @@ export const DiaryEntryAiControl = ({
   const { t } = useTranslation();
 
   return (
-    <s.Root $disabled={disabled}>
-      <s.Icon>
-        <Ionicons
-          name="sparkles-outline"
-          size={theme.size.md}
-          color={disabled ? theme.colors.muted : theme.colors.text}
-        />
-      </s.Icon>
-
-      <s.Title numberOfLines={1}>{t('diaryAi.title')}</s.Title>
-
-      <Switch
-        value={value}
-        disabled={disabled}
-        accessibilityRole="switch"
-        accessibilityLabel={t('diaryAi.title')}
-        onValueChange={onValueChange}
-      />
-    </s.Root>
+    <ToggleSwitch
+      icon="sparkles-outline"
+      iconColor={
+        disabled ? theme.colors.muted : theme.colors.metrics.longInsulin.text
+      }
+      label={t('diary.entry.aiAnalysis')}
+      value={value}
+      disabled={disabled}
+      onValueChange={onValueChange}
+    />
   );
 };

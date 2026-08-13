@@ -125,6 +125,31 @@ export const FieldLabel = styled.Text`
   font-weight: ${({ theme }) => theme.weight.semibold};
 `;
 
+export const DeleteAiButtonContent = styled.View`
+  flex-direction: row;
+  align-items: center;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.xs)};
+`;
+
+export const DeleteAiButtonText = styled.Text`
+  ${({ theme }) => ss.Text(theme, 'sm', 'semibold', 'danger', 'md')};
+`;
+
+export const AiAnalysisScroll = styled.ScrollView`
+  padding: ${({ theme }) => ss.px(theme.spacing.md)};
+
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
+  border-color: ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
+
+  background-color: ${({ theme }) => theme.colors.bg};
+`;
+
+export const AiAnalysisText = styled.Text`
+  ${({ theme }) => ss.Text(theme, 'sm', 'regular', 'default', 'lg')};
+`;
+
 export const ToggleRow = styled.View`
   flex-direction: row;
 

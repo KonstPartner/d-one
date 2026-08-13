@@ -275,15 +275,6 @@ export const OwnerDiary = () => {
       />
 
       <OwnerDiaryPreparationModal entry={diaryPreparation.preparingEntry} />
-
-      <ConfirmDialog
-        visible={diaryPreparation.aiConsentRequired}
-        title={t('diaryAi.consent.title')}
-        description={t('diaryAi.consent.description')}
-        confirmLabel={t('diaryAi.consent.confirm')}
-        onConfirm={diaryPreparation.confirmAiConsent}
-        onClose={diaryPreparation.declineAiConsent}
-      />
     </s.Root>
   );
 };

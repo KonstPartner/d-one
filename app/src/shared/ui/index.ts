@@ -51,4 +51,6 @@ export type {
 export { Spinner } from './Spinner';
 export type { TextAreaProps } from './TextArea';
 export { TextArea } from './TextArea';
+export type { ToggleSwitchProps } from './ToggleSwitch';
+export { ToggleSwitch } from './ToggleSwitch';
 export { WebRefreshButton } from './WebRefreshButton';

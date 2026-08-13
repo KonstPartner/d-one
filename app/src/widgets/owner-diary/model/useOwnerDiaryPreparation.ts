@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
@@ -20,19 +20,20 @@ import type { OwnerDiarySavedEntry } from './useOwnerDiaryEntryEditor';
 
 export type OwnerDiaryPreparationPhase =
   | 'uploadingPhoto'
-  | 'awaitingAiConsent'
+  | 'photoUploaded'
   | 'analyzingAi'
   | 'analysisReady';
 
 export type OwnerDiaryPreparationState = OwnerDiarySavedEntry & {
   photoUri: string | null;
 
+  photoStepVisible: boolean;
+  photoUploaded: boolean;
+
   phase: OwnerDiaryPreparationPhase;
 
   aiAnalysis: string | null;
 };
-
-type ConsentResolver = (granted: boolean) => void;
 
 const hasPhotoToUpload = (entry: DiaryEntry): boolean =>
   entry.localPhotoUri !== null &&
@@ -53,10 +54,6 @@ export const useOwnerDiaryPreparation = () => {
   const [preparingEntry, setPreparingEntry] =
     useState<OwnerDiaryPreparationState | null>(null);
 
-  const aiConsentGrantedRef = useRef(false);
-
-  const consentResolverRef = useRef<ConsentResolver | null>(null);
-
   const refreshDiary = useCallback(async (): Promise<void> => {
     await queryClient.invalidateQueries({
       queryKey: diaryLocalQueryKeys.pagesRoot(userId),
@@ -64,7 +61,10 @@ export const useOwnerDiaryPreparation = () => {
   }, [queryClient, userId]);
 
   const setPhase = useCallback(
-    (phase: OwnerDiaryPreparationPhase, aiAnalysis: string | null = null) => {
+    (
+      phase: OwnerDiaryPreparationPhase,
+      aiAnalysis: string | null = null
+    ): void => {
       setPreparingEntry((current) =>
         current === null
           ? null
@@ -78,30 +78,16 @@ export const useOwnerDiaryPreparation = () => {
     []
   );
 
-  const requestAiConsent = useCallback(async (): Promise<boolean> => {
-    if (aiConsentGrantedRef.current) {
-      return true;
-    }
-
-    setPhase('awaitingAiConsent');
-
-    return new Promise<boolean>((resolve) => {
-      consentResolverRef.current = resolve;
-    });
-  }, [setPhase]);
-
-  const confirmAiConsent = useCallback(() => {
-    aiConsentGrantedRef.current = true;
-
-    consentResolverRef.current?.(true);
-
-    consentResolverRef.current = null;
-  }, []);
-
-  const declineAiConsent = useCallback(() => {
-    consentResolverRef.current?.(false);
-
-    consentResolverRef.current = null;
+  const markPhotoUploaded = useCallback((showAiStep: boolean): void => {
+    setPreparingEntry((current) =>
+      current === null
+        ? null
+        : {
+            ...current,
+            photoUploaded: true,
+            phase: showAiStep ? 'analyzingAi' : 'photoUploaded',
+          }
+    );
   }, []);
 
   const syncEntry = useCallback(
@@ -175,6 +161,9 @@ export const useOwnerDiaryPreparation = () => {
 
         photoUri: entry.localPhotoUri ?? entry.photoUrl,
 
+        photoStepVisible: photoNeedsUpload,
+        photoUploaded: false,
+
         phase: photoNeedsUpload ? 'uploadingPhoto' : 'analyzingAi',
 
         aiAnalysis: null,
@@ -197,6 +186,8 @@ export const useOwnerDiaryPreparation = () => {
             entry = preparedEntry;
 
             uploadedForAiOnly = aiOnlyUpdate;
+
+            markPhotoUploaded(savedEntry.requestAi);
           } catch (error) {
             console.error(`Failed to upload diary photo: ${entry.id}`, error);
 
@@ -210,53 +201,46 @@ export const useOwnerDiaryPreparation = () => {
         }
 
         if (savedEntry.requestAi) {
-          const consentGranted = await requestAiConsent();
+          if (entry.photoPath === null || entry.photoUrl === null) {
+            return;
+          }
 
-          if (
-            consentGranted &&
-            entry.photoPath !== null &&
-            entry.photoUrl !== null
-          ) {
-            setPhase('analyzingAi');
+          setPhase('analyzingAi');
 
-            try {
-              const language = normalizeAppLanguage(
-                i18n.resolvedLanguage ?? i18n.language
-              );
+          try {
+            const language = normalizeAppLanguage(
+              i18n.resolvedLanguage ?? i18n.language
+            );
 
-              const result = await analyzeFood.mutateAsync({
-                entryId: entry.id,
+            const result = await analyzeFood.mutateAsync({
+              entryId: entry.id,
 
-                photoPath: entry.photoPath,
-                photoUrl: entry.photoUrl,
+              photoPath: entry.photoPath,
+              photoUrl: entry.photoUrl,
 
-                comment: entry.comment.slice(0, 1_000),
+              comment: entry.comment,
 
-                language,
-              });
+              language,
+            });
 
-              if (result.status === 'not_food') {
-                showNotification('warn', t('diaryAi.notFood'));
-              } else if (result.status === 'insufficient_data') {
-                showNotification('warn', t('diaryAi.insufficientData'));
-              } else {
-                const aiAnalysis = formatAnalyzeFoodResult(result, language);
+            if (result.status === 'not_food') {
+              showNotification('warn', t('diaryAi.notFood'));
+            } else if (result.status === 'insufficient_data') {
+              showNotification('warn', t('diaryAi.insufficientData'));
+            } else {
+              const aiAnalysis = formatAnalyzeFoodResult(result, language);
 
-                await saveAiAnalysis(entry.id, aiAnalysis);
+              await saveAiAnalysis(entry.id, aiAnalysis);
 
-                aiUpdated = true;
-                shouldSync = true;
+              aiUpdated = true;
+              shouldSync = true;
 
-                setPhase('analysisReady', aiAnalysis);
-              }
-            } catch (error) {
-              console.error(
-                `Failed to analyze diary photo: ${entry.id}`,
-                error
-              );
-
-              showNotification('error', errorMapper(error, 'api'));
+              setPhase('analysisReady', aiAnalysis);
             }
+          } catch (error) {
+            console.error(`Failed to analyze diary photo: ${entry.id}`, error);
+
+            showNotification('error', errorMapper(error, 'api'));
           }
         }
 
@@ -289,9 +273,9 @@ export const useOwnerDiaryPreparation = () => {
       i18n.language,
       i18n.resolvedLanguage,
 
+      markPhotoUploaded,
       refreshDiary,
       repository,
-      requestAiConsent,
       saveAiAnalysis,
       setPhase,
 
@@ -306,11 +290,6 @@ export const useOwnerDiaryPreparation = () => {
 
   return {
     preparingEntry,
-
-    aiConsentRequired: preparingEntry?.phase === 'awaitingAiConsent',
-
-    confirmAiConsent,
-    declineAiConsent,
 
     handleEntrySaved,
   };

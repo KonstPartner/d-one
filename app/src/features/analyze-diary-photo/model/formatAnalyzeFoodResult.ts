@@ -54,13 +54,11 @@ export const formatAnalyzeFoodResult = (
 ): string => {
   const t = i18n.getFixedT(language);
 
-  const lines = [
-    t(`diaryAi.result.${result.status}`),
+  const description = t('diaryAi.result.food', {
+    value: result.description ?? t('diaryAi.result.couldNotDetermine'),
+  });
 
-    t('diaryAi.result.food', {
-      value: result.description ?? t('diaryAi.result.couldNotDetermine'),
-    }),
-
+  const metrics = [
     t('diaryAi.result.calories', {
       value: formatRange({
         range: result.caloriesKcal,
@@ -96,6 +94,10 @@ export const formatAnalyzeFoodResult = (
         t,
       }),
     }),
+  ];
+
+  const details = [
+    t(`diaryAi.result.${result.status}`),
 
     t('diaryAi.result.confidenceLabel', {
       value:
@@ -106,12 +108,14 @@ export const formatAnalyzeFoodResult = (
   ];
 
   if (result.assumptions.length > 0) {
-    lines.push(
+    details.push(
       t('diaryAi.result.assumptions', {
         value: result.assumptions.join('; '),
       })
     );
   }
 
-  return limitAnalysisLength(lines.join('\n'));
+  return limitAnalysisLength(
+    [description, metrics.join('\n'), details.join('\n')].join('\n\n')
+  );
 };

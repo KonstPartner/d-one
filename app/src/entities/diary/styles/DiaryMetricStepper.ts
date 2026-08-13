@@ -16,7 +16,6 @@ type StepButtonProps = MetricProps & {
 
 export const Root = styled.View<MetricProps>`
   min-width: 0;
-  min-height: ${ss.px(112)};
 
   flex-basis: 47%;
   flex-grow: 1;

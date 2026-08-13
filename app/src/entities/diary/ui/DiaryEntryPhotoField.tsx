@@ -59,7 +59,7 @@ export const DiaryEntryPhotoField = ({
           <Ionicons
             name="pencil-outline"
             size={theme.size.lg}
-            color={theme.colors.card}
+            color={theme.colors.white}
           />
         </s.EditButton>
 
@@ -73,7 +73,7 @@ export const DiaryEntryPhotoField = ({
             <Ionicons
               name="trash-outline"
               size={theme.size.sm}
-              color={theme.colors.card}
+              color={theme.colors.white}
             />
           </s.DeleteButton>
         )}

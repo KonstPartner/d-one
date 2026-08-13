@@ -1,9 +1,9 @@
-import { Switch } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { dateKit } from '@shared/lib/date';
+import { ToggleSwitch } from '@shared/ui';
 
 import { useDiaryEntryDateTimeFields } from '../model/useDiaryEntryDateTimeFields';
 import * as s from '../styles/DiaryEntryDateTimeFields';
@@ -44,7 +44,6 @@ export const DiaryEntryDateTimeFields = ({
     manualSelectionDisabled,
     handleDatePress,
     handleTimePress,
-    handleCurrentDateTimePress,
     handlePickerChange,
   } = useDiaryEntryDateTimeFields({
     useCurrentDateTime,
@@ -71,41 +70,14 @@ export const DiaryEntryDateTimeFields = ({
 
   return (
     <s.Root>
-      <s.CurrentDateTime>
-        <s.CurrentDateTimeAction
-          accessible={false}
-          disabled={disabled}
-          onPress={handleCurrentDateTimePress}
-        >
-          <Ionicons
-            name="flash-outline"
-            size={theme.size.md}
-            color={disabled ? theme.colors.muted : theme.colors.primary}
-          />
-
-          <s.CurrentDateTimeLabel $disabled={disabled}>
-            {currentDateTimeLabel}
-          </s.CurrentDateTimeLabel>
-        </s.CurrentDateTimeAction>
-
-        <Switch
-          accessibilityRole="switch"
-          accessibilityLabel={currentDateTimeLabel}
-          accessibilityState={{
-            checked: useCurrentDateTime,
-            disabled,
-          }}
-          value={useCurrentDateTime}
-          disabled={disabled}
-          trackColor={{
-            false: theme.colors.border,
-            true: theme.colors.primary,
-          }}
-          thumbColor={theme.colors.white}
-          ios_backgroundColor={theme.colors.border}
-          onValueChange={onCurrentDateTimeChange}
-        />
-      </s.CurrentDateTime>
+      <ToggleSwitch
+        icon="flash-outline"
+        iconColor={disabled ? theme.colors.muted : theme.colors.primary}
+        label={currentDateTimeLabel}
+        value={useCurrentDateTime}
+        disabled={disabled}
+        onValueChange={onCurrentDateTimeChange}
+      />
 
       {!useCurrentDateTime && (
         <s.Controls>

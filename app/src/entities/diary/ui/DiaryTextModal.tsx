@@ -1,8 +1,5 @@
 import { Modal } from 'react-native';
-import { useTheme } from '@emotion/react';
-import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import type { PressableStateCallbackType } from 'react-native';
 
 import * as s from '../styles/DiaryTextModal';
 
@@ -15,9 +12,47 @@ type DiaryTextModalProps = {
   onClose: () => void;
 };
 
-const pressedStyle = ({ pressed }: PressableStateCallbackType) => ({
-  opacity: pressed ? 0.7 : 1,
-});
+const formatLegacyAiAnalysis = (
+  text: string,
+  statusLabels: ReadonlySet<string>
+): string => {
+  if (text.includes('\n\n')) {
+    return text;
+  }
+
+  const lines = text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  if (lines.length < 2) {
+    return text;
+  }
+
+  const details: string[] = [];
+
+  if (statusLabels.has(lines[0])) {
+    const status = lines.shift();
+
+    if (status !== undefined) {
+      details.push(status);
+    }
+  }
+
+  const description = lines.shift();
+
+  if (description === undefined) {
+    return text;
+  }
+
+  const metrics = lines.splice(0, Math.min(4, lines.length));
+
+  details.push(...lines);
+
+  return [description, metrics.join('\n'), details.join('\n')]
+    .filter((block) => block.length > 0)
+    .join('\n\n');
+};
 
 export const DiaryTextModal = ({
   visible,
@@ -27,13 +62,20 @@ export const DiaryTextModal = ({
 
   onClose,
 }: DiaryTextModalProps) => {
-  const theme = useTheme();
-
   const { t } = useTranslation();
 
   if (!visible) {
     return null;
   }
+
+  const isAiAnalysis = title === t('diary.entry.aiAnalysis');
+
+  const displayedText = isAiAnalysis
+    ? formatLegacyAiAnalysis(
+        text,
+        new Set([t('diaryAi.result.ok'), t('diaryAi.result.partial')])
+      )
+    : text;
 
   return (
     <Modal
@@ -55,25 +97,11 @@ export const DiaryTextModal = ({
         >
           <s.Header>
             <s.Title numberOfLines={1}>{title}</s.Title>
-
-            <s.HeaderCloseButton
-              accessibilityRole="button"
-              accessibilityLabel={t('common.close')}
-              hitSlop={8}
-              onPress={onClose}
-              style={pressedStyle}
-            >
-              <Ionicons
-                name="close"
-                size={theme.size.md}
-                color={theme.colors.text}
-              />
-            </s.HeaderCloseButton>
           </s.Header>
 
           <s.Body showsVerticalScrollIndicator>
             <s.BodyContent>
-              <s.BodyText selectable>{text}</s.BodyText>
+              <s.BodyText selectable>{displayedText}</s.BodyText>
             </s.BodyContent>
           </s.Body>
 

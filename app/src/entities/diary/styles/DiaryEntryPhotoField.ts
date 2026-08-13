@@ -57,11 +57,11 @@ export const EditButton = styled.Pressable`
   margin-left: ${ss.px(-25)};
 
   border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
-  border-color: ${({ theme }) => theme.colors.card};
+  border-color: ${({ theme }) => theme.colors.white};
 
   border-radius: ${ss.px(25)};
 
-  background-color: ${({ theme }) => theme.colors.text};
+  background-color: ${({ theme }) => theme.colors.blackAlpha.lg};
 `;
 
 export const DeleteButton = styled.Pressable`
@@ -77,11 +77,11 @@ export const DeleteButton = styled.Pressable`
   justify-content: center;
 
   border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
-  border-color: ${({ theme }) => theme.colors.card};
+  border-color: ${({ theme }) => theme.colors.white};
 
   border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
-  background-color: ${({ theme }) => theme.colors.text};
+  background-color: ${({ theme }) => theme.colors.blackAlpha.lg};
 `;
 
 export const LoadingOverlay = styled.View`

@@ -80,8 +80,6 @@ type MetricField = {
   onChange: (value: number | null) => void;
 };
 
-const ignoreAiAnalysisChange = () => undefined;
-
 export const DiaryEntryEditorFields = ({
   eventAt,
   useCurrentDateTime,
@@ -112,6 +110,7 @@ export const DiaryEntryEditorFields = ({
   onDeleteAiAnalysis,
 }: DiaryEntryEditorFieldsProps) => {
   const theme = useTheme();
+
   const { t } = useTranslation();
 
   const metricFields: MetricField[] = [
@@ -284,19 +283,26 @@ export const DiaryEntryEditorFields = ({
               variant="ghost"
               size="sm"
               disabled={disabled}
+              accessibilityLabel={t('diary.selection.delete')}
               onPress={onDeleteAiAnalysis}
             >
-              {t('diary.selection.delete')}
+              <s.DeleteAiButtonContent>
+                <Ionicons
+                  name="trash-outline"
+                  size={theme.size.base}
+                  color={theme.colors.danger}
+                />
+
+                <s.DeleteAiButtonText>
+                  {t('diary.selection.delete')}
+                </s.DeleteAiButtonText>
+              </s.DeleteAiButtonContent>
             </Button>
           </s.CommentHeader>
 
-          <TextArea
-            value={aiAnalysis}
-            editable={false}
-            showCharacterCount={false}
-            accessibilityLabel={t('diary.entry.aiAnalysis')}
-            onChangeText={ignoreAiAnalysisChange}
-          />
+          <s.AiAnalysisScroll nestedScrollEnabled showsVerticalScrollIndicator>
+            <s.AiAnalysisText selectable>{aiAnalysis}</s.AiAnalysisText>
+          </s.AiAnalysisScroll>
         </s.CommentField>
       ) : null}
     </s.Root>
