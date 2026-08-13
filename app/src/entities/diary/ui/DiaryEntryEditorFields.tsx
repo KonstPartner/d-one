@@ -3,7 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button, TextArea } from '@shared/ui';
+import { PlatformOS } from '@shared/lib/platform';
+import { Button, TextArea, ToggleSwitch } from '@shared/ui';
 
 import {
   DIARY_ENTRY_COMMENT_MAXIMUM_LENGTH,
@@ -40,6 +41,9 @@ type DiaryEntryEditorFieldsProps = {
   requestAi?: boolean;
   canRequestAi?: boolean;
 
+  requestTimer?: boolean;
+  canRequestTimer?: boolean;
+
   aiAnalysis?: string | null;
 
   disabled?: boolean;
@@ -62,6 +66,7 @@ type DiaryEntryEditorFieldsProps = {
   onDeletePhoto: () => void;
 
   onRequestAiChange?: (value: boolean) => void;
+  onRequestTimerChange?: (value: boolean) => void;
 
   onDeleteAiAnalysis?: () => void;
 };
@@ -93,6 +98,8 @@ export const DiaryEntryEditorFields = ({
   isPhotoBusy = false,
   requestAi = false,
   canRequestAi = false,
+  requestTimer = false,
+  canRequestTimer = false,
   aiAnalysis = null,
   disabled = false,
   onCurrentDateTimeChange,
@@ -107,6 +114,7 @@ export const DiaryEntryEditorFields = ({
   onChoosePhoto,
   onDeletePhoto,
   onRequestAiChange,
+  onRequestTimerChange,
   onDeleteAiAnalysis,
 }: DiaryEntryEditorFieldsProps) => {
   const theme = useTheme();
@@ -149,6 +157,8 @@ export const DiaryEntryEditorFields = ({
   ];
 
   const hasAiAnalysis = aiAnalysis !== null && aiAnalysis.trim().length > 0;
+
+  const showTimer = PlatformOS.ANDROID && onRequestTimerChange !== undefined;
 
   return (
     <s.Root>
@@ -248,17 +258,32 @@ export const DiaryEntryEditorFields = ({
         />
       </s.CommentField>
 
-      {onRequestAiChange ? (
+      {onRequestAiChange || showTimer ? (
         <s.ToggleRow>
           <s.ToggleCell>
-            <DiaryEntryAiControl
-              value={requestAi}
-              disabled={!canRequestAi}
-              onValueChange={onRequestAiChange}
-            />
+            {onRequestAiChange ? (
+              <DiaryEntryAiControl
+                value={requestAi}
+                disabled={!canRequestAi}
+                onValueChange={onRequestAiChange}
+              />
+            ) : null}
           </s.ToggleCell>
 
-          <s.ToggleCell />
+          <s.ToggleCell>
+            {showTimer ? (
+              <ToggleSwitch
+                icon="stopwatch-outline"
+                iconColor={
+                  canRequestTimer ? theme.colors.warning : theme.colors.muted
+                }
+                label={t('diary.form.timer.title')}
+                value={requestTimer}
+                disabled={!canRequestTimer}
+                onValueChange={onRequestTimerChange}
+              />
+            ) : null}
+          </s.ToggleCell>
         </s.ToggleRow>
       ) : null}
 

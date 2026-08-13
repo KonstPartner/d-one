@@ -10,11 +10,13 @@ import { useSyncDiary } from '@features/sync-diary';
 import {
   type DiaryEntry,
   diaryLocalQueryKeys,
+  getDiaryEntryTimerDurationSeconds,
   useReadyDiaryDatabase,
 } from '@entities/diary';
 import { normalizeAppLanguage } from '@shared/i18n';
 import { errorMapper } from '@shared/lib/errors';
 import { showNotification } from '@shared/lib/notifications';
+import { startSystemTimer } from '@shared/lib/system-timer';
 
 import type { OwnerDiarySavedEntry } from './useOwnerDiaryEntryEditor';
 
@@ -136,9 +138,41 @@ export const useOwnerDiaryPreparation = () => {
         };
       }
 
+      if (savedEntry.requestTimer) {
+        const durationSeconds = getDiaryEntryTimerDurationSeconds(
+          entry.eventAt
+        );
+
+        if (durationSeconds <= 0) {
+          showNotification('error', t('diary.form.timer.errors.expired'));
+        } else {
+          try {
+            await startSystemTimer({
+              durationSeconds,
+              message: t('diary.form.timer.systemLabel'),
+            });
+
+            showNotification('success', t('diary.form.timer.enabled'));
+          } catch (error) {
+            console.error(`Failed to create diary timer: ${entry.id}`, error);
+
+            showNotification(
+              'error',
+              t('diary.form.timer.errors.createFailed')
+            );
+          }
+        }
+      }
+
       const photoNeedsUpload = hasPhotoToUpload(entry);
 
-      if (!photoNeedsUpload && !savedEntry.requestAi) {
+      const photoWillUpload =
+        sync.connectionState === 'online' && photoNeedsUpload;
+
+      const aiWillRun =
+        sync.connectionState === 'online' && savedEntry.requestAi;
+
+      if (!photoWillUpload && !aiWillRun) {
         if (sync.connectionState === 'online' && shouldSync) {
           await syncEntry(entry.id);
         }
@@ -146,30 +180,26 @@ export const useOwnerDiaryPreparation = () => {
         return;
       }
 
-      if (sync.connectionState !== 'online') {
-        return;
-      }
+      setPreparingEntry({
+        ...savedEntry,
+
+        photoUri: entry.localPhotoUri ?? entry.photoUrl,
+
+        photoStepVisible: photoWillUpload,
+        photoUploaded: false,
+
+        phase: photoWillUpload ? 'uploadingPhoto' : 'analyzingAi',
+
+        aiAnalysis: null,
+      });
+
+      sync.setEntryPreparing(entry.id, true);
 
       const aiOnlyUpdate =
         savedEntry.operation === 'update' &&
         !savedEntry.entryUpdated &&
         !savedEntry.deleteAiAnalysis &&
         savedEntry.requestAi;
-
-      setPreparingEntry({
-        ...savedEntry,
-
-        photoUri: entry.localPhotoUri ?? entry.photoUrl,
-
-        photoStepVisible: photoNeedsUpload,
-        photoUploaded: false,
-
-        phase: photoNeedsUpload ? 'uploadingPhoto' : 'analyzingAi',
-
-        aiAnalysis: null,
-      });
-
-      sync.setEntryPreparing(entry.id, true);
 
       let uploadedForAiOnly = false;
       let aiUpdated = false;

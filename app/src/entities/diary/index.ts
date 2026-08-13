@@ -66,6 +66,12 @@ export {
   normalizeDiaryEntryEditableValues,
   validateDiaryEntryEditableValues,
 } from './model/diaryEntryEditable';
+export {
+  canCreateDiaryEntryTimer,
+  DIARY_ENTRY_TIMER_OFFSET_MS,
+  getDiaryEntryTimerDurationSeconds,
+  getDiaryEntryTimerTargetAt,
+} from './model/diaryEntryTimer';
 export type { DiaryPageResult, DiaryPagination } from './model/diaryPage';
 export type { MealRelation } from './model/mealRelation';
 export { isMealRelation, MEAL_RELATIONS } from './model/mealRelation';

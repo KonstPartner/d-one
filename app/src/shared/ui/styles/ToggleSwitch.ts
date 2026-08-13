@@ -34,18 +34,13 @@ export const Action = styled.Pressable`
   flex-direction: row;
   align-items: center;
 
-  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
+  gap: ${({ theme }) => ss.px(theme.spacing.xs)};
 
   padding-vertical: ${({ theme }) => ss.px(theme.spacing.sm)};
-  padding-left: ${({ theme }) => ss.px(theme.spacing.xs)};
+  padding-left: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const Icon = styled.View`
-  width: ${ss.px(28)};
-  height: ${ss.px(28)};
-
-  flex-shrink: 0;
-
   align-items: center;
   justify-content: center;
 `;

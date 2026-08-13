@@ -37,7 +37,7 @@ export const ToggleSwitch = ({
         }}
       >
         <s.Icon>
-          <Ionicons name={icon} size={theme.size.md} color={iconColor} />
+          <Ionicons name={icon} size={theme.size.lg} color={iconColor} />
         </s.Icon>
 
         <s.Label>{label}</s.Label>

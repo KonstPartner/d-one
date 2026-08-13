@@ -2,11 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
+  canCreateDiaryEntryTimer,
   normalizeDiaryEntryEditableValues,
   validateDiaryEntryEditableValues,
 } from '@entities/diary';
 import { useNetwork } from '@shared/lib/network';
 import { showNotification } from '@shared/lib/notifications';
+import { PlatformOS } from '@shared/lib/platform';
 
 import { useCreateDiaryEntryMutation } from '../api/useCreateDiaryEntryMutation';
 
@@ -19,7 +21,9 @@ type UseCreateDiaryEntryFormParams = {
 
 export type CreateDiaryEntrySubmitResult = {
   entryId: string;
+
   requestAi: boolean;
+  requestTimer: boolean;
 };
 
 export const useCreateDiaryEntryForm = ({
@@ -44,13 +48,24 @@ export const useCreateDiaryEntryForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [requestAi, setRequestAi] = useState(false);
+  const [requestTimer, setRequestTimer] = useState(false);
+
+  const timerEventAt = draft.useCurrentDateTime
+    ? new Date()
+    : draft.values.eventAt;
 
   const canRequestAi =
     photo.hasPhoto && isOnline && !isSubmitting && !photo.isPhotoBusy;
 
+  const timerAvailable =
+    PlatformOS.ANDROID && canCreateDiaryEntryTimer(timerEventAt);
+
+  const canRequestTimer = timerAvailable && !isSubmitting && !photo.isPhotoBusy;
+
   useEffect(() => {
     if (visible) {
       setRequestAi(false);
+      setRequestTimer(false);
 
       return;
     }
@@ -59,6 +74,7 @@ export const useCreateDiaryEntryForm = ({
 
     setIsSubmitting(false);
     setRequestAi(false);
+    setRequestTimer(false);
   }, [visible]);
 
   useEffect(() => {
@@ -68,6 +84,14 @@ export const useCreateDiaryEntryForm = ({
 
     setRequestAi(false);
   }, [isOnline, photo.hasPhoto]);
+
+  useEffect(() => {
+    if (timerAvailable) {
+      return;
+    }
+
+    setRequestTimer(false);
+  }, [timerAvailable]);
 
   useEffect(() => {
     if (photo.photoError === null) {
@@ -88,6 +112,17 @@ export const useCreateDiaryEntryForm = ({
       setRequestAi(value);
     },
     [canRequestAi]
+  );
+
+  const handleRequestTimerChange = useCallback(
+    (value: boolean): void => {
+      if (value && !canRequestTimer) {
+        return;
+      }
+
+      setRequestTimer(value);
+    },
+    [canRequestTimer]
   );
 
   const handleDeletePhoto = useCallback((): void => {
@@ -139,7 +174,12 @@ export const useCreateDiaryEntryForm = ({
 
         const result: CreateDiaryEntrySubmitResult = {
           entryId,
+
           requestAi: requestAi && photo.hasPhoto && isOnline,
+          requestTimer:
+            requestTimer &&
+            PlatformOS.ANDROID &&
+            canCreateDiaryEntryTimer(normalizedValues.eventAt),
         };
 
         photo.markPhotoSaved();
@@ -147,6 +187,7 @@ export const useCreateDiaryEntryForm = ({
         draft.resetDraft();
 
         setRequestAi(false);
+        setRequestTimer(false);
 
         return result;
       } catch (error) {
@@ -160,7 +201,7 @@ export const useCreateDiaryEntryForm = ({
 
         return null;
       }
-    }, [draft, isOnline, mutation, photo, requestAi, t]);
+    }, [draft, isOnline, mutation, photo, requestAi, requestTimer, t]);
 
   return {
     values: draft.values,
@@ -177,6 +218,9 @@ export const useCreateDiaryEntryForm = ({
 
     requestAi,
     canRequestAi,
+
+    requestTimer,
+    canRequestTimer,
 
     handleGlucoseChange: draft.handleGlucoseChange,
 
@@ -197,6 +241,7 @@ export const useCreateDiaryEntryForm = ({
     handleEventTimeChange: draft.handleEventTimeChange,
 
     handleRequestAiChange,
+    handleRequestTimerChange,
 
     selectPhoto: photo.selectPhoto,
 

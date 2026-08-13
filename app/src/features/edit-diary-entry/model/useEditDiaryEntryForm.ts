@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
+  canCreateDiaryEntryTimer,
   type DiaryEntry,
   type DiaryEntryEditableValues,
   normalizeDiaryEntryEditableValues,
@@ -9,6 +10,7 @@ import {
 } from '@entities/diary';
 import { useNetwork } from '@shared/lib/network';
 import { showNotification } from '@shared/lib/notifications';
+import { PlatformOS } from '@shared/lib/platform';
 
 import {
   type EditDiaryEntryPhotoChange,
@@ -32,6 +34,8 @@ export type EditDiaryEntrySubmitResult = {
   entryUpdated: boolean;
 
   requestAi: boolean;
+  requestTimer: boolean;
+
   deleteAiAnalysis: boolean;
 };
 
@@ -76,8 +80,24 @@ export const useEditDiaryEntryForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [requestAi, setRequestAi] = useState(false);
+  const [requestTimer, setRequestTimer] = useState(false);
 
   const [deleteAiAnalysis, setDeleteAiAnalysis] = useState(false);
+
+  const timerEventAt =
+    draft.values === null
+      ? null
+      : draft.useCurrentDateTime
+        ? new Date()
+        : draft.values.eventAt;
+
+  const timerAvailable =
+    PlatformOS.ANDROID &&
+    timerEventAt !== null &&
+    canCreateDiaryEntryTimer(timerEventAt);
+
+  const canRequestTimer =
+    timerAvailable && !disabled && !isSubmitting && !photo.isPhotoBusy;
 
   useEffect(() => {
     if (!visible) {
@@ -86,6 +106,7 @@ export const useEditDiaryEntryForm = ({
       setIsSubmitting(false);
 
       setRequestAi(false);
+      setRequestTimer(false);
 
       setDeleteAiAnalysis(false);
 
@@ -93,6 +114,7 @@ export const useEditDiaryEntryForm = ({
     }
 
     setRequestAi(false);
+    setRequestTimer(false);
 
     setDeleteAiAnalysis(false);
   }, [entry?.id, visible]);
@@ -104,6 +126,14 @@ export const useEditDiaryEntryForm = ({
 
     setRequestAi(false);
   }, [isOnline, photo.hasPhoto]);
+
+  useEffect(() => {
+    if (timerAvailable) {
+      return;
+    }
+
+    setRequestTimer(false);
+  }, [timerAvailable]);
 
   useEffect(() => {
     if (photo.photoError === null) {
@@ -142,6 +172,17 @@ export const useEditDiaryEntryForm = ({
       setRequestAi(true);
     },
     [canRequestAi]
+  );
+
+  const handleRequestTimerChange = useCallback(
+    (value: boolean) => {
+      if (value && !canRequestTimer) {
+        return;
+      }
+
+      setRequestTimer(value);
+    },
+    [canRequestTimer]
   );
 
   const handleDeleteAiAnalysis = useCallback(() => {
@@ -228,6 +269,11 @@ export const useEditDiaryEntryForm = ({
       const shouldRequestAi =
         requestAi && photo.hasPhoto && isOnline && !disabled;
 
+      const shouldRequestTimer =
+        requestTimer &&
+        PlatformOS.ANDROID &&
+        canCreateDiaryEntryTimer(normalizedValues.eventAt);
+
       submitInProgressRef.current = true;
 
       setIsSubmitting(true);
@@ -251,6 +297,8 @@ export const useEditDiaryEntryForm = ({
           entryUpdated,
 
           requestAi: shouldRequestAi,
+          requestTimer: shouldRequestTimer,
+
           deleteAiAnalysis,
         };
       } catch (error) {
@@ -273,6 +321,7 @@ export const useEditDiaryEntryForm = ({
       mutation,
       photo,
       requestAi,
+      requestTimer,
       t,
     ]);
 
@@ -287,6 +336,9 @@ export const useEditDiaryEntryForm = ({
 
     requestAi,
     canRequestAi,
+
+    requestTimer,
+    canRequestTimer,
 
     deleteAiAnalysis,
 
@@ -319,6 +371,7 @@ export const useEditDiaryEntryForm = ({
     handleEventTimeChange: draft.handleEventTimeChange,
 
     handleRequestAiChange,
+    handleRequestTimerChange,
 
     handleDeleteAiAnalysis,
 

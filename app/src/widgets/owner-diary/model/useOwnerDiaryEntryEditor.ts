@@ -10,6 +10,8 @@ export type OwnerDiarySavedEntry = {
   entryUpdated: boolean;
 
   requestAi: boolean;
+  requestTimer: boolean;
+
   deleteAiAnalysis: boolean;
 };
 
@@ -17,6 +19,7 @@ type OwnerDiaryCreatedEntry = {
   entryId: string;
 
   requestAi: boolean;
+  requestTimer: boolean;
 };
 
 type OwnerDiaryUpdatedEntry = {
@@ -25,6 +28,8 @@ type OwnerDiaryUpdatedEntry = {
   entryUpdated: boolean;
 
   requestAi: boolean;
+  requestTimer: boolean;
+
   deleteAiAnalysis: boolean;
 };
 
@@ -126,6 +131,8 @@ export const useOwnerDiaryEntryEditor = ({
         entryUpdated: true,
 
         requestAi: result.requestAi,
+        requestTimer: result.requestTimer,
+
         deleteAiAnalysis: false,
       });
     },
@@ -142,6 +149,8 @@ export const useOwnerDiaryEntryEditor = ({
         entryUpdated: result.entryUpdated,
 
         requestAi: result.requestAi,
+        requestTimer: result.requestTimer,
+
         deleteAiAnalysis: result.deleteAiAnalysis,
       });
     },
