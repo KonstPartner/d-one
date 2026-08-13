@@ -31,13 +31,13 @@ export const DiaryEntryAiControl = ({
         />
       </s.Icon>
 
-      <s.Title numberOfLines={1}>{t('diary.form.ai.title')}</s.Title>
+      <s.Title numberOfLines={1}>{t('diaryAi.title')}</s.Title>
 
       <Switch
         value={value}
         disabled={disabled}
         accessibilityRole="switch"
-        accessibilityLabel={t('diary.form.ai.title')}
+        accessibilityLabel={t('diaryAi.title')}
         onValueChange={onValueChange}
       />
     </s.Root>

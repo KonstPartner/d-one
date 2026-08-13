@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TextArea } from '@shared/ui';
+import { Button, TextArea } from '@shared/ui';
 
 import {
   DIARY_ENTRY_COMMENT_MAXIMUM_LENGTH,
@@ -40,6 +40,8 @@ type DiaryEntryEditorFieldsProps = {
   requestAi?: boolean;
   canRequestAi?: boolean;
 
+  aiAnalysis?: string | null;
+
   disabled?: boolean;
 
   onCurrentDateTimeChange: (value: boolean) => void;
@@ -60,6 +62,8 @@ type DiaryEntryEditorFieldsProps = {
   onDeletePhoto: () => void;
 
   onRequestAiChange?: (value: boolean) => void;
+
+  onDeleteAiAnalysis?: () => void;
 };
 
 type MetricField = {
@@ -76,6 +80,8 @@ type MetricField = {
   onChange: (value: number | null) => void;
 };
 
+const ignoreAiAnalysisChange = () => undefined;
+
 export const DiaryEntryEditorFields = ({
   eventAt,
   useCurrentDateTime,
@@ -89,6 +95,7 @@ export const DiaryEntryEditorFields = ({
   isPhotoBusy = false,
   requestAi = false,
   canRequestAi = false,
+  aiAnalysis = null,
   disabled = false,
   onCurrentDateTimeChange,
   onEventDateChange,
@@ -102,6 +109,7 @@ export const DiaryEntryEditorFields = ({
   onChoosePhoto,
   onDeletePhoto,
   onRequestAiChange,
+  onDeleteAiAnalysis,
 }: DiaryEntryEditorFieldsProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -140,6 +148,8 @@ export const DiaryEntryEditorFields = ({
       onChange: onLongInsulinChange,
     },
   ];
+
+  const hasAiAnalysis = aiAnalysis !== null && aiAnalysis.trim().length > 0;
 
   return (
     <s.Root>
@@ -251,6 +261,43 @@ export const DiaryEntryEditorFields = ({
 
           <s.ToggleCell />
         </s.ToggleRow>
+      ) : null}
+
+      {hasAiAnalysis && onDeleteAiAnalysis ? (
+        <s.CommentField $disabled={disabled}>
+          <s.CommentHeader>
+            <s.MetaIcon
+              $backgroundColor={theme.colors.shades.primary.sm}
+              $borderColor={theme.colors.primary}
+            >
+              <Ionicons
+                name="sparkles-outline"
+                size={theme.size.lg}
+                color={theme.colors.primary}
+              />
+            </s.MetaIcon>
+
+            <s.FieldLabel>{t('diary.entry.aiAnalysis')}</s.FieldLabel>
+
+            <Button
+              tone="danger"
+              variant="ghost"
+              size="sm"
+              disabled={disabled}
+              onPress={onDeleteAiAnalysis}
+            >
+              {t('diary.selection.delete')}
+            </Button>
+          </s.CommentHeader>
+
+          <TextArea
+            value={aiAnalysis}
+            editable={false}
+            showCharacterCount={false}
+            accessibilityLabel={t('diary.entry.aiAnalysis')}
+            onChangeText={ignoreAiAnalysisChange}
+          />
+        </s.CommentField>
       ) : null}
     </s.Root>
   );

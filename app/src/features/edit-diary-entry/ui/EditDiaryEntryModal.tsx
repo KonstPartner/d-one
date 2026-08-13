@@ -7,7 +7,10 @@ import {
   DiaryEntryEditorModal,
 } from '@entities/diary';
 
-import { useEditDiaryEntryForm } from '../model/useEditDiaryEntryForm';
+import {
+  type EditDiaryEntrySubmitResult,
+  useEditDiaryEntryForm,
+} from '../model/useEditDiaryEntryForm';
 
 type EditDiaryEntryModalProps = {
   visible: boolean;
@@ -17,7 +20,7 @@ type EditDiaryEntryModalProps = {
   disabled?: boolean;
 
   onClose: () => void;
-  onUpdated: (entryId: string) => void;
+  onUpdated: (result: EditDiaryEntrySubmitResult) => void;
 };
 
 export const EditDiaryEntryModal = ({
@@ -35,6 +38,11 @@ export const EditDiaryEntryModal = ({
 
     photoUri,
 
+    aiAnalysis,
+
+    requestAi,
+    canRequestAi,
+
     isPhotoBusy,
     isSubmitting,
 
@@ -49,6 +57,10 @@ export const EditDiaryEntryModal = ({
     handleCurrentDateTimeChange,
     handleEventDateChange,
     handleEventTimeChange,
+
+    handleRequestAiChange,
+
+    handleDeleteAiAnalysis,
 
     selectPhoto,
     deletePhoto,
@@ -108,13 +120,13 @@ export const EditDiaryEntryModal = ({
   };
 
   const handleSave = async () => {
-    const entryId = await handleSubmit();
+    const result = await handleSubmit();
 
-    if (entryId === null) {
+    if (result === null) {
       return;
     }
 
-    onUpdated(entryId);
+    onUpdated(result);
   };
 
   if (!visible || entry === null || values === null) {
@@ -146,6 +158,9 @@ export const EditDiaryEntryModal = ({
         comment={values.comment}
         photoUri={photoUri}
         isPhotoBusy={isPhotoBusy}
+        requestAi={requestAi}
+        canRequestAi={canRequestAi}
+        aiAnalysis={aiAnalysis}
         disabled={editorDisabled}
         onCurrentDateTimeChange={handleCurrentDateTimeChange}
         onEventDateChange={handleEventDateChange}
@@ -158,6 +173,8 @@ export const EditDiaryEntryModal = ({
         onCommentChange={handleCommentChange}
         onChoosePhoto={handleChoosePhoto}
         onDeletePhoto={deletePhoto}
+        onRequestAiChange={handleRequestAiChange}
+        onDeleteAiAnalysis={handleDeleteAiAnalysis}
       />
     </DiaryEntryEditorModal>
   );

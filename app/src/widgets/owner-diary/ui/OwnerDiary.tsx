@@ -17,6 +17,7 @@ import { ConfirmDialog, Spinner } from '@shared/ui';
 import { useOwnerDiary } from '../model/useOwnerDiary';
 import { useOwnerDiaryEntryEditor } from '../model/useOwnerDiaryEntryEditor';
 import { useOwnerDiaryHeaderMenu } from '../model/useOwnerDiaryHeaderMenu';
+import { useOwnerDiaryPreparation } from '../model/useOwnerDiaryPreparation';
 import { useOwnerDiarySelection } from '../model/useOwnerDiarySelection';
 import { useOwnerDiarySync } from '../model/useOwnerDiarySync';
 import * as s from '../styles/OwnerDiary';
@@ -32,12 +33,14 @@ export const OwnerDiary = () => {
 
   const diarySync = useOwnerDiarySync();
 
+  const diaryPreparation = useOwnerDiaryPreparation();
+
   const [photoViewerEntry, setPhotoViewerEntry] = useState<DiaryEntry | null>(
     null
   );
 
   const entryEditor = useOwnerDiaryEntryEditor({
-    onEntrySaved: diarySync.handleEntrySaved,
+    onEntrySaved: diaryPreparation.handleEntrySaved,
   });
 
   const currentPageEntries = diary.list.page?.items ?? [];
@@ -271,7 +274,16 @@ export const OwnerDiary = () => {
         onClose={selection.closeDeleteConfirm}
       />
 
-      <OwnerDiaryPreparationModal entry={diarySync.preparingSavedEntry} />
+      <OwnerDiaryPreparationModal entry={diaryPreparation.preparingEntry} />
+
+      <ConfirmDialog
+        visible={diaryPreparation.aiConsentRequired}
+        title={t('diaryAi.consent.title')}
+        description={t('diaryAi.consent.description')}
+        confirmLabel={t('diaryAi.consent.confirm')}
+        onConfirm={diaryPreparation.confirmAiConsent}
+        onClose={diaryPreparation.declineAiConsent}
+      />
     </s.Root>
   );
 };

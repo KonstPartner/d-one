@@ -1,8 +1,6 @@
-import type { TFunction } from 'i18next';
-
 import { type AppLanguage, i18n } from '@shared/i18n';
 
-import type { AnalyzeFoodResult } from '../api/analyzeFood';
+import type { AnalyzeFoodRange, AnalyzeFoodResult } from '../api/analyzeFood';
 
 type SuccessfulAnalyzeFoodResult = Extract<
   AnalyzeFoodResult,
@@ -11,10 +9,7 @@ type SuccessfulAnalyzeFoodResult = Extract<
   }
 >;
 
-type NumberRange = {
-  min: number;
-  max: number;
-};
+type FixedTranslation = ReturnType<typeof i18n.getFixedT>;
 
 const MAX_AI_ANALYSIS_LENGTH = 2_000;
 
@@ -23,21 +18,34 @@ const formatNumber = (value: number, language: AppLanguage): string =>
     maximumFractionDigits: 1,
   }).format(value);
 
-const formatRange = (
-  range: NumberRange | null,
-  unit: string,
-  language: AppLanguage,
-  t: TFunction
-): string => {
+const formatRange = ({
+  range,
+  unit,
+  language,
+  t,
+}: {
+  range: AnalyzeFoodRange | null;
+  unit: 'kcal' | 'gram';
+  language: AppLanguage;
+  t: FixedTranslation;
+}): string => {
   if (range === null) {
-    return t('diary.form.ai.result.couldNotDetermine');
+    return t('diaryAi.result.couldNotDetermine');
   }
 
-  return t('diary.form.ai.result.range', {
+  return t('diaryAi.result.range', {
     min: formatNumber(range.min, language),
     max: formatNumber(range.max, language),
-    unit,
+    unit: t(`diaryAi.result.units.${unit}`),
   });
+};
+
+const limitAnalysisLength = (value: string): string => {
+  if (value.length <= MAX_AI_ANALYSIS_LENGTH) {
+    return value;
+  }
+
+  return value.slice(0, MAX_AI_ANALYSIS_LENGTH).trimEnd();
 };
 
 export const formatAnalyzeFoodResult = (
@@ -47,43 +55,63 @@ export const formatAnalyzeFoodResult = (
   const t = i18n.getFixedT(language);
 
   const lines = [
-    t(`diary.form.ai.result.${result.status}`),
+    t(`diaryAi.result.${result.status}`),
 
-    t('diary.form.ai.result.food', {
-      value: result.description ?? t('diary.form.ai.result.couldNotDetermine'),
+    t('diaryAi.result.food', {
+      value: result.description ?? t('diaryAi.result.couldNotDetermine'),
     }),
 
-    t('diary.form.ai.result.calories', {
-      value: formatRange(result.caloriesKcal, 'kcal', language, t),
+    t('diaryAi.result.calories', {
+      value: formatRange({
+        range: result.caloriesKcal,
+        unit: 'kcal',
+        language,
+        t,
+      }),
     }),
 
-    t('diary.form.ai.result.protein', {
-      value: formatRange(result.proteinGram, 'g', language, t),
+    t('diaryAi.result.protein', {
+      value: formatRange({
+        range: result.proteinGram,
+        unit: 'gram',
+        language,
+        t,
+      }),
     }),
 
-    t('diary.form.ai.result.fat', {
-      value: formatRange(result.fatGram, 'g', language, t),
+    t('diaryAi.result.fat', {
+      value: formatRange({
+        range: result.fatGram,
+        unit: 'gram',
+        language,
+        t,
+      }),
     }),
 
-    t('diary.form.ai.result.carbohydrates', {
-      value: formatRange(result.carbsGram, 'g', language, t),
+    t('diaryAi.result.carbohydrates', {
+      value: formatRange({
+        range: result.carbsGram,
+        unit: 'gram',
+        language,
+        t,
+      }),
     }),
 
-    t('diary.form.ai.result.confidenceLabel', {
+    t('diaryAi.result.confidenceLabel', {
       value:
         result.confidence === null
-          ? t('diary.form.ai.result.couldNotDetermine')
-          : t(`diary.form.ai.result.confidence.${result.confidence}`),
+          ? t('diaryAi.result.couldNotDetermine')
+          : t(`diaryAi.result.confidence.${result.confidence}`),
     }),
   ];
 
   if (result.assumptions.length > 0) {
     lines.push(
-      t('diary.form.ai.result.assumptions', {
+      t('diaryAi.result.assumptions', {
         value: result.assumptions.join('; '),
       })
     );
   }
 
-  return lines.join('\n').slice(0, MAX_AI_ANALYSIS_LENGTH);
+  return limitAnalysisLength(lines.join('\n'));
 };

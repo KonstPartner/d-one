@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { PortalModal, Spinner } from '@shared/ui';
 
-import type { OwnerDiaryPreparationState } from '../model/useOwnerDiarySync';
+import type { OwnerDiaryPreparationState } from '../model/useOwnerDiaryPreparation';
 import * as s from '../styles/OwnerDiaryPreparationModal';
 
 type OwnerDiaryPreparationModalProps = {
@@ -19,6 +19,19 @@ export const OwnerDiaryPreparationModal = ({
   const theme = useTheme();
 
   const { t } = useTranslation();
+
+  const phase = entry?.phase ?? null;
+
+  const isUploadingPhoto = phase === 'uploadingPhoto';
+  const isAwaitingAiConsent = phase === 'awaitingAiConsent';
+  const isAnalyzingAi = phase === 'analyzingAi';
+  const isAnalysisReady = phase === 'analysisReady';
+
+  const footerText = isUploadingPhoto
+    ? t('diary.form.preparation.photoPreparing')
+    : isAnalysisReady
+      ? t('diaryAi.preparation.analysisSavedReturning')
+      : t('diaryAi.preparation.preparing');
 
   return (
     <PortalModal
@@ -39,53 +52,119 @@ export const OwnerDiaryPreparationModal = ({
           </s.SavedIcon>
 
           <s.SavedContent>
-            <s.SavedTitle>{t('diary.form.preparation.saved')}</s.SavedTitle>
-
-            <s.SavedDescription>
+            <s.SavedTitle>
               {t('diary.form.preparation.savedLocally')}
-            </s.SavedDescription>
+            </s.SavedTitle>
           </s.SavedContent>
         </s.SavedCard>
 
-        <s.UploadCard>
-          <s.PhotoFrame>
-            {entry?.photoUri ? (
-              <s.Photo
-                source={{
-                  uri: entry.photoUri,
-                }}
-                contentFit="cover"
-                cachePolicy="none"
-              />
-            ) : (
-              <s.PhotoPlaceholder>
-                <Ionicons
-                  name="image-outline"
-                  size={theme.size.xl}
-                  color={theme.colors.muted}
+        {isUploadingPhoto && (
+          <s.StatusCard>
+            <s.PhotoFrame>
+              {entry?.photoUri ? (
+                <s.Photo
+                  source={{
+                    uri: entry.photoUri,
+                  }}
+                  contentFit="cover"
+                  cachePolicy="none"
                 />
-              </s.PhotoPlaceholder>
-            )}
-          </s.PhotoFrame>
+              ) : (
+                <s.PhotoPlaceholder>
+                  <Ionicons
+                    name="image-outline"
+                    size={theme.size.xl}
+                    color={theme.colors.muted}
+                  />
+                </s.PhotoPlaceholder>
+              )}
+            </s.PhotoFrame>
 
-          <s.UploadContent>
-            <s.UploadTitle>
-              {t('diary.form.preparation.uploadingPhoto')}
-            </s.UploadTitle>
+            <s.StatusContent>
+              <s.StatusTitle>
+                {t('diary.form.preparation.uploadingPhoto')}
+              </s.StatusTitle>
 
-            <s.UploadDescription>
-              {t('diary.form.preparation.finalizingPhoto')}
-            </s.UploadDescription>
-          </s.UploadContent>
+              <s.StatusDescription>
+                {t('diary.form.preparation.finalizingPhoto')}
+              </s.StatusDescription>
+            </s.StatusContent>
 
-          <s.LoaderBox>
-            <Spinner size={22} color={theme.colors.primary} />
-          </s.LoaderBox>
-        </s.UploadCard>
+            <s.LoaderBox>
+              <Spinner size={22} color={theme.colors.primary} />
+            </s.LoaderBox>
+          </s.StatusCard>
+        )}
 
-        <s.FooterText>
-          {t('diary.form.preparation.photoPreparing')}
-        </s.FooterText>
+        {isAwaitingAiConsent && (
+          <s.StatusCard>
+            <s.StatusIconBox>
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={theme.size.xl}
+                color={theme.colors.primary}
+              />
+            </s.StatusIconBox>
+
+            <s.StatusContent>
+              <s.StatusTitle>
+                {t('diaryAi.preparation.awaitingConsent')}
+              </s.StatusTitle>
+
+              <s.StatusDescription>
+                {t('diaryAi.consent.description')}
+              </s.StatusDescription>
+            </s.StatusContent>
+          </s.StatusCard>
+        )}
+
+        {isAnalyzingAi && (
+          <s.StatusCard>
+            <s.StatusIconBox>
+              <Ionicons
+                name="sparkles-outline"
+                size={theme.size.xl}
+                color={theme.colors.primary}
+              />
+            </s.StatusIconBox>
+
+            <s.StatusContent>
+              <s.StatusTitle>
+                {t('diaryAi.preparation.analyzing')}
+              </s.StatusTitle>
+
+              <s.StatusDescription>
+                {t('diaryAi.preparation.analyzingDescription')}
+              </s.StatusDescription>
+            </s.StatusContent>
+
+            <s.LoaderBox>
+              <Spinner size={22} color={theme.colors.primary} />
+            </s.LoaderBox>
+          </s.StatusCard>
+        )}
+
+        {isAnalysisReady && entry?.aiAnalysis && (
+          <s.ResultCard>
+            <s.ResultHeader>
+              <s.ResultIcon>
+                <Ionicons
+                  name="checkmark"
+                  size={theme.size.lg}
+                  color={theme.colors.success}
+                />
+              </s.ResultIcon>
+
+              <s.ResultTitle>
+                {t('diaryAi.preparation.analysisReady')}
+              </s.ResultTitle>
+            </s.ResultHeader>
+
+            <s.ResultText>{entry.aiAnalysis}</s.ResultText>
+          </s.ResultCard>
+        )}
+
+        <s.FooterText>{footerText}</s.FooterText>
       </s.Content>
     </PortalModal>
   );

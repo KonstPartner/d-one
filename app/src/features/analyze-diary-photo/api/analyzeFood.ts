@@ -44,6 +44,7 @@ export type AnalyzeFoodInput = {
 
 type WorkerAnalyzeFoodResponse = {
   ok: true;
+
   data: AnalyzeFoodResult;
 };
 

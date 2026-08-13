@@ -7,13 +7,26 @@ export type OwnerDiarySavedEntry = {
 
   operation: 'create' | 'update';
 
+  entryUpdated: boolean;
+
+  requestAi: boolean;
+  deleteAiAnalysis: boolean;
+};
+
+type OwnerDiaryCreatedEntry = {
+  entryId: string;
+
   requestAi: boolean;
 };
 
-type OwnerDiaryCreatedEntry = Pick<
-  OwnerDiarySavedEntry,
-  'entryId' | 'requestAi'
->;
+type OwnerDiaryUpdatedEntry = {
+  entryId: string;
+
+  entryUpdated: boolean;
+
+  requestAi: boolean;
+  deleteAiAnalysis: boolean;
+};
 
 type UseOwnerDiaryEntryEditorParams = {
   onEntrySaved: (entry: OwnerDiarySavedEntry) => void | Promise<void>;
@@ -104,22 +117,32 @@ export const useOwnerDiaryEntryEditor = ({
   );
 
   const handleCreated = useCallback(
-    (createdEntry: OwnerDiaryCreatedEntry) => {
+    (result: OwnerDiaryCreatedEntry) => {
       void processSavedEntry({
-        ...createdEntry,
+        entryId: result.entryId,
 
         operation: 'create',
+
+        entryUpdated: true,
+
+        requestAi: result.requestAi,
+        deleteAiAnalysis: false,
       });
     },
     [processSavedEntry]
   );
 
   const handleUpdated = useCallback(
-    (entryId: string) => {
+    (result: OwnerDiaryUpdatedEntry) => {
       void processSavedEntry({
-        entryId,
+        entryId: result.entryId,
+
         operation: 'update',
-        requestAi: false,
+
+        entryUpdated: result.entryUpdated,
+
+        requestAi: result.requestAi,
+        deleteAiAnalysis: result.deleteAiAnalysis,
       });
     },
     [processSavedEntry]

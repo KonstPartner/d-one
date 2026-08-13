@@ -1,0 +1,53 @@
+{
+  "diaryAi": {
+    "title": "AI food analysis",
+    "warning": "The AI estimate is approximate. Do not use it to calculate an insulin dose.",
+    "consent": {
+      "title": "Allow AI analysis?",
+      "description": "The selected photo and up to the first 1000 characters of the comment will be sent to an external AI provider for analysis.",
+      "confirm": "Continue",
+      "decline": "Not now"
+    },
+    "notFood": "AI could not detect food in this photo.",
+    "insufficientData": "There is not enough visible information for a reliable estimate.",
+    "result": {
+      "ok": "Estimate.",
+      "partial": "Partial estimate.",
+      "food": "Food: {{value}}",
+      "calories": "Calories: {{value}}",
+      "protein": "Protein: {{value}}",
+      "fat": "Fat: {{value}}",
+      "carbohydrates": "Carbohydrates: {{value}}",
+      "confidenceLabel": "Confidence: {{value}}",
+      "couldNotDetermine": "could not be determined",
+      "range": "{{min}}–{{max}} {{unit}}",
+      "units": {
+        "kcal": "kcal",
+        "gram": "g"
+      },
+      "confidence": {
+        "low": "low",
+        "medium": "medium",
+        "high": "high"
+      },
+      "assumptions": "Assumptions: {{value}}"
+    },
+    "errors": {
+      "failed": "AI analysis failed. The entry will be saved without a new analysis.",
+      "timeout": "AI analysis took too long. The entry will be saved without a new analysis.",
+      "image": "This photo cannot be analyzed by AI.",
+      "alreadyActive": "Another AI analysis is already running.",
+      "tooFrequent": "Please wait before starting another AI analysis.",
+      "userDailyLimit": "Your daily AI analysis limit has been reached.",
+      "projectDailyLimit": "AI analysis is temporarily unavailable because the daily service limit has been reached."
+    },
+    "preparation": {
+      "awaitingConsent": "Waiting for AI permission",
+      "analyzing": "AI is analyzing the meal",
+      "analyzingDescription": "Estimating the visible portion, calories and macronutrient ranges...",
+      "analysisReady": "Analysis ready",
+      "preparing": "The entry is already saved locally. It will appear in the diary after the selected preparation finishes.",
+      "analysisSavedReturning": "Analysis saved. Returning to the diary..."
+    }
+  }
+}

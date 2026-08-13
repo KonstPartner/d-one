@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import {
   type DiaryEntry,
+  type DiaryEntryEditableValues,
   normalizeDiaryEntryEditableValues,
   validateDiaryEntryEditableValues,
 } from '@entities/diary';
+import { useNetwork } from '@shared/lib/network';
 import { showNotification } from '@shared/lib/notifications';
 
 import {
@@ -24,12 +26,38 @@ type UseEditDiaryEntryFormParams = {
   disabled?: boolean;
 };
 
+export type EditDiaryEntrySubmitResult = {
+  entryId: string;
+
+  entryUpdated: boolean;
+
+  requestAi: boolean;
+  deleteAiAnalysis: boolean;
+};
+
+const hasEditableChanges = ({
+  entry,
+  values,
+}: {
+  entry: DiaryEntry;
+  values: DiaryEntryEditableValues;
+}): boolean =>
+  values.glucose !== entry.glucose ||
+  values.mealRelation !== entry.mealRelation ||
+  values.shortInsulin !== entry.shortInsulin ||
+  values.longInsulin !== entry.longInsulin ||
+  values.carbsGram !== entry.carbsGram ||
+  values.comment !== entry.comment ||
+  values.eventAt.getTime() !== entry.eventAt.getTime();
+
 export const useEditDiaryEntryForm = ({
   visible,
   entry,
   disabled = false,
 }: UseEditDiaryEntryFormParams) => {
   const { t } = useTranslation();
+
+  const { isOnline } = useNetwork();
 
   const mutation = useEditDiaryEntryMutation();
 
@@ -47,15 +75,35 @@ export const useEditDiaryEntryForm = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [requestAi, setRequestAi] = useState(false);
+
+  const [deleteAiAnalysis, setDeleteAiAnalysis] = useState(false);
+
   useEffect(() => {
-    if (visible) {
+    if (!visible) {
+      submitInProgressRef.current = false;
+
+      setIsSubmitting(false);
+
+      setRequestAi(false);
+
+      setDeleteAiAnalysis(false);
+
       return;
     }
 
-    submitInProgressRef.current = false;
+    setRequestAi(false);
 
-    setIsSubmitting(false);
-  }, [visible]);
+    setDeleteAiAnalysis(false);
+  }, [entry?.id, visible]);
+
+  useEffect(() => {
+    if (photo.hasPhoto && isOnline) {
+      return;
+    }
+
+    setRequestAi(false);
+  }, [isOnline, photo.hasPhoto]);
 
   useEffect(() => {
     if (photo.photoError === null) {
@@ -67,90 +115,166 @@ export const useEditDiaryEntryForm = ({
     photo.clearPhotoError();
   }, [photo.clearPhotoError, photo.photoError, t]);
 
-  const handleSubmit = useCallback(async (): Promise<string | null> => {
-    const currentValues = draft.values;
+  const canRequestAi =
+    photo.hasPhoto &&
+    isOnline &&
+    !disabled &&
+    !isSubmitting &&
+    !photo.isPhotoBusy;
 
-    if (
-      disabled ||
-      submitInProgressRef.current ||
-      photo.isPhotoBusy ||
-      entry === null ||
-      currentValues === null
-    ) {
-      return null;
+  const aiAnalysis =
+    deleteAiAnalysis || !entry?.aiAnalysis ? null : entry.aiAnalysis;
+
+  const handleRequestAiChange = useCallback(
+    (value: boolean) => {
+      if (!value) {
+        setRequestAi(false);
+
+        return;
+      }
+
+      if (!canRequestAi) {
+        return;
+      }
+
+      setDeleteAiAnalysis(false);
+
+      setRequestAi(true);
+    },
+    [canRequestAi]
+  );
+
+  const handleDeleteAiAnalysis = useCallback(() => {
+    if (disabled || isSubmitting || entry === null || !entry.aiAnalysis) {
+      return;
     }
 
-    const eventAt = draft.useCurrentDateTime
-      ? new Date()
-      : currentValues.eventAt;
+    setRequestAi(false);
 
-    const normalizedValues = normalizeDiaryEntryEditableValues({
-      ...currentValues,
+    setDeleteAiAnalysis(true);
+  }, [disabled, entry, isSubmitting]);
 
-      eventAt,
-    });
+  const handleDeletePhoto = useCallback(() => {
+    photo.deletePhoto();
 
-    const validationError = validateDiaryEntryEditableValues({
-      values: normalizedValues,
+    setRequestAi(false);
+  }, [photo.deletePhoto]);
 
-      hasPhoto: photo.hasPhoto,
-    });
+  const handleSubmit =
+    useCallback(async (): Promise<EditDiaryEntrySubmitResult | null> => {
+      const currentValues = draft.values;
 
-    if (validationError !== null) {
-      mutation.reset();
+      if (
+        disabled ||
+        submitInProgressRef.current ||
+        photo.isPhotoBusy ||
+        entry === null ||
+        currentValues === null
+      ) {
+        return null;
+      }
 
-      showNotification('error', t(`diary.form.errors.${validationError}`));
+      const eventAt = draft.useCurrentDateTime
+        ? new Date()
+        : currentValues.eventAt;
 
-      return null;
-    }
+      const normalizedValues = normalizeDiaryEntryEditableValues({
+        ...currentValues,
 
-    let photoChange: EditDiaryEntryPhotoChange = {
-      type: 'keep',
-    };
-
-    if (photo.photoAction === 'delete') {
-      photoChange = {
-        type: 'delete',
-      };
-    } else if (
-      photo.photoAction === 'replace' &&
-      photo.photoDraftUri !== null
-    ) {
-      photoChange = {
-        type: 'replace',
-
-        draftUri: photo.photoDraftUri,
-      };
-    }
-
-    submitInProgressRef.current = true;
-
-    setIsSubmitting(true);
-
-    try {
-      const entryId = await mutation.mutateAsync({
-        ...normalizedValues,
-
-        id: entry.id,
-
-        photoChange,
+        eventAt,
       });
 
-      photo.markPhotoSaved();
+      const validationError = validateDiaryEntryEditableValues({
+        values: normalizedValues,
 
-      return entryId;
-    } catch (error) {
-      console.error('Failed to update diary entry', error);
+        hasPhoto: photo.hasPhoto,
+      });
 
-      submitInProgressRef.current = false;
+      if (validationError !== null) {
+        mutation.reset();
 
-      setIsSubmitting(false);
+        showNotification('error', t(`diary.form.errors.${validationError}`));
 
-      showNotification('error', t('diary.form.errors.updateFailed'));
+        return null;
+      }
 
-      return null;
-    }
-  }, [disabled, draft, entry, mutation, photo, t]);
+      let photoChange: EditDiaryEntryPhotoChange = {
+        type: 'keep',
+      };
+
+      if (photo.photoAction === 'delete') {
+        photoChange = {
+          type: 'delete',
+        };
+      } else if (
+        photo.photoAction === 'replace' &&
+        photo.photoDraftUri !== null
+      ) {
+        photoChange = {
+          type: 'replace',
+
+          draftUri: photo.photoDraftUri,
+        };
+      }
+
+      const entryHasEditableChanges = hasEditableChanges({
+        entry,
+        values: normalizedValues,
+      });
+
+      const entryUpdated =
+        entryHasEditableChanges || photo.photoAction !== 'keep';
+
+      const shouldRequestAi =
+        requestAi && photo.hasPhoto && isOnline && !disabled;
+
+      submitInProgressRef.current = true;
+
+      setIsSubmitting(true);
+
+      try {
+        if (entryUpdated) {
+          await mutation.mutateAsync({
+            ...normalizedValues,
+
+            id: entry.id,
+
+            photoChange,
+          });
+
+          photo.markPhotoSaved();
+        }
+
+        return {
+          entryId: entry.id,
+
+          entryUpdated,
+
+          requestAi: shouldRequestAi,
+          deleteAiAnalysis,
+        };
+      } catch (error) {
+        console.error('Failed to update diary entry', error);
+
+        submitInProgressRef.current = false;
+
+        setIsSubmitting(false);
+
+        showNotification('error', t('diary.form.errors.updateFailed'));
+
+        return null;
+      }
+    }, [
+      deleteAiAnalysis,
+      disabled,
+      draft,
+      entry,
+      isOnline,
+      mutation,
+      photo,
+      requestAi,
+      t,
+    ]);
 
   return {
     values: draft.values,
@@ -159,9 +283,18 @@ export const useEditDiaryEntryForm = ({
 
     photoUri: photo.photoUri,
 
+    aiAnalysis,
+
+    requestAi,
+    canRequestAi,
+
+    deleteAiAnalysis,
+
     hasTemporaryPhoto: photo.hasTemporaryPhoto,
 
     hasPhotoChanges: photo.hasPhotoChanges,
+
+    hasAiChanges: requestAi || deleteAiAnalysis,
 
     isPhotoBusy: photo.isPhotoBusy,
 
@@ -185,9 +318,13 @@ export const useEditDiaryEntryForm = ({
 
     handleEventTimeChange: draft.handleEventTimeChange,
 
+    handleRequestAiChange,
+
+    handleDeleteAiAnalysis,
+
     selectPhoto: photo.selectPhoto,
 
-    deletePhoto: photo.deletePhoto,
+    deletePhoto: handleDeletePhoto,
 
     discardPhotoChanges: photo.discardPhotoChanges,
 
