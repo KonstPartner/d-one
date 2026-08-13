@@ -220,6 +220,8 @@ describe('useOwnerDiaryPreparation integration', () => {
         entryUpdated: true,
 
         requestAi: true,
+        requestTimer: false,
+
         deleteAiAnalysis: false,
       });
     });
@@ -286,6 +288,8 @@ describe('useOwnerDiaryPreparation integration', () => {
         entryUpdated: false,
 
         requestAi: true,
+        requestTimer: false,
+
         deleteAiAnalysis: false,
       });
     });
@@ -329,6 +333,8 @@ describe('useOwnerDiaryPreparation integration', () => {
         entryUpdated: true,
 
         requestAi: false,
+        requestTimer: false,
+
         deleteAiAnalysis: false,
       });
     });

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { MealRelation } from '@entities/diary';
+import {
+  type DiaryEntryEditableValues,
+  type MealRelation,
+} from '@entities/diary';
 
 import {
   type CreateDiaryEntryDraft,
-  type CreateDiaryEntryValues,
   createInitialCreateDiaryEntryDraft,
 } from './createDiaryEntryDraft';
 
@@ -21,7 +23,7 @@ export const useCreateDiaryEntryDraftState = ({
     initialDraftRef.current = createInitialCreateDiaryEntryDraft();
   }
 
-  const [values, setValues] = useState<CreateDiaryEntryValues>(
+  const [values, setValues] = useState<DiaryEntryEditableValues>(
     initialDraftRef.current.values
   );
 
@@ -56,9 +58,9 @@ export const useCreateDiaryEntryDraftState = ({
   }, []);
 
   const updateValue = useCallback(
-    <Key extends keyof CreateDiaryEntryValues>(
+    <Key extends keyof DiaryEntryEditableValues>(
       key: Key,
-      value: CreateDiaryEntryValues[Key]
+      value: DiaryEntryEditableValues[Key]
     ) => {
       setValues((currentValues) => {
         const nextValues = {

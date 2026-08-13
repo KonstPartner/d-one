@@ -1,24 +1,14 @@
 import { useCallback, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import {
-  formatAnalyzeFoodResult,
-  useAnalyzeFoodMutation,
-} from '@features/analyze-diary-photo';
 import { useSyncDiary } from '@features/sync-diary';
-import {
-  type DiaryEntry,
-  diaryLocalQueryKeys,
-  getDiaryEntryTimerDurationSeconds,
-  useReadyDiaryDatabase,
-} from '@entities/diary';
-import { normalizeAppLanguage } from '@shared/i18n';
-import { errorMapper } from '@shared/lib/errors';
+import { useReadyDiaryDatabase } from '@entities/diary';
 import { showNotification } from '@shared/lib/notifications';
-import { startSystemTimer } from '@shared/lib/system-timer';
 
+import { useOwnerDiaryAiPreparation } from './useOwnerDiaryAiPreparation';
 import type { OwnerDiarySavedEntry } from './useOwnerDiaryEntryEditor';
+import { useOwnerDiaryPhotoPreparation } from './useOwnerDiaryPhotoPreparation';
+import { useOwnerDiaryTimer } from './useOwnerDiaryTimer';
 
 export type OwnerDiaryPreparationPhase =
   | 'uploadingPhoto'
@@ -37,30 +27,21 @@ export type OwnerDiaryPreparationState = OwnerDiarySavedEntry & {
   aiAnalysis: string | null;
 };
 
-const hasPhotoToUpload = (entry: DiaryEntry): boolean =>
-  entry.localPhotoUri !== null &&
-  entry.photoPath !== null &&
-  entry.photoUrl === null;
-
 export const useOwnerDiaryPreparation = () => {
-  const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
-  const { t, i18n } = useTranslation();
-
-  const { userId, repository } = useReadyDiaryDatabase();
+  const { repository } = useReadyDiaryDatabase();
 
   const sync = useSyncDiary();
 
-  const analyzeFood = useAnalyzeFoodMutation();
+  const timer = useOwnerDiaryTimer();
+
+  const photo = useOwnerDiaryPhotoPreparation();
+
+  const ai = useOwnerDiaryAiPreparation();
 
   const [preparingEntry, setPreparingEntry] =
     useState<OwnerDiaryPreparationState | null>(null);
-
-  const refreshDiary = useCallback(async (): Promise<void> => {
-    await queryClient.invalidateQueries({
-      queryKey: diaryLocalQueryKeys.pagesRoot(userId),
-    });
-  }, [queryClient, userId]);
 
   const setPhase = useCallback(
     (
@@ -105,18 +86,6 @@ export const useOwnerDiaryPreparation = () => {
     [sync.syncEntries, t]
   );
 
-  const saveAiAnalysis = useCallback(
-    async (entryId: string, aiAnalysis: string): Promise<void> => {
-      await repository.updateAiAnalysis({
-        id: entryId,
-        aiAnalysis,
-      });
-
-      await refreshDiary();
-    },
-    [refreshDiary, repository]
-  );
-
   const handleEntrySaved = useCallback(
     async (savedEntry: OwnerDiarySavedEntry): Promise<void> => {
       let entry = await repository.findById(savedEntry.entryId);
@@ -128,7 +97,7 @@ export const useOwnerDiaryPreparation = () => {
       let shouldSync = savedEntry.entryUpdated;
 
       if (savedEntry.deleteAiAnalysis && entry.aiAnalysis.length > 0) {
-        await saveAiAnalysis(entry.id, '');
+        await ai.deleteAnalysis(entry.id);
 
         shouldSync = true;
 
@@ -139,32 +108,10 @@ export const useOwnerDiaryPreparation = () => {
       }
 
       if (savedEntry.requestTimer) {
-        const durationSeconds = getDiaryEntryTimerDurationSeconds(
-          entry.eventAt
-        );
-
-        if (durationSeconds <= 0) {
-          showNotification('error', t('diary.form.timer.errors.expired'));
-        } else {
-          try {
-            await startSystemTimer({
-              durationSeconds,
-              message: t('diary.form.timer.systemLabel'),
-            });
-
-            showNotification('success', t('diary.form.timer.enabled'));
-          } catch (error) {
-            console.error(`Failed to create diary timer: ${entry.id}`, error);
-
-            showNotification(
-              'error',
-              t('diary.form.timer.errors.createFailed')
-            );
-          }
-        }
+        await timer.setTimerForEntry(entry);
       }
 
-      const photoNeedsUpload = hasPhotoToUpload(entry);
+      const photoNeedsUpload = photo.needsUpload(entry);
 
       const photoWillUpload =
         sync.connectionState === 'online' && photoNeedsUpload;
@@ -206,28 +153,17 @@ export const useOwnerDiaryPreparation = () => {
 
       try {
         if (photoNeedsUpload) {
-          try {
-            const preparedEntry = await sync.prepareEntryPhoto(entry.id);
+          const preparedEntry = await photo.upload(entry);
 
-            if (preparedEntry === null) {
-              return;
-            }
-
-            entry = preparedEntry;
-
-            uploadedForAiOnly = aiOnlyUpdate;
-
-            markPhotoUploaded(savedEntry.requestAi);
-          } catch (error) {
-            console.error(`Failed to upload diary photo: ${entry.id}`, error);
-
-            showNotification(
-              'error',
-              t('diary.form.photo.errors.uploadFailed')
-            );
-
+          if (preparedEntry === null) {
             return;
           }
+
+          entry = preparedEntry;
+
+          uploadedForAiOnly = aiOnlyUpdate;
+
+          markPhotoUploaded(savedEntry.requestAi);
         }
 
         if (savedEntry.requestAi) {
@@ -237,53 +173,18 @@ export const useOwnerDiaryPreparation = () => {
 
           setPhase('analyzingAi');
 
-          try {
-            const language = normalizeAppLanguage(
-              i18n.resolvedLanguage ?? i18n.language
-            );
+          const aiAnalysis = await ai.analyzeEntry(entry);
 
-            const result = await analyzeFood.mutateAsync({
-              entryId: entry.id,
+          if (aiAnalysis !== null) {
+            aiUpdated = true;
+            shouldSync = true;
 
-              photoPath: entry.photoPath,
-              photoUrl: entry.photoUrl,
-
-              comment: entry.comment,
-
-              language,
-            });
-
-            if (result.status === 'not_food') {
-              showNotification('warn', t('diaryAi.notFood'));
-            } else if (result.status === 'insufficient_data') {
-              showNotification('warn', t('diaryAi.insufficientData'));
-            } else {
-              const aiAnalysis = formatAnalyzeFoodResult(result, language);
-
-              await saveAiAnalysis(entry.id, aiAnalysis);
-
-              aiUpdated = true;
-              shouldSync = true;
-
-              setPhase('analysisReady', aiAnalysis);
-            }
-          } catch (error) {
-            console.error(`Failed to analyze diary photo: ${entry.id}`, error);
-
-            showNotification('error', errorMapper(error, 'api'));
+            setPhase('analysisReady', aiAnalysis);
           }
         }
 
         if (uploadedForAiOnly && !aiUpdated) {
-          await repository.updatePendingPhotoState({
-            id: entry.id,
-
-            photoPath: entry.photoPath,
-
-            photoUrl: null,
-          });
-
-          await refreshDiary();
+          await photo.restorePendingState(entry);
 
           return;
         }
@@ -298,23 +199,22 @@ export const useOwnerDiaryPreparation = () => {
       }
     },
     [
-      analyzeFood.mutateAsync,
-
-      i18n.language,
-      i18n.resolvedLanguage,
+      ai.analyzeEntry,
+      ai.deleteAnalysis,
 
       markPhotoUploaded,
-      refreshDiary,
+      photo.needsUpload,
+      photo.restorePendingState,
+      photo.upload,
       repository,
-      saveAiAnalysis,
       setPhase,
 
       sync.connectionState,
-      sync.prepareEntryPhoto,
       sync.setEntryPreparing,
 
       syncEntry,
-      t,
+
+      timer.setTimerForEntry,
     ]
   );
 

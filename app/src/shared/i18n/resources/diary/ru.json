@@ -122,7 +122,7 @@
       "dateAccessibilityLabel": "Выбрать дату записи",
       "timeAccessibilityLabel": "Выбрать время записи",
       "useCurrentDateTime": "Сейчас",
-      "mealRelation": "Отношение к приёму пищи",
+      "mealRelation": "Отношение к еде",
       "mealRelationPlaceholder": "Выбрать",
       "mealRelationNone": "Не указано",
       "commentPlaceholder": "Добавить заметку…",
@@ -250,7 +250,7 @@
         "fixBeforeApply": "Исправьте некорректные диапазоны перед применением фильтров."
       },
       "mealRelation": {
-        "title": "Отношение к приёму пищи",
+        "title": "Отношение к еде",
         "placeholder": "Выберите варианты",
         "selected_one": "Выбран {{count}} вариант",
         "selected_few": "Выбрано {{count}} варианта",

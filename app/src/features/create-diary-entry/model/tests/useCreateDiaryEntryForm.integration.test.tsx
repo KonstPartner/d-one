@@ -198,6 +198,7 @@ describe('useCreateDiaryEntryForm integration', () => {
     expect(submitResult).toEqual({
       entryId: 'entry-created',
       requestAi: false,
+      requestTimer: false,
     });
 
     expect(result.current.isSubmitting).toBe(true);

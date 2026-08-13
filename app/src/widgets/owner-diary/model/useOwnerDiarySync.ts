@@ -2,112 +2,16 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useSyncDiary } from '@features/sync-diary';
-import { useReadyDiaryDatabase } from '@entities/diary';
 import { showNotification } from '@shared/lib/notifications';
-
-import type { OwnerDiarySavedEntry } from './useOwnerDiaryEntryEditor';
-
-export type OwnerDiaryPreparationState = OwnerDiarySavedEntry & {
-  photoUri: string | null;
-};
 
 export const useOwnerDiarySync = () => {
   const { t } = useTranslation();
 
-  const { repository } = useReadyDiaryDatabase();
-
   const sync = useSyncDiary();
-
-  const [preparingSavedEntry, setPreparingSavedEntry] =
-    useState<OwnerDiaryPreparationState | null>(null);
 
   const [manualSyncPending, setManualSyncPending] = useState(false);
 
   const [forcedSyncPending, setForcedSyncPending] = useState(false);
-
-  const queueTargetedSync = useCallback(
-    (entryId: string): void => {
-      void sync.syncEntries([entryId]).catch((error) => {
-        console.error(
-          `Failed to synchronize saved diary entry: ${entryId}`,
-          error
-        );
-
-        showNotification('error', t('diary.sync.failed'));
-      });
-    },
-    [sync.syncEntries, t]
-  );
-
-  const handleEntrySaved = useCallback(
-    async (savedEntry: OwnerDiarySavedEntry): Promise<void> => {
-      if (sync.connectionState !== 'online') {
-        return;
-      }
-
-      let entry;
-
-      try {
-        entry = await repository.findById(savedEntry.entryId);
-      } catch (error) {
-        console.error(
-          `Failed to read saved diary entry: ${savedEntry.entryId}`,
-          error
-        );
-
-        return;
-      }
-
-      if (entry === null) {
-        return;
-      }
-
-      const photoNeedsUpload =
-        entry.localPhotoUri !== null &&
-        entry.photoPath !== null &&
-        entry.photoUrl === null;
-
-      if (!photoNeedsUpload) {
-        queueTargetedSync(savedEntry.entryId);
-
-        return;
-      }
-
-      setPreparingSavedEntry({
-        ...savedEntry,
-
-        photoUri: entry.localPhotoUri,
-      });
-
-      try {
-        await sync.prepareEntryPhoto(savedEntry.entryId);
-      } catch (error) {
-        console.error(
-          `Failed to upload diary photo: ${savedEntry.entryId}`,
-          error
-        );
-
-        showNotification('error', t('diary.form.photo.errors.storageFailed'));
-
-        return;
-      } finally {
-        setPreparingSavedEntry((current) =>
-          current?.entryId === savedEntry.entryId ? null : current
-        );
-      }
-
-      queueTargetedSync(savedEntry.entryId);
-    },
-    [
-      queueTargetedSync,
-      repository,
-
-      sync.connectionState,
-      sync.prepareEntryPhoto,
-
-      t,
-    ]
-  );
 
   const handleEntriesMarkedForDeletion = useCallback(
     async (entryIds: ReadonlyArray<string>): Promise<boolean> => {
@@ -206,7 +110,6 @@ export const useOwnerDiarySync = () => {
     connectionState: sync.connectionState,
 
     batchProgress: sync.batchProgress,
-
     batchType: sync.batchType,
 
     syncingEntryIds: sync.syncingEntryIds,
@@ -214,13 +117,7 @@ export const useOwnerDiarySync = () => {
     manualSyncPending,
     forcedSyncPending,
 
-    preparingSavedEntry,
-
-    isPreparingSavedEntry: preparingSavedEntry !== null,
-
     isEntrySyncing: sync.isEntrySyncing,
-
-    handleEntrySaved,
 
     handleEntriesMarkedForDeletion,
 
