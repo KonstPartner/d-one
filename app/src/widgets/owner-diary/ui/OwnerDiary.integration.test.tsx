@@ -131,7 +131,7 @@ jest.mock('@entities/diary', () => {
   };
 });
 
-jest.mock('@widgets/header-menu', () => ({
+jest.mock('@shared/lib/navigation', () => ({
   useHeaderMenu: (items: HeaderMenuItem[]) => {
     mockHeaderMenuItems = items;
   },

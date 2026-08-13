@@ -10,7 +10,7 @@ import {
 } from 'firebase/storage';
 
 import type { DiaryEntry } from '@entities/diary';
-import { app, db } from '@shared/api/firebase/config';
+import { app, db } from '@shared/api';
 
 const MAXIMUM_PHOTO_SIZE = 10 * 1024 * 1024;
 

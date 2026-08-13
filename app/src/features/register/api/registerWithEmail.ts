@@ -10,7 +10,7 @@ import {
   saveLocalUserProfile,
   type UserProfile,
 } from '@entities/user';
-import { auth, db } from '@shared/api/firebase';
+import { auth, db } from '@shared/api';
 
 export type RegisterPayload = {
   nickname: string;

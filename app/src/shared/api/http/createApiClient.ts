@@ -1,5 +1,6 @@
-import { getAuthToken } from '@shared/api/firebase';
 import { deepTrim } from '@shared/lib/data';
+
+import { getAuthToken } from '../firebase/getAuthToken';
 
 export class ApiError extends Error {
   public constructor(

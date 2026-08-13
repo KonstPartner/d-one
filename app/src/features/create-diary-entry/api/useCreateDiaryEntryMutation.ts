@@ -7,7 +7,7 @@ import {
   prepareDiaryPhotoForEntry,
   useReadyDiaryDatabase,
 } from '@entities/diary';
-import { db } from '@shared/api/firebase';
+import { db } from '@shared/api';
 
 export type CreateDiaryEntryMutationInput = DiaryEntryEditableValues & {
   photoDraftUri?: string | null;

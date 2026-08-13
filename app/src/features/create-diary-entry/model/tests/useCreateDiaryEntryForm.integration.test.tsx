@@ -48,7 +48,7 @@ jest.mock('@entities/diary', () => {
   };
 });
 
-jest.mock('@shared/api/firebase', () => ({
+jest.mock('@shared/api', () => ({
   db: {},
 }));
 

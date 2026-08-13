@@ -1,6 +1,6 @@
 import { sendEmailVerification } from 'firebase/auth';
 
-import { auth } from '@shared/api/firebase';
+import { auth } from '@shared/api';
 
 const getCurrentUser = () => {
   const user = auth.currentUser;

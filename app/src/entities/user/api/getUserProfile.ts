@@ -1,6 +1,6 @@
 import { doc, getDoc } from 'firebase/firestore';
 
-import { db } from '@shared/api/firebase';
+import { db } from '@shared/api';
 
 import { isUserProfile } from '../model/isUserProfile';
 import type { UserProfile } from '../model/types';

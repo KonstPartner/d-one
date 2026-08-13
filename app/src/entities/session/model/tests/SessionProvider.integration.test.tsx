@@ -20,7 +20,7 @@ const mockAuthState = {
   currentUser: null as User | null,
 };
 
-jest.mock('@shared/api/firebase', () => ({
+jest.mock('@shared/api', () => ({
   auth: {
     get currentUser() {
       return mockAuthState.currentUser;
