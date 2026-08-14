@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { DiaryTextModal } from './DiaryTextModal';
 import { DiaryTextPreview } from './DiaryTextPreview';
@@ -7,27 +8,26 @@ type DiaryTextKey = 'comment' | 'aiAnalysis';
 
 type DiaryEntryTextSectionsProps = {
   comment: string;
-  commentTitle: string;
-
   aiAnalysis: string;
-  aiAnalysisTitle: string;
 
   disabled?: boolean;
 };
 
 export const DiaryEntryTextSections = ({
   comment,
-  commentTitle,
-
   aiAnalysis,
-  aiAnalysisTitle,
 
   disabled = false,
 }: DiaryEntryTextSectionsProps) => {
+  const { t } = useTranslation();
+
   const [openedTextKey, setOpenedTextKey] = useState<DiaryTextKey | null>(null);
 
   const normalizedComment = comment.trim();
   const normalizedAiAnalysis = aiAnalysis.trim();
+
+  const commentTitle = t('diary.entry.comment');
+  const aiAnalysisTitle = t('diary.entry.aiAnalysis');
 
   const handleOpenComment = useCallback(() => {
     if (!disabled) {

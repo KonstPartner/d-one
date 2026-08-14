@@ -1,15 +1,13 @@
 import { memo } from 'react';
-import { ActivityIndicator } from 'react-native';
-import { useTheme } from '@emotion/react';
-import { Ionicons } from '@expo/vector-icons';
 
 import type { DiaryEntry } from '../model/diaryEntry';
-import { MEAL_RELATION_PRESENTATION } from '../model/mealRelationPresentation';
 import { useDiaryEntryCard } from '../model/useDiaryEntryCard';
-import * as s from '../styles/DiaryEntryCard';
 
-import { DiaryEntryCardShell } from './DiaryEntryCardShell';
+import { DiaryEntryCardBody, DiaryEntryCardShell } from './DiaryEntryCardShell';
+import { DiaryEntryMeta } from './DiaryEntryMeta';
+import { DiaryEntryMetrics } from './DiaryEntryMetrics';
 import { DiaryEntryPhoto } from './DiaryEntryPhoto';
+import { DiaryEntrySyncStatus } from './DiaryEntrySyncStatus';
 import { DiaryEntryTextSections } from './DiaryEntryTextSections';
 
 type DiaryEntryCardProps = {
@@ -23,16 +21,6 @@ type DiaryEntryCardProps = {
   onOpenPhoto?: (entry: DiaryEntry) => void;
 };
 
-const metricIcons = {
-  glucose: 'water',
-
-  carbsGram: 'leaf-outline',
-
-  shortInsulin: 'medical-outline',
-
-  longInsulin: 'shield-checkmark-outline',
-} as const;
-
 const DiaryEntryCardComponent = ({
   entry,
 
@@ -42,27 +30,13 @@ const DiaryEntryCardComponent = ({
   onPress,
   onOpenPhoto,
 }: DiaryEntryCardProps) => {
-  const theme = useTheme();
-
   const {
-    dateTimeLabel,
-    metrics,
-
-    comment,
-    commentTitle,
-
-    aiAnalysis,
-    aiAnalysisTitle,
-
     editAccessibilityLabel,
-    mealRelationLabel,
 
     pendingDelete,
     actionsDisabled,
 
     photoInteractive,
-
-    syncStatus,
 
     handleCardPress,
     handlePhotoPress,
@@ -72,11 +46,6 @@ const DiaryEntryCardComponent = ({
     onPress,
     onOpenPhoto,
   });
-
-  const mealRelationPresentation =
-    entry.mealRelation === null
-      ? null
-      : MEAL_RELATION_PRESENTATION[entry.mealRelation];
 
   return (
     <DiaryEntryCardShell
@@ -97,78 +66,30 @@ const DiaryEntryCardComponent = ({
         onPress={photoInteractive ? handlePhotoPress : undefined}
       />
 
-      <s.Body>
-        <s.Header>
-          <s.Time>
-            <Ionicons
-              name="time-outline"
-              size={theme.size.lg}
-              color={theme.colors.primary}
-            />
+      <DiaryEntryCardBody>
+        <DiaryEntryMeta
+          eventAt={entry.eventAt}
+          mealRelation={entry.mealRelation}
+        />
 
-            <s.TimeText numberOfLines={1}>{dateTimeLabel}</s.TimeText>
-          </s.Time>
-
-          {mealRelationLabel !== null && mealRelationPresentation !== null && (
-            <s.MealRelation $tone={mealRelationPresentation.tone}>
-              <Ionicons
-                name={mealRelationPresentation.icon}
-                size={theme.size.base}
-                color={theme.colors[mealRelationPresentation.tone]}
-              />
-
-              <s.MealRelationText $tone={mealRelationPresentation.tone}>
-                {mealRelationLabel}
-              </s.MealRelationText>
-            </s.MealRelation>
-          )}
-        </s.Header>
-
-        {metrics.length > 0 && (
-          <s.Metrics>
-            {metrics.map((metric) => (
-              <s.Metric
-                key={metric.key}
-                $metric={metric.key}
-                accessible
-                accessibilityLabel={`${metric.label}: ${metric.value}`}
-              >
-                <s.MetricIcon>
-                  <Ionicons
-                    name={metricIcons[metric.key]}
-                    size={theme.size.xl}
-                    color={theme.colors.metrics[metric.key].text}
-                  />
-                </s.MetricIcon>
-
-                <s.MetricValue $metric={metric.key}>
-                  {metric.value}
-                </s.MetricValue>
-              </s.Metric>
-            ))}
-          </s.Metrics>
-        )}
+        <DiaryEntryMetrics
+          glucose={entry.glucose}
+          carbsGram={entry.carbsGram}
+          shortInsulin={entry.shortInsulin}
+          longInsulin={entry.longInsulin}
+        />
 
         <DiaryEntryTextSections
-          comment={comment}
-          commentTitle={commentTitle}
-          aiAnalysis={aiAnalysis}
-          aiAnalysisTitle={aiAnalysisTitle}
+          comment={entry.comment}
+          aiAnalysis={entry.aiAnalysis}
           disabled={actionsDisabled}
         />
 
-        <s.Status accessible accessibilityLabel={syncStatus.label}>
-          {syncStatus.loading ? (
-            <ActivityIndicator size="small" color={syncStatus.color} />
-          ) : (
-            <Ionicons
-              name={syncStatus.icon}
-              size={theme.size.md}
-              color={syncStatus.color}
-            />
-          )}
-        </s.Status>
-      </s.Body>
+        <DiaryEntrySyncStatus
+          syncStatus={entry.syncStatus}
+          synchronizing={synchronizing}
+        />
+      </DiaryEntryCardBody>
     </DiaryEntryCardShell>
   );
 };

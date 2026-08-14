@@ -1,3 +1,13 @@
+export type { CloudDiaryErrorCode } from './api/cloud/CloudDiaryError';
+export {
+  CloudDiaryError,
+  isCloudDiaryError,
+} from './api/cloud/CloudDiaryError';
+export {
+  cloudDiaryPageQueryOptions,
+  cloudDiaryQueryKeys,
+} from './api/cloud/cloudDiaryQueryOptions';
+export { CloudDiaryRepository } from './api/cloud/CloudDiaryRepository';
 export type {
   DiaryDatabaseContextValue,
   DiaryDatabaseStatus,
@@ -51,6 +61,16 @@ export {
 } from './api/local/diaryRepository.types';
 export { getDiaryDayKey } from './lib/getDiaryDayKey';
 export { groupDiaryEntriesByDay } from './lib/groupDiaryEntriesByDay';
+export type { CloudDiaryEntry } from './model/cloudDiaryEntry';
+export type {
+  CloudDiaryCursor,
+  CloudDiaryPageInfo,
+  CloudDiaryPageResult,
+} from './model/cloudDiaryPage';
+export {
+  CLOUD_DIARY_PAGE_SIZE,
+  CLOUD_DIARY_QUERY_LIMIT,
+} from './model/cloudDiaryPage';
 export type { DiaryDay, DiaryDayKey } from './model/diaryDay';
 export type { DiaryEntry, DiarySyncStatus } from './model/diaryEntry';
 export { DIARY_SYNC_STATUSES, isDiarySyncStatus } from './model/diaryEntry';
@@ -75,6 +95,10 @@ export {
 export type { DiaryPageResult, DiaryPagination } from './model/diaryPage';
 export type { MealRelation } from './model/mealRelation';
 export { isMealRelation, MEAL_RELATIONS } from './model/mealRelation';
+export { useCloudDiaryPagination } from './model/useCloudDiaryPagination';
+export { CloudDiaryEntryCard } from './ui/CloudDiaryEntryCard';
+export { CloudDiaryPagination } from './ui/CloudDiaryPagination';
+export { CloudDiaryPhotoViewer } from './ui/CloudDiaryPhotoViewer';
 export { DiaryDayHeader } from './ui/DiaryDayHeader';
 export { DiaryEntryAiControl } from './ui/DiaryEntryAiControl';
 export { DiaryEntryCard } from './ui/DiaryEntryCard';

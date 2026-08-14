@@ -1,0 +1,54 @@
+import * as s from '../styles/CloudDiaryPagination';
+
+type CloudDiaryPaginationProps = {
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+
+  loading?: boolean;
+
+  previousLabel: string;
+  nextLabel: string;
+
+  onPrevious: () => void | Promise<void>;
+
+  onNext: () => void | Promise<void>;
+};
+
+export const CloudDiaryPagination = ({
+  hasPreviousPage,
+  hasNextPage,
+
+  loading = false,
+
+  previousLabel,
+  nextLabel,
+
+  onPrevious,
+  onNext,
+}: CloudDiaryPaginationProps) => (
+  <s.Root>
+    <s.Action
+      tone="secondary"
+      variant="outline"
+      size="md"
+      disabled={loading || !hasPreviousPage}
+      onPress={() => {
+        void onPrevious();
+      }}
+    >
+      {previousLabel}
+    </s.Action>
+
+    <s.Action
+      tone="secondary"
+      variant="outline"
+      size="md"
+      disabled={loading || !hasNextPage}
+      onPress={() => {
+        void onNext();
+      }}
+    >
+      {nextLabel}
+    </s.Action>
+  </s.Root>
+);
