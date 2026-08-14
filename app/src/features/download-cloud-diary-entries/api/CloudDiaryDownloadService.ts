@@ -15,11 +15,16 @@ import type {
   DownloadCloudEntriesResult,
 } from '../model/cloudDiaryDownload.types';
 
+type CloudDiaryDownloadRepository = Pick<
+  DiaryLocalRepository,
+  'findByIds' | 'insertSynced' | 'replaceSynced'
+>;
+
 type DownloadEntryOutcome = keyof DownloadCloudEntriesResult;
 
 type CloudDiaryDownloadServiceParams = {
   userId: string;
-  repository: DiaryLocalRepository;
+  repository: CloudDiaryDownloadRepository;
 
   onCommitted?: () => void | Promise<void>;
 };
@@ -127,7 +132,7 @@ class CloudDiaryDownloadSessionImpl implements CloudDiaryDownloadSession {
   public constructor(
     private readonly userId: string,
 
-    private readonly repository: DiaryLocalRepository,
+    private readonly repository: CloudDiaryDownloadRepository,
 
     private readonly entries: readonly CloudDiaryEntry[],
 
@@ -265,7 +270,7 @@ class CloudDiaryDownloadSessionImpl implements CloudDiaryDownloadSession {
 export class CloudDiaryDownloadService {
   private readonly userId: string;
 
-  private readonly repository: DiaryLocalRepository;
+  private readonly repository: CloudDiaryDownloadRepository;
 
   private readonly onCommitted: () => void | Promise<void>;
 

@@ -118,6 +118,17 @@ jest.mock('@entities/diary', () => {
 
     getDiaryDayKey: (date: Date) => date.toISOString().slice(0, 10),
 
+    useDiaryTransferState: () => ({
+      type: null,
+      phase: 'idle',
+
+      processedEntries: 0,
+      totalEntries: 0,
+
+      processedPhotos: 0,
+      totalPhotos: 0,
+    }),
+
     useReadyDiaryDatabase: () => ({
       userId: 'user-1',
 
