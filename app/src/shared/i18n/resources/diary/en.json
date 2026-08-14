@@ -179,6 +179,13 @@
         "title": "Preparing entry",
         "saved": "Entry created",
         "savedLocally": "Saved safely on this device",
+
+        "creatingTimer": "Setting timer",
+        "timerCreated": "Timer set",
+        "timerCreatedDescription": "The glucose check timer is running.",
+        "timerFailed": "Timer was not set",
+        "timerFailedDescription": "The entry was saved. You can set another timer later.",
+
         "uploadingPhoto": "Uploading photo",
         "finalizingPhoto": "Finalizing the photo...",
         "photoPreparing": "The entry is already saved locally. The cloud photo is being prepared."
@@ -200,6 +207,15 @@
         "title": "Discard changes?",
         "description": "The entered data will not be saved.",
         "confirm": "Discard"
+      },
+      "timer": {
+        "title": "2-hour timer",
+        "systemLabel": "Check blood glucose",
+        "errors": {
+          "expired": "The timer time has already passed.",
+          "createFailed": "Failed to set the timer."
+        },
+        "enabled": "Timer set for 2 hours."
       }
     },
     "filters": {

@@ -8,7 +8,7 @@ import { userProfileQueryOptions } from '@entities/user';
 import { isSamePath } from '@shared/routes';
 import { LoadingView } from '@shared/ui';
 
-import { getGuardRedirectPath } from './model/getGuardRedirectPath';
+import { getGuardRedirectPath } from './access/getGuardRedirectPath';
 
 type AppGuardProps = {
   children: ReactNode;

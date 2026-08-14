@@ -1,22 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  type DiaryEntry,
-  type DiaryEntryEditableValues,
-  normalizeDiaryEntryEditableValues,
-  validateDiaryEntryEditableValues,
-} from '@entities/diary';
+import type { DiaryEntry } from '@entities/diary';
 import { useNetwork } from '@shared/lib/network';
 import { showNotification } from '@shared/lib/notifications';
 
-import {
-  type EditDiaryEntryPhotoChange,
-  useEditDiaryEntryMutation,
-} from '../api/useEditDiaryEntryMutation';
-
 import { useEditDiaryEntryDraftState } from './useEditDiaryEntryDraftState';
 import { useEditDiaryEntryPhoto } from './useEditDiaryEntryPhoto';
+import { useEditDiaryEntryPostSaveOptions } from './useEditDiaryEntryPostSaveOptions';
+import { useEditDiaryEntrySubmit } from './useEditDiaryEntrySubmit';
+
+export type { EditDiaryEntrySubmitResult } from './useEditDiaryEntrySubmit';
 
 type UseEditDiaryEntryFormParams = {
   visible: boolean;
@@ -26,30 +20,6 @@ type UseEditDiaryEntryFormParams = {
   disabled?: boolean;
 };
 
-export type EditDiaryEntrySubmitResult = {
-  entryId: string;
-
-  entryUpdated: boolean;
-
-  requestAi: boolean;
-  deleteAiAnalysis: boolean;
-};
-
-const hasEditableChanges = ({
-  entry,
-  values,
-}: {
-  entry: DiaryEntry;
-  values: DiaryEntryEditableValues;
-}): boolean =>
-  values.glucose !== entry.glucose ||
-  values.mealRelation !== entry.mealRelation ||
-  values.shortInsulin !== entry.shortInsulin ||
-  values.longInsulin !== entry.longInsulin ||
-  values.carbsGram !== entry.carbsGram ||
-  values.comment !== entry.comment ||
-  values.eventAt.getTime() !== entry.eventAt.getTime();
-
 export const useEditDiaryEntryForm = ({
   visible,
   entry,
@@ -58,8 +28,6 @@ export const useEditDiaryEntryForm = ({
   const { t } = useTranslation();
 
   const { isOnline } = useNetwork();
-
-  const mutation = useEditDiaryEntryMutation();
 
   const draft = useEditDiaryEntryDraftState({
     visible,
@@ -71,39 +39,29 @@ export const useEditDiaryEntryForm = ({
     entry,
   });
 
-  const submitInProgressRef = useRef(false);
+  const submit = useEditDiaryEntrySubmit({
+    visible,
+  });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const timerEventAt =
+    draft.values === null
+      ? null
+      : draft.useCurrentDateTime
+        ? new Date()
+        : draft.values.eventAt;
 
-  const [requestAi, setRequestAi] = useState(false);
+  const postSaveOptions = useEditDiaryEntryPostSaveOptions({
+    visible,
 
-  const [deleteAiAnalysis, setDeleteAiAnalysis] = useState(false);
+    entry,
 
-  useEffect(() => {
-    if (!visible) {
-      submitInProgressRef.current = false;
+    hasPhoto: photo.hasPhoto,
+    isOnline,
 
-      setIsSubmitting(false);
+    interactionDisabled: disabled || submit.isSubmitting || photo.isPhotoBusy,
 
-      setRequestAi(false);
-
-      setDeleteAiAnalysis(false);
-
-      return;
-    }
-
-    setRequestAi(false);
-
-    setDeleteAiAnalysis(false);
-  }, [entry?.id, visible]);
-
-  useEffect(() => {
-    if (photo.hasPhoto && isOnline) {
-      return;
-    }
-
-    setRequestAi(false);
-  }, [isOnline, photo.hasPhoto]);
+    timerEventAt,
+  });
 
   useEffect(() => {
     if (photo.photoError === null) {
@@ -115,166 +73,52 @@ export const useEditDiaryEntryForm = ({
     photo.clearPhotoError();
   }, [photo.clearPhotoError, photo.photoError, t]);
 
-  const canRequestAi =
-    photo.hasPhoto &&
-    isOnline &&
-    !disabled &&
-    !isSubmitting &&
-    !photo.isPhotoBusy;
+  const handleDeletePhoto = useCallback((): void => {
+    postSaveOptions.clearAiRequest();
 
-  const aiAnalysis =
-    deleteAiAnalysis || !entry?.aiAnalysis ? null : entry.aiAnalysis;
-
-  const handleRequestAiChange = useCallback(
-    (value: boolean) => {
-      if (!value) {
-        setRequestAi(false);
-
-        return;
-      }
-
-      if (!canRequestAi) {
-        return;
-      }
-
-      setDeleteAiAnalysis(false);
-
-      setRequestAi(true);
-    },
-    [canRequestAi]
-  );
-
-  const handleDeleteAiAnalysis = useCallback(() => {
-    if (disabled || isSubmitting || entry === null || !entry.aiAnalysis) {
-      return;
-    }
-
-    setRequestAi(false);
-
-    setDeleteAiAnalysis(true);
-  }, [disabled, entry, isSubmitting]);
-
-  const handleDeletePhoto = useCallback(() => {
     photo.deletePhoto();
+  }, [photo.deletePhoto, postSaveOptions.clearAiRequest]);
 
-    setRequestAi(false);
-  }, [photo.deletePhoto]);
+  const handleSubmit = useCallback(
+    () =>
+      submit.submit({
+        disabled,
 
-  const handleSubmit =
-    useCallback(async (): Promise<EditDiaryEntrySubmitResult | null> => {
-      const currentValues = draft.values;
-
-      if (
-        disabled ||
-        submitInProgressRef.current ||
-        photo.isPhotoBusy ||
-        entry === null ||
-        currentValues === null
-      ) {
-        return null;
-      }
-
-      const eventAt = draft.useCurrentDateTime
-        ? new Date()
-        : currentValues.eventAt;
-
-      const normalizedValues = normalizeDiaryEntryEditableValues({
-        ...currentValues,
-
-        eventAt,
-      });
-
-      const validationError = validateDiaryEntryEditableValues({
-        values: normalizedValues,
-
-        hasPhoto: photo.hasPhoto,
-      });
-
-      if (validationError !== null) {
-        mutation.reset();
-
-        showNotification('error', t(`diary.form.errors.${validationError}`));
-
-        return null;
-      }
-
-      let photoChange: EditDiaryEntryPhotoChange = {
-        type: 'keep',
-      };
-
-      if (photo.photoAction === 'delete') {
-        photoChange = {
-          type: 'delete',
-        };
-      } else if (
-        photo.photoAction === 'replace' &&
-        photo.photoDraftUri !== null
-      ) {
-        photoChange = {
-          type: 'replace',
-
-          draftUri: photo.photoDraftUri,
-        };
-      }
-
-      const entryHasEditableChanges = hasEditableChanges({
         entry,
-        values: normalizedValues,
-      });
 
-      const entryUpdated =
-        entryHasEditableChanges || photo.photoAction !== 'keep';
+        values: draft.values,
+        useCurrentDateTime: draft.useCurrentDateTime,
 
-      const shouldRequestAi =
-        requestAi && photo.hasPhoto && isOnline && !disabled;
+        photoAction: photo.photoAction,
+        photoDraftUri: photo.photoDraftUri,
+        hasPhoto: photo.hasPhoto,
+        isPhotoBusy: photo.isPhotoBusy,
 
-      submitInProgressRef.current = true;
+        requestAi: postSaveOptions.requestAi,
+        requestTimer: postSaveOptions.requestTimer,
+        deleteAiAnalysis: postSaveOptions.deleteAiAnalysis,
 
-      setIsSubmitting(true);
+        isOnline,
 
-      try {
-        if (entryUpdated) {
-          await mutation.mutateAsync({
-            ...normalizedValues,
-
-            id: entry.id,
-
-            photoChange,
-          });
-
-          photo.markPhotoSaved();
-        }
-
-        return {
-          entryId: entry.id,
-
-          entryUpdated,
-
-          requestAi: shouldRequestAi,
-          deleteAiAnalysis,
-        };
-      } catch (error) {
-        console.error('Failed to update diary entry', error);
-
-        submitInProgressRef.current = false;
-
-        setIsSubmitting(false);
-
-        showNotification('error', t('diary.form.errors.updateFailed'));
-
-        return null;
-      }
-    }, [
-      deleteAiAnalysis,
+        onPhotoSaved: photo.markPhotoSaved,
+      }),
+    [
       disabled,
-      draft,
+      draft.useCurrentDateTime,
+      draft.values,
       entry,
       isOnline,
-      mutation,
-      photo,
-      requestAi,
-      t,
-    ]);
+      photo.hasPhoto,
+      photo.isPhotoBusy,
+      photo.markPhotoSaved,
+      photo.photoAction,
+      photo.photoDraftUri,
+      postSaveOptions.deleteAiAnalysis,
+      postSaveOptions.requestAi,
+      postSaveOptions.requestTimer,
+      submit.submit,
+    ]
+  );
 
   return {
     values: draft.values,
@@ -283,22 +127,25 @@ export const useEditDiaryEntryForm = ({
 
     photoUri: photo.photoUri,
 
-    aiAnalysis,
+    aiAnalysis: postSaveOptions.aiAnalysis,
 
-    requestAi,
-    canRequestAi,
+    requestAi: postSaveOptions.requestAi,
+    canRequestAi: postSaveOptions.canRequestAi,
 
-    deleteAiAnalysis,
+    requestTimer: postSaveOptions.requestTimer,
+    canRequestTimer: postSaveOptions.canRequestTimer,
+
+    deleteAiAnalysis: postSaveOptions.deleteAiAnalysis,
 
     hasTemporaryPhoto: photo.hasTemporaryPhoto,
 
     hasPhotoChanges: photo.hasPhotoChanges,
 
-    hasAiChanges: requestAi || deleteAiAnalysis,
+    hasAiChanges: postSaveOptions.hasAiChanges,
 
     isPhotoBusy: photo.isPhotoBusy,
 
-    isSubmitting,
+    isSubmitting: submit.isSubmitting,
 
     handleGlucoseChange: draft.handleGlucoseChange,
 
@@ -318,9 +165,11 @@ export const useEditDiaryEntryForm = ({
 
     handleEventTimeChange: draft.handleEventTimeChange,
 
-    handleRequestAiChange,
+    handleRequestAiChange: postSaveOptions.handleRequestAiChange,
 
-    handleDeleteAiAnalysis,
+    handleRequestTimerChange: postSaveOptions.handleRequestTimerChange,
+
+    handleDeleteAiAnalysis: postSaveOptions.handleDeleteAiAnalysis,
 
     selectPhoto: photo.selectPhoto,
 

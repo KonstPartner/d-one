@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
-import { type HeaderMenuItem, useHeaderMenu } from '@widgets/header-menu';
 import type { DiaryDayKey } from '@entities/diary';
+import { type HeaderMenuItem, useHeaderMenu } from '@shared/lib/navigation';
 
 type UseOwnerDiaryHeaderMenuParams = {
   selectionMode: boolean;
@@ -22,6 +22,7 @@ type UseOwnerDiaryHeaderMenuParams = {
   onEnterSelection: () => void;
 
   onCollapseAllDays: (dayKeys: ReadonlyArray<DiaryDayKey>) => void;
+
   onExpandAllDays: () => void;
 };
 

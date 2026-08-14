@@ -1,41 +1,29 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 
-import type { DiaryEntry } from '@entities/diary';
 import { showNotification } from '@shared/lib/notifications';
 
 import { useOwnerDiarySync } from '../useOwnerDiarySync';
 
-const mockFindById = jest.fn();
-
-const mockPrepareEntryPhoto = jest.fn();
-
 const mockSyncEntries = jest.fn();
-
 const mockSyncForced = jest.fn();
-
 const mockSyncPending = jest.fn();
 
 let mockConnectionState: 'unknown' | 'offline' | 'online' = 'online';
 
-jest.mock('@entities/diary', () => ({
-  useReadyDiaryDatabase: () => ({
-    repository: {
-      findById: mockFindById,
-    },
-  }),
-}));
+let mockBatchProgress: {
+  current: number;
+  total: number;
+} | null = null;
 
 jest.mock('@features/sync-diary', () => ({
   useSyncDiary: () => ({
     connectionState: mockConnectionState,
 
-    batchProgress: null,
+    batchProgress: mockBatchProgress,
 
     batchType: null,
 
     syncingEntryIds: new Set(),
-
-    prepareEntryPhoto: mockPrepareEntryPhoto,
 
     syncEntries: mockSyncEntries,
 
@@ -57,51 +45,19 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-const createEntry = (overrides: Partial<DiaryEntry> = {}): DiaryEntry => ({
-  id: 'entry-1',
-  userId: 'user-1',
-
-  glucose: 6.5,
-  mealRelation: null,
-
-  shortInsulin: null,
-  longInsulin: null,
-  carbsGram: null,
-
-  comment: '',
-  aiAnalysis: '',
-
-  localPhotoUri: null,
-  photoPath: null,
-  photoUrl: null,
-
-  eventAt: new Date('2026-08-10T12:00:00.000Z'),
-
-  syncStatus: 'pendingCreate',
-
-  ...overrides,
-});
-
 describe('useOwnerDiarySync integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockConnectionState = 'online';
-
-    mockFindById.mockReset();
-
-    mockPrepareEntryPhoto.mockReset();
+    mockBatchProgress = null;
 
     mockSyncEntries.mockReset();
-
     mockSyncForced.mockReset();
-
     mockSyncPending.mockReset();
 
     mockSyncEntries.mockResolvedValue([]);
-
     mockSyncForced.mockResolvedValue([]);
-
     mockSyncPending.mockResolvedValue([]);
   });
 
@@ -109,153 +65,137 @@ describe('useOwnerDiarySync integration', () => {
     jest.restoreAllMocks();
   });
 
-  it('queues targeted sync immediately when entry has no photo to prepare', async () => {
-    mockFindById.mockResolvedValueOnce(createEntry());
+  it('runs manual synchronization and keeps pending state until it finishes', async () => {
+    let resolveSync: (() => void) | null = null;
 
-    const { result } = renderHook(() => useOwnerDiarySync());
-
-    await act(async () => {
-      await result.current.handleEntrySaved({
-        entryId: 'entry-1',
-
-        operation: 'create',
-      });
-    });
-
-    expect(mockPrepareEntryPhoto).not.toHaveBeenCalled();
-
-    expect(mockSyncEntries).toHaveBeenCalledTimes(1);
-
-    expect(mockSyncEntries).toHaveBeenCalledWith(['entry-1']);
-
-    expect(result.current.preparingSavedEntry).toBeNull();
-  });
-
-  it('shows preparation state while photo is uploading and queues sync only after upload completes', async () => {
-    const entry = createEntry({
-      localPhotoUri: 'file:///photo.jpg',
-
-      photoPath: 'users/user-1/diaryPhotos/entry-1.jpg',
-
-      photoUrl: null,
-    });
-
-    mockFindById.mockResolvedValueOnce(entry);
-
-    let resolvePreparation: (() => void) | null = null;
-
-    mockPrepareEntryPhoto.mockImplementationOnce(
+    mockSyncPending.mockImplementationOnce(
       () =>
-        new Promise<DiaryEntry>((resolve) => {
-          resolvePreparation = () => {
-            resolve({
-              ...entry,
-
-              photoUrl: 'https://storage.example/photo.jpg',
-            });
-          };
+        new Promise<void>((resolve) => {
+          resolveSync = resolve;
         })
     );
 
     const { result } = renderHook(() => useOwnerDiarySync());
 
-    let savePromise: Promise<void>;
+    let syncPromise: Promise<boolean>;
 
     act(() => {
-      savePromise = result.current.handleEntrySaved({
-        entryId: 'entry-1',
-
-        operation: 'create',
-      });
+      syncPromise = result.current.handleManualSync();
     });
 
     await waitFor(() => {
-      expect(result.current.preparingSavedEntry).toEqual({
-        entryId: 'entry-1',
-
-        operation: 'create',
-
-        photoUri: 'file:///photo.jpg',
-      });
+      expect(result.current.manualSyncPending).toBe(true);
     });
 
-    expect(mockPrepareEntryPhoto).toHaveBeenCalledWith('entry-1');
-
-    expect(mockSyncEntries).not.toHaveBeenCalled();
-
-    expect(resolvePreparation).not.toBeNull();
+    expect(mockSyncPending).toHaveBeenCalledTimes(1);
 
     act(() => {
-      resolvePreparation?.();
+      resolveSync?.();
     });
+
+    let synchronized = false;
 
     await act(async () => {
-      await savePromise;
+      synchronized = await syncPromise;
     });
 
-    expect(result.current.preparingSavedEntry).toBeNull();
+    expect(synchronized).toBe(true);
 
-    expect(mockSyncEntries).toHaveBeenCalledTimes(1);
+    expect(result.current.manualSyncPending).toBe(false);
+  });
+
+  it('runs forced synchronization for selected entries', async () => {
+    const { result } = renderHook(() => useOwnerDiarySync());
+
+    let synchronized = false;
+
+    await act(async () => {
+      synchronized = await result.current.handleForcedSync([
+        'entry-1',
+        'entry-2',
+      ]);
+    });
+
+    expect(synchronized).toBe(true);
+
+    expect(mockSyncForced).toHaveBeenCalledTimes(1);
+
+    expect(mockSyncForced).toHaveBeenCalledWith(['entry-1', 'entry-2']);
+
+    expect(result.current.forcedSyncPending).toBe(false);
+  });
+
+  it('reports whether deletion synchronization physically removed entries', async () => {
+    mockSyncEntries.mockResolvedValueOnce([
+      {
+        entryId: 'entry-1',
+        status: 'deleted',
+      },
+    ]);
+
+    const { result } = renderHook(() => useOwnerDiarySync());
+
+    let physicallyDeleted = false;
+
+    await act(async () => {
+      physicallyDeleted = await result.current.handleEntriesMarkedForDeletion([
+        'entry-1',
+      ]);
+    });
+
+    expect(physicallyDeleted).toBe(true);
 
     expect(mockSyncEntries).toHaveBeenCalledWith(['entry-1']);
   });
 
-  it('does not queue targeted sync when photo preparation fails', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => undefined);
-
-    mockFindById.mockResolvedValueOnce(
-      createEntry({
-        localPhotoUri: 'file:///photo.jpg',
-
-        photoPath: 'users/user-1/diaryPhotos/entry-1.jpg',
-
-        photoUrl: null,
-      })
-    );
-
-    mockPrepareEntryPhoto.mockRejectedValueOnce(
-      new Error('Storage upload failed')
-    );
-
-    const { result } = renderHook(() => useOwnerDiarySync());
-
-    await act(async () => {
-      await result.current.handleEntrySaved({
-        entryId: 'entry-1',
-
-        operation: 'create',
-      });
-    });
-
-    expect(mockPrepareEntryPhoto).toHaveBeenCalledWith('entry-1');
-
-    expect(mockSyncEntries).not.toHaveBeenCalled();
-
-    expect(result.current.preparingSavedEntry).toBeNull();
-
-    expect(jest.mocked(showNotification)).toHaveBeenCalledWith(
-      'error',
-      'diary.form.photo.errors.storageFailed'
-    );
-  });
-
-  it('does not prepare or synchronize saved entry while offline', async () => {
+  it('does not start synchronization while offline', async () => {
     mockConnectionState = 'offline';
 
     const { result } = renderHook(() => useOwnerDiarySync());
 
-    await act(async () => {
-      await result.current.handleEntrySaved({
-        entryId: 'entry-1',
+    let manualResult = true;
+    let forcedResult = true;
+    let deletionResult = true;
 
-        operation: 'update',
-      });
+    await act(async () => {
+      manualResult = await result.current.handleManualSync();
+
+      forcedResult = await result.current.handleForcedSync(['entry-1']);
+
+      deletionResult = await result.current.handleEntriesMarkedForDeletion([
+        'entry-1',
+      ]);
     });
 
-    expect(mockFindById).not.toHaveBeenCalled();
+    expect(manualResult).toBe(false);
+    expect(forcedResult).toBe(false);
+    expect(deletionResult).toBe(false);
 
-    expect(mockPrepareEntryPhoto).not.toHaveBeenCalled();
-
+    expect(mockSyncPending).not.toHaveBeenCalled();
+    expect(mockSyncForced).not.toHaveBeenCalled();
     expect(mockSyncEntries).not.toHaveBeenCalled();
+  });
+
+  it('shows notification when manual synchronization fails', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    mockSyncPending.mockRejectedValueOnce(new Error('Synchronization failed'));
+
+    const { result } = renderHook(() => useOwnerDiarySync());
+
+    let synchronized = true;
+
+    await act(async () => {
+      synchronized = await result.current.handleManualSync();
+    });
+
+    expect(synchronized).toBe(false);
+
+    expect(jest.mocked(showNotification)).toHaveBeenCalledWith(
+      'error',
+      'diary.sync.failed'
+    );
+
+    expect(result.current.manualSyncPending).toBe(false);
   });
 });

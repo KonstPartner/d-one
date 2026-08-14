@@ -5,7 +5,7 @@ import {
 } from 'firebase/auth';
 
 import { getUserProfile, type UserProfile } from '@entities/user';
-import { auth } from '@shared/api/firebase';
+import { auth } from '@shared/api';
 
 export const loginWithGoogle = async (
   idToken: string

@@ -5,7 +5,7 @@ import {
   updatePassword,
 } from 'firebase/auth';
 
-import { auth } from '@shared/api/firebase';
+import { auth } from '@shared/api';
 
 export type ChangePasswordPayload = {
   currentPassword: string;

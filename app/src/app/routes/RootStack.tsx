@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { HeaderMenu } from '@widgets/header-menu';
 
-import { createStackScreenOptions } from './config/stackScreenOptions';
+import { createStackScreenOptions } from './screen-options/stackScreenOptions';
 
 export const RootStack = () => {
   const theme = useTheme();

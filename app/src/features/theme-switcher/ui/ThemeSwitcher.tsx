@@ -2,7 +2,7 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 
-import type { ThemeMode } from '@shared/config/theme';
+import type { ThemeMode } from '@shared/config';
 import { useThemeMode } from '@shared/lib/theme';
 
 import * as s from '../styles/ThemeSwitcher';

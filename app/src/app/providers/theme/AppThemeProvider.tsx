@@ -14,7 +14,7 @@ import {
   loadThemeMode,
   saveThemeMode,
   type ThemeMode,
-} from '@shared/config/theme';
+} from '@shared/config';
 import {
   type ThemeModeContextValue,
   ThemeModeProvider,

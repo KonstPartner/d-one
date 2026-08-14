@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import * as WebBrowser from 'expo-web-browser';
 
+import { validateEnvConfig } from '@shared/config';
 import { initI18n } from '@shared/i18n';
 import { startNetworkListener } from '@shared/lib/network';
 import { PlatformOS } from '@shared/lib/platform';
@@ -23,6 +24,8 @@ export const AppRoot = () => {
   useEffect(() => {
     return startNetworkListener();
   }, []);
+
+  validateEnvConfig();
 
   if (!ready) {
     return null;

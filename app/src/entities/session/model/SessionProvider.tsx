@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 
-import { auth } from '@shared/api/firebase';
+import { auth } from '@shared/api';
 
 type SessionContextValue = {
   sessionUser: User | null;

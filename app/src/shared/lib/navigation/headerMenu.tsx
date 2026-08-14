@@ -1,13 +1,16 @@
 import {
+  type ComponentProps,
   createContext,
   type PropsWithChildren,
   useCallback,
   useContext,
+  useId,
   useMemo,
   useState,
 } from 'react';
 import type { Ionicons } from '@expo/vector-icons';
-import type { ComponentProps } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { usePathname } from 'expo-router';
 
 export type HeaderMenuItem = {
   key: string;
@@ -112,7 +115,7 @@ export const HeaderMenuProvider = ({ children }: PropsWithChildren) => {
       setItems,
       clearItems,
     }),
-    [getItems, setItems, clearItems]
+    [clearItems, getItems, setItems]
   );
 
   return (
@@ -132,4 +135,22 @@ export const useHeaderMenuContext = (): HeaderMenuContextValue => {
   }
 
   return context;
+};
+
+export const useHeaderMenu = (items: HeaderMenuItem[]): void => {
+  const pathname = usePathname();
+
+  const sourceKey = useId();
+
+  const { setItems, clearItems } = useHeaderMenuContext();
+
+  useFocusEffect(
+    useCallback(() => {
+      setItems(pathname, sourceKey, items);
+
+      return () => {
+        clearItems(pathname, sourceKey);
+      };
+    }, [clearItems, items, pathname, setItems, sourceKey])
+  );
 };

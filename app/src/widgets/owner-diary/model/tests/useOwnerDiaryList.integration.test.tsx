@@ -17,6 +17,15 @@ const mockFindPage = jest.fn<
   [number, DiaryEntryQuery]
 >();
 
+jest.mock('@shared/api', () => ({
+  FORCE_CACHE: {
+    staleTime: Infinity,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+  },
+}));
+
 jest.mock('@entities/diary', () => {
   const { diaryLocalPageQueryOptions } = jest.requireActual(
     '@entities/diary/api/local/diaryLocalQueryOptions'

@@ -48,7 +48,7 @@ jest.mock('@entities/diary', () => {
   };
 });
 
-jest.mock('@shared/api/firebase', () => ({
+jest.mock('@shared/api', () => ({
   db: {},
 }));
 
@@ -198,6 +198,7 @@ describe('useCreateDiaryEntryForm integration', () => {
     expect(submitResult).toEqual({
       entryId: 'entry-created',
       requestAi: false,
+      requestTimer: false,
     });
 
     expect(result.current.isSubmitting).toBe(true);

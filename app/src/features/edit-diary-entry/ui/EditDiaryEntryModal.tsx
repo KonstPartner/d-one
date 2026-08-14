@@ -43,6 +43,9 @@ export const EditDiaryEntryModal = ({
     requestAi,
     canRequestAi,
 
+    requestTimer,
+    canRequestTimer,
+
     isPhotoBusy,
     isSubmitting,
 
@@ -59,6 +62,7 @@ export const EditDiaryEntryModal = ({
     handleEventTimeChange,
 
     handleRequestAiChange,
+    handleRequestTimerChange,
 
     handleDeleteAiAnalysis,
 
@@ -160,6 +164,8 @@ export const EditDiaryEntryModal = ({
         isPhotoBusy={isPhotoBusy}
         requestAi={requestAi}
         canRequestAi={canRequestAi}
+        requestTimer={requestTimer}
+        canRequestTimer={canRequestTimer}
         aiAnalysis={aiAnalysis}
         disabled={editorDisabled}
         onCurrentDateTimeChange={handleCurrentDateTimeChange}
@@ -174,6 +180,7 @@ export const EditDiaryEntryModal = ({
         onChoosePhoto={handleChoosePhoto}
         onDeletePhoto={deletePhoto}
         onRequestAiChange={handleRequestAiChange}
+        onRequestTimerChange={handleRequestTimerChange}
         onDeleteAiAnalysis={handleDeleteAiAnalysis}
       />
     </DiaryEntryEditorModal>

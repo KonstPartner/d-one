@@ -8,7 +8,8 @@ import Popover from 'react-native-popover-view';
 import {
   type HeaderMenuItem,
   useHeaderMenuContext,
-} from '../model/HeaderMenuProvider';
+} from '@shared/lib/navigation';
+
 import * as s from '../styles/HeaderMenu';
 
 import { HeaderMenuSettings } from './HeaderMenuSettings';

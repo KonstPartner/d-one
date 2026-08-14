@@ -43,8 +43,18 @@ const requiredKeys: Array<keyof AppEnvironment> = [
   'iosGoogleClientId',
 ];
 
-for (const key of requiredKeys) {
-  if (!envConfig[key]) {
-    throw new Error(`Missing config: ${key}`);
+let validated = false;
+
+export const validateEnvConfig = (): void => {
+  if (validated) {
+    return;
   }
-}
+
+  for (const key of requiredKeys) {
+    if (!envConfig[key]) {
+      throw new Error(`Missing config: ${key}`);
+    }
+  }
+
+  validated = true;
+};

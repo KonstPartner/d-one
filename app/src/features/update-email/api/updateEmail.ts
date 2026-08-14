@@ -1,6 +1,6 @@
 import { verifyBeforeUpdateEmail } from 'firebase/auth';
 
-import { auth } from '@shared/api/firebase';
+import { auth } from '@shared/api';
 
 export type EmailUpdateConfirmation =
   | 'verified'

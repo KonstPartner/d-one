@@ -1,25 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  normalizeDiaryEntryEditableValues,
-  validateDiaryEntryEditableValues,
-} from '@entities/diary';
 import { useNetwork } from '@shared/lib/network';
 import { showNotification } from '@shared/lib/notifications';
 
-import { useCreateDiaryEntryMutation } from '../api/useCreateDiaryEntryMutation';
-
 import { useCreateDiaryEntryDraftState } from './useCreateDiaryEntryDraftState';
 import { useCreateDiaryEntryPhoto } from './useCreateDiaryEntryPhoto';
+import { useCreateDiaryEntryPostSaveOptions } from './useCreateDiaryEntryPostSaveOptions';
+import { useCreateDiaryEntrySubmit } from './useCreateDiaryEntrySubmit';
+
+export type { CreateDiaryEntrySubmitResult } from './useCreateDiaryEntrySubmit';
 
 type UseCreateDiaryEntryFormParams = {
   visible: boolean;
-};
-
-export type CreateDiaryEntrySubmitResult = {
-  entryId: string;
-  requestAi: boolean;
 };
 
 export const useCreateDiaryEntryForm = ({
@@ -29,8 +22,6 @@ export const useCreateDiaryEntryForm = ({
 
   const { isOnline } = useNetwork();
 
-  const mutation = useCreateDiaryEntryMutation();
-
   const draft = useCreateDiaryEntryDraftState({
     visible,
   });
@@ -39,35 +30,32 @@ export const useCreateDiaryEntryForm = ({
     visible,
   });
 
-  const submitInProgressRef = useRef(false);
+  const submit = useCreateDiaryEntrySubmit({
+    visible,
+  });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const timerEventAt = draft.useCurrentDateTime
+    ? new Date()
+    : draft.values.eventAt;
 
-  const [requestAi, setRequestAi] = useState(false);
+  const postSaveOptions = useCreateDiaryEntryPostSaveOptions({
+    visible,
 
-  const canRequestAi =
-    photo.hasPhoto && isOnline && !isSubmitting && !photo.isPhotoBusy;
+    hasPhoto: photo.hasPhoto,
+    isOnline,
+
+    interactionDisabled: submit.isSubmitting || photo.isPhotoBusy,
+
+    timerEventAt,
+  });
 
   useEffect(() => {
     if (visible) {
-      setRequestAi(false);
-
       return;
     }
 
-    submitInProgressRef.current = false;
-
-    setIsSubmitting(false);
-    setRequestAi(false);
-  }, [visible]);
-
-  useEffect(() => {
-    if (photo.hasPhoto && isOnline) {
-      return;
-    }
-
-    setRequestAi(false);
-  }, [isOnline, photo.hasPhoto]);
+    draft.resetDraft();
+  }, [draft.resetDraft, visible]);
 
   useEffect(() => {
     if (photo.photoError === null) {
@@ -79,88 +67,42 @@ export const useCreateDiaryEntryForm = ({
     photo.clearPhotoError();
   }, [photo.clearPhotoError, photo.photoError, t]);
 
-  const handleRequestAiChange = useCallback(
-    (value: boolean): void => {
-      if (value && !canRequestAi) {
-        return;
-      }
-
-      setRequestAi(value);
-    },
-    [canRequestAi]
-  );
-
   const handleDeletePhoto = useCallback((): void => {
-    setRequestAi(false);
+    postSaveOptions.clearAiRequest();
 
     photo.deletePhoto();
-  }, [photo.deletePhoto]);
+  }, [photo.deletePhoto, postSaveOptions.clearAiRequest]);
 
-  const handleSubmit =
-    useCallback(async (): Promise<CreateDiaryEntrySubmitResult | null> => {
-      if (submitInProgressRef.current || photo.isPhotoBusy) {
-        return null;
-      }
+  const handleSubmit = useCallback(
+    () =>
+      submit.submit({
+        values: draft.values,
+        useCurrentDateTime: draft.useCurrentDateTime,
 
-      const eventAt = draft.useCurrentDateTime
-        ? new Date()
-        : draft.values.eventAt;
-
-      const normalizedValues = normalizeDiaryEntryEditableValues({
-        ...draft.values,
-
-        eventAt,
-      });
-
-      const validationError = validateDiaryEntryEditableValues({
-        values: normalizedValues,
-
+        photoDraftUri: photo.photoDraftUri,
         hasPhoto: photo.hasPhoto,
-      });
+        isPhotoBusy: photo.isPhotoBusy,
 
-      if (validationError !== null) {
-        mutation.reset();
+        requestAi: postSaveOptions.requestAi,
+        requestTimer: postSaveOptions.requestTimer,
 
-        showNotification('error', t(`diary.form.errors.${validationError}`));
+        isOnline,
 
-        return null;
-      }
-
-      submitInProgressRef.current = true;
-
-      setIsSubmitting(true);
-
-      try {
-        const entryId = await mutation.mutateAsync({
-          ...normalizedValues,
-
-          photoDraftUri: photo.photoDraftUri,
-        });
-
-        const result: CreateDiaryEntrySubmitResult = {
-          entryId,
-          requestAi: requestAi && photo.hasPhoto && isOnline,
-        };
-
-        photo.markPhotoSaved();
-
-        draft.resetDraft();
-
-        setRequestAi(false);
-
-        return result;
-      } catch (error) {
-        console.error('Failed to create diary entry', error);
-
-        submitInProgressRef.current = false;
-
-        setIsSubmitting(false);
-
-        showNotification('error', t('diary.form.errors.creationFailed'));
-
-        return null;
-      }
-    }, [draft, isOnline, mutation, photo, requestAi, t]);
+        onPhotoSaved: photo.markPhotoSaved,
+      }),
+    [
+      draft.useCurrentDateTime,
+      draft.values,
+      isOnline,
+      photo.hasPhoto,
+      photo.isPhotoBusy,
+      photo.markPhotoSaved,
+      photo.photoDraftUri,
+      postSaveOptions.requestAi,
+      postSaveOptions.requestTimer,
+      submit.submit,
+    ]
+  );
 
   return {
     values: draft.values,
@@ -173,10 +115,13 @@ export const useCreateDiaryEntryForm = ({
 
     isPhotoBusy: photo.isPhotoBusy,
 
-    isSubmitting,
+    isSubmitting: submit.isSubmitting,
 
-    requestAi,
-    canRequestAi,
+    requestAi: postSaveOptions.requestAi,
+    canRequestAi: postSaveOptions.canRequestAi,
+
+    requestTimer: postSaveOptions.requestTimer,
+    canRequestTimer: postSaveOptions.canRequestTimer,
 
     handleGlucoseChange: draft.handleGlucoseChange,
 
@@ -196,7 +141,8 @@ export const useCreateDiaryEntryForm = ({
 
     handleEventTimeChange: draft.handleEventTimeChange,
 
-    handleRequestAiChange,
+    handleRequestAiChange: postSaveOptions.handleRequestAiChange,
+    handleRequestTimerChange: postSaveOptions.handleRequestTimerChange,
 
     selectPhoto: photo.selectPhoto,
 

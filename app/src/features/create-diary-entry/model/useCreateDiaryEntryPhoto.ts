@@ -196,8 +196,6 @@ export const useCreateDiaryEntryPhoto = ({
 
     photoDraftUriRef.current = null;
 
-    setPhotoDraftUri(null);
-
     setPhotoError(null);
 
     setIsProcessing(false);

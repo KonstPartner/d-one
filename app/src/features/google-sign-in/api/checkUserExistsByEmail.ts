@@ -1,6 +1,6 @@
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 
-import { db } from '@shared/api/firebase';
+import { db } from '@shared/api';
 
 type CheckUserExistsResult = {
   isExists: boolean;

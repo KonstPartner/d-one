@@ -1,5 +1,4 @@
-import { getFirebaseAppCheckToken } from '@shared/api/firebase';
-import { createApiClient } from '@shared/api/http';
+import { createApiClient, getFirebaseAppCheckToken } from '@shared/api';
 import { envConfig } from '@shared/config';
 import type { AppLanguage } from '@shared/i18n';
 

@@ -40,6 +40,9 @@ export const CreateDiaryEntryModal = ({
     requestAi,
     canRequestAi,
 
+    requestTimer,
+    canRequestTimer,
+
     handleGlucoseChange,
     handleCarbsGramChange,
     handleShortInsulinChange,
@@ -53,6 +56,7 @@ export const CreateDiaryEntryModal = ({
     handleEventTimeChange,
 
     handleRequestAiChange,
+    handleRequestTimerChange,
 
     selectPhoto,
     deletePhoto,
@@ -162,6 +166,8 @@ export const CreateDiaryEntryModal = ({
           isPhotoBusy={isPhotoBusy}
           requestAi={requestAi}
           canRequestAi={canRequestAi}
+          requestTimer={requestTimer}
+          canRequestTimer={canRequestTimer}
           disabled={isSubmitting}
           onCurrentDateTimeChange={handleCurrentDateTimeChange}
           onEventDateChange={handleEventDateChange}
@@ -175,6 +181,7 @@ export const CreateDiaryEntryModal = ({
           onChoosePhoto={handleChoosePhoto}
           onDeletePhoto={deletePhoto}
           onRequestAiChange={handleRequestAiChange}
+          onRequestTimerChange={handleRequestTimerChange}
         />
       </DiaryEntryEditorModal>
 

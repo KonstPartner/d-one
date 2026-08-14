@@ -11,7 +11,7 @@ import { type User } from 'firebase/auth';
 
 import { SessionProvider } from '@entities/session';
 import { type UserProfile, UserRole } from '@entities/user';
-import { lightTheme } from '@shared/config/theme';
+import { lightTheme } from '@shared/config';
 
 import { AppGuard } from '../AppGuard';
 
@@ -47,7 +47,7 @@ jest.mock('firebase/firestore', () => ({
   getDoc: (...args: unknown[]) => mockGetDoc(...args),
 }));
 
-jest.mock('@shared/api/firebase', () => ({
+jest.mock('@shared/api', () => ({
   auth: mockAuth,
   db: mockDb,
 }));

@@ -13,7 +13,7 @@ import { Row } from '@shared/styles';
 
 import { DiaryRuntimeBoundary } from '../providers/DiaryRuntimeBoundary';
 
-import { createTabScreenOptions } from './config/tabScreenOptions';
+import { createTabScreenOptions } from './screen-options/tabScreenOptions';
 
 export const AppTabs = () => {
   const theme = useTheme();

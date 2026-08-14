@@ -30,7 +30,7 @@ export default {
       scheme: 'done.android.app',
       package: 'done.android.app',
       googleServicesFile: './google-services.json',
-
+      permissions: ['com.android.alarm.permission.SET_ALARM'],
       allowBackup: false,
 
       adaptiveIcon: {
