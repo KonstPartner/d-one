@@ -1,3 +1,4 @@
+import { View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,27 +20,32 @@ export const VerifyEmail = () => {
   }
 
   return (
-    <s.Container style={[ss.FullWidth, ss.Stack(theme, 'xl')]}>
-      <s.Title>{t('auth.verifyEmail.title')}</s.Title>
+    <View style={[ss.FullWidth, ss.Stack(theme, 'xl'), ss.InsetY(theme, 'xl')]}>
+      <s.Title style={ss.Text(theme, 'xl', 'bold', 'default', '2xl')}>
+        {t('auth.verifyEmail.title')}
+      </s.Title>
 
-      <s.Description>
+      <s.Description style={ss.Text(theme, 'base', 'regular', 'muted', 'md')}>
         {verificationEmailSent
           ? t('auth.verifyEmail.sentDescription')
           : t('auth.verifyEmail.description')}
       </s.Description>
 
-      <s.Email>{email}</s.Email>
+      <s.Email style={ss.Text(theme, 'base', 'bold', 'default', 'md')}>
+        {email}
+      </s.Email>
 
       <Button
+        style={ss.FullWidth}
         onPress={verificationEmailSent ? check : send}
         loading={isPending}
       >
-        <s.ButtonText>
+        <s.ButtonText style={ss.Text(theme, 'md', 'bold', 'inverse', 'md')}>
           {verificationEmailSent
             ? t('auth.verifyEmail.buttons.check')
             : t('auth.verifyEmail.buttons.send')}
         </s.ButtonText>
       </Button>
-    </s.Container>
+    </View>
   );
 };

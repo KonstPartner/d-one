@@ -23,5 +23,6 @@ export const VerificationContent = styled.View`
 export const scrollContent = StyleSheet.create({
   root: {
     flexGrow: 1,
+    paddingBottom: 150,
   },
 }).root;

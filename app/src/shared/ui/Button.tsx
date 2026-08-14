@@ -56,7 +56,7 @@ export const Button = ({
         busy: loading,
       }}
       onPress={onPress}
-      style={style ?? ss.CenterContent}
+      style={[ss.CenterContent, style]}
     >
       {loading ? (
         <Spinner
