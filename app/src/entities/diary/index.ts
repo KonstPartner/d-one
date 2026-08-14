@@ -80,5 +80,7 @@ export { DiaryEntryAiControl } from './ui/DiaryEntryAiControl';
 export { DiaryEntryCard } from './ui/DiaryEntryCard';
 export { DiaryEntryEditorFields } from './ui/DiaryEntryEditorFields';
 export { DiaryEntryEditorModal } from './ui/DiaryEntryEditorModal';
+export { DiaryEntryMeta } from './ui/DiaryEntryMeta';
+export { DiaryEntryMetrics } from './ui/DiaryEntryMetrics';
 export { DiaryEntryPhotoField } from './ui/DiaryEntryPhotoField';
 export { DiaryPhotoViewer } from './ui/DiaryPhotoViewer';

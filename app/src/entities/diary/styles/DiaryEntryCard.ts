@@ -3,15 +3,19 @@ import styled from '@emotion/native';
 import * as ss from '@shared/styles';
 import type { SelectDropdownTone } from '@shared/ui';
 
-import type { DiaryMetricKey } from '../model/useDiaryEntryCard';
-
 type CardProps = {
-  $pendingDelete: boolean;
+  $selected: boolean;
 };
 
 type MealRelationProps = {
   $tone: SelectDropdownTone;
 };
+
+export type DiaryMetricKey =
+  | 'glucose'
+  | 'carbsGram'
+  | 'shortInsulin'
+  | 'longInsulin';
 
 type MetricProps = {
   $metric: DiaryMetricKey;
@@ -20,7 +24,8 @@ type MetricProps = {
 export const Card = styled.Pressable<CardProps>`
   border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
 
-  border-color: ${({ theme }) => theme.colors.border};
+  border-color: ${({ theme, $selected }) =>
+    $selected ? theme.colors.primary : theme.colors.border};
 
   border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 

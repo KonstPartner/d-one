@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
@@ -27,8 +27,6 @@ export type DiaryMetric = {
   value: string;
 };
 
-type DiaryTextKey = 'comment' | 'aiAnalysis';
-
 type SyncIconName =
   | 'cloud-done-outline'
   | 'cloud-offline-outline'
@@ -43,8 +41,6 @@ export const useDiaryEntryCard = ({
   const theme = useTheme();
 
   const { t, i18n } = useTranslation();
-
-  const [openedTextKey, setOpenedTextKey] = useState<DiaryTextKey | null>(null);
 
   const locale = i18n.resolvedLanguage ?? i18n.language;
 
@@ -67,9 +63,7 @@ export const useDiaryEntryCard = ({
     if (entry.glucose !== null) {
       result.push({
         key: 'glucose',
-
         label: t('diary.entry.metrics.glucose'),
-
         value: numberFormatter.format(entry.glucose),
       });
     }
@@ -77,9 +71,7 @@ export const useDiaryEntryCard = ({
     if (entry.carbsGram !== null) {
       result.push({
         key: 'carbsGram',
-
         label: t('diary.entry.metrics.carbohydrates'),
-
         value: numberFormatter.format(entry.carbsGram),
       });
     }
@@ -87,9 +79,7 @@ export const useDiaryEntryCard = ({
     if (entry.shortInsulin !== null) {
       result.push({
         key: 'shortInsulin',
-
         label: t('diary.entry.metrics.shortInsulin'),
-
         value: numberFormatter.format(entry.shortInsulin),
       });
     }
@@ -97,9 +87,7 @@ export const useDiaryEntryCard = ({
     if (entry.longInsulin !== null) {
       result.push({
         key: 'longInsulin',
-
         label: t('diary.entry.metrics.longInsulin'),
-
         value: numberFormatter.format(entry.longInsulin),
       });
     }
@@ -140,20 +128,6 @@ export const useDiaryEntryCard = ({
       ? null
       : t(`diary.entry.mealRelation.${entry.mealRelation}`);
 
-  const openedTextTitle =
-    openedTextKey === 'comment'
-      ? commentTitle
-      : openedTextKey === 'aiAnalysis'
-        ? aiAnalysisTitle
-        : '';
-
-  const openedTextValue =
-    openedTextKey === 'comment'
-      ? comment
-      : openedTextKey === 'aiAnalysis'
-        ? aiAnalysis
-        : '';
-
   let syncIcon: SyncIconName = 'cloud-done-outline';
 
   let syncLabel = t('diary.entry.sync.synced');
@@ -190,22 +164,6 @@ export const useDiaryEntryCard = ({
     }
   }, [entry, onOpenPhoto, photoInteractive]);
 
-  const handleOpenComment = useCallback(() => {
-    if (!actionsDisabled) {
-      setOpenedTextKey('comment');
-    }
-  }, [actionsDisabled]);
-
-  const handleOpenAiAnalysis = useCallback(() => {
-    if (!actionsDisabled) {
-      setOpenedTextKey('aiAnalysis');
-    }
-  }, [actionsDisabled]);
-
-  const handleCloseText = useCallback(() => {
-    setOpenedTextKey(null);
-  }, []);
-
   return {
     dateTimeLabel,
     metrics,
@@ -225,14 +183,6 @@ export const useDiaryEntryCard = ({
     cardInteractive,
     photoInteractive,
 
-    openedText: {
-      visible: openedTextKey !== null,
-
-      title: openedTextTitle,
-
-      value: openedTextValue,
-    },
-
     syncStatus: {
       loading: synchronizing && !pendingDelete,
 
@@ -245,9 +195,5 @@ export const useDiaryEntryCard = ({
 
     handleCardPress,
     handlePhotoPress,
-
-    handleOpenComment,
-    handleOpenAiAnalysis,
-    handleCloseText,
   };
 };

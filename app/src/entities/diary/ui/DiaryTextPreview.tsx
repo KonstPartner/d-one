@@ -1,10 +1,19 @@
+import { useTheme } from '@emotion/react';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import type { PressableStateCallbackType } from 'react-native';
+import type {
+  GestureResponderEvent,
+  PressableStateCallbackType,
+} from 'react-native';
 
 import { useDiaryTextPreview } from '../model/useDiaryTextPreview';
 import * as s from '../styles/DiaryTextPreview';
 
+export type DiaryTextPreviewVariant = 'comment' | 'aiAnalysis';
+
 type DiaryTextPreviewProps = {
+  variant: DiaryTextPreviewVariant;
+
   title: string;
   text: string;
 
@@ -13,7 +22,14 @@ type DiaryTextPreviewProps = {
   onOpen: () => void;
 };
 
+const variantIcons = {
+  comment: 'chatbubble-ellipses-outline',
+  aiAnalysis: 'sparkles-outline',
+} as const;
+
 export const DiaryTextPreview = ({
+  variant,
+
   title,
   text,
 
@@ -21,59 +37,83 @@ export const DiaryTextPreview = ({
 
   onOpen,
 }: DiaryTextPreviewProps) => {
+  const theme = useTheme();
   const { t } = useTranslation();
 
-  const {
-    previewLineCount,
-    isTruncated,
+  const { previewLineCount, isTruncated, handleTextLayout, handleOpen } =
+    useDiaryTextPreview({
+      onOpen,
+    });
 
-    handleTextLayout,
-    handleOpen,
-  } = useDiaryTextPreview({
-    text,
-    onOpen,
-  });
+  const interactive = isTruncated && !disabled;
+
+  const iconColor =
+    variant === 'aiAnalysis'
+      ? theme.colors.metrics.longInsulin.text
+      : theme.colors.primary;
+
+  const handlePress = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+
+    if (interactive) {
+      handleOpen();
+    }
+  };
 
   return (
-    <s.Section>
-      <s.Title>{title}</s.Title>
+    <s.Root
+      $variant={variant}
+      disabled={!interactive}
+      pointerEvents={interactive ? 'auto' : 'none'}
+      accessibilityRole={interactive ? 'button' : undefined}
+      accessibilityLabel={
+        interactive
+          ? t('diary.entry.openFullText', {
+              title,
+            })
+          : undefined
+      }
+      onPress={interactive ? handlePress : undefined}
+      style={({ pressed }: PressableStateCallbackType) => ({
+        opacity: interactive && pressed ? 0.72 : 1,
+      })}
+    >
+      <s.Icon $variant={variant}>
+        <Ionicons
+          name={variantIcons[variant]}
+          size={theme.size.lg}
+          color={iconColor}
+        />
+      </s.Icon>
 
-      <s.TextFrame>
-        <s.PreviewText numberOfLines={previewLineCount} ellipsizeMode="tail">
-          {text}
-        </s.PreviewText>
+      <s.Content>
+        <s.Title numberOfLines={1}>{title}</s.Title>
 
-        <s.Measurement
-          accessible={false}
-          accessibilityElementsHidden
-          importantForAccessibility="no-hide-descendants"
-          pointerEvents="none"
-        >
-          <s.MeasurementText onTextLayout={handleTextLayout}>
+        <s.TextFrame>
+          <s.PreviewText numberOfLines={previewLineCount} ellipsizeMode="tail">
             {text}
-          </s.MeasurementText>
-        </s.Measurement>
-      </s.TextFrame>
+          </s.PreviewText>
+
+          <s.Measurement
+            accessible={false}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            pointerEvents="none"
+          >
+            <s.MeasurementText onTextLayout={handleTextLayout}>
+              {text}
+            </s.MeasurementText>
+          </s.Measurement>
+        </s.TextFrame>
+      </s.Content>
 
       {isTruncated && (
-        <s.MoreButton
-          accessibilityRole="button"
-          accessibilityLabel={t('diary.entry.openFullText', {
-            title,
-          })}
-          accessibilityState={{
-            disabled,
-          }}
-          disabled={disabled}
-          hitSlop={8}
-          onPress={handleOpen}
-          style={({ pressed }: PressableStateCallbackType) => ({
-            opacity: disabled ? 0.45 : pressed ? 0.7 : 1,
-          })}
-        >
-          <s.MoreText>{t('diary.entry.more')}</s.MoreText>
-        </s.MoreButton>
+        <Ionicons
+          name="chevron-forward"
+          size={theme.size.md}
+          color={theme.colors.muted}
+        />
       )}
-    </s.Section>
+    </s.Root>
   );
 };
