@@ -38,7 +38,16 @@
       "aiProjectDailyLimitReached": "AI analysis is temporarily unavailable because the service daily limit has been reached.",
       "aiRequestTooFrequent": "Please wait before starting another AI analysis.",
       "aiProviderUnavailable": "AI analysis is temporarily unavailable. Try again later.",
-      "aiTimeout": "AI analysis took too long. Try again later."
+      "aiTimeout": "AI analysis took too long. Try again later.",
+      "network": "A network error occurred. Check your connection and try again.",
+      "accessDenied": "Access denied.",
+      "userProfileNotFound": "The user profile was not found.",
+      "invalidUserProfile": "The user profile contains invalid data.",
+      "cloudUnauthenticated": "Sign in again to access the cloud diary.",
+      "cloudAccessDenied": "Access to this diary has not been granted.",
+      "cloudNetwork": "The cloud diary could not be loaded because of a network error.",
+      "cloudInvalidData": "The cloud diary contains invalid data.",
+      "cloudQueryConfiguration": "The cloud diary query is not configured correctly."
     },
     "notifications": {
       "type": {

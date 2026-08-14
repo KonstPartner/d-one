@@ -1,12 +1,11 @@
-import type { DiaryDay, DiaryDayKey } from '../model/diaryDay';
-import type { DiaryEntry } from '../model/diaryEntry';
+import type { DiaryDay, DiaryDayEntry, DiaryDayKey } from '../model/diaryDay';
 
 import { getDiaryDayKey } from './getDiaryDayKey';
 
-export const groupDiaryEntriesByDay = (
-  entries: readonly DiaryEntry[]
-): DiaryDay[] => {
-  const groups = new Map<DiaryDayKey, DiaryDay>();
+export const groupDiaryEntriesByDay = <TEntry extends DiaryDayEntry>(
+  entries: readonly TEntry[]
+): DiaryDay<TEntry>[] => {
+  const groups = new Map<DiaryDayKey, DiaryDay<TEntry>>();
 
   entries.forEach((entry) => {
     const key = getDiaryDayKey(entry.eventAt);

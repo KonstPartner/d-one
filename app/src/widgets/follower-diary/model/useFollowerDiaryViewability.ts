@@ -1,13 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, type ViewToken } from 'react-native';
 
-import type {
-  DiaryEntry,
-  DiaryEntryQuery,
-  DiaryListItem,
-} from '@entities/diary';
+import type { CloudDiaryEntry, DiaryListItem } from '@entities/diary';
 
-type OwnerDiaryListItem = DiaryListItem<DiaryEntry>;
+type FollowerDiaryListItem = DiaryListItem<CloudDiaryEntry>;
 
 const VIEWABILITY_CONFIG = {
   itemVisiblePercentThreshold: 10,
@@ -30,42 +26,32 @@ const haveSameIds = (
   return true;
 };
 
-type UseOwnerDiaryViewabilityParams = {
-  currentPage: number;
-
-  diaryQuery: DiaryEntryQuery;
-
-  loadedPage: number | undefined;
-};
-
-export const useOwnerDiaryViewability = ({
-  currentPage,
-
-  diaryQuery,
-
-  loadedPage,
-}: UseOwnerDiaryViewabilityParams) => {
-  const listRef = useRef<FlatList<OwnerDiaryListItem>>(null);
+export const useFollowerDiaryViewability = (ownerUid: string) => {
+  const listRef = useRef<FlatList<FollowerDiaryListItem>>(null);
 
   const [visibleEntryIds, setVisibleEntryIds] = useState<ReadonlySet<string>>(
     () => new Set()
   );
 
-  useEffect(() => {
-    if (loadedPage !== currentPage) {
-      return;
-    }
-
+  const resetViewability = useCallback(() => {
     setVisibleEntryIds(new Set());
 
     listRef.current?.scrollToOffset({
       offset: 0,
       animated: false,
     });
-  }, [currentPage, diaryQuery, loadedPage]);
+  }, []);
+
+  useEffect(() => {
+    resetViewability();
+  }, [ownerUid, resetViewability]);
 
   const handleViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken<OwnerDiaryListItem>[] }) => {
+    ({
+      viewableItems,
+    }: {
+      viewableItems: ViewToken<FollowerDiaryListItem>[];
+    }) => {
       const nextVisibleEntryIds = new Set<string>();
 
       for (const token of viewableItems) {
@@ -90,5 +76,7 @@ export const useOwnerDiaryViewability = ({
     viewabilityConfig: VIEWABILITY_CONFIG,
 
     handleViewableItemsChanged,
+
+    resetViewability,
   };
 };

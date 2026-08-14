@@ -17,6 +17,7 @@ import { createTabScreenOptions } from './screen-options/tabScreenOptions';
 
 export const AppTabs = () => {
   const theme = useTheme();
+
   const { t } = useTranslation();
 
   const { sessionUser } = useSession();
@@ -30,7 +31,10 @@ export const AppTabs = () => {
   const role = profile?.role ?? null;
 
   const isPending = role === null;
+
   const isUser = role === UserRole.User;
+
+  const isFollower = role === UserRole.Follower;
 
   const networkIconName: keyof typeof Ionicons.glyphMap =
     networkStatus === 'online'
@@ -38,6 +42,22 @@ export const AppTabs = () => {
       : networkStatus === 'offline'
         ? 'cloud-offline-outline'
         : 'help-circle-outline';
+
+  const renderDiaryIcon = ({
+    color,
+    size,
+    focused,
+  }: {
+    color: string;
+    size: number;
+    focused: boolean;
+  }) => (
+    <Ionicons
+      name={focused ? 'book' : 'book-outline'}
+      size={size}
+      color={color}
+    />
+  );
 
   return (
     <DiaryRuntimeBoundary enabled={isUser} userId={userId}>
@@ -65,13 +85,18 @@ export const AppTabs = () => {
 
             href: isUser ? undefined : null,
 
-            tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons
-                name={focused ? 'book' : 'book-outline'}
-                size={size}
-                color={color}
-              />
-            ),
+            tabBarIcon: renderDiaryIcon,
+          }}
+        />
+
+        <Tabs.Screen
+          name="follower-diary"
+          options={{
+            title: t('layout.tabs.diary'),
+
+            href: isFollower ? undefined : null,
+
+            tabBarIcon: renderDiaryIcon,
           }}
         />
 

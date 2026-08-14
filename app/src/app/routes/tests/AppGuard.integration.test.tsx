@@ -297,7 +297,7 @@ describe('AppGuard integration', () => {
     expect(mockRouterReplace).not.toHaveBeenCalled();
   });
 
-  it('redirects a follower from cloud to diary', async () => {
+  it('redirects a follower from cloud to follower diary', async () => {
     mockPathname = '/cloud';
 
     const user = createUser();
@@ -315,12 +315,12 @@ describe('AppGuard integration', () => {
     await emitAuthState(user);
 
     await waitFor(() => {
-      expect(mockRouterReplace).toHaveBeenCalledWith('/diary');
+      expect(mockRouterReplace).toHaveBeenCalledWith('/follower-diary');
     });
   });
 
-  it('keeps a follower on the diary route', async () => {
-    mockPathname = '/diary';
+  it('keeps a follower on the follower diary route', async () => {
+    mockPathname = '/follower-diary';
 
     const user = createUser();
 

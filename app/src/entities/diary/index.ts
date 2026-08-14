@@ -59,6 +59,11 @@ export {
   isDiaryEntrySearchField,
   isDiaryEntryTextSearchField,
 } from './api/local/diaryRepository.types';
+export type { DiaryListEntry, DiaryListItem } from './lib/buildDiaryListItems';
+export {
+  buildDiaryListItems,
+  getDiaryListItemKey,
+} from './lib/buildDiaryListItems';
 export { getDiaryDayKey } from './lib/getDiaryDayKey';
 export { groupDiaryEntriesByDay } from './lib/groupDiaryEntriesByDay';
 export type { CloudDiaryEntry } from './model/cloudDiaryEntry';
@@ -71,7 +76,7 @@ export {
   CLOUD_DIARY_PAGE_SIZE,
   CLOUD_DIARY_QUERY_LIMIT,
 } from './model/cloudDiaryPage';
-export type { DiaryDay, DiaryDayKey } from './model/diaryDay';
+export type { DiaryDay, DiaryDayEntry, DiaryDayKey } from './model/diaryDay';
 export type { DiaryEntry, DiarySyncStatus } from './model/diaryEntry';
 export { DIARY_SYNC_STATUSES, isDiarySyncStatus } from './model/diaryEntry';
 export {

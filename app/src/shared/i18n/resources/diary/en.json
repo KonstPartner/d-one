@@ -255,6 +255,19 @@
         "has": "Has",
         "doesNotHave": "Does not have"
       }
+    },
+    "follower": {
+      "menu": {
+        "refresh": "Refresh list"
+      },
+      "unassigned": {
+        "title": "No user assigned to follow",
+        "description": "A user must be assigned to your account before their diary can be viewed."
+      },
+      "empty": {
+        "title": "No entries",
+        "description": "There are no diary entries to display."
+      }
     }
   }
 }

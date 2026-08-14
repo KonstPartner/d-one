@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 
-import type { DiaryEntryQuery } from '@entities/diary';
-
 import {
-  buildOwnerDiaryListItems,
-  getOwnerDiaryListItemKey,
-} from './ownerDiaryList';
+  buildDiaryListItems,
+  type DiaryEntryQuery,
+  getDiaryListItemKey,
+} from '@entities/diary';
+
 import { useOwnerDiaryListState } from './useOwnerDiaryListState';
 import { useOwnerDiaryPagination } from './useOwnerDiaryPagination';
 import { useOwnerDiaryViewability } from './useOwnerDiaryViewability';
@@ -33,8 +33,7 @@ export const useOwnerDiaryList = (diaryQuery: DiaryEntryQuery) => {
   });
 
   const listItems = useMemo(
-    () =>
-      buildOwnerDiaryListItems(pagination.page?.items ?? [], collapsedDayKeys),
+    () => buildDiaryListItems(pagination.page?.items ?? [], collapsedDayKeys),
     [collapsedDayKeys, pagination.page?.items]
   );
 
@@ -67,7 +66,7 @@ export const useOwnerDiaryList = (diaryQuery: DiaryEntryQuery) => {
 
     reconcileCurrentPage: pagination.reconcileCurrentPage,
 
-    getListItemKey: getOwnerDiaryListItemKey,
+    getListItemKey: getDiaryListItemKey,
 
     viewabilityConfig: viewability.viewabilityConfig,
 
