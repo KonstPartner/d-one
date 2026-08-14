@@ -63,6 +63,12 @@ export const FIND_DIARY_ENTRY_BY_ID_SQL = `
   LIMIT 1
 `;
 
+export const buildFindDiaryEntriesByIdsSql = (entriesList: string): string => `
+  ${DIARY_ENTRY_SELECT_SQL}
+  WHERE user_id = $userId
+    AND id IN (${entriesList})
+`;
+
 export const FIND_PENDING_DIARY_ENTRY_IDS_SQL = `
   SELECT id
   FROM diary_entries
@@ -118,6 +124,25 @@ export const UPDATE_DIARY_ENTRY_WITH_PHOTO_SQL = `
     AND sync_status IN (
       ${MUTABLE_SYNC_STATUSES_SQL}
     )
+`;
+
+export const REPLACE_SYNCED_DIARY_ENTRY_SQL = `
+  UPDATE diary_entries
+  SET
+    glucose = $glucose,
+    meal_relation = $mealRelation,
+    short_insulin = $shortInsulin,
+    long_insulin = $longInsulin,
+    carbs_gram = $carbsGram,
+    comment = $comment,
+    ai_analysis = $aiAnalysis,
+    local_photo_uri = $localPhotoUri,
+    photo_path = $photoPath,
+    photo_url = $photoUrl,
+    event_at = $eventAt,
+    sync_status = 'synced'
+  WHERE id = $id
+    AND user_id = $userId
 `;
 
 export const UPDATE_DIARY_ENTRY_AI_ANALYSIS_SQL = `

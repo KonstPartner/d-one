@@ -3,6 +3,7 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 
 import { isDiaryEntryNumericRangeValid } from '@entities/diary';
+import * as ss from '@shared/styles';
 import { Button } from '@shared/ui';
 
 import type { NumericBoundary } from '../lib/numericRange';
@@ -89,7 +90,7 @@ export const DiaryNumericRangeFilter = ({
   );
 
   return (
-    <s.Root>
+    <s.Root style={[ss.Surface(theme, 'card'), ss.Rounded(theme, 'lg')]}>
       <s.Header>
         <s.Title>{label}</s.Title>
 
@@ -156,10 +157,8 @@ export const DiaryNumericRangeFilter = ({
         <Button
           accessibilityLabel={`${resetLabel}: ${label}`}
           disabled={!canReset}
-          tone="secondary"
-          variant="solid"
-          size="md"
-          style={s.getResetButtonStyle(theme)}
+          tone="input"
+          style={s.getResetButtonStyle}
           onPress={() => onReset(field)}
         >
           <Ionicons

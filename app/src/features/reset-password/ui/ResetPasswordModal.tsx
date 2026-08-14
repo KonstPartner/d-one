@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
-import { Input, PortalModal } from '@shared/ui';
+import * as ss from '@shared/styles';
+import { Button, Input, PortalModal } from '@shared/ui';
 
 import { useResetPassword } from '../model/useResetPassword';
 import * as s from '../styles/ResetPassword';
@@ -57,9 +58,9 @@ export const ResetPasswordModal = () => {
             onSubmitEditing={submit}
           />
 
-          <s.SubmitButton onPress={submit} loading={isPending}>
+          <Button style={ss.FullWidth} onPress={submit} loading={isPending}>
             <s.SubmitButtonText>{t('common.send')}</s.SubmitButtonText>
-          </s.SubmitButton>
+          </Button>
         </s.Container>
       </PortalModal>
     </>

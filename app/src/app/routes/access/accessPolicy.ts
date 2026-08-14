@@ -3,7 +3,9 @@ import { type RoutePath, ROUTES } from '@shared/routes';
 
 type RouteAccessPolicy = {
   guest: readonly RoutePath[];
+
   unverified: readonly RoutePath[];
+
   pending: readonly RoutePath[];
 
   [UserRole.User]: readonly RoutePath[];
@@ -20,5 +22,5 @@ export const ROUTE_ACCESS = {
 
   [UserRole.User]: [ROUTES.diary, ROUTES.cloud, ROUTES.profile],
 
-  [UserRole.Follower]: [ROUTES.profile],
+  [UserRole.Follower]: [ROUTES.followerDiary, ROUTES.profile],
 } as const satisfies RouteAccessPolicy;

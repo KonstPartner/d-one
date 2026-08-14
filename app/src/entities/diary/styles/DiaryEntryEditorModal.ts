@@ -14,7 +14,7 @@ export const Root = styled.View`
 export const Header = styled.View`
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 
   gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 

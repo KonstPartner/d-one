@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 
+import * as ss from '@shared/styles';
+
 import * as s from './styles';
 import { usePhotoViewer } from './usePhotoViewer';
 
@@ -149,7 +151,7 @@ export const PhotoViewer = ({
               accessibilityLabel={t('common.close')}
               hitSlop={theme.spacing.sm}
               onPress={onClose}
-              style={({ pressed }) => (pressed ? s.Pressed : undefined)}
+              style={ss.CenterContent}
             >
               <Ionicons
                 name="close"
@@ -161,7 +163,11 @@ export const PhotoViewer = ({
 
           {sourceUri !== null && !loading && (
             <s.HintArea edges={['bottom']} pointerEvents="none">
-              <s.HintText>{t('common.photoViewer.hint')}</s.HintText>
+              <s.HintText
+                style={ss.Text(theme, 'sm', 'regular', 'inverse', 'sm')}
+              >
+                {t('common.photoViewer.hint')}
+              </s.HintText>
             </s.HintArea>
           )}
         </s.Root>

@@ -15,10 +15,6 @@ type OpenedProps = {
 };
 
 export const SectionCard = styled.View`
-  ${({ theme }) => ss.Surface(theme, 'card')};
-
-  ${({ theme }) => ss.Rounded(theme, 'lg')};
-
   ${({ theme }) => ss.Shadow(theme, 'soft')};
 
   padding: ${({ theme }) => ss.px(theme.spacing.md)};

@@ -1,69 +1,33 @@
 import { useCallback, useState } from 'react';
-import type {
-  GestureResponderEvent,
-  NativeSyntheticEvent,
-  TextLayoutEventData,
-} from 'react-native';
-
-const PREVIEW_LINE_COUNT = 4;
+import type { NativeSyntheticEvent, TextLayoutEventData } from 'react-native';
 
 type UseDiaryTextPreviewParams = {
-  text: string;
   onOpen: () => void;
 };
 
-type TextMeasurement = {
-  text: string;
-  lineCount: number;
-};
+const PREVIEW_LINE_COUNT = 2;
 
-export const useDiaryTextPreview = ({
-  text,
-  onOpen,
-}: UseDiaryTextPreviewParams) => {
-  const [measurement, setMeasurement] = useState<TextMeasurement>({
-    text,
-    lineCount: 0,
-  });
+export const useDiaryTextPreview = ({ onOpen }: UseDiaryTextPreviewParams) => {
+  const [measuredLineCount, setMeasuredLineCount] = useState(0);
 
-  const isTruncated =
-    measurement.text === text && measurement.lineCount > PREVIEW_LINE_COUNT;
+  const isTruncated = measuredLineCount > PREVIEW_LINE_COUNT;
 
   const handleTextLayout = useCallback(
-    ({ nativeEvent }: NativeSyntheticEvent<TextLayoutEventData>) => {
-      const lineCount = nativeEvent.lines.length;
-
-      setMeasurement((currentMeasurement) => {
-        if (
-          currentMeasurement.text === text &&
-          currentMeasurement.lineCount === lineCount
-        ) {
-          return currentMeasurement;
-        }
-
-        return {
-          text,
-          lineCount,
-        };
-      });
+    (event: NativeSyntheticEvent<TextLayoutEventData>) => {
+      setMeasuredLineCount(event.nativeEvent.lines.length);
     },
-    [text]
+    []
   );
 
-  const handleOpen = useCallback(
-    (event: GestureResponderEvent) => {
-      event.stopPropagation();
-
+  const handleOpen = useCallback(() => {
+    if (isTruncated) {
       onOpen();
-    },
-    [onOpen]
-  );
+    }
+  }, [isTruncated, onOpen]);
 
   return {
     previewLineCount: PREVIEW_LINE_COUNT,
-
     isTruncated,
-
     handleTextLayout,
     handleOpen,
   };

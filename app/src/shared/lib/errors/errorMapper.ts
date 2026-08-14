@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 
-export type ErrorType = 'none' | 'firebase' | 'api';
+export type ErrorType = 'none' | 'firebase' | 'api' | 'cloud';
 
 type I18nErrorKey = `common.errors.${string}`;
 
@@ -50,6 +50,18 @@ const firebaseErrorDictionary: ErrorDictionary = {
   'common.errors.invalidGoogleIdToken': 'custom/invalid-google-id-token',
 
   'common.errors.currentUserEmailMissing': 'custom/no-current-user-email',
+
+  'common.errors.network': [
+    'unavailable',
+    'deadline-exceeded',
+    'auth/network-request-failed',
+  ],
+
+  'common.errors.accessDenied': ['permission-denied'],
+
+  'common.errors.userProfileNotFound': 'custom/user-profile-not-found',
+
+  'common.errors.invalidUserProfile': 'custom/invalid-user-profile',
 };
 
 const apiErrorDictionary: ErrorDictionary = {
@@ -88,6 +100,20 @@ const apiErrorDictionary: ErrorDictionary = {
   'common.errors.aiTimeout': 'AI_TIMEOUT',
 };
 
+const cloudErrorDictionary: ErrorDictionary = {
+  'common.errors.cloudUnauthenticated': 'UNAUTHENTICATED',
+
+  'common.errors.cloudAccessDenied': 'ACCESS_DENIED',
+
+  'common.errors.cloudNetwork': 'NETWORK_ERROR',
+
+  'common.errors.cloudInvalidData': 'INVALID_CLOUD_DATA',
+
+  'common.errors.cloudQueryConfiguration': 'QUERY_CONFIGURATION_ERROR',
+
+  'common.errors.unknown': 'UNKNOWN_ERROR',
+};
+
 const getErrorDictionary = (type: ErrorType): ErrorDictionary => {
   switch (type) {
     case 'firebase':
@@ -95,6 +121,9 @@ const getErrorDictionary = (type: ErrorType): ErrorDictionary => {
 
     case 'api':
       return apiErrorDictionary;
+
+    case 'cloud':
+      return cloudErrorDictionary;
 
     case 'none':
       return {};

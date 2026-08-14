@@ -75,8 +75,6 @@ export const Controls = styled(SafeAreaView)`
 `;
 
 export const CloseButton = styled.Pressable`
-  ${ss.CenterContent};
-
   ${({ theme }) => ss.Rounded(theme, 'full')};
 
   width: ${({ theme }) => ss.px(theme.control.height.md)};
@@ -85,10 +83,6 @@ export const CloseButton = styled.Pressable`
 
   background-color: ${({ theme }) => theme.colors.blackAlpha.xl};
 `;
-
-export const Pressed = css`
-  opacity: 0.7;
-` as ViewStyle;
 
 export const HintArea = styled(SafeAreaView)`
   position: absolute;
@@ -103,8 +97,6 @@ export const HintArea = styled(SafeAreaView)`
 `;
 
 export const HintText = styled.Text`
-  ${({ theme }) => ss.Text(theme, 'sm', 'regular', 'inverse', 'sm')};
-
   padding: ${({ theme }) =>
     `${ss.px(theme.spacing.sm)} ${ss.px(theme.spacing.md)}`};
 

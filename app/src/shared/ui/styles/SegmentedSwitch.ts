@@ -22,10 +22,6 @@ export const Label = styled.Text`
 `;
 
 export const Container = styled.View`
-  ${ss.FullWidth};
-
-  ${({ theme }) => ss.Surface(theme, 'input')};
-
   ${({ theme }) => ss.Rounded(theme, 'lg')};
 
   min-height: ${({ theme }) => ss.px(theme.control.height.md)};

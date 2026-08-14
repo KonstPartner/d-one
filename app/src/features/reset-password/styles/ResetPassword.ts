@@ -1,7 +1,6 @@
 import styled from '@emotion/native';
 
 import * as ss from '@shared/styles';
-import { Button } from '@shared/ui';
 
 export const Trigger = styled.Pressable`
   align-self: center;
@@ -28,10 +27,6 @@ export const Title = styled.Text`
 
 export const Description = styled.Text`
   ${({ theme }) => ss.Text(theme, 'sm', 'regular', 'muted', 'md')};
-`;
-
-export const SubmitButton = styled(Button)`
-  ${ss.FullWidth};
 `;
 
 export const SubmitButtonText = styled.Text`

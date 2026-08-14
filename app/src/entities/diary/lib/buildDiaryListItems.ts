@@ -1,8 +1,14 @@
-import type { DiaryDayKey, DiaryEntry } from '@entities/diary';
-import { groupDiaryEntriesByDay } from '@entities/diary';
 import { dateKit } from '@shared/lib/date';
 
-export type OwnerDiaryListItem =
+import type { DiaryDayEntry, DiaryDayKey } from '../model/diaryDay';
+
+import { groupDiaryEntriesByDay } from './groupDiaryEntriesByDay';
+
+export type DiaryListEntry = DiaryDayEntry & {
+  id: string;
+};
+
+export type DiaryListItem<TEntry extends DiaryListEntry> =
   | {
       type: 'dayHeader';
       dayKey: DiaryDayKey;
@@ -11,16 +17,16 @@ export type OwnerDiaryListItem =
     }
   | {
       type: 'entry';
-      entry: DiaryEntry;
+      entry: TEntry;
     };
 
-export const buildOwnerDiaryListItems = (
-  entries: readonly DiaryEntry[],
+export const buildDiaryListItems = <TEntry extends DiaryListEntry>(
+  entries: readonly TEntry[],
   collapsedDayKeys: ReadonlySet<DiaryDayKey>
-): OwnerDiaryListItem[] => {
+): DiaryListItem<TEntry>[] => {
   const days = groupDiaryEntriesByDay(entries);
 
-  const items: OwnerDiaryListItem[] = [];
+  const items: DiaryListItem<TEntry>[] = [];
 
   days.forEach((day) => {
     const firstEntry = day.entries[0];
@@ -31,6 +37,7 @@ export const buildOwnerDiaryListItems = (
 
     items.push({
       type: 'dayHeader',
+
       dayKey: day.key,
 
       title: dateKit.format(firstEntry.eventAt, {
@@ -57,5 +64,7 @@ export const buildOwnerDiaryListItems = (
   return items;
 };
 
-export const getOwnerDiaryListItemKey = (item: OwnerDiaryListItem): string =>
+export const getDiaryListItemKey = <TEntry extends DiaryListEntry>(
+  item: DiaryListItem<TEntry>
+): string =>
   item.type === 'dayHeader' ? `day:${item.dayKey}` : `entry:${item.entry.id}`;

@@ -305,8 +305,6 @@ export const DiaryEntryEditorFields = ({
 
             <Button
               tone="danger"
-              variant="ghost"
-              size="sm"
               disabled={disabled}
               accessibilityLabel={t('diary.selection.delete')}
               onPress={onDeleteAiAnalysis}

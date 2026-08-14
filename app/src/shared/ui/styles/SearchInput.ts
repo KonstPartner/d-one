@@ -14,8 +14,6 @@ export const Root = styled.View`
 `;
 
 export const SearchButton = styled.Pressable`
-  ${ss.CenterContent};
-
   ${({ theme }) => ss.Rounded(theme, 'full')};
 
   position: absolute;

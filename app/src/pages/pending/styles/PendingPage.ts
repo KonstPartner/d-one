@@ -3,14 +3,10 @@ import styled from '@emotion/native';
 import * as ss from '@shared/styles';
 
 export const Content = styled.View`
-  ${ss.CenterContent};
-
   flex: 1;
 `;
 
 export const Card = styled.View`
-  ${ss.FullWidth};
-
   ${({ theme }) => ss.CardContainer(theme, '2xl', 'xl')};
 
   max-width: 520px;
@@ -21,10 +17,6 @@ export const Card = styled.View`
 `;
 
 export const Icon = styled.View`
-  ${ss.CenterContent};
-
-  ${({ theme }) => ss.Rounded(theme, 'full')};
-
   width: ${({ theme }) => ss.px(theme.spacing['5xl'] + theme.spacing['2xl'])};
 
   height: ${({ theme }) => ss.px(theme.spacing['5xl'] + theme.spacing['2xl'])};
@@ -33,8 +25,6 @@ export const Icon = styled.View`
 `;
 
 export const TextContent = styled.View`
-  ${ss.FullWidth};
-
   ${({ theme }) => ss.Stack(theme, 'md')};
 
   align-items: center;

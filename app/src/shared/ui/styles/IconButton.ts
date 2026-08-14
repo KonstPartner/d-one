@@ -2,7 +2,7 @@ import styled from '@emotion/native';
 import type { Theme } from '@emotion/react';
 import type { TextStyle, ViewStyle } from 'react-native';
 
-export type IconButtonTone = 'primary' | 'secondary' | 'success' | 'danger';
+import { ButtonTone } from './Button';
 
 export type IconButtonVariant = 'solid' | 'outline' | 'ghost';
 
@@ -15,7 +15,7 @@ export const Root = styled.Pressable`
   justify-content: center;
 `;
 
-const getToneColor = (theme: Theme, tone: IconButtonTone): string => {
+const getToneColor = (theme: Theme, tone: ButtonTone): string => {
   switch (tone) {
     case 'success':
       return theme.colors.success;
@@ -23,7 +23,7 @@ const getToneColor = (theme: Theme, tone: IconButtonTone): string => {
     case 'danger':
       return theme.colors.danger;
 
-    case 'secondary':
+    case 'muted':
       return theme.colors.text;
 
     default:
@@ -33,7 +33,7 @@ const getToneColor = (theme: Theme, tone: IconButtonTone): string => {
 
 const getBackgroundColor = (
   theme: Theme,
-  tone: IconButtonTone,
+  tone: ButtonTone,
   variant: IconButtonVariant
 ): string => {
   if (variant === 'ghost') {
@@ -44,7 +44,7 @@ const getBackgroundColor = (
     return theme.colors.card;
   }
 
-  if (tone === 'secondary') {
+  if (tone === 'muted') {
     return theme.colors.input;
   }
 
@@ -53,14 +53,14 @@ const getBackgroundColor = (
 
 const getBorderColor = (
   theme: Theme,
-  tone: IconButtonTone,
+  tone: ButtonTone,
   variant: IconButtonVariant
 ): string => {
   if (variant !== 'outline') {
     return 'transparent';
   }
 
-  if (tone === 'secondary') {
+  if (tone === 'muted') {
     return theme.colors.border;
   }
 
@@ -69,10 +69,10 @@ const getBorderColor = (
 
 export const getIconButtonForegroundColor = (
   theme: Theme,
-  tone: IconButtonTone,
+  tone: ButtonTone,
   variant: IconButtonVariant
 ): string => {
-  if (variant === 'solid' && tone !== 'secondary') {
+  if (variant === 'solid' && tone !== 'muted') {
     return theme.colors.white;
   }
 
@@ -81,7 +81,7 @@ export const getIconButtonForegroundColor = (
 
 export const getIconButtonStyle = (
   theme: Theme,
-  tone: IconButtonTone,
+  tone: ButtonTone,
   variant: IconButtonVariant,
   size: IconButtonSize
 ): ViewStyle => {

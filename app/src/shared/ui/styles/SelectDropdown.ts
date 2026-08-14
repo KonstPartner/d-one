@@ -119,8 +119,6 @@ export const Label = styled.Text`
 `;
 
 export const Field = styled.Pressable<OpenedProps>`
-  ${({ theme }) => ss.Surface(theme, 'input')};
-
   ${({ theme }) => ss.Rounded(theme, 'md')};
 
   min-height: 46px;
@@ -164,8 +162,6 @@ export const Dropdown = styled.View<DropdownProps>`
   border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
   background-color: ${({ theme }) => theme.colors.input};
-
-  ${ss.PrimeLayer};
 
   ${({ $hasLabel, $inlineOptions }) =>
     getDropdownPosition($hasLabel, $inlineOptions)};

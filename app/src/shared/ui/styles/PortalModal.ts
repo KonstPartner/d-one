@@ -33,7 +33,6 @@ export const SafeArea = styled(SafeAreaView)`
 
 export const Sheet = styled.View`
   ${({ theme }) => ss.PageRoot(theme)};
-  ${ss.FullWidth};
 
   height: 100%;
 `;

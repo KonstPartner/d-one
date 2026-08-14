@@ -57,7 +57,8 @@ export const Input = ({
 
       <s.Field
         ref={inputRef}
-        style={[isFocused && s.getFocusedFieldStyle(theme), style]}
+        $focused={isFocused}
+        style={style}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}

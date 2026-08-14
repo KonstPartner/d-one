@@ -2,6 +2,7 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
+import * as ss from '@shared/styles';
 import { Calendar, type CalendarMarkedDates } from '@shared/ui';
 
 import type {
@@ -100,7 +101,7 @@ export const DiaryFilterDateSection = ({
   };
 
   return (
-    <s.SectionCard>
+    <s.SectionCard style={[ss.Surface(theme, 'card'), ss.Rounded(theme, 'lg')]}>
       <s.SectionHeader>
         <s.SectionTitle>{t('diary.filters.date.title')}</s.SectionTitle>
 

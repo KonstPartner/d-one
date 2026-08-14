@@ -35,8 +35,8 @@ jest.mock('@entities/diary', () => {
     '@entities/diary/api/local/diaryRepository.types'
   );
 
-  const { groupDiaryEntriesByDay } = jest.requireActual(
-    '@entities/diary/lib/groupDiaryEntriesByDay'
+  const { buildDiaryListItems, getDiaryListItemKey } = jest.requireActual(
+    '@entities/diary/lib/buildDiaryListItems'
   );
 
   return {
@@ -44,7 +44,8 @@ jest.mock('@entities/diary', () => {
 
     createDefaultDiaryEntryQuery,
 
-    groupDiaryEntriesByDay,
+    buildDiaryListItems,
+    getDiaryListItemKey,
 
     useReadyDiaryDatabase: () => ({
       userId: 'user-1',

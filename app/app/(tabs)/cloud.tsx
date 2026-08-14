@@ -1,7 +1,3 @@
-import Cloud from '@pages/Cloud';
+import { CloudPage } from '@pages/cloud';
 
-const cloud = () => {
-  return <Cloud />;
-};
-
-export default cloud;
+export default CloudPage;

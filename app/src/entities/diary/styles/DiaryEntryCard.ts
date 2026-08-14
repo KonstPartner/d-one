@@ -3,24 +3,39 @@ import styled from '@emotion/native';
 import * as ss from '@shared/styles';
 import type { SelectDropdownTone } from '@shared/ui';
 
-import type { DiaryMetricKey } from '../model/useDiaryEntryCard';
-
 type CardProps = {
-  $pendingDelete: boolean;
+  $selected: boolean;
+};
+
+type BodyProps = {
+  $selectionActive: boolean;
+};
+
+type SelectionIndicatorProps = {
+  $selected: boolean;
 };
 
 type MealRelationProps = {
   $tone: SelectDropdownTone;
 };
 
+export type DiaryMetricKey =
+  | 'glucose'
+  | 'carbsGram'
+  | 'shortInsulin'
+  | 'longInsulin';
+
 type MetricProps = {
   $metric: DiaryMetricKey;
 };
 
 export const Card = styled.Pressable<CardProps>`
+  position: relative;
+
   border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
 
-  border-color: ${({ theme }) => theme.colors.border};
+  border-color: ${({ theme, $selected }) =>
+    $selected ? theme.colors.primary : theme.colors.border};
 
   border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
@@ -29,8 +44,41 @@ export const Card = styled.Pressable<CardProps>`
   overflow: hidden;
 `;
 
-export const Body = styled.View`
+export const SelectionIndicator = styled.View<SelectionIndicatorProps>`
+  position: absolute;
+
+  top: ${({ theme }) => ss.px(theme.spacing.sm)};
+
+  left: ${({ theme }) => ss.px(theme.spacing.sm)};
+
+  z-index: 2;
+
+  width: ${({ theme }) => ss.px(theme.control.height.sm)};
+
+  height: ${({ theme }) => ss.px(theme.control.height.sm)};
+
+  align-items: center;
+  justify-content: center;
+
+  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
+
+  border-color: ${({ theme, $selected }) =>
+    $selected ? theme.colors.primary : theme.colors.border};
+
+  border-radius: ${({ theme }) => ss.px(theme.radius.full)};
+
+  background-color: ${({ theme, $selected }) =>
+    $selected ? theme.colors.primary : theme.colors.card};
+`;
+
+export const Body = styled.View<BodyProps>`
   ${({ theme }) => ss.Inset(theme, 'md')};
+
+  padding-left: ${({ theme, $selectionActive }) =>
+    ss.px(
+      theme.spacing.md +
+        ($selectionActive ? theme.control.height.sm + theme.spacing.sm : 0)
+    )};
 
   gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;

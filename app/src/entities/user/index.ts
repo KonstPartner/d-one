@@ -1,4 +1,4 @@
-export { getUserProfile } from './api/getUserProfile';
+export { getUserProfile, getUserProfileFromServer } from './api/getUserProfile';
 export {
   getLocalUserProfile,
   removeLocalUserProfile,

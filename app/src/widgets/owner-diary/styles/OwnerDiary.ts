@@ -13,8 +13,6 @@ export const ToolbarArea = styled.View`
 `;
 
 export const SyncProgress = styled.View`
-  ${({ theme }) => ss.Surface(theme, 'card')};
-
   ${({ theme }) => ss.Rounded(theme, 'md')};
 
   flex-shrink: 0;

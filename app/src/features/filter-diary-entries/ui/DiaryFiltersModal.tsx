@@ -7,6 +7,7 @@ import {
   DIARY_ENTRY_PRESENCE_VALUES,
   type DiaryEntryPresence,
 } from '@entities/diary';
+import * as ss from '@shared/styles';
 import { Button, IconButton, PortalModal, SegmentedSwitch } from '@shared/ui';
 
 import { useDiaryFiltersModal } from '../model/useDiaryFiltersModal';
@@ -71,7 +72,7 @@ export const DiaryFiltersModal = ({ onApply }: DiaryFiltersModalProps) => {
     value: DiaryEntryPresence,
     onChange: (nextValue: DiaryEntryPresence) => void
   ) => (
-    <s.SectionCard>
+    <s.SectionCard style={[ss.Surface(theme, 'card'), ss.Rounded(theme, 'lg')]}>
       <s.SectionTitle>{label}</s.SectionTitle>
 
       <SegmentedSwitch
@@ -96,9 +97,7 @@ export const DiaryFiltersModal = ({ onApply }: DiaryFiltersModalProps) => {
           <IconButton
             icon="close"
             accessibilityLabel={t('diary.filters.closeAccessibilityLabel')}
-            tone="secondary"
-            variant="ghost"
-            size="sm"
+            tone="input"
             onPress={modal.handleClose}
           />
         </s.Header>
@@ -179,13 +178,11 @@ export const DiaryFiltersModal = ({ onApply }: DiaryFiltersModalProps) => {
           <Button
             accessibilityLabel={t('diary.filters.clear')}
             disabled={!modal.canClear}
-            tone="secondary"
-            variant="solid"
-            size="lg"
+            tone={!modal.canClear ? 'card' : 'input'}
             style={s.footerButtonStyle}
             onPress={modal.handleClear}
           >
-            <s.SecondaryButtonText>
+            <s.SecondaryButtonText $disabled={!modal.canClear}>
               {t('diary.filters.clear')}
             </s.SecondaryButtonText>
           </Button>
@@ -195,9 +192,7 @@ export const DiaryFiltersModal = ({ onApply }: DiaryFiltersModalProps) => {
               modal.isApplied ? 'diary.filters.applied' : 'diary.filters.apply'
             )}
             disabled={!modal.canApply}
-            tone={modal.isApplied ? 'secondary' : 'primary'}
-            variant="solid"
-            size="lg"
+            tone={modal.isApplied ? 'card' : 'primary'}
             style={s.footerButtonStyle}
             onPress={modal.handleApply}
           >

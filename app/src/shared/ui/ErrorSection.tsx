@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
+import * as ss from '@shared/styles';
+
 import { Button } from './Button';
 import * as s from './styles/ErrorSection';
 
@@ -12,7 +14,7 @@ export const ErrorSection = ({ message, onRetry }: ErrorSectionProps) => {
   const { t } = useTranslation();
 
   return (
-    <s.Root>
+    <s.Root style={ss.CenterContent}>
       <s.Message>{message}</s.Message>
 
       <Button tone="primary" onPress={onRetry}>

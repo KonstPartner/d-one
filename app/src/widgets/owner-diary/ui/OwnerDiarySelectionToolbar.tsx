@@ -1,5 +1,7 @@
+import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
+import * as ss from '@shared/styles';
 import { Button, IconButton } from '@shared/ui';
 
 import * as s from '../styles/OwnerDiarySelectionToolbar';
@@ -11,6 +13,8 @@ type OwnerDiarySelectionToolbarProps = {
 
   deleting: boolean;
   synchronizing: boolean;
+
+  operationsDisabled: boolean;
   synchronizeDisabled: boolean;
 
   onToggleAll: () => void;
@@ -26,6 +30,8 @@ export const OwnerDiarySelectionToolbar = ({
 
   deleting,
   synchronizing,
+
+  operationsDisabled,
   synchronizeDisabled,
 
   onToggleAll,
@@ -33,11 +39,13 @@ export const OwnerDiarySelectionToolbar = ({
   onDelete,
   onClose,
 }: OwnerDiarySelectionToolbarProps) => {
+  const theme = useTheme();
+
   const { t } = useTranslation();
 
   return (
     <s.Root>
-      <s.Count>
+      <s.Count style={ss.Subheading(theme)}>
         {t('diary.selection.selected', {
           count: selectedCount,
         })}
@@ -51,12 +59,10 @@ export const OwnerDiarySelectionToolbar = ({
               : 'diary.selection.selectAll'
           )}
           disabled={deleting || synchronizing}
-          tone="secondary"
-          variant="outline"
-          size="md"
+          tone="input"
           onPress={onToggleAll}
         >
-          <s.SecondaryActionText>
+          <s.SecondaryActionText style={ss.Text(theme)}>
             {t(
               allSelected
                 ? 'diary.selection.clearAll'
@@ -67,39 +73,38 @@ export const OwnerDiarySelectionToolbar = ({
 
         <Button
           accessibilityLabel={t('diary.selection.synchronize')}
-          disabled={synchronizeDisabled}
+          disabled={operationsDisabled || synchronizeDisabled}
           loading={synchronizing}
           tone="primary"
-          variant="outline"
-          size="md"
           onPress={onSynchronize}
         >
-          <s.SecondaryActionText>
+          <s.DeleteActionText style={ss.Text(theme)}>
             {t('diary.selection.synchronize')}
-          </s.SecondaryActionText>
+          </s.DeleteActionText>
         </Button>
 
         <Button
           accessibilityLabel={t('diary.selection.delete')}
-          disabled={selectedCount === 0 || synchronizing}
+          disabled={operationsDisabled || selectedCount === 0 || synchronizing}
           loading={deleting}
           tone="danger"
-          variant="solid"
-          size="md"
           onPress={onDelete}
         >
-          <s.DeleteActionText>{t('diary.selection.delete')}</s.DeleteActionText>
+          <s.DeleteActionText style={ss.Text(theme)}>
+            {t('diary.selection.delete')}
+          </s.DeleteActionText>
         </Button>
 
-        <IconButton
-          icon="close"
-          accessibilityLabel={t('diary.selection.close')}
-          disabled={deleting || synchronizing}
-          tone="secondary"
-          variant="ghost"
-          size="md"
-          onPress={onClose}
-        />
+        <s.CloseView>
+          <IconButton
+            icon="close"
+            accessibilityLabel={t('diary.selection.close')}
+            disabled={deleting || synchronizing}
+            tone="muted"
+            variant="solid"
+            onPress={onClose}
+          />
+        </s.CloseView>
       </s.Actions>
     </s.Root>
   );

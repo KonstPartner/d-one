@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { FlatList, type ViewToken } from 'react-native';
 
-import type { DiaryEntryQuery } from '@entities/diary';
+import type {
+  DiaryEntry,
+  DiaryEntryQuery,
+  DiaryListItem,
+} from '@entities/diary';
 
-import type { OwnerDiaryListItem } from './ownerDiaryList';
+type OwnerDiaryListItem = DiaryListItem<DiaryEntry>;
 
 const VIEWABILITY_CONFIG = {
   itemVisiblePercentThreshold: 10,
