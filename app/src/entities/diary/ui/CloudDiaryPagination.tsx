@@ -27,7 +27,7 @@ export const CloudDiaryPagination = ({
 }: CloudDiaryPaginationProps) => (
   <s.Root>
     <s.Action
-      accessibilityLabel={nextLabel}
+      accessibilityLabel={previousLabel}
       tone="secondary"
       variant="outline"
       size="md"
@@ -36,11 +36,11 @@ export const CloudDiaryPagination = ({
         void onPrevious();
       }}
     >
-      <s.ActionText>{nextLabel}</s.ActionText>
+      <s.ActionText>{previousLabel}</s.ActionText>
     </s.Action>
 
     <s.Action
-      accessibilityLabel={previousLabel}
+      accessibilityLabel={nextLabel}
       tone="secondary"
       variant="outline"
       size="md"
@@ -49,7 +49,7 @@ export const CloudDiaryPagination = ({
         void onNext();
       }}
     >
-      <s.ActionText>{previousLabel}</s.ActionText>
+      <s.ActionText>{nextLabel}</s.ActionText>
     </s.Action>
   </s.Root>
 );

@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useDeleteDiaryEntriesMutation } from '@features/delete-diary-entries';
 import { showNotification } from '@shared/lib/notifications';
+import { useSelection } from '@shared/lib/selection';
 
 type UseOwnerDiarySelectionParams = {
   availableEntryIds: ReadonlySet<string>;
@@ -16,57 +17,36 @@ type UseOwnerDiarySelectionParams = {
 
 export const useOwnerDiarySelection = ({
   availableEntryIds,
+
   onEnter,
+
   onEntriesMarkedForDeletion,
 }: UseOwnerDiarySelectionParams) => {
   const { t } = useTranslation();
 
   const deleteMutation = useDeleteDiaryEntriesMutation();
 
-  const [selectionMode, setSelectionMode] = useState(false);
-
-  const [selectedEntryIds, setSelectedEntryIds] = useState<ReadonlySet<string>>(
-    () => new Set()
-  );
-
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
 
-  useEffect(() => {
-    setSelectedEntryIds((currentIds) => {
-      const nextIds = new Set(
-        Array.from(currentIds).filter((entryId) =>
-          availableEntryIds.has(entryId)
-        )
-      );
+  const selection = useSelection({
+    availableIds: availableEntryIds,
 
-      if (nextIds.size === currentIds.size) {
-        return currentIds;
-      }
+    disabled: deleteMutation.isPending,
+  });
 
-      return nextIds;
-    });
-  }, [availableEntryIds]);
-
-  const selectedCount = selectedEntryIds.size;
-
-  const allSelected =
-    availableEntryIds.size > 0 && selectedCount === availableEntryIds.size;
-
-  const canDelete = selectedCount > 0 && !deleteMutation.isPending;
+  const canDelete = selection.selectedCount > 0 && !deleteMutation.isPending;
 
   const enterSelection = useCallback(() => {
-    if (availableEntryIds.size === 0 || deleteMutation.isPending) {
+    const entered = selection.enter();
+
+    if (!entered) {
       return;
     }
 
-    setSelectedEntryIds(new Set());
-
     setDeleteConfirmVisible(false);
 
-    setSelectionMode(true);
-
     onEnter();
-  }, [availableEntryIds.size, deleteMutation.isPending, onEnter]);
+  }, [onEnter, selection.enter]);
 
   const exitSelection = useCallback(() => {
     if (deleteMutation.isPending) {
@@ -75,48 +55,8 @@ export const useOwnerDiarySelection = ({
 
     setDeleteConfirmVisible(false);
 
-    setSelectedEntryIds(new Set());
-
-    setSelectionMode(false);
-  }, [deleteMutation.isPending]);
-
-  const toggleEntry = useCallback(
-    (entryId: string) => {
-      if (
-        !selectionMode ||
-        deleteMutation.isPending ||
-        !availableEntryIds.has(entryId)
-      ) {
-        return;
-      }
-
-      setSelectedEntryIds((currentIds) => {
-        const nextIds = new Set(currentIds);
-
-        if (nextIds.has(entryId)) {
-          nextIds.delete(entryId);
-        } else {
-          nextIds.add(entryId);
-        }
-
-        return nextIds;
-      });
-    },
-    [availableEntryIds, deleteMutation.isPending, selectionMode]
-  );
-
-  const toggleAll = useCallback(() => {
-    if (!selectionMode || deleteMutation.isPending) {
-      return;
-    }
-
-    setSelectedEntryIds(allSelected ? new Set() : new Set(availableEntryIds));
-  }, [allSelected, availableEntryIds, deleteMutation.isPending, selectionMode]);
-
-  const isEntrySelected = useCallback(
-    (entryId: string): boolean => selectedEntryIds.has(entryId),
-    [selectedEntryIds]
-  );
+    selection.exit();
+  }, [deleteMutation.isPending, selection.exit]);
 
   const requestDelete = useCallback(() => {
     if (!canDelete) {
@@ -139,16 +79,14 @@ export const useOwnerDiarySelection = ({
       return;
     }
 
-    const entryIds = Array.from(selectedEntryIds);
+    const entryIds = selection.selectedIdsArray;
 
     try {
       const deletedEntryIds = await deleteMutation.mutateAsync(entryIds);
 
       setDeleteConfirmVisible(false);
 
-      setSelectedEntryIds(new Set());
-
-      setSelectionMode(false);
+      selection.forceExit();
 
       void Promise.resolve(onEntriesMarkedForDeletion(deletedEntryIds)).catch(
         (error) => {
@@ -167,42 +105,40 @@ export const useOwnerDiarySelection = ({
     }
   }, [
     canDelete,
-    deleteMutation,
+    deleteMutation.mutateAsync,
     onEntriesMarkedForDeletion,
-    selectedEntryIds,
+    selection.forceExit,
+    selection.selectedIdsArray,
     t,
   ]);
 
-  const selectedEntryIdsArray = useMemo(
-    () => Array.from(selectedEntryIds),
-    [selectedEntryIds]
-  );
-
   return {
-    selectionMode,
+    selectionMode: selection.selectionMode,
 
-    selectedEntryIds,
-    selectedEntryIdsArray,
+    selectedEntryIds: selection.selectedIds,
 
-    selectedCount,
+    selectedEntryIdsArray: selection.selectedIdsArray,
 
-    allSelected,
+    selectedCount: selection.selectedCount,
+
+    allSelected: selection.allSelected,
 
     deleteConfirmVisible,
 
     isDeleting: deleteMutation.isPending,
 
-    canEnterSelection: availableEntryIds.size > 0 && !deleteMutation.isPending,
+    canEnterSelection: selection.canEnter,
 
     canDelete,
 
     enterSelection,
     exitSelection,
 
-    toggleEntry,
-    toggleAll,
+    toggleEntry: selection.toggle,
 
-    isEntrySelected,
+    toggleAll: selection.toggleAll,
+
+    isEntrySelected: selection.isSelected,
 
     requestDelete,
 

@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { FlatList, type ListRenderItem, RefreshControl } from 'react-native';
 import { useTheme } from '@emotion/react';
-import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -51,6 +50,13 @@ export const OwnerDiaryList = ({
 
   const { t } = useTranslation();
 
+  const handleToggleSelection = useCallback(
+    (entry: DiaryEntry) => {
+      onToggleSelection(entry.id);
+    },
+    [onToggleSelection]
+  );
+
   const renderEntry = useCallback(
     (entry: DiaryEntry) => {
       const selected = selectedEntryIds.has(entry.id);
@@ -58,40 +64,15 @@ export const OwnerDiaryList = ({
       const synchronizing = isEntrySyncing(entry.id);
 
       if (selectionMode) {
-        const disabled = entry.syncStatus === 'pendingDelete' || synchronizing;
-
         return (
-          <s.SelectableEntry
-            accessibilityRole="checkbox"
-            accessibilityLabel={t('diary.selection.entryAccessibilityLabel')}
-            accessibilityState={{
-              checked: selected,
-
-              disabled,
-            }}
-            disabled={disabled}
-            onPress={() => {
-              onToggleSelection(entry.id);
-            }}
-          >
-            <s.SelectionIndicator $selected={selected}>
-              {selected && (
-                <Ionicons
-                  name="checkmark"
-                  size={theme.size.md}
-                  color={theme.colors.white}
-                />
-              )}
-            </s.SelectionIndicator>
-
-            <s.EntryContent $selected={selected}>
-              <DiaryEntryCard
-                entry={entry}
-                isVisible={list.visibleEntryIds.has(entry.id)}
-                synchronizing={synchronizing}
-              />
-            </s.EntryContent>
-          </s.SelectableEntry>
+          <DiaryEntryCard
+            entry={entry}
+            isVisible={list.visibleEntryIds.has(entry.id)}
+            synchronizing={synchronizing}
+            selectionActive
+            selected={selected}
+            onToggleSelection={handleToggleSelection}
+          />
         );
       }
 
@@ -108,16 +89,13 @@ export const OwnerDiaryList = ({
       );
     },
     [
+      handleToggleSelection,
       isEntrySyncing,
       list.visibleEntryIds,
       onOpenEntry,
       onOpenPhoto,
-      onToggleSelection,
       selectedEntryIds,
       selectionMode,
-      t,
-      theme.colors.white,
-      theme.size.md,
     ]
   );
 
@@ -179,7 +157,7 @@ export const OwnerDiaryList = ({
         </s.Empty>
       }
       ListFooterComponent={
-        list.page === undefined ? null : (
+        selectionMode || list.page === undefined ? null : (
           <s.Footer>
             <Pagination
               currentPage={list.currentPage}

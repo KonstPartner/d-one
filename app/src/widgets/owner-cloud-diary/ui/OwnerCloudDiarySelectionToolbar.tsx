@@ -52,14 +52,16 @@ export const OwnerCloudDiarySelectionToolbar = ({
           </s.ActionText>
         </Button>
 
-        <IconButton
-          icon="close"
-          accessibilityLabel={t('diary.selection.close')}
-          tone="secondary"
-          variant="ghost"
-          size="md"
-          onPress={onClose}
-        />
+        <s.CloseView>
+          <IconButton
+            icon="close"
+            accessibilityLabel={t('diary.selection.close')}
+            tone="secondary"
+            variant="solid"
+            size="md"
+            onPress={onClose}
+          />
+        </s.CloseView>
       </s.Actions>
     </s.Root>
   );

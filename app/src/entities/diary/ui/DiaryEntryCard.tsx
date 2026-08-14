@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 
 import type { DiaryEntry } from '../model/diaryEntry';
 import { useDiaryEntryCard } from '../model/useDiaryEntryCard';
@@ -16,6 +16,11 @@ type DiaryEntryCardProps = {
   isVisible?: boolean;
   synchronizing?: boolean;
 
+  selectionActive?: boolean;
+  selected?: boolean;
+
+  onToggleSelection?: (entry: DiaryEntry) => void;
+
   onPress?: (entry: DiaryEntry) => void;
 
   onOpenPhoto?: (entry: DiaryEntry) => void;
@@ -26,6 +31,11 @@ const DiaryEntryCardComponent = ({
 
   isVisible = false,
   synchronizing = false,
+
+  selectionActive = false,
+  selected = false,
+
+  onToggleSelection,
 
   onPress,
   onOpenPhoto,
@@ -47,26 +57,40 @@ const DiaryEntryCardComponent = ({
     onOpenPhoto,
   });
 
+  const handleToggleSelection = useCallback(() => {
+    if (!selectionActive || actionsDisabled) {
+      return;
+    }
+
+    onToggleSelection?.(entry);
+  }, [actionsDisabled, entry, onToggleSelection, selectionActive]);
+
   return (
     <DiaryEntryCardShell
       testID={`diary-entry-card-${entry.id}`}
       disabled={actionsDisabled}
       dimmed={pendingDelete}
-      accessibilityLabel={
-        onPress !== undefined ? editAccessibilityLabel : undefined
+      selectionActive={selectionActive}
+      selectionDisabled={actionsDisabled}
+      selected={selected}
+      accessibilityLabel={editAccessibilityLabel}
+      onPress={
+        !selectionActive && onPress !== undefined ? handleCardPress : undefined
       }
-      onPress={onPress !== undefined ? handleCardPress : undefined}
+      onToggleSelection={selectionActive ? handleToggleSelection : undefined}
     >
       <DiaryEntryPhoto
         entryId={entry.id}
         localPhotoUri={entry.localPhotoUri}
         photoUrl={entry.photoUrl}
         isVisible={isVisible}
-        disabled={actionsDisabled}
-        onPress={photoInteractive ? handlePhotoPress : undefined}
+        disabled={actionsDisabled || selectionActive}
+        onPress={
+          !selectionActive && photoInteractive ? handlePhotoPress : undefined
+        }
       />
 
-      <DiaryEntryCardBody>
+      <DiaryEntryCardBody selectionActive={selectionActive}>
         <DiaryEntryMeta
           eventAt={entry.eventAt}
           mealRelation={entry.mealRelation}
@@ -82,7 +106,7 @@ const DiaryEntryCardComponent = ({
         <DiaryEntryTextSections
           comment={entry.comment}
           aiAnalysis={entry.aiAnalysis}
-          disabled={actionsDisabled}
+          disabled={actionsDisabled || selectionActive}
         />
 
         <DiaryEntrySyncStatus

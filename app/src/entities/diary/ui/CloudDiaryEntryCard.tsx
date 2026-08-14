@@ -37,22 +37,27 @@ const CloudDiaryEntryCardComponent = ({
     !selectionActive && entry.photoUrl !== null && onOpenPhoto !== undefined;
 
   const handleToggleSelection = useCallback(() => {
-    if (selectionActive) {
-      onToggleSelection?.(entry);
+    if (!selectionActive) {
+      return;
     }
+
+    onToggleSelection?.(entry);
   }, [entry, onToggleSelection, selectionActive]);
 
   const handlePhotoPress = useCallback(() => {
-    if (photoInteractive) {
-      onOpenPhoto?.(entry);
+    if (!photoInteractive) {
+      return;
     }
+
+    onOpenPhoto?.(entry);
   }, [entry, onOpenPhoto, photoInteractive]);
 
   return (
     <DiaryEntryCardShell
       testID={`cloud-diary-entry-card-${entry.id}`}
+      selectionActive={selectionActive}
       selected={selected}
-      onPress={selectionActive ? handleToggleSelection : undefined}
+      onToggleSelection={selectionActive ? handleToggleSelection : undefined}
     >
       <CloudDiaryEntryPhoto
         entryId={entry.id}
@@ -62,7 +67,7 @@ const CloudDiaryEntryCardComponent = ({
         onPress={photoInteractive ? handlePhotoPress : undefined}
       />
 
-      <DiaryEntryCardBody>
+      <DiaryEntryCardBody selectionActive={selectionActive}>
         <DiaryEntryMeta
           eventAt={entry.eventAt}
           mealRelation={entry.mealRelation}

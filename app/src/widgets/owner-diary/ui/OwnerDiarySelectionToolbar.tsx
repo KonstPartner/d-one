@@ -91,15 +91,17 @@ export const OwnerDiarySelectionToolbar = ({
           <s.DeleteActionText>{t('diary.selection.delete')}</s.DeleteActionText>
         </Button>
 
-        <IconButton
-          icon="close"
-          accessibilityLabel={t('diary.selection.close')}
-          disabled={deleting || synchronizing}
-          tone="secondary"
-          variant="ghost"
-          size="md"
-          onPress={onClose}
-        />
+        <s.CloseView>
+          <IconButton
+            icon="close"
+            accessibilityLabel={t('diary.selection.close')}
+            disabled={deleting || synchronizing}
+            tone="secondary"
+            variant="solid"
+            size="md"
+            onPress={onClose}
+          />
+        </s.CloseView>
       </s.Actions>
     </s.Root>
   );
