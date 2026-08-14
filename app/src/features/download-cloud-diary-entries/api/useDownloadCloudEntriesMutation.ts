@@ -8,27 +8,11 @@ import {
 } from '@entities/diary';
 
 import type {
-  CloudDiaryDownloadConflict,
   CloudDiaryDownloadResolutionMap,
   CloudDiaryDownloadSession,
-  DownloadCloudEntriesResult,
 } from '../model/cloudDiaryDownload.types';
 
 import { CloudDiaryDownloadService } from './CloudDiaryDownloadService';
-
-export type BeginCloudDiaryDownloadResult =
-  | {
-      status: 'conflicts';
-
-      session: CloudDiaryDownloadSession;
-
-      conflicts: readonly CloudDiaryDownloadConflict[];
-    }
-  | {
-      status: 'completed';
-
-      result: DownloadCloudEntriesResult;
-    };
 
 type CompleteCloudDiaryDownloadInput = {
   session: CloudDiaryDownloadSession;
@@ -78,29 +62,7 @@ export const useDownloadCloudEntriesMutation = () => {
       'begin',
     ],
 
-    mutationFn: async (
-      entries: readonly CloudDiaryEntry[]
-    ): Promise<BeginCloudDiaryDownloadResult> => {
-      const session = await service.begin(entries);
-
-      if (session.conflicts.length === 0) {
-        const result = await session.complete(new Map());
-
-        return {
-          status: 'completed',
-
-          result,
-        };
-      }
-
-      return {
-        status: 'conflicts',
-
-        session,
-
-        conflicts: session.conflicts,
-      };
-    },
+    mutationFn: (entries: readonly CloudDiaryEntry[]) => service.begin(entries),
 
     networkMode: 'always',
 

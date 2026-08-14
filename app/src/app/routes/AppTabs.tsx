@@ -9,6 +9,7 @@ import { HeaderMenu } from '@widgets/header-menu';
 import { useSession } from '@entities/session';
 import { userProfileQueryOptions, UserRole } from '@entities/user';
 import { useNetwork } from '@shared/lib/network';
+import { PlatformOS } from '@shared/lib/platform';
 import { Row } from '@shared/styles';
 
 import { DiaryRuntimeBoundary } from '../providers/DiaryRuntimeBoundary';
@@ -35,6 +36,8 @@ export const AppTabs = () => {
   const isUser = role === UserRole.User;
 
   const isFollower = role === UserRole.Follower;
+
+  const supportsOwnerCloud = !PlatformOS.WEB;
 
   const networkIconName: keyof typeof Ionicons.glyphMap =
     networkStatus === 'online'
@@ -105,7 +108,7 @@ export const AppTabs = () => {
           options={{
             title: t('layout.tabs.cloud'),
 
-            href: isUser ? undefined : null,
+            href: isUser && supportsOwnerCloud ? undefined : null,
 
             tabBarIcon: ({ color, size, focused }) => (
               <Ionicons

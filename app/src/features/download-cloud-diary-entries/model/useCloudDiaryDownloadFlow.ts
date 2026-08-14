@@ -24,7 +24,11 @@ export type CloudDiaryDownloadStep =
 export const useCloudDiaryDownloadFlow = () => {
   const mutation = useDownloadCloudEntriesMutation();
 
+  const mountedRef = useRef(true);
+
   const activeSessionRef = useRef<CloudDiaryDownloadSession | null>(null);
+
+  const stepRef = useRef<CloudDiaryDownloadStep>('idle');
 
   const [step, setStep] = useState<CloudDiaryDownloadStep>('idle');
 
@@ -40,14 +44,23 @@ export const useCloudDiaryDownloadFlow = () => {
 
   const [result, setResult] = useState<DownloadCloudEntriesResult | null>(null);
 
-  useEffect(
-    () => () => {
+  const setFlowStep = useCallback((nextStep: CloudDiaryDownloadStep) => {
+    stepRef.current = nextStep;
+
+    setStep(nextStep);
+  }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    return () => {
+      mountedRef.current = false;
+
       activeSessionRef.current?.cancel();
 
       activeSessionRef.current = null;
-    },
-    []
-  );
+    };
+  }, []);
 
   const resetFlow = useCallback(() => {
     activeSessionRef.current = null;
@@ -60,8 +73,8 @@ export const useCloudDiaryDownloadFlow = () => {
 
     setResult(null);
 
-    setStep('idle');
-  }, []);
+    setFlowStep('idle');
+  }, [setFlowStep]);
 
   const finishWithResult = useCallback(
     (downloadResult: DownloadCloudEntriesResult) => {
@@ -75,9 +88,9 @@ export const useCloudDiaryDownloadFlow = () => {
 
       setResult(downloadResult);
 
-      setStep('result');
+      setFlowStep('result');
     },
-    []
+    [setFlowStep]
   );
 
   const runComplete = useCallback(
@@ -86,7 +99,15 @@ export const useCloudDiaryDownloadFlow = () => {
 
       nextResolutions: CloudDiaryDownloadResolutionMap
     ): Promise<void> => {
-      setStep('processing');
+      /*
+       * From this point the session is no longer cancellable by UI.
+       *
+       * complete() may already be writing entries to SQLite, so an unmount
+       * must not call session.cancel() while processing is in progress.
+       */
+      activeSessionRef.current = null;
+
+      setFlowStep('processing');
 
       try {
         const downloadResult = await mutation.complete({
@@ -94,60 +115,91 @@ export const useCloudDiaryDownloadFlow = () => {
           resolutions: nextResolutions,
         });
 
+        if (!mountedRef.current) {
+          return;
+        }
+
         finishWithResult(downloadResult);
       } catch (error) {
-        activeSessionRef.current = null;
+        if (!mountedRef.current) {
+          return;
+        }
 
-        setStep('idle');
+        setFlowStep('idle');
 
         throw error;
       }
     },
-    [finishWithResult, mutation.complete]
+    [finishWithResult, mutation.complete, setFlowStep]
   );
 
   const start = useCallback(
     async (entries: readonly CloudDiaryEntry[]): Promise<void> => {
-      if (step !== 'idle') {
+      /*
+       * stepRef changes synchronously, unlike React state.
+       * This prevents two fast taps from starting two begin() calls
+       * before the component has rerendered.
+       */
+      if (stepRef.current !== 'idle') {
         return;
       }
 
       setResult(null);
 
-      setStep('checking');
+      setFlowStep('checking');
 
       try {
-        const beginResult = await mutation.begin(entries);
+        const session = await mutation.begin(entries);
 
-        if (beginResult.status === 'completed') {
-          finishWithResult(beginResult.result);
+        /*
+         * The component may have unmounted while begin() was:
+         * - waiting for active sync;
+         * - reading SQLite;
+         * - detecting conflicts.
+         *
+         * In that case begin() has already acquired the global transfer
+         * lease, therefore the returned session must be explicitly
+         * cancelled.
+         */
+        if (!mountedRef.current) {
+          session.cancel();
 
           return;
         }
 
-        activeSessionRef.current = beginResult.session;
+        activeSessionRef.current = session;
 
-        setConflicts(beginResult.conflicts);
+        setConflicts(session.conflicts);
 
         setReviewIndex(0);
 
         setResolutions(new Map());
 
-        setStep('strategy');
+        if (session.conflicts.length === 0) {
+          await runComplete(session, new Map());
+
+          return;
+        }
+
+        setFlowStep('strategy');
       } catch (error) {
         activeSessionRef.current = null;
 
-        setStep('idle');
+        if (!mountedRef.current) {
+          return;
+        }
+
+        setFlowStep('idle');
 
         throw error;
       }
     },
-    [finishWithResult, mutation.begin, step]
+    [mutation.begin, runComplete, setFlowStep]
   );
 
   const chooseStrategy = useCallback(
     async (strategy: CloudDiaryDownloadConflictStrategy): Promise<void> => {
-      if (step !== 'strategy') {
+      if (stepRef.current !== 'strategy') {
         return;
       }
 
@@ -162,7 +214,7 @@ export const useCloudDiaryDownloadFlow = () => {
 
         setResolutions(new Map());
 
-        setStep('review');
+        setFlowStep('review');
 
         return;
       }
@@ -183,7 +235,7 @@ export const useCloudDiaryDownloadFlow = () => {
 
       await runComplete(session, nextResolutions);
     },
-    [conflicts, runComplete, step]
+    [conflicts, runComplete, setFlowStep]
   );
 
   const resolveCurrent = useCallback(
@@ -192,7 +244,7 @@ export const useCloudDiaryDownloadFlow = () => {
 
       applyToRemaining = false
     ): Promise<void> => {
-      if (step !== 'review') {
+      if (stepRef.current !== 'review') {
         return;
       }
 
@@ -236,26 +288,26 @@ export const useCloudDiaryDownloadFlow = () => {
 
       setReviewIndex((currentIndex) => currentIndex + 1);
     },
-    [conflicts, resolutions, reviewIndex, runComplete, step]
+    [conflicts, resolutions, reviewIndex, runComplete]
   );
 
   const cancel = useCallback(() => {
-    if (step !== 'strategy' && step !== 'review') {
+    if (stepRef.current !== 'strategy' && stepRef.current !== 'review') {
       return;
     }
 
     activeSessionRef.current?.cancel();
 
     resetFlow();
-  }, [resetFlow, step]);
+  }, [resetFlow]);
 
   const closeResult = useCallback(() => {
-    if (step !== 'result') {
+    if (stepRef.current !== 'result') {
       return;
     }
 
     resetFlow();
-  }, [resetFlow, step]);
+  }, [resetFlow]);
 
   const currentConflict =
     step === 'review' ? (conflicts[reviewIndex] ?? null) : null;

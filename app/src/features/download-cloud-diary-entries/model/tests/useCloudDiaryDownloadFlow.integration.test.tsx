@@ -114,18 +114,25 @@ describe('useCloudDiaryDownloadFlow', () => {
   it('finishes immediately when there are no conflicts', async () => {
     const cloud = createCloudEntry('entry-1');
 
+    const session = createSession([]);
+
     const downloadResult = createResult();
 
-    mockBegin.mockResolvedValue({
-      status: 'completed',
+    mockBegin.mockResolvedValue(session);
 
-      result: downloadResult,
-    });
+    mockComplete.mockResolvedValue(downloadResult);
 
     const { result: hook } = renderHook(() => useCloudDiaryDownloadFlow());
 
     await act(async () => {
       await hook.current.start([cloud]);
+    });
+
+    expect(mockComplete).toHaveBeenCalledTimes(1);
+
+    expect(mockComplete).toHaveBeenCalledWith({
+      session,
+      resolutions: expect.any(Map),
     });
 
     expect(hook.current.step).toBe('result');
@@ -138,13 +145,7 @@ describe('useCloudDiaryDownloadFlow', () => {
 
     const session = createSession([conflict]);
 
-    mockBegin.mockResolvedValue({
-      status: 'conflicts',
-
-      session,
-
-      conflicts: session.conflicts,
-    });
+    mockBegin.mockResolvedValue(session);
 
     const { result: hook } = renderHook(() => useCloudDiaryDownloadFlow());
 
@@ -164,13 +165,7 @@ describe('useCloudDiaryDownloadFlow', () => {
 
     const session = createSession(conflicts);
 
-    mockBegin.mockResolvedValue({
-      status: 'conflicts',
-
-      session,
-
-      conflicts,
-    });
+    mockBegin.mockResolvedValue(session);
 
     mockComplete.mockResolvedValue({
       added: 0,
@@ -211,13 +206,7 @@ describe('useCloudDiaryDownloadFlow', () => {
 
     const session = createSession(conflicts);
 
-    mockBegin.mockResolvedValue({
-      status: 'conflicts',
-
-      session,
-
-      conflicts,
-    });
+    mockBegin.mockResolvedValue(session);
 
     mockComplete.mockResolvedValue({
       added: 0,
@@ -280,13 +269,7 @@ describe('useCloudDiaryDownloadFlow', () => {
 
     const session = createSession(conflicts);
 
-    mockBegin.mockResolvedValue({
-      status: 'conflicts',
-
-      session,
-
-      conflicts,
-    });
+    mockBegin.mockResolvedValue(session);
 
     mockComplete.mockResolvedValue({
       added: 0,
@@ -333,13 +316,7 @@ describe('useCloudDiaryDownloadFlow', () => {
 
     const session = createSession([conflict]);
 
-    mockBegin.mockResolvedValue({
-      status: 'conflicts',
-
-      session,
-
-      conflicts: session.conflicts,
-    });
+    mockBegin.mockResolvedValue(session);
 
     const { result: hook } = renderHook(() => useCloudDiaryDownloadFlow());
 
@@ -365,13 +342,7 @@ describe('useCloudDiaryDownloadFlow', () => {
 
     const session = createSession([conflict]);
 
-    mockBegin.mockResolvedValue({
-      status: 'conflicts',
-
-      session,
-
-      conflicts: session.conflicts,
-    });
+    mockBegin.mockResolvedValue(session);
 
     const { result: hook, unmount } = renderHook(() =>
       useCloudDiaryDownloadFlow()
