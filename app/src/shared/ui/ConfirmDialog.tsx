@@ -65,7 +65,7 @@ export const ConfirmDialog = ({
               </s.ConfirmButtonText>
             </s.ActionButton>
 
-            <s.ActionButton tone="secondary" onPress={onClose}>
+            <s.ActionButton tone="input" onPress={onClose}>
               <s.CancelButtonText>{t('common.cancel')}</s.CancelButtonText>
             </s.ActionButton>
           </s.Actions>

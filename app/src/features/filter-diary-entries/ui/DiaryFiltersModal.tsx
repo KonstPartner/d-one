@@ -97,9 +97,7 @@ export const DiaryFiltersModal = ({ onApply }: DiaryFiltersModalProps) => {
           <IconButton
             icon="close"
             accessibilityLabel={t('diary.filters.closeAccessibilityLabel')}
-            tone="secondary"
-            variant="ghost"
-            size="sm"
+            tone="input"
             onPress={modal.handleClose}
           />
         </s.Header>
@@ -180,11 +178,11 @@ export const DiaryFiltersModal = ({ onApply }: DiaryFiltersModalProps) => {
           <Button
             accessibilityLabel={t('diary.filters.clear')}
             disabled={!modal.canClear}
-            tone="muted"
+            tone={!modal.canClear ? 'card' : 'input'}
             style={s.footerButtonStyle}
             onPress={modal.handleClear}
           >
-            <s.SecondaryButtonText>
+            <s.SecondaryButtonText $disabled={!modal.canClear}>
               {t('diary.filters.clear')}
             </s.SecondaryButtonText>
           </Button>
@@ -194,7 +192,7 @@ export const DiaryFiltersModal = ({ onApply }: DiaryFiltersModalProps) => {
               modal.isApplied ? 'diary.filters.applied' : 'diary.filters.apply'
             )}
             disabled={!modal.canApply}
-            tone={modal.isApplied ? 'muted' : 'primary'}
+            tone={modal.isApplied ? 'card' : 'primary'}
             style={s.footerButtonStyle}
             onPress={modal.handleApply}
           >

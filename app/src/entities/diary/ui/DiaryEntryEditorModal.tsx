@@ -51,26 +51,7 @@ export const DiaryEntryEditorModal = ({
     >
       <s.Root>
         <s.Header>
-          <Button
-            tone="secondary"
-            variant="ghost"
-            size="sm"
-            disabled={isBusy}
-            accessibilityRole="button"
-            accessibilityLabel={t('diary.form.cancelAccessibilityLabel')}
-            onPress={onClose}
-            style={s.headerActionStyle}
-          >
-            <Ionicons
-              name="chevron-back"
-              size={theme.size.md}
-              color={isBusy ? theme.colors.muted : theme.colors.text}
-            />
-          </Button>
-
           <s.Title>{title}</s.Title>
-
-          <s.HeaderPlaceholder />
         </s.Header>
 
         <s.Scroll
@@ -83,8 +64,7 @@ export const DiaryEntryEditorModal = ({
 
         <s.Footer>
           <Button
-            tone="secondary"
-            variant="solid"
+            tone="input"
             disabled={isBusy}
             accessibilityRole="button"
             accessibilityLabel={t('diary.form.cancel')}
@@ -106,7 +86,6 @@ export const DiaryEntryEditorModal = ({
 
           <Button
             tone="primary"
-            variant="solid"
             loading={isSubmitting}
             disabled={submitDisabled}
             accessibilityRole="button"

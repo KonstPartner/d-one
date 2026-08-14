@@ -157,8 +157,8 @@ export const DiaryNumericRangeFilter = ({
         <Button
           accessibilityLabel={`${resetLabel}: ${label}`}
           disabled={!canReset}
-          tone="muted"
-          style={s.getResetButtonStyle(theme)}
+          tone="input"
+          style={s.getResetButtonStyle}
           onPress={() => onReset(field)}
         >
           <Ionicons

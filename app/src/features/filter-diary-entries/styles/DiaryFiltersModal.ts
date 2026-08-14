@@ -8,6 +8,10 @@ type AppliedProps = {
   $applied: boolean;
 };
 
+type DisabledProps = {
+  $disabled: boolean;
+};
+
 export const Root = styled.View`
   flex: 1;
 `;
@@ -82,10 +86,11 @@ export const footerButtonStyle: ViewStyle = {
   flex: 1,
 };
 
-export const SecondaryButtonText = styled.Text`
+export const SecondaryButtonText = styled.Text<DisabledProps>`
   ${({ theme }) => ss.Body(theme)};
 
-  color: ${({ theme }) => theme.colors.text};
+  color: ${({ theme, $disabled }) =>
+    $disabled ? theme.colors.muted : theme.colors.white};
 
   font-weight: ${({ theme }) => theme.weight.bold};
 `;

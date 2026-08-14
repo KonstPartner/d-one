@@ -5,7 +5,7 @@ import * as ss from '@shared/styles';
 
 export type ButtonTone = keyof Pick<
   Theme['colors'],
-  'primary' | 'success' | 'warning' | 'muted' | 'danger'
+  'primary' | 'success' | 'warning' | 'muted' | 'danger' | 'card' | 'input'
 >;
 
 type RootProps = {

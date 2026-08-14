@@ -106,12 +106,7 @@ export const DiaryTextModal = ({
           </s.Body>
 
           <s.Footer>
-            <s.FooterButton
-              tone="primary"
-              variant="solid"
-              size="lg"
-              onPress={onClose}
-            >
+            <s.FooterButton tone="primary" onPress={onClose}>
               <s.FooterButtonText>{t('common.close')}</s.FooterButtonText>
             </s.FooterButton>
           </s.Footer>

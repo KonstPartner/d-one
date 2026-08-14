@@ -51,9 +51,7 @@ export const OwnerDiarySelectionToolbar = ({
               : 'diary.selection.selectAll'
           )}
           disabled={deleting || synchronizing}
-          tone="secondary"
-          variant="outline"
-          size="md"
+          tone="input"
           onPress={onToggleAll}
         >
           <s.SecondaryActionText>
@@ -70,8 +68,6 @@ export const OwnerDiarySelectionToolbar = ({
           disabled={synchronizeDisabled}
           loading={synchronizing}
           tone="primary"
-          variant="outline"
-          size="md"
           onPress={onSynchronize}
         >
           <s.SecondaryActionText>
@@ -84,8 +80,6 @@ export const OwnerDiarySelectionToolbar = ({
           disabled={selectedCount === 0 || synchronizing}
           loading={deleting}
           tone="danger"
-          variant="solid"
-          size="md"
           onPress={onDelete}
         >
           <s.DeleteActionText>{t('diary.selection.delete')}</s.DeleteActionText>
@@ -96,9 +90,7 @@ export const OwnerDiarySelectionToolbar = ({
             icon="close"
             accessibilityLabel={t('diary.selection.close')}
             disabled={deleting || synchronizing}
-            tone="secondary"
-            variant="solid"
-            size="md"
+            tone="input"
             onPress={onClose}
           />
         </s.CloseView>

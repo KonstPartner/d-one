@@ -38,9 +38,7 @@ export const OwnerCloudDiarySelectionToolbar = ({
               ? 'diary.selection.clearAll'
               : 'diary.selection.selectAll'
           )}
-          tone="secondary"
-          variant="outline"
-          size="md"
+          tone="input"
           onPress={onToggleAll}
         >
           <s.ActionText>
@@ -56,9 +54,7 @@ export const OwnerCloudDiarySelectionToolbar = ({
           <IconButton
             icon="close"
             accessibilityLabel={t('diary.selection.close')}
-            tone="secondary"
-            variant="solid"
-            size="md"
+            tone="input"
             onPress={onClose}
           />
         </s.CloseView>

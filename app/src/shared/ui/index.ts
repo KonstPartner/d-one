@@ -1,9 +1,4 @@
-export type {
-  ButtonProps,
-  ButtonSize,
-  ButtonTone,
-  ButtonVariant,
-} from './Button';
+export type { ButtonProps } from './Button';
 export { Button } from './Button';
 export type {
   CalendarComponentProps,
@@ -17,7 +12,6 @@ export { ErrorSection } from './ErrorSection';
 export type {
   IconButtonProps,
   IconButtonSize,
-  IconButtonTone,
   IconButtonVariant,
 } from './IconButton';
 export { IconButton } from './IconButton';

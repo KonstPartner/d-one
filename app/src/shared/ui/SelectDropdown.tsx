@@ -61,7 +61,6 @@ export const SelectDropdown = <T,>({
       {label ? <s.Label>{label}</s.Label> : null}
 
       <s.Field
-        style={ss.Surface(theme, 'input')}
         $opened={opened}
         accessibilityRole="button"
         accessibilityState={{

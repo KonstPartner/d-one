@@ -1,6 +1,4 @@
 import styled from '@emotion/native';
-import type { Theme } from '@emotion/react';
-import type { ViewStyle } from 'react-native';
 
 import * as ss from '@shared/styles';
 
@@ -99,12 +97,10 @@ export const Input = styled.TextInput<InputProps>`
   font-size: ${({ theme }) => ss.px(theme.size.md)};
 `;
 
-export const getResetButtonStyle = (theme: Theme): ViewStyle => ({
-  width: theme.control.height.md,
-
+export const getResetButtonStyle = {
   paddingHorizontal: 0,
   paddingVertical: 0,
-});
+};
 
 export const ErrorText = styled.Text`
   ${({ theme }) => ss.Caption(theme)};
