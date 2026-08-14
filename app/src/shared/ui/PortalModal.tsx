@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Portal } from 'react-native-portalize';
 
 import { PlatformOS } from '@shared/lib/platform';
+import * as ss from '@shared/styles';
 
 import { KeyboardAvoidingContent } from './KeyboardAvoidingContent';
 import * as s from './styles/PortalModal';
@@ -65,7 +66,9 @@ export const PortalModal = ({
 
       <s.Container>
         <s.SafeArea edges={['top', 'bottom']}>
-          <s.Sheet style={s.getSheetStyle(theme, withoutPadding)}>
+          <s.Sheet
+            style={[s.getSheetStyle(theme, withoutPadding), ss.FullWidth]}
+          >
             <KeyboardAvoidingContent>
               {withoutScroll ? (
                 <s.Content>{children}</s.Content>

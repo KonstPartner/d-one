@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 
+import * as ss from '@shared/styles';
+
 import type { InputProps } from './Input';
 import * as s from './styles/SearchInput';
 
@@ -49,7 +51,10 @@ export const SearchInput = ({
     <s.Root>
       <s.SearchButton
         accessibilityRole="button"
-        style={s.getSearchButtonStyle(theme, withLabel, isFocused)}
+        style={[
+          s.getSearchButtonStyle(theme, withLabel, isFocused),
+          ss.CenterContent,
+        ]}
         onPress={handleSearch}
       >
         <Ionicons

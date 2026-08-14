@@ -1,9 +1,14 @@
+import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
+
+import * as ss from '@shared/styles';
+import { Button } from '@shared/ui';
 
 import { useVerifyEmail } from '../model/useVerifyEmail';
 import * as s from '../styles/VerifyEmail';
 
 export const VerifyEmail = () => {
+  const theme = useTheme();
   const { t } = useTranslation();
 
   const { email, verificationEmailSent, isPending, send, check } =
@@ -14,7 +19,7 @@ export const VerifyEmail = () => {
   }
 
   return (
-    <s.Container>
+    <s.Container style={[ss.FullWidth, ss.Stack(theme, 'xl')]}>
       <s.Title>{t('auth.verifyEmail.title')}</s.Title>
 
       <s.Description>
@@ -25,7 +30,7 @@ export const VerifyEmail = () => {
 
       <s.Email>{email}</s.Email>
 
-      <s.SubmitButton
+      <Button
         onPress={verificationEmailSent ? check : send}
         loading={isPending}
       >
@@ -34,7 +39,7 @@ export const VerifyEmail = () => {
             ? t('auth.verifyEmail.buttons.check')
             : t('auth.verifyEmail.buttons.send')}
         </s.ButtonText>
-      </s.SubmitButton>
+      </Button>
     </s.Container>
   );
 };

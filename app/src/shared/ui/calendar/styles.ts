@@ -38,8 +38,6 @@ export const WeekHeaderText = styled.Text`
 export const Day = styled.Pressable``;
 
 export const DayContainer = styled.View<DayContainerProps>`
-  ${ss.CenterContent};
-
   ${({ theme }) => ss.Rounded(theme, 'full')};
 
   width: 40px;

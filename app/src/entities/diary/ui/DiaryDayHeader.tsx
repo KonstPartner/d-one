@@ -2,7 +2,8 @@ import { memo } from 'react';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import type { PressableStateCallbackType } from 'react-native';
+
+import * as ss from '@shared/styles';
 
 import type { DiaryDayKey } from '../model/diaryDay';
 import * as s from '../styles/DiaryDayHeader';
@@ -42,6 +43,7 @@ const DiaryDayHeaderComponent = ({
 
   return (
     <s.Root
+      style={[ss.Surface(theme, 'card'), ss.Rounded(theme, 'md')]}
       accessibilityRole="button"
       accessibilityLabel={`${title}, ${entriesLabel}`}
       accessibilityState={{
@@ -53,9 +55,6 @@ const DiaryDayHeaderComponent = ({
       onPress={() => {
         onToggle(dayKey);
       }}
-      style={({ pressed }: PressableStateCallbackType) => ({
-        opacity: disabled ? 1 : pressed ? 0.7 : 1,
-      })}
     >
       <s.Main>
         <Ionicons

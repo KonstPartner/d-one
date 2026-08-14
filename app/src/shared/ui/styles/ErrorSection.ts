@@ -3,8 +3,6 @@ import styled from '@emotion/native';
 import * as ss from '@shared/styles';
 
 export const Root = styled.View`
-  ${ss.CenterContent};
-
   ${({ theme }) => ss.Stack(theme, 'md')};
 `;
 

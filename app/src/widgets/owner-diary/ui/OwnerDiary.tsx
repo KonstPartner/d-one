@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
 import { CreateDiaryEntryModal } from '@features/create-diary-entry';
@@ -12,6 +13,7 @@ import {
   getDiaryDayKey,
 } from '@entities/diary';
 import { showNotification } from '@shared/lib/notifications';
+import * as ss from '@shared/styles';
 import { ConfirmDialog, Spinner } from '@shared/ui';
 
 import { useOwnerDiary } from '../model/useOwnerDiary';
@@ -27,6 +29,7 @@ import { OwnerDiaryPreparationModal } from './OwnerDiaryPreparationModal';
 import { OwnerDiarySelectionToolbar } from './OwnerDiarySelectionToolbar';
 
 export const OwnerDiary = () => {
+  const theme = useTheme();
   const { t } = useTranslation();
 
   const diary = useOwnerDiary();
@@ -213,7 +216,7 @@ export const OwnerDiary = () => {
       </s.ToolbarArea>
 
       {diarySync.batchProgress !== null && (
-        <s.SyncProgress>
+        <s.SyncProgress style={ss.Surface(theme, 'card')}>
           <Spinner size={18} />
 
           <s.SyncProgressText>

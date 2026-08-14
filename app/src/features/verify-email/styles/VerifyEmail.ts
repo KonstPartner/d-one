@@ -1,12 +1,8 @@
 import styled from '@emotion/native';
 
 import * as ss from '@shared/styles';
-import { Button } from '@shared/ui';
 
 export const Container = styled.View`
-  ${ss.FullWidth};
-
-  ${({ theme }) => ss.Stack(theme, 'xl')};
   ${({ theme }) => ss.InsetY(theme, 'xl')};
 
   flex: 1;
@@ -36,10 +32,6 @@ export const Email = styled.Text`
 
   align-self: center;
   text-align: center;
-`;
-
-export const SubmitButton = styled(Button)`
-  ${ss.FullWidth};
 `;
 
 export const ButtonText = styled.Text`

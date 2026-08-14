@@ -8,14 +8,18 @@ export const Label = styled.Text`
   ${({ theme }) => ss.Label(theme)};
 `;
 
-export const Field = styled.TextInput`
-  ${ss.FullWidth};
+export const Field = styled.TextInput<{ $focused: boolean }>`
+  width: 100%;
 
-  background-color: ${({ theme }) => theme.colors.input};
+  background-color: ${({ theme, $focused }) =>
+    $focused ? theme.colors.card : theme.colors.input};
 
   border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
   border-style: solid;
-  border-color: transparent;
+
+  border-color: ${({ theme, $focused }) =>
+    $focused ? theme.colors.primary : 'transparent'};
+
   border-radius: ${({ theme }) => ss.px(theme.radius.sm)};
 
   padding: ${({ theme }) =>
@@ -23,10 +27,6 @@ export const Field = styled.TextInput`
 
   color: ${({ theme }) => theme.colors.text};
   font-size: ${({ theme }) => ss.px(theme.size.md)};
-
-  outline-width: 0;
-  outline-style: none;
-  box-shadow: none;
 `;
 
 export const getFocusedFieldStyle = (theme: Theme) =>

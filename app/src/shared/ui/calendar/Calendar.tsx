@@ -5,6 +5,8 @@ import {
   WeekCalendar,
 } from 'react-native-calendars';
 
+import * as ss from '@shared/styles';
+
 import { SegmentedSwitch } from '../SegmentedSwitch';
 
 import * as s from './styles';
@@ -92,6 +94,7 @@ export const Calendar = ({
     return (
       <s.Day onPress={handlePress}>
         <s.DayContainer
+          style={ss.CenterContent}
           $selected={isSelected}
           $today={isToday}
           $disabled={disabled}

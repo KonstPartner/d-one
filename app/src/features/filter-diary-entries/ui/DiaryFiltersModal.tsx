@@ -7,6 +7,7 @@ import {
   DIARY_ENTRY_PRESENCE_VALUES,
   type DiaryEntryPresence,
 } from '@entities/diary';
+import * as ss from '@shared/styles';
 import { Button, IconButton, PortalModal, SegmentedSwitch } from '@shared/ui';
 
 import { useDiaryFiltersModal } from '../model/useDiaryFiltersModal';
@@ -71,7 +72,7 @@ export const DiaryFiltersModal = ({ onApply }: DiaryFiltersModalProps) => {
     value: DiaryEntryPresence,
     onChange: (nextValue: DiaryEntryPresence) => void
   ) => (
-    <s.SectionCard>
+    <s.SectionCard style={[ss.Surface(theme, 'card'), ss.Rounded(theme, 'lg')]}>
       <s.SectionTitle>{label}</s.SectionTitle>
 
       <SegmentedSwitch
@@ -179,9 +180,7 @@ export const DiaryFiltersModal = ({ onApply }: DiaryFiltersModalProps) => {
           <Button
             accessibilityLabel={t('diary.filters.clear')}
             disabled={!modal.canClear}
-            tone="secondary"
-            variant="solid"
-            size="lg"
+            tone="muted"
             style={s.footerButtonStyle}
             onPress={modal.handleClear}
           >
@@ -195,9 +194,7 @@ export const DiaryFiltersModal = ({ onApply }: DiaryFiltersModalProps) => {
               modal.isApplied ? 'diary.filters.applied' : 'diary.filters.apply'
             )}
             disabled={!modal.canApply}
-            tone={modal.isApplied ? 'secondary' : 'primary'}
-            variant="solid"
-            size="lg"
+            tone={modal.isApplied ? 'muted' : 'primary'}
             style={s.footerButtonStyle}
             onPress={modal.handleApply}
           >

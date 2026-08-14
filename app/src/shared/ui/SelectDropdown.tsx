@@ -3,6 +3,8 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
 
+import * as ss from '@shared/styles';
+
 import type {
   SelectDropdownOption,
   SelectDropdownProps,
@@ -59,6 +61,7 @@ export const SelectDropdown = <T,>({
       {label ? <s.Label>{label}</s.Label> : null}
 
       <s.Field
+        style={ss.Surface(theme, 'input')}
         $opened={opened}
         accessibilityRole="button"
         accessibilityState={{
@@ -116,7 +119,11 @@ export const SelectDropdown = <T,>({
       </s.Field>
 
       {opened ? (
-        <s.Dropdown $hasLabel={hasLabel} $inlineOptions={inlineOptions}>
+        <s.Dropdown
+          style={ss.PrimeLayer}
+          $hasLabel={hasLabel}
+          $inlineOptions={inlineOptions}
+        >
           <ScrollView
             testID="select-dropdown-options"
             disallowInterruption

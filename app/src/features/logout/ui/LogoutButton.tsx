@@ -1,5 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
+import * as ss from '@shared/styles';
+import { Button } from '@shared/ui';
+
 import { useLogout } from '../model/useLogout';
 import * as s from '../styles/LogoutButton';
 
@@ -9,13 +12,13 @@ export const LogoutButton = () => {
   const { logout, isPending } = useLogout();
 
   return (
-    <s.Root
+    <Button
+      style={ss.FullWidth}
       tone="danger"
-      variant="outline"
       loading={isPending}
       onPress={logout}
     >
       <s.Text>{t('auth.buttons.logout')}</s.Text>
-    </s.Root>
+    </Button>
   );
 };

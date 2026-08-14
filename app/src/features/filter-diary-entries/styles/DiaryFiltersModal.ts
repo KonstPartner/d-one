@@ -43,10 +43,6 @@ export const scrollContentStyle: ViewStyle = {
 };
 
 export const SectionCard = styled.View`
-  ${({ theme }) => ss.Surface(theme, 'card')};
-
-  ${({ theme }) => ss.Rounded(theme, 'lg')};
-
   ${({ theme }) => ss.Shadow(theme, 'soft')};
 
   gap: ${({ theme }) => ss.px(theme.spacing.md)};

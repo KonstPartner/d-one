@@ -277,19 +277,79 @@ jest.mock('../styles/OwnerDiary', () => {
   };
 });
 
-jest.mock('../styles/OwnerDiarySelectionToolbar', () => {
-  const { Text, View } = require('react-native');
+jest.mock('./OwnerDiarySelectionToolbar', () => {
+  const React = require('react');
+
+  const { Pressable, View } = require('react-native');
 
   return {
-    Root: View,
+    OwnerDiarySelectionToolbar: ({
+      selectedCount,
+      allSelected,
+      deleting,
+      synchronizing,
+      synchronizeDisabled,
+      onToggleAll,
+      onSynchronize,
+      onDelete,
+      onClose,
+    }: {
+      selectedCount: number;
+      allSelected: boolean;
+      deleting: boolean;
+      synchronizing: boolean;
+      synchronizeDisabled: boolean;
+      onToggleAll: () => void;
+      onSynchronize: () => void;
+      onDelete: () => void;
+      onClose: () => void;
+    }) =>
+      React.createElement(
+        View,
+        null,
 
-    Count: Text,
+        React.createElement(Pressable, {
+          accessibilityRole: 'button',
+          accessibilityLabel: allSelected
+            ? 'diary.selection.clearAll'
+            : 'diary.selection.selectAll',
+          accessibilityState: {
+            disabled: deleting || synchronizing,
+          },
+          disabled: deleting || synchronizing,
+          onPress: onToggleAll,
+        }),
 
-    Actions: View,
+        React.createElement(Pressable, {
+          accessibilityRole: 'button',
+          accessibilityLabel: 'diary.selection.synchronize',
+          accessibilityState: {
+            disabled: synchronizeDisabled,
+          },
+          disabled: synchronizeDisabled,
+          onPress: onSynchronize,
+        }),
 
-    SecondaryActionText: Text,
+        React.createElement(Pressable, {
+          accessibilityRole: 'button',
+          accessibilityLabel: 'diary.selection.delete',
+          accessibilityState: {
+            disabled: selectedCount === 0 || synchronizing,
+          },
+          disabled: selectedCount === 0 || synchronizing,
+          onPress: onDelete,
+        }),
 
-    DeleteActionText: Text,
+        React.createElement(Pressable, {
+          accessibilityRole: 'button',
+          accessibilityLabel: 'diary.selection.close',
+          accessibilityState: {
+            disabled: deleting || synchronizing,
+          },
+          disabled: deleting || synchronizing,
+          onPress: onClose,
+        })
+      ),
   };
 });
 

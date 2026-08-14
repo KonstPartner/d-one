@@ -1,3 +1,7 @@
+import { useTheme } from '@emotion/react';
+
+import * as ss from '@shared/styles';
+
 import * as s from './styles/SegmentedSwitch';
 
 export type SegmentedSwitchOption<T extends string> = {
@@ -24,11 +28,13 @@ export const SegmentedSwitch = <T extends string>({
   label,
   disabled = false,
 }: SegmentedSwitchProps<T>) => {
+  const theme = useTheme();
+
   return (
     <s.Wrapper>
       {label ? <s.Label>{label}</s.Label> : null}
 
-      <s.Container>
+      <s.Container style={[ss.FullWidth, ss.Surface(theme, 'input')]}>
         {options.map((option) => {
           const active = option.value === value;
 

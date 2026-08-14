@@ -3,10 +3,6 @@ import styled from '@emotion/native';
 import * as ss from '@shared/styles';
 
 export const Root = styled.Pressable`
-  ${({ theme }) => ss.Surface(theme, 'card')};
-
-  ${({ theme }) => ss.Rounded(theme, 'md')};
-
   ${({ theme }) => ss.Inset(theme, 'md')};
 
   flex-direction: row;

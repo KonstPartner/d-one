@@ -1,10 +1,7 @@
-import {
-  type PressableProps,
-  type RegisteredStyle,
-  StyleSheet,
-  type ViewStyle,
-} from 'react-native';
 import { useTheme } from '@emotion/react';
+import type { PressableProps, StyleProp, ViewStyle } from 'react-native';
+
+import * as ss from '@shared/styles';
 
 import { Spinner } from './Spinner';
 import * as s from './styles/Button';
@@ -12,18 +9,14 @@ import * as s from './styles/Button';
 export type ButtonProps = Omit<PressableProps, 'onPress' | 'style'> & {
   onPress: NonNullable<PressableProps['onPress']>;
 
-  style?: PressableProps['style'];
+  style?: StyleProp<ViewStyle>;
 
   tone?: s.ButtonTone;
-  variant?: s.ButtonVariant;
-  size?: s.ButtonSize;
+
+  spinnerColor?: s.ButtonTone;
 
   loading?: boolean;
-
-  className?: string;
 };
-
-export type { ButtonSize, ButtonTone, ButtonVariant } from './styles/Button';
 
 export const Button = ({
   onPress,
@@ -31,13 +24,10 @@ export const Button = ({
   style,
 
   tone = 'primary',
-  variant = 'solid',
-  size = 'md',
+  spinnerColor,
 
   loading = false,
   disabled = false,
-
-  className,
 
   accessibilityLabel,
   accessibilityState,
@@ -50,17 +40,10 @@ export const Button = ({
 
   const isDisabled = disabled || loading;
 
-  const foregroundColor = s.getButtonForegroundColor(
-    theme,
-    tone,
-    variant,
-    isDisabled
-  );
-
   return (
     <s.Root
       {...props}
-      className={className}
+      $tone={tone}
       testID={testID ?? 'button'}
       disabled={isDisabled}
       accessibilityLabel={
@@ -73,13 +56,13 @@ export const Button = ({
         busy: loading,
       }}
       onPress={onPress}
-      style={StyleSheet.flatten([
-        s.getButtonStyle(theme, tone, variant, size, isDisabled),
-        style as RegisteredStyle<ViewStyle>,
-      ])}
+      style={style ?? ss.CenterContent}
     >
       {loading ? (
-        <Spinner color={foregroundColor} size={s.getSpinnerSize(size)} />
+        <Spinner
+          color={spinnerColor ? theme.colors[spinnerColor] : theme.colors.white}
+          size={32}
+        />
       ) : (
         children
       )}
