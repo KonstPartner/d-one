@@ -94,6 +94,22 @@ export type DiaryRepositoryCreateInput = Pick<
   | 'eventAt'
 >;
 
+export type DiaryRepositorySyncedEntryInput = Pick<
+  DiaryEntry,
+  | 'id'
+  | 'glucose'
+  | 'mealRelation'
+  | 'shortInsulin'
+  | 'longInsulin'
+  | 'carbsGram'
+  | 'comment'
+  | 'aiAnalysis'
+  | 'localPhotoUri'
+  | 'photoPath'
+  | 'photoUrl'
+  | 'eventAt'
+>;
+
 export type DiaryEntryPhotoState = Pick<
   DiaryEntry,
   'localPhotoUri' | 'photoPath' | 'photoUrl'
@@ -121,8 +137,11 @@ export const createDefaultDiaryEntryFilterCriteria =
     },
 
     glucose: createEmptyDiaryEntryNumericRange(),
+
     shortInsulin: createEmptyDiaryEntryNumericRange(),
+
     longInsulin: createEmptyDiaryEntryNumericRange(),
+
     carbsGram: createEmptyDiaryEntryNumericRange(),
 
     mealRelations: [],

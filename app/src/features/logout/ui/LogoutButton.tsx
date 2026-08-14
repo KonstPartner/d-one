@@ -9,12 +9,13 @@ import * as s from '../styles/LogoutButton';
 export const LogoutButton = () => {
   const { t } = useTranslation();
 
-  const { logout, isPending } = useLogout();
+  const { logout, isPending, disabled } = useLogout();
 
   return (
     <Button
       style={ss.FullWidth}
       tone="danger"
+      disabled={disabled}
       loading={isPending}
       onPress={logout}
     >

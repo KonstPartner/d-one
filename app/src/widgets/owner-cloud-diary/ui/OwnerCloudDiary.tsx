@@ -1,10 +1,15 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import {
+  CloudDiaryDownloadModal,
+  useCloudDiaryDownloadFlow,
+} from '@features/download-cloud-diary-entries';
 import {
   type CloudDiaryEntry,
   CloudDiaryList,
   CloudDiaryPhotoViewer,
+  useDiaryTransferState,
 } from '@entities/diary';
 import { useSession } from '@entities/session';
 import { errorMapper } from '@shared/lib/errors';
@@ -27,12 +32,33 @@ const OwnerCloudDiaryContent = ({ ownerUid }: OwnerCloudDiaryContentProps) => {
     ownerUid,
   });
 
+  const download = useCloudDiaryDownloadFlow();
+
+  const transfer = useDiaryTransferState();
+
+  const transferLocked =
+    transfer.phase === 'waitingForSync' ||
+    transfer.phase === 'validating' ||
+    transfer.phase === 'resolvingConflicts' ||
+    transfer.phase === 'processing';
+
+  const downloadActive = download.step !== 'idle' && download.step !== 'result';
+
   const [photoViewerEntry, setPhotoViewerEntry] =
     useState<CloudDiaryEntry | null>(null);
 
   const showCloudError = useCallback((error: unknown) => {
     showNotification('error', errorMapper(error, 'cloud'));
   }, []);
+
+  const showDownloadError = useCallback(
+    (error: unknown) => {
+      console.error('Failed to download cloud diary entries', error);
+
+      showNotification('error', t('diary.cloud.download.failed'));
+    },
+    [t]
+  );
 
   const handleOpenPhoto = useCallback(
     (entry: CloudDiaryEntry) => {
@@ -62,6 +88,40 @@ const OwnerCloudDiaryContent = ({ ownerUid }: OwnerCloudDiaryContentProps) => {
 
     void diary.refreshFirstPage().catch(showCloudError);
   }, [diary.refreshFirstPage, showCloudError]);
+
+  const handleDownload = useCallback(() => {
+    if (
+      diary.selection.selectedEntries.length === 0 ||
+      download.step !== 'idle' ||
+      transferLocked
+    ) {
+      return;
+    }
+
+    setPhotoViewerEntry(null);
+
+    void download
+      .start(diary.selection.selectedEntries)
+      .catch(showDownloadError);
+  }, [
+    diary.selection.selectedEntries,
+    download.start,
+    download.step,
+    showDownloadError,
+    transferLocked,
+  ]);
+
+  const handleDownloadDone = useCallback(() => {
+    diary.selection.exitSelection();
+  }, [diary.selection.exitSelection]);
+
+  useEffect(() => {
+    if (download.step !== 'result') {
+      return;
+    }
+
+    diary.selection.exitSelection();
+  }, [diary.selection.exitSelection, download.step]);
 
   const headerMenuItems = useMemo<HeaderMenuItem[]>(
     () =>
@@ -94,9 +154,13 @@ const OwnerCloudDiaryContent = ({ ownerUid }: OwnerCloudDiaryContentProps) => {
           ],
     [
       diary.isLoading,
+
       diary.selection.canEnterSelection,
+
       diary.selection.enterSelection,
+
       diary.selection.selectionMode,
+
       handleRefresh,
     ]
   );
@@ -117,7 +181,14 @@ const OwnerCloudDiaryContent = ({ ownerUid }: OwnerCloudDiaryContentProps) => {
         <OwnerCloudDiarySelectionToolbar
           selectedCount={diary.selection.selectedCount}
           allSelected={diary.selection.allSelected}
+          downloadDisabled={
+            diary.selection.selectedCount === 0 ||
+            transferLocked ||
+            downloadActive
+          }
+          downloading={download.isChecking || download.isProcessing}
           onToggleAll={diary.selection.toggleAll}
+          onDownload={handleDownload}
           onClose={diary.selection.exitSelection}
         />
       ) : null}
@@ -145,6 +216,12 @@ const OwnerCloudDiaryContent = ({ ownerUid }: OwnerCloudDiaryContentProps) => {
       <CloudDiaryPhotoViewer
         entry={photoViewerEntry}
         onClose={handleClosePhoto}
+      />
+
+      <CloudDiaryDownloadModal
+        flow={download}
+        onDone={handleDownloadDone}
+        onError={showDownloadError}
       />
     </>
   );

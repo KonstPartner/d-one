@@ -264,6 +264,51 @@
       "empty": {
         "title": "No cloud entries",
         "description": "There are no synchronized diary entries to display."
+      },
+      "download": {
+        "action": "Download",
+        "title": "Download entries",
+        "checking": "Checking selected entries…",
+
+        "conflictsFound_one": "{{count}} conflict found.",
+        "conflictsFound_other": "{{count}} conflicts found.",
+
+        "skipAll": "Skip all conflicts",
+        "skipAllDescription": "Keep all existing local entries unchanged.",
+
+        "replaceAll": "Replace all conflicts",
+        "replaceAllDescription": "Replace every conflicting local entry with the cloud version.",
+
+        "review": "Review individually",
+        "reviewDescription": "Choose what to do with each conflicting entry.",
+
+        "resolveConflict": "Resolve conflict",
+        "conflictProgress": "Conflict {{current}} of {{total}}",
+
+        "cloudEntry": "Cloud entry",
+        "localEntry": "Local entry",
+
+        "applyToRemaining": "Apply this decision to all remaining conflicts",
+
+        "skip": "Skip",
+        "replace": "Replace",
+
+        "downloading": "Downloading entries",
+        "progress": "{{current}} of {{total}} processed",
+        "processingDescription": "Keep the app open until the operation is complete.",
+
+        "complete": "Download complete",
+
+        "result": {
+          "added": "Added",
+          "replaced": "Replaced",
+          "skipped": "Skipped",
+          "failed": "Errors",
+          "description": "Downloaded entries are stored locally and will not be uploaded back to the cloud automatically."
+        },
+
+        "done": "Done",
+        "failed": "Failed to download the selected entries."
       }
     },
     "follower": {

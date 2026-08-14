@@ -98,6 +98,20 @@ export {
   getDiaryEntryTimerTargetAt,
 } from './model/diaryEntryTimer';
 export type { DiaryPageResult, DiaryPagination } from './model/diaryPage';
+export type {
+  DiarySyncOperationLease,
+  DiaryTransferLease,
+  DiaryTransferPhase,
+  DiaryTransferState,
+  DiaryTransferType,
+} from './model/diaryTransferCoordinator';
+export {
+  acquireDiarySyncOperation,
+  beginDiaryTransfer,
+  isDiaryTransferLocked,
+  resetDiaryTransferState,
+  useDiaryTransferState,
+} from './model/diaryTransferCoordinator';
 export type { MealRelation } from './model/mealRelation';
 export { isMealRelation, MEAL_RELATIONS } from './model/mealRelation';
 export { useCloudDiaryList } from './model/useCloudDiaryList';

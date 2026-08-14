@@ -7,10 +7,10 @@ import {
   DiaryDayHeader,
   type DiaryEntry,
   DiaryEntryCard,
+  type DiaryListItem,
 } from '@entities/diary';
 import { ErrorSection, LoadingView, Pagination } from '@shared/ui';
 
-import type { OwnerDiaryListItem } from '../model/ownerDiaryList';
 import type { useOwnerDiaryList } from '../model/useOwnerDiaryList';
 import * as s from '../styles/OwnerDiaryList';
 
@@ -22,6 +22,8 @@ type OwnerDiaryListProps = {
   selectionMode: boolean;
 
   selectedEntryIds: ReadonlySet<string>;
+
+  editDisabled: boolean;
 
   isEntrySyncing: (entryId: string) => boolean;
 
@@ -38,6 +40,8 @@ export const OwnerDiaryList = ({
   selectionMode,
 
   selectedEntryIds,
+
+  editDisabled,
 
   isEntrySyncing,
 
@@ -81,9 +85,13 @@ export const OwnerDiaryList = ({
           entry={entry}
           isVisible={list.visibleEntryIds.has(entry.id)}
           synchronizing={synchronizing}
-          onPress={() => {
-            onOpenEntry(entry.id);
-          }}
+          onPress={
+            editDisabled
+              ? undefined
+              : () => {
+                  onOpenEntry(entry.id);
+                }
+          }
           onOpenPhoto={onOpenPhoto}
         />
       );
@@ -96,10 +104,11 @@ export const OwnerDiaryList = ({
       onOpenPhoto,
       selectedEntryIds,
       selectionMode,
+      editDisabled,
     ]
   );
 
-  const renderItem = useCallback<ListRenderItem<OwnerDiaryListItem>>(
+  const renderItem = useCallback<ListRenderItem<DiaryListItem<DiaryEntry>>>(
     ({ item }) => {
       if (item.type === 'dayHeader') {
         return (

@@ -1,4 +1,8 @@
-import type { DiaryEntry, DiaryLocalRepository } from '@entities/diary';
+import {
+  acquireDiarySyncOperation,
+  type DiaryEntry,
+  type DiaryLocalRepository,
+} from '@entities/diary';
 
 import {
   type DiarySyncResult,
@@ -138,24 +142,30 @@ const drainQueue = async (): Promise<void> => {
         continue;
       }
 
-      notifyJobStarted(job);
+      const syncOperation = await acquireDiarySyncOperation();
 
       let result: DiarySyncResult;
 
       try {
-        result = await synchronizeQueuedEntry(job.input);
-      } catch (error) {
-        console.error(
-          `Failed to synchronize diary entry: ${job.input.entryId}`,
-          error
-        );
+        notifyJobStarted(job);
 
-        result = {
-          entryId: job.input.entryId,
-          status: 'failed',
-        };
+        try {
+          result = await synchronizeQueuedEntry(job.input);
+        } catch (error) {
+          console.error(
+            `Failed to synchronize diary entry: ${job.input.entryId}`,
+            error
+          );
+
+          result = {
+            entryId: job.input.entryId,
+            status: 'failed',
+          };
+        } finally {
+          notifyJobFinished(job);
+        }
       } finally {
-        notifyJobFinished(job);
+        syncOperation.release();
       }
 
       scheduledJobs.delete(job.key);

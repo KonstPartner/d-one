@@ -72,12 +72,14 @@ type DiarySearchProps = {
 
   onOpenFilters: () => void;
   onCreateEntry: () => void;
+  createDisabled?: boolean;
 };
 
 export const DiarySearch = ({
   text,
   field,
 
+  createDisabled = false,
   onTextChange,
   onApplyText,
   onFieldChange,
@@ -268,6 +270,7 @@ export const DiarySearch = ({
             <IconButton
               icon="add"
               accessibilityLabel={t('diary.form.openCreateAccessibilityLabel')}
+              disabled={createDisabled}
               tone="primary"
               variant="solid"
               size="lg"

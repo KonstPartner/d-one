@@ -8,6 +8,7 @@ import type { DiaryDatabaseOperationGate } from './diaryDatabaseOperationGate';
 import { type DiaryEntryRow, mapDiaryEntryRow } from './diaryEntryRow';
 import {
   buildCountDiaryEntriesSql,
+  buildFindDiaryEntriesByIdsSql,
   buildFindDiaryPageSql,
   buildMarkDiaryEntriesPendingDeleteSql,
   CREATE_DIARY_ENTRY_SQL,
@@ -16,6 +17,7 @@ import {
   FIND_DIARY_ENTRY_BY_ID_SQL,
   FIND_PENDING_DIARY_ENTRY_IDS_SQL,
   MARK_DIARY_ENTRY_SYNCED_IF_UNCHANGED_SQL,
+  REPLACE_SYNCED_DIARY_ENTRY_SQL,
   UPDATE_DIARY_ENTRY_AI_ANALYSIS_SQL,
   UPDATE_DIARY_ENTRY_SQL,
   UPDATE_DIARY_ENTRY_WITH_PHOTO_SQL,
@@ -24,6 +26,7 @@ import {
 import type {
   DiaryEntryQuery,
   DiaryRepositoryCreateInput,
+  DiaryRepositorySyncedEntryInput,
   DiaryRepositoryUpdateInput,
 } from './diaryRepository.types';
 import { createDefaultDiaryEntryQuery } from './diaryRepository.types';
@@ -53,10 +56,45 @@ const getEventAtTimestamp = (eventAt: Date): number => {
   return timestamp;
 };
 
+const createSyncedEntryParameters = (
+  userId: string,
+  input: DiaryRepositorySyncedEntryInput,
+  eventAt: number
+): Record<string, SQLiteBindValue> => ({
+  $id: input.id,
+  $userId: userId,
+
+  $glucose: input.glucose,
+
+  $mealRelation: input.mealRelation,
+
+  $shortInsulin: input.shortInsulin,
+
+  $longInsulin: input.longInsulin,
+
+  $carbsGram: input.carbsGram,
+
+  $comment: input.comment,
+
+  $aiAnalysis: input.aiAnalysis,
+
+  $localPhotoUri: input.localPhotoUri,
+
+  $photoPath: input.photoPath,
+
+  $photoUrl: input.photoUrl,
+
+  $eventAt: eventAt,
+
+  $syncStatus: 'synced',
+});
+
 export class DiaryLocalRepository {
   public constructor(
     private readonly database: SQLiteDatabase,
+
     private readonly userId: string,
+
     private readonly operationGate: DiaryDatabaseOperationGate
   ) {}
 
@@ -112,6 +150,95 @@ export class DiaryLocalRepository {
       );
 
       return row === null ? null : mapDiaryEntryRow(row);
+    });
+  }
+
+  public findByIds(ids: readonly string[]): Promise<DiaryEntry[]> {
+    const uniqueIds = Array.from(new Set(ids));
+
+    if (uniqueIds.length === 0) {
+      return Promise.resolve([]);
+    }
+
+    if (uniqueIds.some((id) => id.length === 0)) {
+      return Promise.reject(new Error('Invalid diary entry ids'));
+    }
+
+    const placeholders = uniqueIds.map((_, index) => `$entryId${index}`);
+
+    const entriesList = placeholders.join(', ');
+
+    const parameters: Record<string, SQLiteBindValue> = {
+      $userId: this.userId,
+    };
+
+    uniqueIds.forEach((id, index) => {
+      parameters[`$entryId${index}`] = id;
+    });
+
+    const sql = buildFindDiaryEntriesByIdsSql(entriesList);
+
+    return this.operationGate.run(async () => {
+      const rows = await this.database.getAllAsync<DiaryEntryRow>(
+        sql,
+        parameters
+      );
+
+      return rows.map(mapDiaryEntryRow);
+    });
+  }
+
+  public insertSynced(input: DiaryRepositorySyncedEntryInput): Promise<void> {
+    if (input.id.length === 0) {
+      return Promise.reject(new Error('Invalid diary entry id'));
+    }
+
+    let eventAt: number;
+
+    try {
+      eventAt = getEventAtTimestamp(input.eventAt);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+
+    const parameters = createSyncedEntryParameters(this.userId, input, eventAt);
+
+    return this.operationGate.run(async () => {
+      const result = await this.database.runAsync(
+        CREATE_DIARY_ENTRY_SQL,
+        parameters
+      );
+
+      if (result.changes !== 1) {
+        throw new Error(`Diary synced entry cannot be inserted: ${input.id}`);
+      }
+    });
+  }
+
+  public replaceSynced(input: DiaryRepositorySyncedEntryInput): Promise<void> {
+    if (input.id.length === 0) {
+      return Promise.reject(new Error('Invalid diary entry id'));
+    }
+
+    let eventAt: number;
+
+    try {
+      eventAt = getEventAtTimestamp(input.eventAt);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+
+    const parameters = createSyncedEntryParameters(this.userId, input, eventAt);
+
+    return this.operationGate.run(async () => {
+      const result = await this.database.runAsync(
+        REPLACE_SYNCED_DIARY_ENTRY_SQL,
+        parameters
+      );
+
+      if (result.changes !== 1) {
+        throw new Error(`Diary synced entry cannot be replaced: ${input.id}`);
+      }
     });
   }
 
@@ -356,6 +483,7 @@ export class DiaryLocalRepository {
 
           pagination: {
             page: 1,
+
             pageSize: DIARY_PAGE_SIZE,
 
             totalItems: 0,

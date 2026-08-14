@@ -11,6 +11,7 @@ import {
   type DiaryEntry,
   DiaryPhotoViewer,
   getDiaryDayKey,
+  useDiaryTransferState,
 } from '@entities/diary';
 import { showNotification } from '@shared/lib/notifications';
 import * as ss from '@shared/styles';
@@ -30,6 +31,7 @@ import { OwnerDiarySelectionToolbar } from './OwnerDiarySelectionToolbar';
 
 export const OwnerDiary = () => {
   const theme = useTheme();
+
   const { t } = useTranslation();
 
   const diary = useOwnerDiary();
@@ -37,6 +39,14 @@ export const OwnerDiary = () => {
   const diarySync = useOwnerDiarySync();
 
   const diaryPreparation = useOwnerDiaryPreparation();
+
+  const transfer = useDiaryTransferState();
+
+  const transferLocked =
+    transfer.phase === 'waitingForSync' ||
+    transfer.phase === 'validating' ||
+    transfer.phase === 'resolvingConflicts' ||
+    transfer.phase === 'processing';
 
   const [photoViewerEntry, setPhotoViewerEntry] = useState<DiaryEntry | null>(
     null
@@ -97,6 +107,10 @@ export const OwnerDiary = () => {
 
   const handleOpenEntry = useCallback(
     async (entryId: string): Promise<void> => {
+      if (transferLocked) {
+        return;
+      }
+
       try {
         const opened = await entryEditor.openEdit(entryId);
 
@@ -111,7 +125,7 @@ export const OwnerDiary = () => {
         showNotification('error', t('diary.form.errors.openFailed'));
       }
     },
-    [entryEditor.openEdit, t]
+    [entryEditor.openEdit, t, transferLocked]
   );
 
   const handleOpenPhoto = useCallback((entry: DiaryEntry) => {
@@ -123,14 +137,28 @@ export const OwnerDiary = () => {
   }, []);
 
   const handleManualSync = useCallback(async (): Promise<void> => {
+    if (transferLocked) {
+      return;
+    }
+
     const synchronized = await diarySync.handleManualSync();
 
     if (synchronized) {
       await diary.list.reconcileCurrentPage();
     }
-  }, [diary.list.reconcileCurrentPage, diarySync.handleManualSync]);
+  }, [
+    diary.list.reconcileCurrentPage,
+
+    diarySync.handleManualSync,
+
+    transferLocked,
+  ]);
 
   const handleForcedSync = useCallback(async (): Promise<void> => {
+    if (transferLocked) {
+      return;
+    }
+
     const entryIds = Array.from(selection.selectedEntryIds);
 
     if (entryIds.length === 0) {
@@ -150,8 +178,9 @@ export const OwnerDiary = () => {
     diarySync.handleForcedSync,
 
     selection.exitSelection,
-
     selection.selectedEntryIds,
+
+    transferLocked,
   ]);
 
   useOwnerDiaryHeaderMenu({
@@ -159,7 +188,7 @@ export const OwnerDiary = () => {
 
     connectionState: diarySync.connectionState,
 
-    batchActive: diarySync.batchProgress !== null,
+    batchActive: diarySync.batchProgress !== null || transferLocked,
 
     manualSyncPending: diarySync.manualSyncPending,
 
@@ -187,6 +216,7 @@ export const OwnerDiary = () => {
             allSelected={selection.allSelected}
             deleting={selection.isDeleting}
             synchronizing={diarySync.forcedSyncPending}
+            operationsDisabled={transferLocked}
             synchronizeDisabled={
               selection.selectedCount === 0 ||
               diarySync.connectionState !== 'online' ||
@@ -210,6 +240,7 @@ export const OwnerDiary = () => {
             filtersVisible={diary.filters.visible}
             filtersApplied={diary.filters.hasAppliedFilters}
             onOpenFilters={diary.filters.open}
+            createDisabled={transferLocked}
             onCreateEntry={entryEditor.openCreate}
           />
         )}
@@ -234,6 +265,7 @@ export const OwnerDiary = () => {
           list={diary.list}
           selectionMode={selection.selectionMode}
           selectedEntryIds={selection.selectedEntryIds}
+          editDisabled={transferLocked}
           isEntrySyncing={diarySync.isEntrySyncing}
           onToggleSelection={selection.toggleEntry}
           onOpenEntry={(entryId) => {
@@ -253,8 +285,9 @@ export const OwnerDiary = () => {
         visible={entryEditor.editVisible}
         entry={entryEditor.editingEntry}
         disabled={
-          entryEditor.editingEntry !== null &&
-          diarySync.isEntrySyncing(entryEditor.editingEntry.id)
+          transferLocked ||
+          (entryEditor.editingEntry !== null &&
+            diarySync.isEntrySyncing(entryEditor.editingEntry.id))
         }
         onClose={entryEditor.closeEdit}
         onUpdated={entryEditor.handleUpdated}
@@ -272,7 +305,7 @@ export const OwnerDiary = () => {
         })}
         confirmLabel={t('diary.selection.delete')}
         confirmTone="danger"
-        confirmDisabled={selection.isDeleting}
+        confirmDisabled={selection.isDeleting || transferLocked}
         onConfirm={selection.confirmDelete}
         onClose={selection.closeDeleteConfirm}
       />
