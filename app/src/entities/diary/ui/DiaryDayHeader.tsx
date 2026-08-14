@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +20,7 @@ type DiaryDayHeaderProps = {
   onToggle: (dayKey: DiaryDayKey) => void;
 };
 
-export const DiaryDayHeader = ({
+const DiaryDayHeaderComponent = ({
   dayKey,
 
   title,
@@ -70,3 +71,5 @@ export const DiaryDayHeader = ({
     </s.Root>
   );
 };
+
+export const DiaryDayHeader = memo(DiaryDayHeaderComponent);

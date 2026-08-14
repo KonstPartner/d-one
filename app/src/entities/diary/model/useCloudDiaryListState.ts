@@ -1,20 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import type { DiaryDayKey } from '@entities/diary';
+import type { DiaryDayKey } from './diaryDay';
 
-type FollowerDiaryListState = {
+type CloudDiaryListState = {
   ownerUid: string;
 
   collapsedDayKeys: ReadonlySet<DiaryDayKey>;
 };
 
-const createInitialState = (ownerUid: string): FollowerDiaryListState => ({
+const createInitialState = (ownerUid: string): CloudDiaryListState => ({
   ownerUid,
+
   collapsedDayKeys: new Set(),
 });
 
-export const useFollowerDiaryListState = (ownerUid: string) => {
-  const [state, setState] = useState<FollowerDiaryListState>(() =>
+export const useCloudDiaryListState = (ownerUid: string) => {
+  const [state, setState] = useState<CloudDiaryListState>(() =>
     createInitialState(ownerUid)
   );
 
@@ -47,6 +48,7 @@ export const useFollowerDiaryListState = (ownerUid: string) => {
 
         return {
           ownerUid,
+
           collapsedDayKeys: nextKeys,
         };
       });
@@ -57,6 +59,7 @@ export const useFollowerDiaryListState = (ownerUid: string) => {
   const expandAllDays = useCallback(() => {
     setState({
       ownerUid,
+
       collapsedDayKeys: new Set(),
     });
   }, [ownerUid]);

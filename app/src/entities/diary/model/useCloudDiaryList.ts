@@ -3,25 +3,29 @@ import { useCallback, useMemo } from 'react';
 import {
   buildDiaryListItems,
   getDiaryListItemKey,
-  useCloudDiaryPagination,
-} from '@entities/diary';
+} from '../lib/buildDiaryListItems';
 
-import { useFollowerDiaryListState } from './useFollowerDiaryListState';
-import { useFollowerDiaryViewability } from './useFollowerDiaryViewability';
+import { useCloudDiaryListState } from './useCloudDiaryListState';
+import { useCloudDiaryListViewability } from './useCloudDiaryListViewability';
+import { useCloudDiaryPagination } from './useCloudDiaryPagination';
 
-export const useFollowerDiaryList = (ownerUid: string) => {
+type UseCloudDiaryListParams = {
+  ownerUid: string;
+};
+
+export const useCloudDiaryList = ({ ownerUid }: UseCloudDiaryListParams) => {
   const {
     collapsedDayKeys,
 
     toggleDay,
     expandAllDays,
-  } = useFollowerDiaryListState(ownerUid);
+  } = useCloudDiaryListState(ownerUid);
 
   const pagination = useCloudDiaryPagination({
     ownerUid,
   });
 
-  const viewability = useFollowerDiaryViewability(ownerUid);
+  const viewability = useCloudDiaryListViewability(ownerUid);
 
   const listItems = useMemo(
     () => buildDiaryListItems(pagination.page?.items ?? [], collapsedDayKeys),
@@ -36,6 +40,7 @@ export const useFollowerDiaryList = (ownerUid: string) => {
     }
 
     expandAllDays();
+
     viewability.resetViewability();
 
     return true;
@@ -85,6 +90,7 @@ export const useFollowerDiaryList = (ownerUid: string) => {
     collapsedDayKeys,
 
     toggleDay,
+    expandAllDays,
 
     getListItemKey: getDiaryListItemKey,
 

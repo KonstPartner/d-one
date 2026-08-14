@@ -1,48 +1,43 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type CloudDiaryEntry, CloudDiaryPhotoViewer } from '@entities/diary';
-import type { UserProfile } from '@entities/user';
+import {
+  type CloudDiaryEntry,
+  CloudDiaryList,
+  CloudDiaryPhotoViewer,
+  useCloudDiaryList,
+} from '@entities/diary';
 import { errorMapper } from '@shared/lib/errors';
 import { type HeaderMenuItem, useHeaderMenu } from '@shared/lib/navigation';
 import { showNotification } from '@shared/lib/notifications';
 import { Loader, LoadingView } from '@shared/ui';
 
-import { useFollowerDiaryList } from '../model/useFollowerDiaryList';
-
-import { FollowerDiaryList } from './FollowerDiaryList';
-
 type FollowerDiaryContentProps = {
   ownerUid: string;
 
-  refreshProfile: () => Promise<UserProfile>;
+  refreshing: boolean;
+
+  onRefresh: () => void | Promise<void>;
 };
 
 const FollowerDiaryContentInner = ({
   ownerUid,
-  refreshProfile,
+
+  refreshing,
+
+  onRefresh,
 }: FollowerDiaryContentProps) => {
   const { t } = useTranslation();
 
-  const list = useFollowerDiaryList(ownerUid);
-
-  const refreshInProgressRef = useRef(false);
-
-  const [refreshing, setRefreshing] = useState(false);
+  const list = useCloudDiaryList({
+    ownerUid,
+  });
 
   const [photoViewerEntry, setPhotoViewerEntry] =
     useState<CloudDiaryEntry | null>(null);
 
-  if (list.hasInitialError) {
-    throw list.error ?? new Error('UNKNOWN_ERROR');
-  }
-
   const showCloudError = useCallback((error: unknown) => {
     showNotification('error', errorMapper(error, 'cloud'));
-  }, []);
-
-  const showProfileError = useCallback((error: unknown) => {
-    showNotification('error', errorMapper(error, 'firebase'));
   }, []);
 
   const handleOpenPhoto = useCallback((entry: CloudDiaryEntry) => {
@@ -61,48 +56,6 @@ const FollowerDiaryContentInner = ({
     void list.goNext().catch(showCloudError);
   }, [list.goNext, showCloudError]);
 
-  const handleRefresh = useCallback(async () => {
-    if (refreshInProgressRef.current) {
-      return;
-    }
-
-    refreshInProgressRef.current = true;
-
-    setRefreshing(true);
-
-    try {
-      let nextProfile: UserProfile;
-
-      try {
-        nextProfile = await refreshProfile();
-      } catch (error) {
-        showProfileError(error);
-
-        return;
-      }
-
-      if (nextProfile.followedUserId !== ownerUid) {
-        return;
-      }
-
-      try {
-        await list.refreshFirstPage();
-      } catch (error) {
-        showCloudError(error);
-      }
-    } finally {
-      refreshInProgressRef.current = false;
-
-      setRefreshing(false);
-    }
-  }, [
-    list.refreshFirstPage,
-    ownerUid,
-    refreshProfile,
-    showCloudError,
-    showProfileError,
-  ]);
-
   const headerMenuItems = useMemo<HeaderMenuItem[]>(
     () => [
       {
@@ -115,14 +68,18 @@ const FollowerDiaryContentInner = ({
         disabled: refreshing || list.isLoading,
 
         onPress: () => {
-          void handleRefresh();
+          void onRefresh();
         },
       },
     ],
-    [handleRefresh, list.isLoading, refreshing]
+    [list.isLoading, onRefresh, refreshing]
   );
 
   useHeaderMenu(headerMenuItems);
+
+  if (list.hasInitialError) {
+    throw list.error ?? new Error('UNKNOWN_ERROR');
+  }
 
   if (list.isInitialLoading) {
     return <LoadingView />;
@@ -130,7 +87,7 @@ const FollowerDiaryContentInner = ({
 
   return (
     <>
-      <FollowerDiaryList
+      <CloudDiaryList
         list={list}
         emptyTitle={t('diary.follower.empty.title')}
         emptyDescription={t('diary.follower.empty.description')}

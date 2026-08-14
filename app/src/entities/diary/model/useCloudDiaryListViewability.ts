@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, type ViewToken } from 'react-native';
 
-import type { CloudDiaryEntry, DiaryListItem } from '@entities/diary';
+import type { DiaryListItem } from '../lib/buildDiaryListItems';
 
-type FollowerDiaryListItem = DiaryListItem<CloudDiaryEntry>;
+import type { CloudDiaryEntry } from './cloudDiaryEntry';
+
+type CloudDiaryListItem = DiaryListItem<CloudDiaryEntry>;
 
 const VIEWABILITY_CONFIG = {
   itemVisiblePercentThreshold: 10,
@@ -26,8 +28,10 @@ const haveSameIds = (
   return true;
 };
 
-export const useFollowerDiaryViewability = (ownerUid: string) => {
-  const listRef = useRef<FlatList<FollowerDiaryListItem>>(null);
+export const useCloudDiaryListViewability = (ownerUid: string) => {
+  const listRef = useRef<FlatList<CloudDiaryListItem>>(null);
+
+  const previousOwnerUidRef = useRef(ownerUid);
 
   const [visibleEntryIds, setVisibleEntryIds] = useState<ReadonlySet<string>>(
     () => new Set()
@@ -43,15 +47,17 @@ export const useFollowerDiaryViewability = (ownerUid: string) => {
   }, []);
 
   useEffect(() => {
+    if (previousOwnerUidRef.current === ownerUid) {
+      return;
+    }
+
+    previousOwnerUidRef.current = ownerUid;
+
     resetViewability();
   }, [ownerUid, resetViewability]);
 
   const handleViewableItemsChanged = useRef(
-    ({
-      viewableItems,
-    }: {
-      viewableItems: ViewToken<FollowerDiaryListItem>[];
-    }) => {
+    ({ viewableItems }: { viewableItems: ViewToken<CloudDiaryListItem>[] }) => {
       const nextVisibleEntryIds = new Set<string>();
 
       for (const token of viewableItems) {

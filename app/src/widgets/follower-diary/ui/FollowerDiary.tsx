@@ -1,24 +1,27 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import styled from '@emotion/native';
 import { useTranslation } from 'react-i18next';
 
-import { errorMapper } from '@shared/lib/errors';
 import { type HeaderMenuItem, useHeaderMenu } from '@shared/lib/navigation';
-import { showNotification } from '@shared/lib/notifications';
 import * as ss from '@shared/styles';
 import { Loader, LoadingView } from '@shared/ui';
 
 import { useFollowerDiaryProfile } from '../model/useFollowerDiaryProfile';
+import { useFollowerDiaryRefresh } from '../model/useFollowerDiaryRefresh';
 
 import { FollowerDiaryContent } from './FollowerDiaryContent';
 
 type UnassignedStateProps = {
   refreshing: boolean;
 
-  onRefresh: () => void;
+  onRefresh: () => void | Promise<void>;
 };
 
-const UnassignedState = ({ refreshing, onRefresh }: UnassignedStateProps) => {
+const UnassignedState = ({
+  refreshing,
+
+  onRefresh,
+}: UnassignedStateProps) => {
   const { t } = useTranslation();
 
   const headerMenuItems = useMemo<HeaderMenuItem[]>(
@@ -32,7 +35,9 @@ const UnassignedState = ({ refreshing, onRefresh }: UnassignedStateProps) => {
 
         disabled: refreshing,
 
-        onPress: onRefresh,
+        onPress: () => {
+          void onRefresh();
+        },
       },
     ],
     [onRefresh, refreshing]
@@ -54,15 +59,15 @@ const UnassignedState = ({ refreshing, onRefresh }: UnassignedStateProps) => {
 const FollowerDiaryInner = () => {
   const followerProfile = useFollowerDiaryProfile();
 
+  const diaryRefresh = useFollowerDiaryRefresh({
+    userId: followerProfile.userId,
+
+    currentOwnerUid: followerProfile.followedUserId,
+  });
+
   if (followerProfile.hasInitialError) {
     throw followerProfile.error ?? new Error('custom/user-profile-load-failed');
   }
-
-  const handleRefreshProfile = useCallback(() => {
-    void followerProfile.refreshProfile().catch((error) => {
-      showNotification('error', errorMapper(error, 'firebase'));
-    });
-  }, [followerProfile.refreshProfile]);
 
   if (followerProfile.isInitialLoading) {
     return <LoadingView />;
@@ -71,35 +76,27 @@ const FollowerDiaryInner = () => {
   if (followerProfile.followedUserId === null) {
     return (
       <UnassignedState
-        refreshing={followerProfile.isRefreshing}
-        onRefresh={handleRefreshProfile}
+        refreshing={diaryRefresh.isRefreshing}
+        onRefresh={diaryRefresh.refresh}
       />
     );
   }
 
   return (
     <FollowerDiaryContent
+      key={`${followerProfile.followedUserId}:${diaryRefresh.contentRevision}`}
       ownerUid={followerProfile.followedUserId}
-      refreshProfile={followerProfile.refreshProfile}
+      refreshing={diaryRefresh.isRefreshing}
+      onRefresh={diaryRefresh.refresh}
     />
   );
 };
 
 export const FollowerDiary = () => (
-  <Root>
-    <Loader errorType="firebase">
-      <FollowerDiaryInner />
-    </Loader>
-  </Root>
+  <Loader errorType="firebase">
+    <FollowerDiaryInner />
+  </Loader>
 );
-
-const Root = styled.View`
-  flex: 1;
-
-  background-color: ${({ theme }) => theme.colors.bg};
-
-  padding-horizontal: ${({ theme }) => ss.px(theme.spacing.lg)};
-`;
 
 const State = styled.View`
   flex: 1;

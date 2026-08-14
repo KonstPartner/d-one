@@ -8,18 +8,15 @@ import { DiaryEntryMeta } from './DiaryEntryMeta';
 import { DiaryEntryMetrics } from './DiaryEntryMetrics';
 import { DiaryEntryTextSections } from './DiaryEntryTextSections';
 
-type CloudDiaryEntrySelection = {
-  selected: boolean;
-
-  onToggle: (entry: CloudDiaryEntry) => void;
-};
-
 type CloudDiaryEntryCardProps = {
   entry: CloudDiaryEntry;
 
   isVisible?: boolean;
 
-  selection?: CloudDiaryEntrySelection;
+  selectionActive?: boolean;
+  selected?: boolean;
+
+  onToggleSelection?: (entry: CloudDiaryEntry) => void;
 
   onOpenPhoto?: (entry: CloudDiaryEntry) => void;
 };
@@ -29,18 +26,21 @@ const CloudDiaryEntryCardComponent = ({
 
   isVisible = false,
 
-  selection,
+  selectionActive = false,
+  selected = false,
+
+  onToggleSelection,
 
   onOpenPhoto,
 }: CloudDiaryEntryCardProps) => {
-  const selectionActive = selection !== undefined;
-
   const photoInteractive =
     !selectionActive && entry.photoUrl !== null && onOpenPhoto !== undefined;
 
   const handleToggleSelection = useCallback(() => {
-    selection?.onToggle(entry);
-  }, [entry, selection]);
+    if (selectionActive) {
+      onToggleSelection?.(entry);
+    }
+  }, [entry, onToggleSelection, selectionActive]);
 
   const handlePhotoPress = useCallback(() => {
     if (photoInteractive) {
@@ -51,13 +51,14 @@ const CloudDiaryEntryCardComponent = ({
   return (
     <DiaryEntryCardShell
       testID={`cloud-diary-entry-card-${entry.id}`}
-      selected={selection?.selected ?? false}
+      selected={selected}
       onPress={selectionActive ? handleToggleSelection : undefined}
     >
       <CloudDiaryEntryPhoto
         entryId={entry.id}
         photoUrl={entry.photoUrl}
         isVisible={isVisible}
+        disabled={selectionActive}
         onPress={photoInteractive ? handlePhotoPress : undefined}
       />
 

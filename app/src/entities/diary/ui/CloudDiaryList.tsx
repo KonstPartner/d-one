@@ -1,23 +1,41 @@
 import { useCallback } from 'react';
 import { FlatList, type ListRenderItem } from 'react-native';
 
-import {
-  type CloudDiaryEntry,
-  CloudDiaryEntryCard,
-  CloudDiaryPagination,
-  DiaryDayHeader,
-  type DiaryListItem,
-} from '@entities/diary';
+import type { DiaryListItem } from '../lib/buildDiaryListItems';
+import type { CloudDiaryEntry } from '../model/cloudDiaryEntry';
+import type { useCloudDiaryList } from '../model/useCloudDiaryList';
+import * as s from '../styles/CloudDiaryList';
 
-import type { useFollowerDiaryList } from '../model/useFollowerDiaryList';
-import * as s from '../styles/FollowerDiaryList';
+import { CloudDiaryEntryCard } from './CloudDiaryEntryCard';
+import { CloudDiaryPagination } from './CloudDiaryPagination';
+import { DiaryDayHeader } from './DiaryDayHeader';
 
-type FollowerDiaryListItem = DiaryListItem<CloudDiaryEntry>;
+type CloudDiaryListItem = DiaryListItem<CloudDiaryEntry>;
 
-type FollowerDiaryListController = ReturnType<typeof useFollowerDiaryList>;
+type CloudDiaryListController = Pick<
+  ReturnType<typeof useCloudDiaryList>,
+  | 'listRef'
+  | 'page'
+  | 'listItems'
+  | 'visibleEntryIds'
+  | 'collapsedDayKeys'
+  | 'toggleDay'
+  | 'getListItemKey'
+  | 'viewabilityConfig'
+  | 'handleViewableItemsChanged'
+  | 'hasPreviousPage'
+  | 'hasNextPage'
+  | 'isLoading'
+>;
 
-type FollowerDiaryListProps = {
-  list: FollowerDiaryListController;
+type CloudDiaryListSelection = {
+  isEntrySelected: (entryId: string) => boolean;
+
+  onToggleEntry: (entry: CloudDiaryEntry) => void;
+};
+
+type CloudDiaryListProps = {
+  list: CloudDiaryListController;
 
   emptyTitle: string;
   emptyDescription: string;
@@ -29,9 +47,11 @@ type FollowerDiaryListProps = {
   onNext: () => void;
 
   onOpenPhoto: (entry: CloudDiaryEntry) => void;
+
+  selection?: CloudDiaryListSelection;
 };
 
-export const FollowerDiaryList = ({
+export const CloudDiaryList = ({
   list,
 
   emptyTitle,
@@ -44,8 +64,12 @@ export const FollowerDiaryList = ({
   onNext,
 
   onOpenPhoto,
-}: FollowerDiaryListProps) => {
-  const renderItem = useCallback<ListRenderItem<FollowerDiaryListItem>>(
+
+  selection,
+}: CloudDiaryListProps) => {
+  const selectionActive = selection !== undefined;
+
+  const renderItem = useCallback<ListRenderItem<CloudDiaryListItem>>(
     ({ item }) => {
       if (item.type === 'dayHeader') {
         return (
@@ -54,6 +78,7 @@ export const FollowerDiaryList = ({
             title={item.title}
             entriesCount={item.entriesCount}
             collapsed={list.collapsedDayKeys.has(item.dayKey)}
+            disabled={selectionActive}
             onToggle={list.toggleDay}
           />
         );
@@ -63,11 +88,21 @@ export const FollowerDiaryList = ({
         <CloudDiaryEntryCard
           entry={item.entry}
           isVisible={list.visibleEntryIds.has(item.entry.id)}
+          selectionActive={selectionActive}
+          selected={selection?.isEntrySelected(item.entry.id) ?? false}
+          onToggleSelection={selection?.onToggleEntry}
           onOpenPhoto={onOpenPhoto}
         />
       );
     },
-    [list.collapsedDayKeys, list.toggleDay, list.visibleEntryIds, onOpenPhoto]
+    [
+      list.collapsedDayKeys,
+      list.toggleDay,
+      list.visibleEntryIds,
+      onOpenPhoto,
+      selection,
+      selectionActive,
+    ]
   );
 
   return (
@@ -85,7 +120,9 @@ export const FollowerDiaryList = ({
         </s.Empty>
       }
       ListFooterComponent={
-        list.page === undefined || list.listItems.length === 0 ? null : (
+        selectionActive ||
+        list.page === undefined ||
+        list.listItems.length === 0 ? null : (
           <s.Footer>
             <CloudDiaryPagination
               hasPreviousPage={list.hasPreviousPage}
@@ -101,9 +138,10 @@ export const FollowerDiaryList = ({
       }
       viewabilityConfig={list.viewabilityConfig}
       onViewableItemsChanged={list.handleViewableItemsChanged}
-      initialNumToRender={6}
-      maxToRenderPerBatch={6}
-      windowSize={5}
+      initialNumToRender={5}
+      maxToRenderPerBatch={5}
+      updateCellsBatchingPeriod={50}
+      windowSize={3}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     />

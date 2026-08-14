@@ -48,8 +48,8 @@
       }
     },
     "pagination": {
-      "previousPage": "Previous page",
-      "nextPage": "Next page"
+      "previousPage": "Previous",
+      "nextPage": "Next"
     },
     "search": {
       "placeholder": "Search entries",
@@ -254,6 +254,16 @@
         "ignore": "Any",
         "has": "Has",
         "doesNotHave": "Does not have"
+      }
+    },
+    "cloud": {
+      "menu": {
+        "refresh": "Refresh list",
+        "selectEntries": "Select entries"
+      },
+      "empty": {
+        "title": "No cloud entries",
+        "description": "There are no synchronized diary entries to display."
       }
     },
     "follower": {
