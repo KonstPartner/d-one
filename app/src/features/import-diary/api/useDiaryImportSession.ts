@@ -62,6 +62,8 @@ export const useDiaryImportSession = () => {
 
   const leaseRef = useRef<DiaryTransferLease | null>(null);
 
+  const [hasActiveSession, setHasActiveSession] = useState(false);
+
   const execution = useDiaryImportExecution({
     service: executionService,
 
@@ -185,6 +187,8 @@ export const useDiaryImportSession = () => {
 
         sessionRef.current = session;
 
+        setHasActiveSession(true);
+
         setPreview(session.preview);
 
         setConflictItems(session.conflictItems);
@@ -197,6 +201,8 @@ export const useDiaryImportSession = () => {
 
         sessionRef.current?.cleanup();
         sessionRef.current = null;
+
+        setHasActiveSession(false);
 
         lease?.fail();
 
@@ -214,8 +220,20 @@ export const useDiaryImportSession = () => {
     [conflicts.reset, execution.reset, isPreparing, preparationService, userId]
   );
 
+  const executeImport = useCallback(async () => {
+    const status = await execution.execute();
+
+    if (status !== null) {
+      setHasActiveSession(false);
+    }
+
+    return status;
+  }, [execution.execute]);
+
   const cancelSession = useCallback((): void => {
     disposeActiveSession();
+
+    setHasActiveSession(false);
 
     setPreview(null);
     setConflictItems([]);
@@ -240,12 +258,12 @@ export const useDiaryImportSession = () => {
 
     isImporting: execution.isImporting,
 
-    hasActiveSession: sessionRef.current !== null,
+    hasActiveSession,
 
     chooseFromDevice,
     prepareSource,
 
-    executeImport: execution.execute,
+    executeImport,
 
     cancelSession,
   };

@@ -28,6 +28,10 @@ jest.mock('@entities/diary', () => {
   return {
     diaryLocalQueryKeys,
 
+    tryAcquireDiaryWriteOperation: () => ({
+      release: () => undefined,
+    }),
+
     useReadyDiaryDatabase: () => ({
       userId: 'user-1',
 
