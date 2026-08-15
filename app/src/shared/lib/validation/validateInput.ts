@@ -37,7 +37,7 @@ const getValidationRule = (type: ValidateInputType): ValidationRule | null => {
 
     case 'nickname':
       key = 'common.validation.nickname';
-      pattern = '^.{1,255}$';
+      pattern = '^[\\p{L}\\p{N}_-]{1,32}$';
       break;
 
     default:

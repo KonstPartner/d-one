@@ -59,6 +59,15 @@ export {
   isDiaryEntrySearchField,
   isDiaryEntryTextSearchField,
 } from './api/local/diaryRepository.types';
+export type {
+  DiaryStoredExportFile,
+  DiaryStoredExportFileKind,
+} from './api/local/diaryStoredExportFileStorage';
+export {
+  createDiaryStoredExportTargetUri,
+  deleteDiaryStoredExportFiles,
+  listDiaryStoredExportFiles,
+} from './api/local/diaryStoredExportFileStorage';
 export type { DiaryListEntry, DiaryListItem } from './lib/buildDiaryListItems';
 export {
   buildDiaryListItems,

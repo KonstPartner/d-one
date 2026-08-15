@@ -34,9 +34,17 @@ export type DiaryCsvFileResult = {
 };
 
 export type DiaryCsvFileSession = {
-  append: (content: string) => void;
+  resetChunk: (chunkNumber: number) => void;
 
-  createResultFile: (fileName: string) => DiaryCsvFileResult;
+  writeRowsChunk: (input: {
+    chunkNumber: number;
+    rows: readonly string[];
+  }) => void;
+
+  createResultFile: (input: {
+    fileName: string;
+    chunksCount: number;
+  }) => DiaryCsvFileResult;
 
   cleanupWorkingFiles: () => void;
 };

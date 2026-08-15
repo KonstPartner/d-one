@@ -1,0 +1,61 @@
+{
+  "transfer": {
+    "title": "Import and export",
+    "actions": {
+      "back": "Back",
+      "export": "Export",
+      "import": "Import",
+      "continue": "Continue",
+      "delete": "Delete",
+      "refresh": "Refresh"
+    },
+    "export": {
+      "title": "Export diary",
+      "fullBackup": "Full backup",
+      "fullBackupDescription": "Entries and locally stored photos in an importable ZIP backup.",
+      "lightweightBackup": "Lightweight backup",
+      "lightweightBackupDescription": "Entries without local photo files. Existing cloud photo links are preserved.",
+      "csv": "CSV",
+      "csvDescription": "A localized spreadsheet-friendly file for viewing and sharing. CSV cannot be imported.",
+      "createdExports": "Created exports"
+    },
+    "import": {
+      "title": "Import diary",
+      "chooseFromDevice": "Choose file from device",
+      "createdBackups": "Created backups"
+    },
+    "files": {
+      "manageTitle": "Created exports",
+      "importTitle": "Created backups",
+      "searchPlaceholder": "Search by file name",
+      "searchAccessibilityLabel": "Search created exports",
+      "unfinishedTitle": "Unfinished exports",
+      "finishedTitle": "Created exports",
+      "empty": "No exports yet",
+      "noResults": "No files match your search",
+      "formats": {
+        "fullBackup": "Full backup",
+        "lightweightBackup": "Lightweight backup",
+        "csv": "CSV"
+      },
+      "phases": {
+        "planning": "Preparing export",
+        "processing": "Exporting",
+        "readyToFinalize": "Ready to finish"
+      },
+      "progress": {
+        "entries": "{{current}} of {{total}} entries",
+        "photos": "{{current}} of {{total}} photos"
+      },
+      "deleteUnfinishedTitle": "Delete unfinished export?",
+      "deleteUnfinishedDescription": "The saved export progress will be permanently deleted.",
+      "deleteFinishedTitle": "Delete export?",
+      "deleteFinishedDescription": "The created export file will be permanently deleted from this device.",
+      "errors": {
+        "loadFailed": "Failed to load exports.",
+        "deleteFailed": "Failed to delete the export.",
+        "resumeFailed": "Failed to continue the export."
+      }
+    }
+  }
+}

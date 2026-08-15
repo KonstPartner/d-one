@@ -1,5 +1,7 @@
 import type { DiaryBackupExportType } from '@entities/diary';
 
+import type { DiaryCsvLocalization } from './diaryCsv';
+
 export const DIARY_EXPORT_FORMATS = [
   'fullBackup',
   'lightweightBackup',
@@ -22,13 +24,19 @@ export type DiaryExportScope =
       entryIds: readonly string[];
     };
 
-export type DiaryExportRequest = {
-  userId: string;
+type DiaryExportRequestBase = {
   userName: string;
-  format: DiaryExportFormat;
   scope: DiaryExportScope;
-  exportedAt: Date;
 };
+
+export type DiaryExportRequest =
+  | (DiaryExportRequestBase & {
+      format: DiaryBackupExportType;
+    })
+  | (DiaryExportRequestBase & {
+      format: 'csv';
+      localization: DiaryCsvLocalization;
+    });
 
 export type DiaryExportResult = {
   fileUri: string;

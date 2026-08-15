@@ -4,6 +4,7 @@ import { diaryTranslations } from './resources/diary';
 import { diaryAiTranslations } from './resources/diaryAi';
 import { headerTranslations } from './resources/header';
 import { layoutTranslations } from './resources/layout';
+import { transferTranslations } from './resources/transfer';
 
 const mergeTranslations = (...parts: Record<string, unknown>[]) =>
   Object.assign({}, ...parts);
@@ -16,7 +17,8 @@ export const resources = {
       layoutTranslations.en,
       headerTranslations.en,
       diaryTranslations.en,
-      diaryAiTranslations.en
+      diaryAiTranslations.en,
+      transferTranslations.en
     ),
   },
 
@@ -27,7 +29,8 @@ export const resources = {
       layoutTranslations.ru,
       headerTranslations.ru,
       diaryTranslations.ru,
-      diaryAiTranslations.ru
+      diaryAiTranslations.ru,
+      transferTranslations.ru
     ),
   },
 } as const;

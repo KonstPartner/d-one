@@ -4,7 +4,7 @@ import type {
 } from '../model/diaryExport.types';
 
 const APP_FILE_NAME = 'd-one';
-const FALLBACK_USER_NAME = 'user';
+const SAFE_USER_NAME_PATTERN = /^[\p{L}\p{N}_-]{1,32}$/u;
 
 const pad = (value: number): string => value.toString().padStart(2, '0');
 
@@ -17,17 +17,6 @@ const formatLocalDateTime = (value: Date): string =>
   `${formatLocalDate(value)}_${pad(value.getHours())}-${pad(
     value.getMinutes()
   )}-${pad(value.getSeconds())}`;
-
-const normalizeUserName = (value: string): string => {
-  const normalized = value
-    .normalize('NFKC')
-    .trim()
-    .toLocaleLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, '-')
-    .replace(/^-+|-+$/g, '');
-
-  return normalized.length > 0 ? normalized : FALLBACK_USER_NAME;
-};
 
 const getExportTypePart = (format: DiaryExportFormat): string => {
   switch (format) {
@@ -75,6 +64,10 @@ export const buildDiaryExportFileName = ({
     throw new Error('Invalid diary export date');
   }
 
+  if (!SAFE_USER_NAME_PATTERN.test(userName)) {
+    throw new Error('Invalid diary export user name');
+  }
+
   if (
     scope.type === 'period' &&
     (Number.isNaN(scope.from.getTime()) ||
@@ -88,7 +81,7 @@ export const buildDiaryExportFileName = ({
     [
       APP_FILE_NAME,
       getExportTypePart(format),
-      normalizeUserName(userName),
+      userName,
       formatLocalDateTime(exportedAt),
       getScopePart(scope),
     ].join('_') + `.${getExtension(format)}`

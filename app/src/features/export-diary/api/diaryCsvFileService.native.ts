@@ -1,4 +1,6 @@
-import { Directory, File, Paths } from 'expo-file-system';
+import { Directory, File } from 'expo-file-system';
+
+import { createDiaryStoredExportTargetUri } from '@entities/diary';
 
 import type {
   DiaryCsvFileResult,
@@ -7,15 +9,12 @@ import type {
 
 const SAFE_CSV_FILE_NAME_PATTERN = /^[^/\\]+\.csv$/i;
 
-const TEMP_DIRECTORY_NAME = 'tmp';
-const EXPORT_RESULT_DIRECTORY_NAME = 'diary-export-results';
+const CSV_DIRECTORY_NAME = 'csv';
+const STAGING_FILE_NAME = 'csv-staging.csv';
 
 const UTF8_BOM = '\uFEFF';
 
 const textEncoder = new TextEncoder();
-
-const createUniqueSessionName = (): string =>
-  `export_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
 const safelyDeleteFile = (file: File): void => {
   try {
@@ -27,43 +26,48 @@ const safelyDeleteFile = (file: File): void => {
   }
 };
 
-const safelyDeleteDirectory = (directory: Directory): void => {
-  try {
-    if (directory.exists) {
-      directory.delete();
-    }
-  } catch {
-    return;
+const assertValidChunkNumber = (chunkNumber: number): void => {
+  if (!Number.isInteger(chunkNumber) || chunkNumber < 1) {
+    throw new Error('Invalid diary CSV chunk number');
   }
 };
 
+const createChunkFileName = (chunkNumber: number): string =>
+  `rows_${chunkNumber.toString().padStart(6, '0')}.csv`;
+
 export const createDiaryCsvFileSession = ({
+  payloadUri,
   headerRow,
 }: {
+  payloadUri: string;
   headerRow: string;
 }): DiaryCsvFileSession => {
-  const workingDirectory = new Directory(
-    Paths.document,
-    TEMP_DIRECTORY_NAME,
-    createUniqueSessionName()
-  );
+  if (payloadUri.length === 0) {
+    throw new Error('Diary CSV payload is missing');
+  }
 
-  workingDirectory.create({
+  if (headerRow.length === 0) {
+    throw new Error('Diary CSV header is missing');
+  }
+
+  const payloadDirectory = new Directory(payloadUri);
+
+  if (!payloadDirectory.exists) {
+    throw new Error('Diary CSV payload does not exist');
+  }
+
+  const workingDirectory = payloadDirectory.parentDirectory;
+
+  const csvDirectory = new Directory(payloadDirectory, CSV_DIRECTORY_NAME);
+
+  csvDirectory.create({
     idempotent: true,
     intermediates: true,
   });
 
-  const workingFile = new File(workingDirectory, 'export.csv');
-
-  workingFile.create({
-    overwrite: true,
-    intermediates: true,
-  });
-
-  const fileHandle = workingFile.open();
+  const stagingFile = new File(workingDirectory, STAGING_FILE_NAME);
 
   let active = true;
-  let handleClosed = false;
 
   const assertActive = (): void => {
     if (!active) {
@@ -71,83 +75,125 @@ export const createDiaryCsvFileSession = ({
     }
   };
 
-  const closeHandle = (): void => {
-    if (handleClosed) {
-      return;
-    }
-
-    fileHandle.close();
-    handleClosed = true;
-  };
-
-  const appendBytes = (content: string): void => {
-    fileHandle.writeBytes(textEncoder.encode(content));
-  };
-
-  try {
-    appendBytes(`${UTF8_BOM}${headerRow}\r\n`);
-  } catch (error) {
-    try {
-      closeHandle();
-    } finally {
-      safelyDeleteDirectory(workingDirectory);
-    }
-
-    throw error;
-  }
-
-  const append: DiaryCsvFileSession['append'] = (content) => {
+  const resetChunk: DiaryCsvFileSession['resetChunk'] = (chunkNumber) => {
     assertActive();
+    assertValidChunkNumber(chunkNumber);
 
-    if (content.length === 0) {
-      return;
-    }
-
-    appendBytes(content);
+    safelyDeleteFile(new File(csvDirectory, createChunkFileName(chunkNumber)));
   };
 
-  const createResultFile: DiaryCsvFileSession['createResultFile'] = (
-    fileName
-  ): DiaryCsvFileResult => {
+  const writeRowsChunk: DiaryCsvFileSession['writeRowsChunk'] = ({
+    chunkNumber,
+    rows,
+  }) => {
+    assertActive();
+    assertValidChunkNumber(chunkNumber);
+
+    const chunkFile = new File(csvDirectory, createChunkFileName(chunkNumber));
+
+    chunkFile.create({
+      overwrite: true,
+      intermediates: true,
+    });
+
+    const content = rows.length === 0 ? '' : `${rows.join('\r\n')}\r\n`;
+
+    chunkFile.write(content);
+
+    if (!chunkFile.exists) {
+      throw new Error('Diary CSV chunk cannot be written');
+    }
+
+    if (rows.length > 0 && chunkFile.size <= 0) {
+      throw new Error('Diary CSV chunk is empty');
+    }
+  };
+
+  const createResultFile: DiaryCsvFileSession['createResultFile'] = ({
+    fileName,
+    chunksCount,
+  }): DiaryCsvFileResult => {
     assertActive();
 
     if (!SAFE_CSV_FILE_NAME_PATTERN.test(fileName)) {
       throw new Error('Invalid diary CSV file name');
     }
 
-    closeHandle();
-
-    if (!workingFile.exists || workingFile.size <= 0) {
-      throw new Error('Diary CSV file is empty');
+    if (!Number.isInteger(chunksCount) || chunksCount < 0) {
+      throw new Error('Invalid diary CSV chunks count');
     }
 
-    const resultDirectory = new Directory(
-      Paths.cache,
-      EXPORT_RESULT_DIRECTORY_NAME
-    );
+    safelyDeleteFile(stagingFile);
 
-    resultDirectory.create({
-      idempotent: true,
-      intermediates: true,
+    stagingFile.create({
+      overwrite: true,
+      intermediates: false,
     });
 
-    const resultFile = new File(resultDirectory, fileName);
-
-    safelyDeleteFile(resultFile);
+    const fileHandle = stagingFile.open();
 
     try {
-      workingFile.copy(resultFile);
-    } catch {
-      safelyDeleteFile(resultFile);
+      fileHandle.writeBytes(textEncoder.encode(`${UTF8_BOM}${headerRow}\r\n`));
 
-      throw new Error('Diary CSV result file cannot be created');
+      for (let chunkNumber = 1; chunkNumber <= chunksCount; chunkNumber += 1) {
+        const chunkFile = new File(
+          csvDirectory,
+          createChunkFileName(chunkNumber)
+        );
+
+        if (!chunkFile.exists) {
+          throw new Error(`Diary CSV chunk is missing: ${chunkNumber}`);
+        }
+
+        if (chunkFile.size > 0) {
+          fileHandle.writeBytes(textEncoder.encode(chunkFile.textSync()));
+        }
+      }
+    } catch (error) {
+      try {
+        fileHandle.close();
+      } finally {
+        safelyDeleteFile(stagingFile);
+      }
+
+      throw error;
     }
 
-    if (!resultFile.exists || resultFile.size <= 0) {
-      safelyDeleteFile(resultFile);
+    fileHandle.close();
+
+    if (!stagingFile.exists || stagingFile.size <= 0) {
+      safelyDeleteFile(stagingFile);
 
       throw new Error('Diary CSV result file is empty');
     }
+
+    const resultSize = stagingFile.size;
+    const resultFile = new File(createDiaryStoredExportTargetUri(fileName));
+
+    try {
+      stagingFile.move(resultFile);
+    } catch {
+      if (resultFile.exists && resultFile.size === resultSize) {
+        active = false;
+
+        return {
+          fileUri: resultFile.uri,
+          fileSize: resultFile.size,
+        };
+      }
+
+      safelyDeleteFile(resultFile);
+
+      throw new Error('Diary CSV result file cannot be finalized');
+    }
+
+    if (!resultFile.exists || resultFile.size !== resultSize) {
+      safelyDeleteFile(resultFile);
+
+      throw new Error('Diary CSV result file cannot be finalized');
+    }
+
+    active = false;
 
     return {
       fileUri: resultFile.uri,
@@ -162,15 +208,12 @@ export const createDiaryCsvFileSession = ({
 
     active = false;
 
-    try {
-      closeHandle();
-    } finally {
-      safelyDeleteDirectory(workingDirectory);
-    }
+    safelyDeleteFile(stagingFile);
   };
 
   return {
-    append,
+    resetChunk,
+    writeRowsChunk,
     createResultFile,
     cleanupWorkingFiles,
   };

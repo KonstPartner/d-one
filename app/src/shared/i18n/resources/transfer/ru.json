@@ -1,0 +1,61 @@
+{
+  "transfer": {
+    "title": "Импорт и экспорт",
+    "actions": {
+      "back": "Назад",
+      "export": "Экспорт",
+      "import": "Импорт",
+      "continue": "Продолжить",
+      "delete": "Удалить",
+      "refresh": "Обновить"
+    },
+    "export": {
+      "title": "Экспорт дневника",
+      "fullBackup": "Полная резервная копия",
+      "fullBackupDescription": "Записи и локально сохранённые фотографии в ZIP-архиве, который можно импортировать.",
+      "lightweightBackup": "Облегчённая резервная копия",
+      "lightweightBackupDescription": "Записи без локальных файлов фотографий. Существующие ссылки на облачные фотографии сохраняются.",
+      "csv": "CSV",
+      "csvDescription": "Локализованный файл для просмотра и работы с таблицами. CSV нельзя импортировать.",
+      "createdExports": "Сделанные экспорты"
+    },
+    "import": {
+      "title": "Импорт дневника",
+      "chooseFromDevice": "Выбрать файл с устройства",
+      "createdBackups": "Сделанные резервные копии"
+    },
+    "files": {
+      "manageTitle": "Сделанные экспорты",
+      "importTitle": "Сделанные резервные копии",
+      "searchPlaceholder": "Поиск по имени файла",
+      "searchAccessibilityLabel": "Поиск по сделанным экспортам",
+      "unfinishedTitle": "Незавершённые экспорты",
+      "finishedTitle": "Сделанные экспорты",
+      "empty": "Экспортов пока нет",
+      "noResults": "По вашему запросу файлов не найдено",
+      "formats": {
+        "fullBackup": "Полная резервная копия",
+        "lightweightBackup": "Облегчённая резервная копия",
+        "csv": "CSV"
+      },
+      "phases": {
+        "planning": "Подготовка экспорта",
+        "processing": "Экспорт",
+        "readyToFinalize": "Готов к завершению"
+      },
+      "progress": {
+        "entries": "{{current}} из {{total}} записей",
+        "photos": "{{current}} из {{total}} фотографий"
+      },
+      "deleteUnfinishedTitle": "Удалить незавершённый экспорт?",
+      "deleteUnfinishedDescription": "Сохранённый прогресс экспорта будет удалён без возможности восстановления.",
+      "deleteFinishedTitle": "Удалить экспорт?",
+      "deleteFinishedDescription": "Созданный файл экспорта будет навсегда удалён с этого устройства.",
+      "errors": {
+        "loadFailed": "Не удалось загрузить список экспортов.",
+        "deleteFailed": "Не удалось удалить экспорт.",
+        "resumeFailed": "Не удалось продолжить экспорт."
+      }
+    }
+  }
+}

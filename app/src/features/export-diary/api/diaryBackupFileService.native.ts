@@ -1,36 +1,33 @@
-import { Directory, File, Paths } from 'expo-file-system';
+import { Directory, File } from 'expo-file-system';
 import { zip } from 'react-native-zip-archive';
 
-import { DIARY_BACKUP_CHUNK_SIZE } from '@entities/diary';
+import {
+  createDiaryStoredExportTargetUri,
+  DIARY_BACKUP_CHUNK_SIZE,
+} from '@entities/diary';
 
-import type {
-  DiaryBackupArchiveResult,
-  DiaryBackupFileSession,
-} from './diaryBackupFileService.types';
+import type { DiaryBackupFileSession } from './diaryBackupFileService.types';
 
 const SAFE_IDENTIFIER_PATTERN = /^[A-Za-z0-9_-]+$/;
 const SAFE_ARCHIVE_FILE_NAME_PATTERN = /^[^/\\]+\.zip$/i;
 
-const TEMP_DIRECTORY_NAME = 'tmp';
-const EXPORT_RESULT_DIRECTORY_NAME = 'diary-export-results';
+const STAGING_ARCHIVE_FILE_NAME = 'archive-staging.zip';
 
-const createUniqueSessionName = (): string =>
-  `export_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+export type DiaryBackupPersistentFileSession = DiaryBackupFileSession & {
+  resetBatch: (input: {
+    chunkNumber: number;
+    entryIds: readonly string[];
+  }) => void;
+};
+
+type CreateDiaryBackupFileSessionInput = {
+  payloadUri: string;
+};
 
 const safelyDeleteFile = (file: File): void => {
   try {
     if (file.exists) {
       file.delete();
-    }
-  } catch {
-    return;
-  }
-};
-
-const safelyDeleteDirectory = (directory: Directory): void => {
-  try {
-    if (directory.exists) {
-      directory.delete();
     }
   } catch {
     return;
@@ -46,25 +43,33 @@ const assertValidChunkNumber = (chunkNumber: number): void => {
 const createChunkFileName = (chunkNumber: number): string =>
   `entries_${chunkNumber.toString().padStart(6, '0')}.json`;
 
-export const createDiaryBackupFileSession = (): DiaryBackupFileSession => {
-  const workingDirectory = new Directory(
-    Paths.document,
-    TEMP_DIRECTORY_NAME,
-    createUniqueSessionName()
-  );
+export const createDiaryBackupFileSession = ({
+  payloadUri,
+}: CreateDiaryBackupFileSessionInput): DiaryBackupPersistentFileSession => {
+  if (payloadUri.length === 0) {
+    throw new Error('Diary backup payload is missing');
+  }
 
-  const entriesDirectory = new Directory(workingDirectory, 'entries');
-  const photosDirectory = new Directory(workingDirectory, 'photos');
+  const payloadDirectory = new Directory(payloadUri);
 
-  workingDirectory.create({
-    idempotent: true,
-    intermediates: true,
-  });
+  if (!payloadDirectory.exists) {
+    throw new Error('Diary backup payload does not exist');
+  }
+
+  const workingDirectory = payloadDirectory.parentDirectory;
+
+  const entriesDirectory = new Directory(payloadDirectory, 'entries');
+  const photosDirectory = new Directory(payloadDirectory, 'photos');
 
   entriesDirectory.create({
     idempotent: true,
     intermediates: true,
   });
+
+  const stagingArchiveFile = new File(
+    workingDirectory,
+    STAGING_ARCHIVE_FILE_NAME
+  );
 
   let active = true;
 
@@ -72,6 +77,30 @@ export const createDiaryBackupFileSession = (): DiaryBackupFileSession => {
     if (!active) {
       throw new Error('Diary backup file session is closed');
     }
+  };
+
+  const resetBatch: DiaryBackupPersistentFileSession['resetBatch'] = ({
+    chunkNumber,
+    entryIds,
+  }) => {
+    assertActive();
+    assertValidChunkNumber(chunkNumber);
+
+    if (
+      entryIds.length === 0 ||
+      entryIds.length > DIARY_BACKUP_CHUNK_SIZE ||
+      entryIds.some((entryId) => !SAFE_IDENTIFIER_PATTERN.test(entryId))
+    ) {
+      throw new Error('Invalid diary backup batch');
+    }
+
+    safelyDeleteFile(
+      new File(entriesDirectory, createChunkFileName(chunkNumber))
+    );
+
+    entryIds.forEach((entryId) => {
+      safelyDeleteFile(new File(photosDirectory, `${entryId}.jpg`));
+    });
   };
 
   const addLocalPhoto: DiaryBackupFileSession['addLocalPhoto'] = ({
@@ -149,7 +178,7 @@ export const createDiaryBackupFileSession = (): DiaryBackupFileSession => {
   const writeManifest: DiaryBackupFileSession['writeManifest'] = (manifest) => {
     assertActive();
 
-    const manifestFile = new File(workingDirectory, 'manifest.json');
+    const manifestFile = new File(payloadDirectory, 'manifest.json');
 
     manifestFile.create({
       overwrite: true,
@@ -165,46 +194,62 @@ export const createDiaryBackupFileSession = (): DiaryBackupFileSession => {
 
   const createArchive: DiaryBackupFileSession['createArchive'] = async (
     fileName
-  ): Promise<DiaryBackupArchiveResult> => {
+  ) => {
     assertActive();
 
     if (!SAFE_ARCHIVE_FILE_NAME_PATTERN.test(fileName)) {
       throw new Error('Invalid diary backup archive file name');
     }
 
-    const manifestFile = new File(workingDirectory, 'manifest.json');
+    const manifestFile = new File(payloadDirectory, 'manifest.json');
 
     if (!manifestFile.exists || manifestFile.size <= 0) {
       throw new Error('Diary backup manifest is missing');
     }
 
-    const resultDirectory = new Directory(
-      Paths.cache,
-      EXPORT_RESULT_DIRECTORY_NAME
-    );
-
-    resultDirectory.create({
-      idempotent: true,
-      intermediates: true,
-    });
-
-    const archiveFile = new File(resultDirectory, fileName);
-
-    safelyDeleteFile(archiveFile);
+    safelyDeleteFile(stagingArchiveFile);
 
     try {
-      await zip(workingDirectory.uri, archiveFile.uri);
+      await zip(payloadDirectory.uri, stagingArchiveFile.uri);
     } catch {
-      safelyDeleteFile(archiveFile);
+      safelyDeleteFile(stagingArchiveFile);
 
       throw new Error('Diary backup archive cannot be created');
     }
 
-    if (!archiveFile.exists || archiveFile.size <= 0) {
-      safelyDeleteFile(archiveFile);
+    if (!stagingArchiveFile.exists || stagingArchiveFile.size <= 0) {
+      safelyDeleteFile(stagingArchiveFile);
 
       throw new Error('Diary backup archive is empty');
     }
+
+    const archiveSize = stagingArchiveFile.size;
+    const archiveFile = new File(createDiaryStoredExportTargetUri(fileName));
+
+    try {
+      stagingArchiveFile.move(archiveFile);
+    } catch {
+      if (archiveFile.exists && archiveFile.size === archiveSize) {
+        active = false;
+
+        return {
+          fileUri: archiveFile.uri,
+          fileSize: archiveFile.size,
+        };
+      }
+
+      safelyDeleteFile(archiveFile);
+
+      throw new Error('Diary backup archive cannot be finalized');
+    }
+
+    if (!archiveFile.exists || archiveFile.size !== archiveSize) {
+      safelyDeleteFile(archiveFile);
+
+      throw new Error('Diary backup archive cannot be finalized');
+    }
+
+    active = false;
 
     return {
       fileUri: archiveFile.uri,
@@ -219,22 +264,15 @@ export const createDiaryBackupFileSession = (): DiaryBackupFileSession => {
 
     active = false;
 
-    safelyDeleteDirectory(workingDirectory);
+    safelyDeleteFile(stagingArchiveFile);
   };
 
   return {
+    resetBatch,
     addLocalPhoto,
     writeEntriesChunk,
     writeManifest,
     createArchive,
     cleanupWorkingFiles,
   };
-};
-
-export const removeDiaryExportFile = (fileUri: string): void => {
-  if (fileUri.length === 0) {
-    return;
-  }
-
-  safelyDeleteFile(new File(fileUri));
 };
