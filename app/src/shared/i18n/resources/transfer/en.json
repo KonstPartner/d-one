@@ -45,6 +45,33 @@
         "comment": "Comment",
         "aiAnalysis": "AI analysis",
         "photoUrl": "Photo URL"
+      },
+      "progress": {
+        "waitingTitle": "Waiting for synchronization",
+        "waitingDescription": "The active diary operation must finish first.",
+        "preparingTitle": "Preparing export",
+        "preparingDescription": "Reading current SQLite rows and creating entry data.",
+        "photosTitle": "Adding photos",
+        "photosDescription": "Local photos are added sequentially.",
+        "finalizingTitle": "Creating file",
+        "finalizingDescription": "Finalizing the export file.",
+        "entriesProcessed": "Entries processed",
+        "photosAdded": "Photos added",
+        "locked": "Diary changes and synchronization are temporarily locked."
+      },
+      "result": {
+        "title": "Export complete",
+        "description": "The file is ready to save or share.",
+        "entries": "Entries",
+        "photos": "Photos",
+        "photosNotAdded": "Photos not added",
+        "fileSize": "File size",
+        "shareAgain": "Save / Share again",
+        "done": "Done",
+        "shareFailed": "Failed to open the system save or share interface.",
+        "failedTitle": "Export could not be completed",
+        "failedProgress": "Entries processed: {{current}} of {{total}}",
+        "noFileCreated": "No file was created."
       }
     },
     "import": {

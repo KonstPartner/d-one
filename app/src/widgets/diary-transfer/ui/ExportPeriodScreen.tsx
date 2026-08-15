@@ -3,16 +3,14 @@ import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
 import type { DiaryExportScope } from '@features/export-diary';
-import {
-  buildDiaryFilterMarkedDates,
-  type DiaryFilterDateBoundary,
-  type DiaryFilterDateRange,
-  getDiaryFilterCalendarCurrent,
-} from '@features/filter-diary-entries';
+import type { DiaryFilterDateRange } from '@features/filter-diary-entries';
 import * as ss from '@shared/styles';
-import { Button, Calendar, type CalendarMarkedDates } from '@shared/ui';
+import { Button, Spinner } from '@shared/ui';
 
+import { useDiaryExportPeriodStats } from '../model/useDiaryExportScopeStats';
 import * as s from '../styles/DiaryTransferModal';
+
+import { ExportPeriodDateRangePicker } from './ExportPeriodDateRangePicker';
 
 type ExportPeriodScreenProps = {
   disabled: boolean;
@@ -20,6 +18,11 @@ type ExportPeriodScreenProps = {
   onExport: (
     scope: Extract<DiaryExportScope, { type: 'period' }>
   ) => void | Promise<void>;
+};
+
+type ExportPeriod = {
+  from: Date;
+  to: Date;
 };
 
 const createInitialDateRange = (): DiaryFilterDateRange => ({
@@ -45,145 +48,81 @@ const parseDateKeyToLocalDate = (
   return date;
 };
 
+const createExportPeriod = (
+  dateRange: DiaryFilterDateRange
+): ExportPeriod | null => {
+  if (dateRange.from === null || dateRange.to === null) {
+    return null;
+  }
+
+  return {
+    from: parseDateKeyToLocalDate(dateRange.from, 'start'),
+
+    to: parseDateKeyToLocalDate(dateRange.to, 'end'),
+  };
+};
+
 export const ExportPeriodScreen = ({
   disabled,
   onExport,
 }: ExportPeriodScreenProps) => {
   const theme = useTheme();
 
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
-  const [date, setDate] = useState<DiaryFilterDateRange>(
+  const [dateRange, setDateRange] = useState<DiaryFilterDateRange>(
     createInitialDateRange
   );
 
-  const markedDates = useMemo<CalendarMarkedDates>(
-    () =>
-      buildDiaryFilterMarkedDates({
-        date,
+  const period = useMemo(() => createExportPeriod(dateRange), [dateRange]);
 
-        primaryColor: theme.colors.primary,
-        rangeColor: theme.colors.shades.primary.sm,
-        textColor: theme.colors.text,
-      }),
-    [
-      date,
-      theme.colors.primary,
-      theme.colors.shades.primary.sm,
-      theme.colors.text,
-    ]
-  );
-
-  const calendarCurrent = getDiaryFilterCalendarCurrent(date);
-
-  const formatDate = (value: string | null): string => {
-    if (value === null) {
-      return t('diary.filters.notSet');
-    }
-
-    return new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).format(new Date(`${value}T12:00:00`));
-  };
-
-  const setBoundary = (boundary: DiaryFilterDateBoundary): void => {
-    setDate((current) => ({
-      ...current,
-      activeBoundary: boundary,
-    }));
-  };
-
-  const handleDayPress = (dateString: string): void => {
-    setDate((current) => {
-      if (current.activeBoundary === 'from') {
-        return {
-          from: dateString,
-          to:
-            current.to !== null && dateString > current.to ? null : current.to,
-          activeBoundary: 'to',
-        };
-      }
-
-      if (current.from !== null && dateString < current.from) {
-        return {
-          from: dateString,
-          to: null,
-          activeBoundary: 'to',
-        };
-      }
-
-      return {
-        ...current,
-        to: dateString,
-      };
-    });
-  };
+  const { stats, isFetching, error } = useDiaryExportPeriodStats(period);
 
   const canExport =
-    !disabled && date.from !== null && date.to !== null && date.from <= date.to;
+    !disabled &&
+    period !== null &&
+    !isFetching &&
+    error === null &&
+    stats !== null &&
+    stats.entriesCount > 0;
 
   const handleExport = (): void => {
-    if (!canExport || date.from === null || date.to === null) {
+    if (!canExport || period === null) {
       return;
     }
 
     void onExport({
       type: 'period',
-      from: parseDateKeyToLocalDate(date.from, 'start'),
-      to: parseDateKeyToLocalDate(date.to, 'end'),
+      from: period.from,
+      to: period.to,
     });
-  };
-
-  const renderBoundary = (
-    boundary: DiaryFilterDateBoundary,
-    label: string,
-    value: string | null
-  ) => {
-    const active = date.activeBoundary === boundary;
-
-    return (
-      <s.OptionButton
-        accessibilityRole="button"
-        accessibilityLabel={label}
-        accessibilityState={{
-          selected: active,
-          disabled,
-        }}
-        disabled={disabled}
-        $disabled={disabled}
-        onPress={() => {
-          setBoundary(boundary);
-        }}
-        style={disabled ? undefined : s.getOptionButtonStyle}
-      >
-        <s.OptionContent>
-          <s.OptionDescription>{label}</s.OptionDescription>
-
-          <s.OptionTitle>{formatDate(value)}</s.OptionTitle>
-        </s.OptionContent>
-      </s.OptionButton>
-    );
   };
 
   return (
     <s.Options>
-      <s.Options>
-        {renderBoundary('from', t('diary.filters.date.from'), date.from)}
-
-        {renderBoundary('to', t('diary.filters.date.to'), date.to)}
-      </s.Options>
-
-      <Calendar
-        markingType="period"
-        current={calendarCurrent}
-        markedDates={markedDates}
-        enableSwipeMonths
-        onDayPress={(day) => {
-          handleDayPress(day.dateString);
-        }}
+      <ExportPeriodDateRangePicker
+        value={dateRange}
+        disabled={disabled}
+        onChange={setDateRange}
       />
+
+      {period !== null && (
+        <s.OptionContent>
+          {isFetching ? (
+            <Spinner size={20} />
+          ) : error !== null ? (
+            <s.OptionDescription>
+              {t('transfer.export.errors.failed')}
+            </s.OptionDescription>
+          ) : (
+            <s.OptionDescription>
+              {t('transfer.export.result.entries')}
+              {': '}
+              {stats?.entriesCount ?? 0}
+            </s.OptionDescription>
+          )}
+        </s.OptionContent>
+      )}
 
       <Button tone="input" disabled={!canExport} onPress={handleExport}>
         <s.OptionTitle style={ss.Text(theme)}>

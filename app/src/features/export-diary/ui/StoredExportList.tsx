@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { FlatList, type ListRenderItem } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import type { DiaryStoredExportFile } from '@entities/diary';
 import * as ss from '@shared/styles';
 import {
   Button,
+  Checkbox,
   ConfirmDialog,
   ErrorSection,
   IconButton,
@@ -15,12 +16,16 @@ import {
   LoadingView,
 } from '@shared/ui';
 
-import { useDiaryExportFiles } from '../api/useDiaryExportFiles';
-import { useDiaryExportMutation } from '../api/useDiaryExportMutation';
 import type { DiaryUnfinishedExport } from '../model/diaryUnfinishedExport';
+import {
+  type StoredExportListMode,
+  useStoredExportList,
+} from '../model/useStoredExportList';
 import * as s from '../styles/StoredExportList';
 
-export type StoredExportListMode = 'manage' | 'import';
+import { ExportFileActionsScreen } from './ExportFileActionsScreen';
+
+export type { StoredExportListMode } from '../model/useStoredExportList';
 
 export type StoredExportSelection = {
   fileName: string;
@@ -29,35 +34,14 @@ export type StoredExportSelection = {
 
 type StoredExportListProps = {
   mode: StoredExportListMode;
-
   onBack: () => void;
   onSelectBackup?: (file: StoredExportSelection) => void;
 };
 
 type StoredExportListItem =
-  | {
-      type: 'section';
-      key: 'unfinished' | 'finished';
-      title: string;
-    }
-  | {
-      type: 'unfinished';
-      export: DiaryUnfinishedExport;
-    }
-  | {
-      type: 'finished';
-      file: DiaryStoredExportFile;
-    };
-
-type DeleteTarget =
-  | {
-      type: 'unfinished';
-      exportId: string;
-    }
-  | {
-      type: 'finished';
-      fileName: string;
-    };
+  | { type: 'section'; key: 'unfinished' | 'finished'; title: string }
+  | { type: 'unfinished'; export: DiaryUnfinishedExport }
+  | { type: 'finished'; file: DiaryStoredExportFile };
 
 const getUnfinishedFormatKey = (
   format: DiaryUnfinishedExport['format']
@@ -68,10 +52,8 @@ const getUnfinishedFormatKey = (
   switch (format) {
     case 'fullBackup':
       return 'transfer.files.formats.fullBackup';
-
     case 'lightweightBackup':
       return 'transfer.files.formats.lightweightBackup';
-
     case 'csv':
       return 'transfer.files.formats.csv';
   }
@@ -86,10 +68,8 @@ const getUnfinishedPhaseKey = (
   switch (phase) {
     case 'planning':
       return 'transfer.files.phases.planning';
-
     case 'processing':
       return 'transfer.files.phases.processing';
-
     case 'readyToFinalize':
       return 'transfer.files.phases.readyToFinalize';
   }
@@ -102,88 +82,26 @@ export const StoredExportList = ({
 }: StoredExportListProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
-
-  const [search, setSearch] = useState('');
-
-  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
-
-  const [resumingExportId, setResumingExportId] = useState<string | null>(null);
-
-  const {
-    finishedExports,
-    unfinishedExports,
-
-    isLoading,
-    isRefreshing,
-    loadError,
-
-    refresh,
-
-    deleteFinishedExports,
-    deleteUnfinishedExport,
-
-    isDeleting,
-    deleteError,
-    resetDelete,
-  } = useDiaryExportFiles();
-
-  const {
-    resumeDiaryExport,
-    isExporting,
-    error: resumeError,
-    reset: resetExport,
-  } = useDiaryExportMutation();
-
-  const normalizedSearch = search.trim().toLocaleLowerCase();
-
-  const filteredFinishedExports = useMemo(
-    () =>
-      finishedExports.filter((file) => {
-        if (mode === 'import' && file.kind !== 'backup') {
-          return false;
-        }
-
-        return (
-          normalizedSearch.length === 0 ||
-          file.fileName.toLocaleLowerCase().includes(normalizedSearch)
-        );
-      }),
-    [finishedExports, mode, normalizedSearch]
-  );
-
-  const filteredUnfinishedExports = useMemo(
-    () =>
-      mode === 'manage'
-        ? unfinishedExports.filter(
-            (item) =>
-              normalizedSearch.length === 0 ||
-              item.fileName.toLocaleLowerCase().includes(normalizedSearch)
-          )
-        : [],
-    [mode, normalizedSearch, unfinishedExports]
-  );
+  const list = useStoredExportList({ mode });
 
   const listItems = useMemo<StoredExportListItem[]>(() => {
     const items: StoredExportListItem[] = [];
 
-    if (filteredUnfinishedExports.length > 0) {
+    if (list.filteredUnfinishedExports.length > 0) {
       items.push({
         type: 'section',
         key: 'unfinished',
         title: t('transfer.files.unfinishedTitle'),
       });
-
       items.push(
-        ...filteredUnfinishedExports.map(
-          (item): StoredExportListItem => ({
-            type: 'unfinished',
-            export: item,
-          })
-        )
+        ...list.filteredUnfinishedExports.map((item) => ({
+          type: 'unfinished' as const,
+          export: item,
+        }))
       );
     }
 
-    if (filteredFinishedExports.length > 0) {
+    if (list.filteredFinishedExports.length > 0) {
       items.push({
         type: 'section',
         key: 'finished',
@@ -192,174 +110,64 @@ export const StoredExportList = ({
             ? t('transfer.import.createdBackups')
             : t('transfer.files.finishedTitle'),
       });
-
       items.push(
-        ...filteredFinishedExports.map(
-          (file): StoredExportListItem => ({
-            type: 'finished',
-            file,
-          })
-        )
+        ...list.filteredFinishedExports.map((file) => ({
+          type: 'finished' as const,
+          file,
+        }))
       );
     }
 
     return items;
-  }, [filteredFinishedExports, filteredUnfinishedExports, mode, t]);
+  }, [list.filteredFinishedExports, list.filteredUnfinishedExports, mode, t]);
 
-  const operationsDisabled = isExporting || isDeleting || isRefreshing;
-
-  const hasAnyExports =
-    mode === 'manage'
-      ? finishedExports.length > 0 || unfinishedExports.length > 0
-      : finishedExports.some((file) => file.kind === 'backup');
-
+  const normalizedSearch = list.search.trim().toLocaleLowerCase();
   const emptyMessage =
-    normalizedSearch.length > 0 && hasAnyExports
+    normalizedSearch.length > 0 && list.hasAnyExports
       ? t('transfer.files.noResults')
       : t('transfer.files.empty');
 
-  const handleResume = async (item: DiaryUnfinishedExport): Promise<void> => {
-    resetExport();
-    setResumingExportId(item.exportId);
-
-    try {
-      await resumeDiaryExport(item.exportId);
-    } catch {
-      return;
-    } finally {
-      setResumingExportId(null);
-    }
-  };
-
-  const handleConfirmDelete = async (): Promise<void> => {
-    if (deleteTarget === null) {
-      return;
-    }
-
-    resetDelete();
-
-    try {
-      if (deleteTarget.type === 'unfinished') {
-        await deleteUnfinishedExport(deleteTarget.exportId);
-      } else {
-        await deleteFinishedExports([deleteTarget.fileName]);
-      }
-
-      setDeleteTarget(null);
-    } catch {
-      return;
-    }
-  };
-
-  const renderItem: ListRenderItem<StoredExportListItem> = ({ item }) => {
-    if (item.type === 'section') {
-      return (
-        <s.SectionTitle style={ss.Subheading(theme)}>
-          {item.title}
-        </s.SectionTitle>
-      );
-    }
-
-    if (item.type === 'unfinished') {
-      const exportItem = item.export;
+  const renderFinishedFile = (file: DiaryStoredExportFile) => {
+    if (mode === 'manage') {
+      const selected = list.selectedFinishedFileNames.has(file.fileName);
 
       return (
         <s.Card>
           <s.FileMain>
-            <s.IconBox>
-              <Ionicons
-                name={
-                  exportItem.format === 'csv'
-                    ? 'document-text-outline'
-                    : 'archive-outline'
-                }
-                size={22}
-                color={theme.colors.text}
-              />
-            </s.IconBox>
+            <Checkbox
+              checked={selected}
+              onPress={() => list.toggleFinished(file.fileName)}
+            />
 
             <s.FileInfo>
-              <s.FileName numberOfLines={2}>{exportItem.fileName}</s.FileName>
-
-              <s.MetaText>
-                {t(getUnfinishedFormatKey(exportItem.format))}
-              </s.MetaText>
-
-              <s.MetaText>
-                {t(getUnfinishedPhaseKey(exportItem.phase))}
-              </s.MetaText>
-
-              {exportItem.phase !== 'planning' && (
-                <s.ProgressGroup>
-                  <s.ProgressText>
-                    {t('transfer.files.progress.entries', {
-                      current: exportItem.processedEntries,
-                      total: exportItem.totalEntries,
-                    })}
-                  </s.ProgressText>
-
-                  {exportItem.totalPhotos > 0 && (
-                    <s.ProgressText>
-                      {t('transfer.files.progress.photos', {
-                        current: exportItem.processedPhotos,
-                        total: exportItem.totalPhotos,
-                      })}
-                    </s.ProgressText>
-                  )}
-                </s.ProgressGroup>
-              )}
+              <s.FileName numberOfLines={2} ellipsizeMode="middle">
+                {file.fileName}
+              </s.FileName>
             </s.FileInfo>
+
+            <IconButton
+              icon="open-outline"
+              accessibilityLabel={file.fileName}
+              disabled={list.operationsDisabled}
+              tone="muted"
+              variant="solid"
+              onPress={() => list.openFinishedExport(file)}
+            />
           </s.FileMain>
-
-          <s.Actions>
-            <Button
-              tone="primary"
-              disabled={operationsDisabled}
-              loading={isExporting && resumingExportId === exportItem.exportId}
-              onPress={() => {
-                void handleResume(exportItem);
-              }}
-            >
-              <s.PrimaryActionText>
-                {t('transfer.actions.continue')}
-              </s.PrimaryActionText>
-            </Button>
-
-            <Button
-              tone="danger"
-              disabled={operationsDisabled}
-              onPress={() => {
-                resetDelete();
-
-                setDeleteTarget({
-                  type: 'unfinished',
-                  exportId: exportItem.exportId,
-                });
-              }}
-            >
-              <s.PrimaryActionText>
-                {t('transfer.actions.delete')}
-              </s.PrimaryActionText>
-            </Button>
-          </s.Actions>
         </s.Card>
       );
     }
 
-    const { file } = item;
-
-    const isBackup = file.kind === 'backup';
-
-    const backupSelectionEnabled = isBackup && onSelectBackup !== undefined;
+    const selectable = file.kind === 'backup' && onSelectBackup !== undefined;
 
     return (
       <s.Card>
         <s.FinishedFilePressable
-          accessibilityRole={backupSelectionEnabled ? 'button' : undefined}
+          accessibilityRole={selectable ? 'button' : undefined}
           accessibilityLabel={file.fileName}
-          disabled={!backupSelectionEnabled || operationsDisabled}
+          disabled={!selectable || list.operationsDisabled}
           onPress={() => {
-            if (isBackup && onSelectBackup !== undefined) {
+            if (selectable) {
               onSelectBackup({
                 fileName: file.fileName,
                 fileUri: file.fileUri,
@@ -371,17 +179,19 @@ export const StoredExportList = ({
           <s.FileMain>
             <s.IconBox>
               <Ionicons
-                name={isBackup ? 'archive-outline' : 'document-text-outline'}
+                name="archive-outline"
                 size={22}
                 color={theme.colors.text}
               />
             </s.IconBox>
 
             <s.FileInfo>
-              <s.FileName numberOfLines={2}>{file.fileName}</s.FileName>
+              <s.FileName numberOfLines={2} ellipsizeMode="middle">
+                {file.fileName}
+              </s.FileName>
             </s.FileInfo>
 
-            {backupSelectionEnabled && (
+            {selectable && (
               <Ionicons
                 name="chevron-forward"
                 size={20}
@@ -390,41 +200,109 @@ export const StoredExportList = ({
             )}
           </s.FileMain>
         </s.FinishedFilePressable>
-
-        {mode === 'manage' && (
-          <s.FinishedActions>
-            <IconButton
-              icon="trash-outline"
-              accessibilityLabel={t('transfer.actions.delete')}
-              disabled={operationsDisabled}
-              tone="danger"
-              variant="solid"
-              onPress={() => {
-                resetDelete();
-
-                setDeleteTarget({
-                  type: 'finished',
-                  fileName: file.fileName,
-                });
-              }}
-            />
-          </s.FinishedActions>
-        )}
       </s.Card>
     );
   };
 
-  if (isLoading) {
+  const renderUnfinishedFile = (item: DiaryUnfinishedExport) => (
+    <s.Card>
+      <s.FileMain>
+        <s.IconBox>
+          <Ionicons
+            name={
+              item.format === 'csv'
+                ? 'document-text-outline'
+                : 'archive-outline'
+            }
+            size={22}
+            color={theme.colors.text}
+          />
+        </s.IconBox>
+
+        <s.FileInfo>
+          <s.FileName numberOfLines={2} ellipsizeMode="middle">
+            {item.fileName}
+          </s.FileName>
+          <s.MetaText>{t(getUnfinishedFormatKey(item.format))}</s.MetaText>
+          <s.MetaText>{t(getUnfinishedPhaseKey(item.phase))}</s.MetaText>
+
+          {item.phase !== 'planning' && (
+            <s.ProgressGroup>
+              <s.ProgressText>
+                {t('transfer.files.progress.entries', {
+                  current: item.processedEntries,
+                  total: item.totalEntries,
+                })}
+              </s.ProgressText>
+              {item.totalPhotos > 0 && (
+                <s.ProgressText>
+                  {t('transfer.files.progress.photos', {
+                    current: item.processedPhotos,
+                    total: item.totalPhotos,
+                  })}
+                </s.ProgressText>
+              )}
+            </s.ProgressGroup>
+          )}
+        </s.FileInfo>
+      </s.FileMain>
+
+      <s.Actions>
+        <Button
+          tone="primary"
+          disabled={list.operationsDisabled}
+          loading={list.isExporting && list.resumingExportId === item.exportId}
+          onPress={() => void list.resumeExport(item)}
+        >
+          <s.PrimaryActionText>
+            {t('transfer.actions.continue')}
+          </s.PrimaryActionText>
+        </Button>
+        <Button
+          tone="danger"
+          disabled={list.operationsDisabled}
+          onPress={() => list.requestDeleteUnfinished(item.exportId)}
+        >
+          <s.PrimaryActionText>
+            {t('transfer.actions.delete')}
+          </s.PrimaryActionText>
+        </Button>
+      </s.Actions>
+    </s.Card>
+  );
+
+  const renderItem: ListRenderItem<StoredExportListItem> = ({ item }) => {
+    if (item.type === 'section') {
+      return (
+        <s.SectionTitle style={ss.Subheading(theme)}>
+          {item.title}
+        </s.SectionTitle>
+      );
+    }
+
+    return item.type === 'unfinished'
+      ? renderUnfinishedFile(item.export)
+      : renderFinishedFile(item.file);
+  };
+
+  if (list.openedFinishedExport !== null) {
+    return (
+      <ExportFileActionsScreen
+        file={list.openedFinishedExport}
+        onBack={list.closeFinishedExport}
+      />
+    );
+  }
+
+  if (list.isLoading) {
     return <LoadingView />;
   }
 
-  if (loadError !== null) {
+  if (list.loadError !== null) {
     return (
       <ErrorSection
         message={t('transfer.files.errors.loadFailed')}
-        onRetry={() => {
-          void refresh();
-        }}
+        onRetry={() => void list.refresh()}
       />
     );
   }
@@ -435,12 +313,11 @@ export const StoredExportList = ({
         <IconButton
           icon="arrow-back"
           accessibilityLabel={t('transfer.actions.back')}
-          disabled={operationsDisabled}
+          disabled={list.operationsDisabled}
           tone="muted"
           variant="solid"
           onPress={onBack}
         />
-
         <s.Title style={ss.Heading(theme)}>
           {t(
             mode === 'import'
@@ -448,50 +325,71 @@ export const StoredExportList = ({
               : 'transfer.files.manageTitle'
           )}
         </s.Title>
-
         <IconButton
           icon="refresh"
           accessibilityLabel={t('transfer.actions.refresh')}
-          disabled={operationsDisabled}
+          disabled={list.operationsDisabled}
           tone="muted"
           variant="solid"
-          onPress={() => {
-            void refresh();
-          }}
+          onPress={() => void list.refresh()}
         />
       </s.Header>
 
-      <Input
-        value={search}
-        onChangeText={setSearch}
-        placeholder={t('transfer.files.searchPlaceholder')}
-        accessibilityLabel={t('transfer.files.searchAccessibilityLabel')}
-        autoCapitalize="none"
-        autoCorrect={false}
-        returnKeyType="search"
-      />
+      <s.Toolbar>
+        <Input
+          value={list.search}
+          onChangeText={list.setSearch}
+          placeholder={t('transfer.files.searchPlaceholder')}
+          accessibilityLabel={t('transfer.files.searchAccessibilityLabel')}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="search"
+        />
 
-      {resumeError !== null && (
+        {mode === 'manage' && list.filteredFinishedExports.length > 0 && (
+          <s.SelectionBar>
+            <Checkbox
+              checked={list.allFilteredFinishedSelected}
+              label={
+                list.allFilteredFinishedSelected
+                  ? t('diary.selection.clearAll')
+                  : t('diary.selection.selectAll')
+              }
+              onPress={list.toggleAllFiltered}
+            />
+            <s.SelectionMeta>
+              {t('diary.selection.selected', { count: list.selectedCount })}
+            </s.SelectionMeta>
+            <IconButton
+              icon="trash-outline"
+              accessibilityLabel={t('transfer.actions.delete')}
+              disabled={list.operationsDisabled || list.selectedCount === 0}
+              tone="danger"
+              variant="solid"
+              onPress={list.requestDeleteSelected}
+            />
+          </s.SelectionBar>
+        )}
+      </s.Toolbar>
+
+      {list.resumeError !== null && (
         <s.ErrorText>{t('transfer.files.errors.resumeFailed')}</s.ErrorText>
       )}
-
-      {deleteError !== null && (
+      {list.deleteError !== null && (
         <s.ErrorText>{t('transfer.files.errors.deleteFailed')}</s.ErrorText>
       )}
 
       <FlatList
         data={listItems}
         keyExtractor={(item) => {
-          switch (item.type) {
-            case 'section':
-              return `section:${item.key}`;
-
-            case 'unfinished':
-              return `unfinished:${item.export.exportId}`;
-
-            case 'finished':
-              return `finished:${item.file.fileName}`;
+          if (item.type === 'section') {
+            return `section:${item.key}`;
           }
+          if (item.type === 'unfinished') {
+            return `unfinished:${item.export.exportId}`;
+          }
+
+          return `finished:${item.file.fileName}`;
         }}
         renderItem={renderItem}
         contentContainerStyle={s.getListContentStyle(
@@ -505,26 +403,22 @@ export const StoredExportList = ({
       />
 
       <ConfirmDialog
-        visible={deleteTarget !== null}
+        visible={list.deleteTarget !== null}
         title={t(
-          deleteTarget?.type === 'unfinished'
+          list.deleteTarget?.type === 'unfinished'
             ? 'transfer.files.deleteUnfinishedTitle'
             : 'transfer.files.deleteFinishedTitle'
         )}
         description={t(
-          deleteTarget?.type === 'unfinished'
+          list.deleteTarget?.type === 'unfinished'
             ? 'transfer.files.deleteUnfinishedDescription'
             : 'transfer.files.deleteFinishedDescription'
         )}
         confirmLabel={t('transfer.actions.delete')}
         confirmTone="danger"
-        confirmDisabled={isDeleting}
-        onConfirm={handleConfirmDelete}
-        onClose={() => {
-          if (!isDeleting) {
-            setDeleteTarget(null);
-          }
-        }}
+        confirmDisabled={list.isDeleting}
+        onConfirm={list.confirmDelete}
+        onClose={list.closeDeleteDialog}
       />
     </s.Root>
   );

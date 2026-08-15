@@ -1,3 +1,8 @@
+export type { DiaryExportFileTarget } from './api/diaryExportShareService';
+export {
+  saveDiaryExportFile,
+  shareDiaryExportFile,
+} from './api/diaryExportShareService';
 export type { DiaryExportFilesSnapshot } from './api/useDiaryExportFiles';
 export {
   diaryExportFilesQueryKey,
@@ -13,6 +18,10 @@ export type {
 } from './model/diaryExport.types';
 export { DIARY_EXPORT_FORMATS } from './model/diaryExport.types';
 export type { DiaryUnfinishedExport } from './model/diaryUnfinishedExport';
+export {
+  ExportFileActions,
+  ExportFileActionsScreen,
+} from './ui/ExportFileActionsScreen';
 export type {
   StoredExportListMode,
   StoredExportSelection,
