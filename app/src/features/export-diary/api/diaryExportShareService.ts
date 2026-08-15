@@ -65,7 +65,7 @@ const getAndroidShareUri = (result: DiaryExportFileTarget): string => {
 
 const saveDiaryExportFileOnAndroid = async (
   result: DiaryExportFileTarget
-): Promise<void> => {
+): Promise<boolean> => {
   const FileSystem = await import('expo-file-system/legacy');
 
   const { default: ReactNativeBlobUtil } =
@@ -75,7 +75,7 @@ const saveDiaryExportFileOnAndroid = async (
     await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
 
   if (!permission.granted) {
-    return;
+    return false;
   }
 
   const targetUri = await FileSystem.StorageAccessFramework.createFileAsync(
@@ -106,11 +106,13 @@ const saveDiaryExportFileOnAndroid = async (
 
     throw error;
   }
+
+  return true;
 };
 
 const saveDiaryExportFileOnIos = async (
   result: DiaryExportFileTarget
-): Promise<void> => {
+): Promise<boolean> => {
   const { default: Share } = await import('react-native-share');
 
   await Share.open({
@@ -121,11 +123,13 @@ const saveDiaryExportFileOnIos = async (
     saveToFiles: true,
     failOnCancel: false,
   });
+
+  return true;
 };
 
 export const saveDiaryExportFile = async (
   result: DiaryExportFileTarget
-): Promise<void> => {
+): Promise<boolean> => {
   if (PlatformOS.WEB) {
     throw new Error('Diary export saving is unavailable on this platform');
   }
@@ -133,12 +137,10 @@ export const saveDiaryExportFile = async (
   assertExportFile(result);
 
   if (PlatformOS.ANDROID) {
-    await saveDiaryExportFileOnAndroid(result);
-
-    return;
+    return saveDiaryExportFileOnAndroid(result);
   }
 
-  await saveDiaryExportFileOnIos(result);
+  return saveDiaryExportFileOnIos(result);
 };
 
 export const shareDiaryExportFile = async (

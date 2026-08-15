@@ -9,9 +9,11 @@ const SAFE_USER_NAME_PATTERN = /^[\p{L}\p{N}_-]{1,32}$/u;
 const pad = (value: number): string => value.toString().padStart(2, '0');
 
 const formatLocalDate = (value: Date): string =>
-  [value.getFullYear(), pad(value.getMonth() + 1), pad(value.getDate())].join(
-    '-'
-  );
+  [
+    pad(value.getDate()),
+    pad(value.getMonth() + 1),
+    pad(value.getFullYear() % 100),
+  ].join('-');
 
 const formatLocalDateTime = (value: Date): string =>
   `${formatLocalDate(value)}_${pad(value.getHours())}-${pad(

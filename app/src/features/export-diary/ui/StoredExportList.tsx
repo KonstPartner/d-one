@@ -12,8 +12,8 @@ import {
   ConfirmDialog,
   ErrorSection,
   IconButton,
-  Input,
   LoadingView,
+  SearchInput,
 } from '@shared/ui';
 
 import type { DiaryUnfinishedExport } from '../model/diaryUnfinishedExport';
@@ -336,14 +336,16 @@ export const StoredExportList = ({
       </s.Header>
 
       <s.Toolbar>
-        <Input
+        <SearchInput
           value={list.search}
           onChangeText={list.setSearch}
+          onSearchClick={list.setSearch}
           placeholder={t('transfer.files.searchPlaceholder')}
           accessibilityLabel={t('transfer.files.searchAccessibilityLabel')}
           autoCapitalize="none"
           autoCorrect={false}
           returnKeyType="search"
+          isActiveSearch={normalizedSearch.length > 0}
         />
 
         {mode === 'manage' && list.filteredFinishedExports.length > 0 && (
@@ -360,14 +362,18 @@ export const StoredExportList = ({
             <s.SelectionMeta>
               {t('diary.selection.selected', { count: list.selectedCount })}
             </s.SelectionMeta>
-            <IconButton
-              icon="trash-outline"
+            <Button
+              tone="danger"
               accessibilityLabel={t('transfer.actions.delete')}
               disabled={list.operationsDisabled || list.selectedCount === 0}
-              tone="danger"
-              variant="solid"
               onPress={list.requestDeleteSelected}
-            />
+            >
+              <Ionicons
+                name="trash-outline"
+                size={20}
+                color={theme.colors.white}
+              />
+            </Button>
           </s.SelectionBar>
         )}
       </s.Toolbar>

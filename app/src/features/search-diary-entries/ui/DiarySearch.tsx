@@ -10,6 +10,7 @@ import {
 } from '@entities/diary';
 import {
   IconButton,
+  SearchInput,
   SelectDropdown,
   type SelectDropdownOption,
 } from '@shared/ui';
@@ -152,11 +153,20 @@ export const DiarySearch = ({
     [clearApplyTimer, onFieldChange]
   );
 
-  const handleClear = useCallback(() => {
-    clearApplyTimer();
+  const handleSearchClick = useCallback(
+    (value: string) => {
+      clearApplyTimer();
 
-    onClear();
-  }, [clearApplyTimer, onClear]);
+      if (value.length === 0) {
+        onClear();
+
+        return;
+      }
+
+      onApplyText();
+    },
+    [clearApplyTimer, onApplyText, onClear]
+  );
 
   const getFieldColors = useCallback(
     (searchField: DiaryEntrySearchField) => {
@@ -287,45 +297,19 @@ export const DiarySearch = ({
         </s.Row>
       </s.Row>
 
-      <s.TopRow>
-        <s.InputShell>
-          <Ionicons
-            name="search-outline"
-            size={theme.size.md}
-            color={theme.colors.muted}
-          />
-
-          <s.Input
-            accessibilityLabel={t('diary.search.inputAccessibilityLabel')}
-            value={text}
-            placeholder={t('diary.search.placeholder')}
-            placeholderTextColor={theme.colors.muted}
-            keyboardType={
-              isDiaryEntryTextSearchField(field) ? 'default' : 'decimal-pad'
-            }
-            inputMode={
-              isDiaryEntryTextSearchField(field) ? 'search' : 'decimal'
-            }
-            returnKeyType="search"
-            onChangeText={handleTextChange}
-          />
-
-          {text.length > 0 && (
-            <s.ClearButton
-              accessibilityRole="button"
-              accessibilityLabel={t('diary.search.clearAccessibilityLabel')}
-              onPress={handleClear}
-              hitSlop={8}
-            >
-              <Ionicons
-                name="close-circle"
-                size={theme.size.md}
-                color={theme.colors.muted}
-              />
-            </s.ClearButton>
-          )}
-        </s.InputShell>
-      </s.TopRow>
+      <SearchInput
+        value={text}
+        placeholder={t('diary.search.placeholder')}
+        accessibilityLabel={t('diary.search.inputAccessibilityLabel')}
+        keyboardType={
+          isDiaryEntryTextSearchField(field) ? 'default' : 'decimal-pad'
+        }
+        inputMode={isDiaryEntryTextSearchField(field) ? 'search' : 'decimal'}
+        returnKeyType="search"
+        isActiveSearch={text.length > 0}
+        onChangeText={handleTextChange}
+        onSearchClick={handleSearchClick}
+      />
     </s.Root>
   );
 };

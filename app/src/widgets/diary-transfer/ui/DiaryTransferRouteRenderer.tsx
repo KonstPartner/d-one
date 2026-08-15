@@ -8,6 +8,10 @@ import { ExportProgressResultScreen } from './ExportProgressResultScreen';
 import { ExportScopeStep } from './ExportScopeStep';
 import { ExportSelectedEntriesStep } from './ExportSelectedEntriesStep';
 import { ImportChooseFileStep } from './ImportChooseFileStep';
+import { ImportConflictReviewStep } from './ImportConflictReviewStep';
+import { ImportConflictStrategyStep } from './ImportConflictStrategyStep';
+import { ImportPreviewStep } from './ImportPreviewStep';
+import { ImportProgressResultScreen } from './ImportProgressResultScreen';
 import { TransferHomeStep } from './TransferHomeStep';
 
 type DiaryTransferRouteRendererProps = {
@@ -20,7 +24,31 @@ export const DiaryTransferRouteRenderer = ({
   controller,
   onClose,
 }: DiaryTransferRouteRendererProps) => {
-  const { transferState, exportFlow, navigation, startExport } = controller;
+  const {
+    transferState,
+
+    exportFlow,
+    importFlow,
+
+    navigation,
+
+    startExport,
+
+    openImportPreview,
+    chooseImportFromDevice,
+    prepareImportPreview,
+
+    continueImportFromPreview,
+    resolveAllImportConflicts,
+
+    openIndividualImportReview,
+    backFromIndividualImportReview,
+    continueIndividualImport,
+
+    backFromImportConflicts,
+
+    cancelImportAndPop,
+  } = controller;
 
   const { currentRoute } = navigation;
 
@@ -148,10 +176,16 @@ export const DiaryTransferRouteRenderer = ({
     case 'import.choose-file':
       return (
         <ImportChooseFileStep
-          disabled={navigation.locked}
-          devicePickerDisabled
+          disabled={navigation.locked || importFlow.isPicking}
+          devicePickerDisabled={
+            importFlow.isPreparing ||
+            importFlow.isImporting ||
+            importFlow.hasActiveSession
+          }
           onBack={navigation.popRoute}
-          onChooseFromDevice={() => undefined}
+          onChooseFromDevice={() => {
+            void chooseImportFromDevice();
+          }}
           onOpenCreatedBackups={() => {
             navigation.pushRoute({
               name: 'saved-exports.import',
@@ -164,6 +198,73 @@ export const DiaryTransferRouteRenderer = ({
       return <StoredExportList mode="manage" onBack={navigation.popRoute} />;
 
     case 'saved-exports.import':
-      return <StoredExportList mode="import" onBack={navigation.popRoute} />;
+      return (
+        <StoredExportList
+          mode="import"
+          onBack={navigation.popRoute}
+          onSelectBackup={(backup) => {
+            openImportPreview({
+              fileName: backup.fileName,
+              fileUri: backup.fileUri,
+            });
+          }}
+        />
+      );
+
+    case 'import.preview':
+      return (
+        <ImportPreviewStep
+          source={currentRoute.source}
+          preview={importFlow.preview}
+          error={importFlow.error}
+          isPreparing={importFlow.isPreparing}
+          transferPhase={transferState.phase}
+          processedEntries={transferState.processedEntries}
+          totalEntries={transferState.totalEntries}
+          onPrepare={prepareImportPreview}
+          onCancel={cancelImportAndPop}
+          onContinue={
+            importFlow.preview === null ? undefined : continueImportFromPreview
+          }
+        />
+      );
+
+    case 'import.conflicts':
+      return (
+        <ImportConflictStrategyStep
+          matchesCount={importFlow.preview?.matchesCount ?? 0}
+          disabled={importFlow.isImporting}
+          onBack={backFromImportConflicts}
+          onSkipAll={() => {
+            resolveAllImportConflicts('skip');
+          }}
+          onReplaceAll={() => {
+            resolveAllImportConflicts('replace');
+          }}
+          onReviewIndividually={openIndividualImportReview}
+        />
+      );
+
+    case 'import.review':
+      return (
+        <ImportConflictReviewStep
+          items={importFlow.conflictItems}
+          resolvedCount={importFlow.conflicts.resolvedCount}
+          getDecision={importFlow.conflicts.getDecision}
+          onSetDecision={importFlow.conflicts.setIndividualDecision}
+          onBack={backFromIndividualImportReview}
+          onContinue={continueIndividualImport}
+        />
+      );
+
+    case 'import.progress':
+      return (
+        <ImportProgressResultScreen
+          transferState={transferState}
+          result={importFlow.result}
+          error={importFlow.error}
+          onDone={onClose}
+        />
+      );
   }
 };

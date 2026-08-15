@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import type { DiaryExportFormat } from '@features/export-diary';
+import type { DiaryImportSource } from '@features/import-diary';
 import type { DiaryTransferState } from '@entities/diary';
 
 export type DiaryTransferRoute =
@@ -34,6 +35,19 @@ export type DiaryTransferRoute =
     }
   | {
       name: 'saved-exports.import';
+    }
+  | {
+      name: 'import.preview';
+      source: DiaryImportSource;
+    }
+  | {
+      name: 'import.conflicts';
+    }
+  | {
+      name: 'import.review';
+    }
+  | {
+      name: 'import.progress';
     };
 
 type UseDiaryTransferNavigationParams = {
@@ -110,6 +124,29 @@ export const useDiaryTransferNavigation = ({
     );
   }, [locked]);
 
+  const pushTransferRoute = useCallback((route: DiaryTransferRoute): void => {
+    setRouteStack((current) => [...current, route]);
+  }, []);
+
+  const replaceTransferRoute = useCallback(
+    (route: DiaryTransferRoute): void => {
+      setRouteStack((current) => {
+        if (current.length === 0) {
+          return [route];
+        }
+
+        return [...current.slice(0, -1), route];
+      });
+    },
+    []
+  );
+
+  const popTransferRoute = useCallback((): void => {
+    setRouteStack((current) =>
+      current.length > 1 ? current.slice(0, -1) : current
+    );
+  }, []);
+
   const handleRequestClose = useCallback((): void => {
     if (locked) {
       return;
@@ -130,6 +167,10 @@ export const useDiaryTransferNavigation = ({
 
     pushRoute,
     popRoute,
+
+    pushTransferRoute,
+    replaceTransferRoute,
+    popTransferRoute,
 
     handleRequestClose,
   };

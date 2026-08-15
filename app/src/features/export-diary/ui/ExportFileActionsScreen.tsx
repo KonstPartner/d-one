@@ -30,7 +30,30 @@ export const ExportFileActions = ({
 
   const [fileActionError, setFileActionError] = useState(false);
 
+  const [saveSucceeded, setSaveSucceeded] = useState(false);
+
   const fileActionInProgressRef = useRef(false);
+
+  const saveFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
+  const clearSaveFeedbackTimer = useCallback(() => {
+    if (saveFeedbackTimerRef.current === null) {
+      return;
+    }
+
+    clearTimeout(saveFeedbackTimerRef.current);
+
+    saveFeedbackTimerRef.current = null;
+  }, []);
+
+  useEffect(
+    () => () => {
+      clearSaveFeedbackTimer();
+    },
+    [clearSaveFeedbackTimer]
+  );
 
   useEffect(() => {
     onBusyChange?.(fileAction !== null);
@@ -43,11 +66,23 @@ export const ExportFileActions = ({
 
     fileActionInProgressRef.current = true;
 
+    clearSaveFeedbackTimer();
+    setSaveSucceeded(false);
     setFileAction('save');
     setFileActionError(false);
 
     try {
-      await saveDiaryExportFile(file);
+      const saved = await saveDiaryExportFile(file);
+
+      if (saved) {
+        setSaveSucceeded(true);
+
+        saveFeedbackTimerRef.current = setTimeout(() => {
+          saveFeedbackTimerRef.current = null;
+
+          setSaveSucceeded(false);
+        }, 2000);
+      }
     } catch (error) {
       console.error('Failed to save diary export file', error);
 
@@ -57,7 +92,7 @@ export const ExportFileActions = ({
 
       setFileAction(null);
     }
-  }, [file]);
+  }, [clearSaveFeedbackTimer, file]);
 
   const shareFile = useCallback(async (): Promise<void> => {
     if (fileActionInProgressRef.current) {
@@ -93,7 +128,7 @@ export const ExportFileActions = ({
           tone="input"
           spinnerColor="primary"
           loading={fileAction === 'save'}
-          disabled={fileAction !== null}
+          disabled={fileAction !== null || saveSucceeded}
           style={s.fileActionButtonStyle}
           onPress={() => {
             void saveFile();
@@ -101,12 +136,18 @@ export const ExportFileActions = ({
         >
           <s.FileActionContent>
             <Ionicons
-              name="download-outline"
+              name={saveSucceeded ? 'checkmark' : 'download-outline'}
               size={20}
-              color={theme.colors.text}
+              color={saveSucceeded ? theme.colors.success : theme.colors.text}
             />
 
-            <s.FileActionText>{t('diary.form.save')}</s.FileActionText>
+            <s.FileActionText>
+              {t(
+                saveSucceeded
+                  ? 'transfer.export.result.saved'
+                  : 'diary.form.save'
+              )}
+            </s.FileActionText>
           </s.FileActionContent>
         </Button>
 

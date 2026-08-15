@@ -65,6 +65,17 @@ type PendingPhotoStateUpdate = Pick<
 
 type AiAnalysisUpdate = Pick<DiaryEntry, 'id' | 'aiAnalysis'>;
 
+type DiaryImportedBatchOperation = {
+  type: 'insert' | 'replace';
+  entry: DiaryRepositorySyncedEntryInput;
+};
+
+type PreparedDiaryImportedBatchOperation = {
+  type: 'insert' | 'replace';
+  entryId: string;
+  parameters: Record<string, SQLiteBindValue>;
+};
+
 const getEventAtTimestamp = (eventAt: Date): number => {
   const timestamp = eventAt.getTime();
 
@@ -107,6 +118,39 @@ const createSyncedEntryParameters = (
 
   $syncStatus: 'synced',
 });
+
+const prepareDiaryImportedBatch = (
+  userId: string,
+  operations: readonly DiaryImportedBatchOperation[]
+): readonly PreparedDiaryImportedBatchOperation[] | null => {
+  if (operations.length === 0 || operations.length > DIARY_BACKUP_CHUNK_SIZE) {
+    return null;
+  }
+
+  const seenEntryIds = new Set<string>();
+  const prepared: PreparedDiaryImportedBatchOperation[] = [];
+
+  for (const operation of operations) {
+    if (
+      operation.entry.id.length === 0 ||
+      seenEntryIds.has(operation.entry.id)
+    ) {
+      return null;
+    }
+
+    seenEntryIds.add(operation.entry.id);
+
+    const eventAt = getEventAtTimestamp(operation.entry.eventAt);
+
+    prepared.push({
+      type: operation.type,
+      entryId: operation.entry.id,
+      parameters: createSyncedEntryParameters(userId, operation.entry, eventAt),
+    });
+  }
+
+  return prepared;
+};
 
 export class DiaryLocalRepository {
   public constructor(
@@ -321,6 +365,43 @@ export class DiaryLocalRepository {
       if (result.changes !== 1) {
         throw new Error(`Diary synced entry cannot be replaced: ${input.id}`);
       }
+    });
+  }
+
+  public applyImportedBatch(
+    operations: readonly DiaryImportedBatchOperation[]
+  ): Promise<void> {
+    let prepared: readonly PreparedDiaryImportedBatchOperation[] | null;
+
+    try {
+      prepared = prepareDiaryImportedBatch(this.userId, operations);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+
+    if (prepared === null) {
+      return Promise.reject(new Error('Invalid diary import batch'));
+    }
+
+    return this.operationGate.run(async () => {
+      await this.database.withTransactionAsync(async () => {
+        for (const operation of prepared) {
+          const result = await this.database.runAsync(
+            operation.type === 'insert'
+              ? CREATE_DIARY_ENTRY_SQL
+              : REPLACE_SYNCED_DIARY_ENTRY_SQL,
+            operation.parameters
+          );
+
+          if (result.changes !== 1) {
+            throw new Error(
+              `Diary imported entry cannot be ${
+                operation.type === 'insert' ? 'inserted' : 'replaced'
+              }: ${operation.entryId}`
+            );
+          }
+        }
+      });
     });
   }
 
