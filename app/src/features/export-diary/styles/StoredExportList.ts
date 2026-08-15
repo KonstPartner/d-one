@@ -80,6 +80,10 @@ export const FileMain = styled.View`
   gap: ${({ theme }) => ss.px(theme.spacing.md)};
 `;
 
+export const ManageFileMain = styled(FileMain)`
+  gap: 0;
+`;
+
 export const IconBox = styled.View`
   width: ${({ theme }) => ss.px(theme.control.height.md)};
   height: ${({ theme }) => ss.px(theme.control.height.md)};

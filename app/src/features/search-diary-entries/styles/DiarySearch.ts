@@ -21,7 +21,7 @@ type SearchOptionTextProps = {
 export const Root = styled.View`
   width: 100%;
 
-  gap: ${({ theme }) => ss.px(theme.spacing.xs)};
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 
   min-width: 0;
 `;

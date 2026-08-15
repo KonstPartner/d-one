@@ -201,3 +201,10 @@ export const getStrategyPressStyle = ({
 }: PressableStateCallbackType): ViewStyle => ({
   opacity: pressed ? 0.7 : 1,
 });
+
+export const LoadingState = styled.View`
+  width: 100%;
+  flex: 1;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.lg)};
+`;

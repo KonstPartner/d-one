@@ -262,26 +262,25 @@ export const DiarySearch = ({
         </s.SelectView>
 
         <s.Row>
-          <s.Filter>
-            <IconButton
-              icon="filter-outline"
-              accessibilityLabel={t('diary.filters.openAccessibilityLabel')}
-              accessibilityState={{
-                expanded: filtersVisible,
+          <IconButton
+            icon="filter-outline"
+            accessibilityLabel={t('diary.filters.openAccessibilityLabel')}
+            accessibilityState={{
+              expanded: filtersVisible,
 
-                selected: filtersApplied,
-              }}
-              tone="primary"
-              variant={filtersApplied ? 'solid' : 'outline'}
-              size="lg"
-              onPress={onOpenFilters}
-            />
-          </s.Filter>
+              selected: filtersApplied,
+            }}
+            tone="primary"
+            variant={filtersApplied ? 'solid' : 'outline'}
+            size="lg"
+            onPress={onOpenFilters}
+          />
 
           {onCreateEntry !== undefined && (
             <s.Add>
               <IconButton
                 icon="add"
+                style={{}}
                 accessibilityLabel={t(
                   'diary.form.openCreateAccessibilityLabel'
                 )}

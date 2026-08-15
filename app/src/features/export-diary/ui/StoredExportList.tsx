@@ -92,6 +92,7 @@ export const StoredExportList = ({
         key: 'unfinished',
         title: t('transfer.files.unfinishedTitle'),
       });
+
       items.push(
         ...list.filteredUnfinishedExports.map((item) => ({
           type: 'unfinished' as const,
@@ -109,6 +110,7 @@ export const StoredExportList = ({
             ? t('transfer.import.createdBackups')
             : t('transfer.files.finishedTitle'),
       });
+
       items.push(
         ...list.filteredFinishedExports.map((file) => ({
           type: 'finished' as const,
@@ -121,6 +123,7 @@ export const StoredExportList = ({
   }, [list.filteredFinishedExports, list.filteredUnfinishedExports, mode, t]);
 
   const normalizedSearch = list.search.trim().toLocaleLowerCase();
+
   const emptyMessage =
     normalizedSearch.length > 0 && list.hasAnyExports
       ? t('transfer.files.noResults')
@@ -132,27 +135,26 @@ export const StoredExportList = ({
 
       return (
         <s.Card>
-          <s.FileMain>
+          <s.ManageFileMain>
             <Checkbox
               checked={selected}
               onPress={() => list.toggleFinished(file.fileName)}
             />
 
             <s.FileInfo>
-              <s.FileName numberOfLines={2} ellipsizeMode="middle">
-                {file.fileName}
-              </s.FileName>
+              <s.FileName>{file.fileName}</s.FileName>
             </s.FileInfo>
 
             <IconButton
               icon="open-outline"
+              iconSize={theme.size.lg}
               accessibilityLabel={file.fileName}
               disabled={list.operationsDisabled}
               tone="muted"
               variant="solid"
               onPress={() => list.openFinishedExport(file)}
             />
-          </s.FileMain>
+          </s.ManageFileMain>
         </s.Card>
       );
     }
@@ -185,9 +187,7 @@ export const StoredExportList = ({
             </s.IconBox>
 
             <s.FileInfo>
-              <s.FileName numberOfLines={2} ellipsizeMode="middle">
-                {file.fileName}
-              </s.FileName>
+              <s.FileName>{file.fileName}</s.FileName>
             </s.FileInfo>
 
             {selectable && (
@@ -219,9 +219,8 @@ export const StoredExportList = ({
         </s.IconBox>
 
         <s.FileInfo>
-          <s.FileName numberOfLines={2} ellipsizeMode="middle">
-            {item.fileName}
-          </s.FileName>
+          <s.FileName>{item.fileName}</s.FileName>
+
           <s.MetaText>{t(getUnfinishedFormatKey(item.format))}</s.MetaText>
           <s.MetaText>{t(getUnfinishedPhaseKey(item.phase))}</s.MetaText>
 
@@ -306,6 +305,7 @@ export const StoredExportList = ({
       <s.Header>
         <IconButton
           icon="arrow-back"
+          iconSize={theme.size.lg}
           accessibilityLabel={t('transfer.actions.back')}
           disabled={list.operationsDisabled}
           tone="muted"
@@ -323,6 +323,7 @@ export const StoredExportList = ({
 
         <IconButton
           icon="refresh"
+          iconSize={theme.size.lg}
           accessibilityLabel={t('transfer.actions.refresh')}
           disabled={list.operationsDisabled}
           tone="muted"
@@ -372,7 +373,7 @@ export const StoredExportList = ({
             >
               <Ionicons
                 name="trash-outline"
-                size={20}
+                size={22}
                 color={theme.colors.white}
               />
             </Button>
@@ -386,6 +387,7 @@ export const StoredExportList = ({
           if (item.type === 'section') {
             return `section:${item.key}`;
           }
+
           if (item.type === 'unfinished') {
             return `unfinished:${item.export.exportId}`;
           }

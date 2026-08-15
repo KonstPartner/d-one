@@ -52,7 +52,16 @@ export type DiaryLocalListProps = {
 
   listRef?: Ref<FlatList<DiaryLocalListData>>;
   viewabilityConfig?: ViewabilityConfig;
+
   onViewableItemsChanged?: FlatListProps<DiaryLocalListData>['onViewableItemsChanged'];
+
+  contentContainerStyle?: FlatListProps<DiaryLocalListData>['contentContainerStyle'];
+
+  onScroll?: FlatListProps<DiaryLocalListData>['onScroll'];
+
+  onScrollBeginDrag?: FlatListProps<DiaryLocalListData>['onScrollBeginDrag'];
+
+  onScrollEndDrag?: FlatListProps<DiaryLocalListData>['onScrollEndDrag'];
 
   onToggleDay: (dayKey: DiaryDayKey) => void;
   onToggleSelection?: (entryId: string) => void;
@@ -94,6 +103,12 @@ export const DiaryLocalList = ({
   viewabilityConfig,
   onViewableItemsChanged,
 
+  contentContainerStyle,
+
+  onScroll,
+  onScrollBeginDrag,
+  onScrollEndDrag,
+
   onToggleDay,
   onToggleSelection,
 
@@ -110,6 +125,7 @@ export const DiaryLocalList = ({
   const renderEntry = useCallback(
     (entry: DiaryEntry) => {
       const selected = selectedEntryIds.has(entry.id);
+
       const synchronizing = isEntrySyncing(entry.id);
 
       if (selectionActive) {
@@ -196,6 +212,11 @@ export const DiaryLocalList = ({
       keyExtractor={getDiaryListItemKey}
       renderItem={renderItem}
       ItemSeparatorComponent={s.ItemSeparator}
+      contentContainerStyle={contentContainerStyle}
+      onScroll={onScroll}
+      onScrollBeginDrag={onScrollBeginDrag}
+      onScrollEndDrag={onScrollEndDrag}
+      scrollEventThrottle={16}
       refreshControl={
         <RefreshControl
           refreshing={isRefetching}

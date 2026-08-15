@@ -1,4 +1,3 @@
-import styled from '@emotion/native';
 import type { Theme } from '@emotion/react';
 import type { TextStyle, ViewStyle } from 'react-native';
 
@@ -8,13 +7,6 @@ export type IconButtonVariant = 'solid' | 'outline' | 'ghost';
 
 export type IconButtonSize = 'sm' | 'md' | 'lg';
 
-export const Root = styled.Pressable`
-  flex-shrink: 0;
-
-  align-items: center;
-  justify-content: center;
-`;
-
 const getToneColor = (theme: Theme, tone: ButtonTone): string => {
   switch (tone) {
     case 'success':
@@ -23,7 +15,12 @@ const getToneColor = (theme: Theme, tone: ButtonTone): string => {
     case 'danger':
       return theme.colors.danger;
 
+    case 'warning':
+      return theme.colors.warning;
+
     case 'muted':
+    case 'card':
+    case 'input':
       return theme.colors.text;
 
     default:
@@ -44,11 +41,17 @@ const getBackgroundColor = (
     return theme.colors.card;
   }
 
-  if (tone === 'muted') {
-    return theme.colors.input;
-  }
+  switch (tone) {
+    case 'muted':
+    case 'input':
+      return theme.colors.input;
 
-  return getToneColor(theme, tone);
+    case 'card':
+      return theme.colors.card;
+
+    default:
+      return getToneColor(theme, tone);
+  }
 };
 
 const getBorderColor = (
@@ -56,15 +59,20 @@ const getBorderColor = (
   tone: ButtonTone,
   variant: IconButtonVariant
 ): string => {
-  if (variant !== 'outline') {
+  if (variant === 'ghost') {
     return 'transparent';
   }
 
-  if (tone === 'muted') {
+  if (
+    variant === 'outline' ||
+    tone === 'muted' ||
+    tone === 'input' ||
+    tone === 'card'
+  ) {
     return theme.colors.border;
   }
 
-  return getToneColor(theme, tone);
+  return 'transparent';
 };
 
 export const getIconButtonForegroundColor = (
@@ -72,7 +80,12 @@ export const getIconButtonForegroundColor = (
   tone: ButtonTone,
   variant: IconButtonVariant
 ): string => {
-  if (variant === 'solid' && tone !== 'muted') {
+  if (
+    variant === 'solid' &&
+    tone !== 'muted' &&
+    tone !== 'input' &&
+    tone !== 'card'
+  ) {
     return theme.colors.white;
   }
 
@@ -90,15 +103,21 @@ export const getIconButtonStyle = (
   return {
     width: dimension,
     height: dimension,
+
     minWidth: dimension,
     minHeight: dimension,
+
+    flexShrink: 0,
+
+    alignItems: 'center',
+    justifyContent: 'center',
 
     paddingTop: 0,
     paddingRight: 0,
     paddingBottom: 0,
     paddingLeft: 0,
 
-    borderWidth: variant === 'outline' ? theme.border.width.sm : 0,
+    borderWidth: variant === 'ghost' ? 0 : theme.border.width.sm,
 
     borderColor: getBorderColor(theme, tone, variant),
 
@@ -127,8 +146,11 @@ export const getIconButtonIconSize = (
 export const getIconStyle = (size: number): TextStyle => ({
   width: size,
   height: size,
+
   lineHeight: size,
+
   textAlign: 'center',
   textAlignVertical: 'center',
+
   includeFontPadding: false,
 });

@@ -9,13 +9,21 @@ import type {
 import * as ss from '@shared/styles';
 
 export const Content = styled.View`
+  flex: 1;
+
   width: 100%;
 
   align-self: center;
 
-  gap: ${({ theme }) => ss.px(theme.spacing.lg)};
+  justify-content: space-between;
 
   padding-bottom: ${({ theme }) => ss.px(theme.spacing.xl)};
+`;
+
+export const MainContent = styled.View`
+  width: 100%;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.lg)};
 `;
 
 export const ProfileCard = styled.View`
@@ -123,6 +131,7 @@ export const getRoleBadgeTextStyle = (
 
 export const Actions = styled.View`
   width: 100%;
+
   gap: ${({ theme }) => ss.px(theme.spacing.md)};
 `;
 
@@ -143,6 +152,12 @@ export const ActionButton = styled.Pressable`
   border-radius: ${({ theme }) => ss.px(theme.radius.lg)};
 
   background-color: ${({ theme }) => theme.colors.card};
+`;
+
+export const TransferActionButton = styled(ActionButton)`
+  border-color: ${({ theme }) => theme.colors.shades.warning.lg};
+
+  background-color: ${({ theme }) => theme.colors.shades.warning.md};
 `;
 
 export const getActionButtonStyle = ({
@@ -167,4 +182,8 @@ export const ActionText = styled.Text`
   font-weight: ${({ theme }) => theme.weight.bold};
 
   line-height: ${({ theme }) => ss.px(theme.lineHeight.lg)};
+`;
+
+export const TransferActionText = styled(ActionText)`
+  color: ${({ theme }) => theme.colors.shades.warning.text};
 `;

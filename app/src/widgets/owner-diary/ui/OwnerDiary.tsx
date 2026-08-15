@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +9,7 @@ import { DiarySearch } from '@features/search-diary-entries';
 import {
   type DiaryDayKey,
   type DiaryEntry,
+  DiaryLocalList,
   DiaryPhotoViewer,
   getDiaryDayKey,
   useDiaryTransferState,
@@ -23,9 +24,9 @@ import { useOwnerDiaryHeaderMenu } from '../model/useOwnerDiaryHeaderMenu';
 import { useOwnerDiaryPreparation } from '../model/useOwnerDiaryPreparation';
 import { useOwnerDiarySelection } from '../model/useOwnerDiarySelection';
 import { useOwnerDiarySync } from '../model/useOwnerDiarySync';
+import { useOwnerDiaryToolbarVisibility } from '../model/useOwnerDiaryToolbarVisibility';
 import * as s from '../styles/OwnerDiary';
 
-import { OwnerDiaryList } from './OwnerDiaryList';
 import { OwnerDiaryPreparationModal } from './OwnerDiaryPreparationModal';
 import { OwnerDiarySelectionToolbar } from './OwnerDiarySelectionToolbar';
 
@@ -39,6 +40,8 @@ export const OwnerDiary = () => {
   const diarySync = useOwnerDiarySync();
 
   const diaryPreparation = useOwnerDiaryPreparation();
+
+  const toolbar = useOwnerDiaryToolbarVisibility();
 
   const transfer = useDiaryTransferState();
 
@@ -105,6 +108,10 @@ export const OwnerDiary = () => {
     onEntriesMarkedForDeletion: handleEntriesMarkedForDeletion,
   });
 
+  useEffect(() => {
+    toolbar.showToolbar();
+  }, [selection.selectionMode, toolbar.showToolbar]);
+
   const handleOpenEntry = useCallback(
     async (entryId: string): Promise<void> => {
       if (transferLocked) {
@@ -148,9 +155,7 @@ export const OwnerDiary = () => {
     }
   }, [
     diary.list.reconcileCurrentPage,
-
     diarySync.handleManualSync,
-
     transferLocked,
   ]);
 
@@ -174,12 +179,9 @@ export const OwnerDiary = () => {
     }
   }, [
     diary.list.reconcileCurrentPage,
-
     diarySync.handleForcedSync,
-
     selection.exitSelection,
     selection.selectedEntryIds,
-
     transferLocked,
   ]);
 
@@ -209,70 +211,97 @@ export const OwnerDiary = () => {
 
   return (
     <s.Root>
-      <s.ToolbarArea>
-        {selection.selectionMode ? (
-          <OwnerDiarySelectionToolbar
-            selectedCount={selection.selectedCount}
-            allSelected={selection.allSelected}
-            deleting={selection.isDeleting}
-            synchronizing={diarySync.forcedSyncPending}
-            operationsDisabled={transferLocked}
-            synchronizeDisabled={
-              selection.selectedCount === 0 ||
-              diarySync.connectionState !== 'online' ||
-              diarySync.batchProgress !== null ||
-              diarySync.forcedSyncPending ||
-              selection.isDeleting
-            }
-            onToggleAll={selection.toggleAll}
-            onSynchronize={handleForcedSync}
-            onDelete={selection.requestDelete}
-            onClose={selection.exitSelection}
-          />
-        ) : (
-          <DiarySearch
-            text={diary.search.text}
-            field={diary.search.search.field}
-            onTextChange={diary.search.setText}
-            onApplyText={diary.search.applyText}
-            onFieldChange={diary.search.setField}
-            onClear={diary.search.clear}
-            filtersVisible={diary.filters.visible}
-            filtersApplied={diary.filters.hasAppliedFilters}
-            onOpenFilters={diary.filters.open}
-            createDisabled={transferLocked}
-            onCreateEntry={entryEditor.openCreate}
-          />
-        )}
-      </s.ToolbarArea>
-
-      {diarySync.batchProgress !== null && (
-        <s.SyncProgress style={ss.Surface(theme, 'card')}>
-          <Spinner size={18} />
-
-          <s.SyncProgressText>
-            {t('diary.sync.progress', {
-              current: diarySync.batchProgress.current,
-
-              total: diarySync.batchProgress.total,
-            })}
-          </s.SyncProgressText>
-        </s.SyncProgress>
-      )}
-
       <s.ListArea>
-        <OwnerDiaryList
-          list={diary.list}
-          selectionMode={selection.selectionMode}
-          selectedEntryIds={selection.selectedEntryIds}
-          editDisabled={transferLocked}
-          isEntrySyncing={diarySync.isEntrySyncing}
-          onToggleSelection={selection.toggleEntry}
-          onOpenEntry={(entryId) => {
-            void handleOpenEntry(entryId);
-          }}
-          onOpenPhoto={handleOpenPhoto}
-        />
+        <s.ListArea>
+          <DiaryLocalList
+            items={diary.list.listItems}
+            page={diary.list.page}
+            currentPage={diary.list.currentPage}
+            collapsedDayKeys={diary.list.collapsedDayKeys}
+            visibleEntryIds={diary.list.visibleEntryIds}
+            selectedEntryIds={selection.selectedEntryIds}
+            selectionActive={selection.selectionMode}
+            dayToggleDisabled={selection.selectionMode}
+            interactionDisabled={transferLocked}
+            showPagination={!selection.selectionMode}
+            isInitialLoading={diary.list.isInitialLoading}
+            hasInitialError={diary.list.hasInitialError}
+            isRefetching={diary.list.isRefetching}
+            isPaginationLoading={diary.list.isPaginationLoading}
+            isEntrySyncing={diarySync.isEntrySyncing}
+            listRef={diary.list.listRef}
+            viewabilityConfig={diary.list.viewabilityConfig}
+            onViewableItemsChanged={diary.list.handleViewableItemsChanged}
+            contentContainerStyle={toolbar.listContentContainerStyle}
+            onScroll={toolbar.handleScroll}
+            onScrollBeginDrag={toolbar.handleScrollBeginDrag}
+            onScrollEndDrag={toolbar.handleScrollEndDrag}
+            onToggleDay={diary.list.toggleDay}
+            onToggleSelection={selection.toggleEntry}
+            onOpenEntry={(entryId) => {
+              void handleOpenEntry(entryId);
+            }}
+            onOpenPhoto={handleOpenPhoto}
+            onChangePage={diary.list.handleChangePage}
+            onRetry={diary.list.handleRetry}
+          />
+        </s.ListArea>
+
+        <s.ToolbarOverlay
+          onLayout={toolbar.handleToolbarLayout}
+          style={toolbar.toolbarAnimatedStyle}
+        >
+          <s.ToolbarArea>
+            {selection.selectionMode ? (
+              <OwnerDiarySelectionToolbar
+                selectedCount={selection.selectedCount}
+                allSelected={selection.allSelected}
+                deleting={selection.isDeleting}
+                synchronizing={diarySync.forcedSyncPending}
+                operationsDisabled={transferLocked}
+                synchronizeDisabled={
+                  selection.selectedCount === 0 ||
+                  diarySync.connectionState !== 'online' ||
+                  diarySync.batchProgress !== null ||
+                  diarySync.forcedSyncPending ||
+                  selection.isDeleting
+                }
+                onToggleAll={selection.toggleAll}
+                onSynchronize={handleForcedSync}
+                onDelete={selection.requestDelete}
+                onClose={selection.exitSelection}
+              />
+            ) : (
+              <DiarySearch
+                text={diary.search.text}
+                field={diary.search.search.field}
+                onTextChange={diary.search.setText}
+                onApplyText={diary.search.applyText}
+                onFieldChange={diary.search.setField}
+                onClear={diary.search.clear}
+                filtersVisible={diary.filters.visible}
+                filtersApplied={diary.filters.hasAppliedFilters}
+                onOpenFilters={diary.filters.open}
+                createDisabled={transferLocked}
+                onCreateEntry={entryEditor.openCreate}
+              />
+            )}
+          </s.ToolbarArea>
+
+          {diarySync.batchProgress !== null && (
+            <s.SyncProgress style={ss.Surface(theme, 'card')}>
+              <Spinner size={18} />
+
+              <s.SyncProgressText>
+                {t('diary.sync.progress', {
+                  current: diarySync.batchProgress.current,
+
+                  total: diarySync.batchProgress.total,
+                })}
+              </s.SyncProgressText>
+            </s.SyncProgress>
+          )}
+        </s.ToolbarOverlay>
       </s.ListArea>
 
       <CreateDiaryEntryModal

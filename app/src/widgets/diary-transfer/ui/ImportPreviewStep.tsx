@@ -162,8 +162,9 @@ export const ImportPreviewStep = ({
       />
 
       {preview === null ? (
-        <s.Options>
+        <f.LoadingState>
           <LoadingView />
+
           <s.OptionContent>
             <s.OptionTitle>
               {t(
@@ -172,6 +173,7 @@ export const ImportPreviewStep = ({
                   : 'transfer.import.preview.validatingTitle'
               )}
             </s.OptionTitle>
+
             <s.OptionDescription>
               {t(
                 waitingForSync
@@ -179,6 +181,7 @@ export const ImportPreviewStep = ({
                   : 'transfer.import.preview.validatingDescription'
               )}
             </s.OptionDescription>
+
             {totalEntries > 0 && (
               <s.OptionDescription>
                 {t('transfer.import.preview.progress', {
@@ -187,9 +190,10 @@ export const ImportPreviewStep = ({
                 })}
               </s.OptionDescription>
             )}
+
             <s.OptionDescription>{source.fileName}</s.OptionDescription>
           </s.OptionContent>
-        </s.Options>
+        </f.LoadingState>
       ) : (
         <f.Scroll showsVerticalScrollIndicator={false}>
           <f.Content>
