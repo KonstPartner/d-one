@@ -10,7 +10,6 @@ import {
   Button,
   Checkbox,
   ConfirmDialog,
-  ErrorSection,
   IconButton,
   LoadingView,
   SearchInput,
@@ -234,6 +233,7 @@ export const StoredExportList = ({
                   total: item.totalEntries,
                 })}
               </s.ProgressText>
+
               {item.totalPhotos > 0 && (
                 <s.ProgressText>
                   {t('transfer.files.progress.photos', {
@@ -252,12 +252,15 @@ export const StoredExportList = ({
           tone="primary"
           disabled={list.operationsDisabled}
           loading={list.isExporting && list.resumingExportId === item.exportId}
-          onPress={() => void list.resumeExport(item)}
+          onPress={() => {
+            void list.resumeExport(item);
+          }}
         >
           <s.PrimaryActionText>
             {t('transfer.actions.continue')}
           </s.PrimaryActionText>
         </Button>
+
         <Button
           tone="danger"
           disabled={list.operationsDisabled}
@@ -298,15 +301,6 @@ export const StoredExportList = ({
     return <LoadingView />;
   }
 
-  if (list.loadError !== null) {
-    return (
-      <ErrorSection
-        message={t('transfer.files.errors.loadFailed')}
-        onRetry={() => void list.refresh()}
-      />
-    );
-  }
-
   return (
     <s.Root>
       <s.Header>
@@ -318,6 +312,7 @@ export const StoredExportList = ({
           variant="solid"
           onPress={onBack}
         />
+
         <s.Title style={ss.Heading(theme)}>
           {t(
             mode === 'import'
@@ -325,13 +320,16 @@ export const StoredExportList = ({
               : 'transfer.files.manageTitle'
           )}
         </s.Title>
+
         <IconButton
           icon="refresh"
           accessibilityLabel={t('transfer.actions.refresh')}
           disabled={list.operationsDisabled}
           tone="muted"
           variant="solid"
-          onPress={() => void list.refresh()}
+          onPress={() => {
+            void list.refresh();
+          }}
         />
       </s.Header>
 
@@ -359,9 +357,13 @@ export const StoredExportList = ({
               }
               onPress={list.toggleAllFiltered}
             />
+
             <s.SelectionMeta>
-              {t('diary.selection.selected', { count: list.selectedCount })}
+              {t('diary.selection.selected', {
+                count: list.selectedCount,
+              })}
             </s.SelectionMeta>
+
             <Button
               tone="danger"
               accessibilityLabel={t('transfer.actions.delete')}
@@ -377,13 +379,6 @@ export const StoredExportList = ({
           </s.SelectionBar>
         )}
       </s.Toolbar>
-
-      {list.resumeError !== null && (
-        <s.ErrorText>{t('transfer.files.errors.resumeFailed')}</s.ErrorText>
-      )}
-      {list.deleteError !== null && (
-        <s.ErrorText>{t('transfer.files.errors.deleteFailed')}</s.ErrorText>
-      )}
 
       <FlatList
         data={listItems}

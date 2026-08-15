@@ -79,14 +79,8 @@ export const resolveDiaryImportPhotoUri = ({
     return null;
   }
 
-  const photoFile = new File(
+  return new File(
     new Directory(archive.payloadUri, 'photos'),
     entry.photoFileName
-  );
-
-  if (!photoFile.exists || photoFile.size <= 0) {
-    throw new DiaryImportValidationError('entryInvalid');
-  }
-
-  return photoFile.uri;
+  ).uri;
 };

@@ -47,7 +47,25 @@
       "cloudAccessDenied": "Access to this diary has not been granted.",
       "cloudNetwork": "The cloud diary could not be loaded because of a network error.",
       "cloudInvalidData": "The cloud diary contains invalid data.",
-      "cloudQueryConfiguration": "The cloud diary query is not configured correctly."
+      "cloudQueryConfiguration": "The cloud diary query is not configured correctly.",
+      "diaryImportUnsupportedPlatform": "Diary import is not supported on this platform.",
+      "diaryImportInvalidBackup": "The selected file is not a valid DOne backup.",
+      "diaryImportUnsupportedVersion": "This backup was created with an unsupported format version.",
+      "diaryImportPickerFailed": "The backup file could not be selected.",
+      "diaryImportSnapshotChanged": "The local diary changed after the preview. Open the backup again and review the conflicts.",
+      "diaryImportConflictPlanInvalid": "Conflict decisions are incomplete. Open the backup again and repeat the import.",
+      "diaryImportRollbackFailed": "The import was stopped because local photo files could not be restored safely.",
+      "diaryImportPhotoFailed": "A photo from the backup could not be restored. The current batch was not imported.",
+      "diaryImportPartialFailed": "The import stopped before all entries were processed. Previously completed batches remain in the diary.",
+      "diaryImportRefreshFailed": "The import finished, but the diary could not be refreshed. Reopen the diary to load the latest local data.",
+      "diaryImportFailed": "The diary import could not be completed.",
+      "diaryExportEmpty": "There are no diary entries to export.",
+      "diaryExportFailed": "The diary export could not be completed.",
+      "diaryExportFilesLoadFailed": "The created export files could not be loaded.",
+      "diaryExportResumeFailed": "The export could not be resumed.",
+      "diaryExportDeleteFailed": "The selected export files could not be deleted.",
+      "diaryExportSaveFailed": "The export file could not be saved.",
+      "diaryExportShareFailed": "The export file could not be shared."
     },
     "notifications": {
       "type": {

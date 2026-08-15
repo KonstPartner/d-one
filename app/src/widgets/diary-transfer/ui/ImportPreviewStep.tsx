@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 import {
   type DiaryImportPreview,
   type DiaryImportSource,
-  type DiaryImportValidationErrorCode,
-  isDiaryImportValidationError,
 } from '@features/import-diary';
 import type { DiaryTransferState } from '@entities/diary';
-import { Button, ErrorSection, LoadingView } from '@shared/ui';
+import { Button, LoadingView } from '@shared/ui';
 
+import type { ImportConflictStrategySelection } from '../model/diaryImportFlow.types';
+import * as f from '../styles/DiaryImportPreview';
 import * as s from '../styles/DiaryTransferModal';
 
 import { TransferStepHeader } from './TransferStepPrimitives';
@@ -18,57 +18,70 @@ type ImportPreviewStepProps = {
   source: DiaryImportSource;
 
   preview: DiaryImportPreview | null;
-  error: Error | null;
-
   isPreparing: boolean;
-
   transferPhase: DiaryTransferState['phase'];
 
   processedEntries: number;
   totalEntries: number;
 
+  selectedConflictStrategy: ImportConflictStrategySelection | null;
+
   onPrepare: (source: DiaryImportSource) => Promise<DiaryImportPreview | null>;
+  onSelectConflictStrategy: (strategy: ImportConflictStrategySelection) => void;
 
   onCancel: () => void;
-  onContinue?: () => void;
+  onPreparationFailed: () => void;
+  onContinue: () => void;
 };
 
-type PreviewFieldProps = {
+type PreviewMetaRowProps = {
   label: string;
   value: ReactNode;
-  description?: string;
+  warning?: boolean;
 };
 
-const VALIDATION_ERROR_KEYS: Record<DiaryImportValidationErrorCode, string> = {
-  unsupportedPlatform: 'transfer.import.errors.unsupportedPlatform',
-  invalidArchive: 'transfer.import.errors.invalidArchive',
-  manifestMissing: 'transfer.import.errors.manifestMissing',
-  manifestInvalid: 'transfer.import.errors.manifestInvalid',
-  unsupportedVersion: 'transfer.import.errors.unsupportedVersion',
-  unsafePath: 'transfer.import.errors.unsafePath',
-  chunkMissing: 'transfer.import.errors.chunkMissing',
-  chunkInvalid: 'transfer.import.errors.chunkInvalid',
-  entryInvalid: 'transfer.import.errors.entryInvalid',
-  duplicateEntryId: 'transfer.import.errors.duplicateEntryId',
-  entryCountMismatch: 'transfer.import.errors.entryCountMismatch',
+type StrategyOptionProps = {
+  selected: boolean;
+  title: string;
+  description: string;
+  onPress: () => void;
 };
 
-const PreviewField = ({ label, value, description }: PreviewFieldProps) => (
-  <s.OptionContent>
-    <s.OptionDescription>{label}</s.OptionDescription>
-
-    <s.OptionTitle>{value}</s.OptionTitle>
-
-    {description !== undefined && (
-      <s.OptionDescription>{description}</s.OptionDescription>
-    )}
-  </s.OptionContent>
+const PreviewMetaRow = ({
+  label,
+  value,
+  warning = false,
+}: PreviewMetaRowProps) => (
+  <f.MetaRow>
+    <f.MetaLabel>{label}</f.MetaLabel>
+    <f.MetaValue $warning={warning}>{value}</f.MetaValue>
+  </f.MetaRow>
 );
 
-const getValidationErrorKey = (error: Error): string =>
-  isDiaryImportValidationError(error)
-    ? VALIDATION_ERROR_KEYS[error.code]
-    : 'transfer.import.errors.unknown';
+const StrategyOption = ({
+  selected,
+  title,
+  description,
+  onPress,
+}: StrategyOptionProps) => (
+  <f.StrategyOption
+    accessibilityRole="radio"
+    accessibilityLabel={title}
+    accessibilityState={{ selected }}
+    $selected={selected}
+    onPress={onPress}
+    style={f.getStrategyPressStyle}
+  >
+    <f.StrategyDot $selected={selected}>
+      {selected && <f.StrategyDotInner />}
+    </f.StrategyDot>
+
+    <f.StrategyContent>
+      <f.StrategyTitle>{title}</f.StrategyTitle>
+      <f.StrategyDescription>{description}</f.StrategyDescription>
+    </f.StrategyContent>
+  </f.StrategyOption>
+);
 
 const getExportTypeKey = (
   preview: DiaryImportPreview
@@ -93,13 +106,15 @@ const formatExportedAt = (value: string, language: string): string => {
 export const ImportPreviewStep = ({
   source,
   preview,
-  error,
   isPreparing,
   transferPhase,
   processedEntries,
   totalEntries,
+  selectedConflictStrategy,
   onPrepare,
+  onSelectConflictStrategy,
   onCancel,
+  onPreparationFailed,
   onContinue,
 }: ImportPreviewStepProps) => {
   const { t, i18n } = useTranslation();
@@ -113,20 +128,18 @@ export const ImportPreviewStep = ({
 
     preparationStartedRef.current = true;
 
-    void onPrepare(source);
-  }, [isPreparing, onPrepare, preview, source]);
+    void onPrepare(source).then((preparedPreview) => {
+      if (preparedPreview === null) {
+        onPreparationFailed();
+      }
+    });
+  }, [isPreparing, onPrepare, onPreparationFailed, preview, source]);
 
   useEffect(() => {
-    if (error === null && preview === null) {
+    if (preview === null) {
       startPreparation();
     }
-  }, [error, preview, startPreparation]);
-
-  const handleRetry = useCallback((): void => {
-    preparationStartedRef.current = false;
-
-    startPreparation();
-  }, [startPreparation]);
+  }, [preview, startPreparation]);
 
   const waitingForSync = transferPhase === 'waitingForSync';
 
@@ -134,6 +147,11 @@ export const ImportPreviewStep = ({
     isPreparing || waitingForSync || transferPhase === 'validating';
 
   const language = i18n.resolvedLanguage ?? i18n.language;
+
+  const continueDisabled =
+    preview !== null &&
+    preview.matchesCount > 0 &&
+    selectedConflictStrategy === null;
 
   return (
     <s.Screen>
@@ -143,21 +161,9 @@ export const ImportPreviewStep = ({
         onBack={onCancel}
       />
 
-      {error !== null ? (
-        <>
-          <ErrorSection
-            message={t(getValidationErrorKey(error))}
-            onRetry={handleRetry}
-          />
-
-          <Button tone="input" onPress={onCancel}>
-            {t('transfer.actions.cancel')}
-          </Button>
-        </>
-      ) : preview === null ? (
+      {preview === null ? (
         <s.Options>
           <LoadingView />
-
           <s.OptionContent>
             <s.OptionTitle>
               {t(
@@ -166,7 +172,6 @@ export const ImportPreviewStep = ({
                   : 'transfer.import.preview.validatingTitle'
               )}
             </s.OptionTitle>
-
             <s.OptionDescription>
               {t(
                 waitingForSync
@@ -174,7 +179,6 @@ export const ImportPreviewStep = ({
                   : 'transfer.import.preview.validatingDescription'
               )}
             </s.OptionDescription>
-
             {totalEntries > 0 && (
               <s.OptionDescription>
                 {t('transfer.import.preview.progress', {
@@ -183,67 +187,115 @@ export const ImportPreviewStep = ({
                 })}
               </s.OptionDescription>
             )}
-
             <s.OptionDescription>{source.fileName}</s.OptionDescription>
           </s.OptionContent>
         </s.Options>
       ) : (
-        <>
-          <s.Options>
-            <PreviewField
-              label={t('transfer.import.preview.file')}
-              value={preview.fileName}
-            />
+        <f.Scroll showsVerticalScrollIndicator={false}>
+          <f.Content>
+            <f.Intro>
+              <f.IntroTitle>
+                {t('transfer.import.preview.heading')}
+              </f.IntroTitle>
+              <f.IntroDescription>
+                {t('transfer.import.preview.description')}
+              </f.IntroDescription>
+            </f.Intro>
 
-            <PreviewField
-              label={t('transfer.import.preview.type')}
-              value={t(getExportTypeKey(preview))}
-            />
+            <f.MetaList>
+              <PreviewMetaRow
+                label={t('transfer.import.preview.type')}
+                value={t(getExportTypeKey(preview))}
+              />
+              <PreviewMetaRow
+                label={t('transfer.import.preview.created')}
+                value={formatExportedAt(preview.exportedAt, language)}
+              />
+              <PreviewMetaRow
+                label={t('transfer.import.preview.source')}
+                value={preview.sourceUserName}
+              />
+              <PreviewMetaRow
+                label={t('transfer.import.preview.entries')}
+                value={preview.entriesCount}
+              />
+              <PreviewMetaRow
+                label={t('transfer.import.preview.photos')}
+                value={preview.photosCount}
+              />
+              <PreviewMetaRow
+                label={t('transfer.import.preview.matches')}
+                value={preview.matchesCount}
+                warning={preview.matchesCount > 0}
+              />
+            </f.MetaList>
 
-            <PreviewField
-              label={t('transfer.import.preview.created')}
-              value={formatExportedAt(preview.exportedAt, language)}
-            />
+            {preview.matchesCount > 0 && (
+              <>
+                <f.Intro>
+                  <f.IntroTitle>
+                    {t('transfer.import.conflicts.title')}
+                  </f.IntroTitle>
+                  <f.IntroDescription>
+                    {t('transfer.import.conflicts.description')}
+                  </f.IntroDescription>
+                </f.Intro>
 
-            <PreviewField
-              label={t('transfer.import.preview.source')}
-              value={preview.sourceUserName}
-            />
+                <f.StrategyList>
+                  <StrategyOption
+                    selected={selectedConflictStrategy === 'skip'}
+                    title={t('transfer.import.conflicts.skipAll')}
+                    description={t(
+                      'transfer.import.conflicts.skipAllDescription'
+                    )}
+                    onPress={() => {
+                      onSelectConflictStrategy('skip');
+                    }}
+                  />
+                  <StrategyOption
+                    selected={selectedConflictStrategy === 'replace'}
+                    title={t('transfer.import.conflicts.replaceAll')}
+                    description={t(
+                      'transfer.import.conflicts.replaceAllDescription'
+                    )}
+                    onPress={() => {
+                      onSelectConflictStrategy('replace');
+                    }}
+                  />
+                  <StrategyOption
+                    selected={selectedConflictStrategy === 'review'}
+                    title={t('transfer.import.conflicts.reviewIndividually')}
+                    description={t(
+                      'transfer.import.conflicts.reviewIndividuallyDescription'
+                    )}
+                    onPress={() => {
+                      onSelectConflictStrategy('review');
+                    }}
+                  />
+                </f.StrategyList>
+              </>
+            )}
 
-            <PreviewField
-              label={t('transfer.import.preview.entries')}
-              value={preview.entriesCount}
-            />
+            <f.ActionRow>
+              <Button
+                tone="input"
+                style={f.actionButtonStyle}
+                onPress={onCancel}
+              >
+                {t('transfer.actions.cancel')}
+              </Button>
 
-            <PreviewField
-              label={t('transfer.import.preview.photos')}
-              value={preview.photosCount}
-            />
-
-            <PreviewField
-              label={t('transfer.import.preview.matches')}
-              value={preview.matchesCount}
-              description={t(
-                preview.matchesCount === 0
-                  ? 'transfer.import.preview.noMatches'
-                  : 'transfer.import.preview.matchesDescription',
-                {
-                  count: preview.matchesCount,
-                }
-              )}
-            />
-          </s.Options>
-
-          {onContinue !== undefined && (
-            <Button tone="primary" onPress={onContinue}>
-              {t('transfer.actions.continue')}
-            </Button>
-          )}
-
-          <Button tone="input" onPress={onCancel}>
-            {t('transfer.actions.cancel')}
-          </Button>
-        </>
+              <Button
+                tone={continueDisabled ? 'muted' : 'primary'}
+                disabled={continueDisabled}
+                style={f.actionButtonStyle}
+                onPress={onContinue}
+              >
+                {t('transfer.actions.continue')}
+              </Button>
+            </f.ActionRow>
+          </f.Content>
+        </f.Scroll>
       )}
     </s.Screen>
   );

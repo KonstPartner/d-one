@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import type { DiaryStoredExportFile } from '@entities/diary';
+import { errorMapper } from '@shared/lib/errors';
+import { showNotification } from '@shared/lib/notifications';
 
 import { useDiaryExportFiles } from '../api/useDiaryExportFiles';
 import { useDiaryExportMutation } from '../api/useDiaryExportMutation';
@@ -30,6 +32,18 @@ export const useStoredExportList = ({ mode }: UseStoredExportListParams) => {
 
   const files = useDiaryExportFiles();
   const exportMutation = useDiaryExportMutation();
+
+  useEffect(() => {
+    if (files.loadError === null) {
+      return;
+    }
+
+    console.error('Failed to load diary export files', files.loadError);
+    showNotification(
+      'error',
+      errorMapper(new Error('DIARY_EXPORT_FILES_LOAD_FAILED'), 'transfer')
+    );
+  }, [files.loadError]);
 
   const normalizedSearch = search.trim().toLocaleLowerCase();
 
@@ -139,8 +153,12 @@ export const useStoredExportList = ({ mode }: UseStoredExportListParams) => {
 
     try {
       await exportMutation.resumeDiaryExport(item.exportId);
-    } catch {
-      return;
+    } catch (error) {
+      console.error('Failed to resume diary export', error);
+      showNotification(
+        'error',
+        errorMapper(new Error('DIARY_EXPORT_RESUME_FAILED'), 'transfer')
+      );
     } finally {
       setResumingExportId(null);
     }
@@ -185,8 +203,12 @@ export const useStoredExportList = ({ mode }: UseStoredExportListParams) => {
       }
 
       setDeleteTarget(null);
-    } catch {
-      return;
+    } catch (error) {
+      console.error('Failed to delete diary export', error);
+      showNotification(
+        'error',
+        errorMapper(new Error('DIARY_EXPORT_DELETE_FAILED'), 'transfer')
+      );
     }
   };
 
@@ -226,9 +248,6 @@ export const useStoredExportList = ({ mode }: UseStoredExportListParams) => {
     isLoading: files.isLoading,
     isRefreshing: files.isRefreshing,
     isDeleting: files.isDeleting,
-    loadError: files.loadError,
-    deleteError: files.deleteError,
-    resumeError: exportMutation.error,
     isExporting: exportMutation.isExporting,
     refresh: files.refresh,
   };

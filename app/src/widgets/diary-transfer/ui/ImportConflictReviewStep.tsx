@@ -213,7 +213,11 @@ export const ImportConflictReviewStep = ({
             </s.OptionDescription>
           </s.OptionContent>
 
-          <Button tone="primary" disabled={!allResolved} onPress={onContinue}>
+          <Button
+            tone={allResolved ? 'primary' : 'muted'}
+            disabled={!allResolved}
+            onPress={onContinue}
+          >
             {t('transfer.import.review.continueImport')}
           </Button>
         </s.Options>

@@ -5,58 +5,24 @@ import type { DiaryImportSource } from '@features/import-diary';
 import type { DiaryTransferState } from '@entities/diary';
 
 export type DiaryTransferRoute =
-  | {
-      name: 'home';
-    }
-  | {
-      name: 'export.format';
-    }
-  | {
-      name: 'export.scope';
-      format: DiaryExportFormat;
-    }
-  | {
-      name: 'export.period';
-      format: DiaryExportFormat;
-    }
-  | {
-      name: 'export.selected';
-      format: DiaryExportFormat;
-    }
-  | {
-      name: 'export.progress';
-      format: DiaryExportFormat;
-    }
-  | {
-      name: 'saved-exports.manage';
-    }
-  | {
-      name: 'import.choose-file';
-    }
-  | {
-      name: 'saved-exports.import';
-    }
-  | {
-      name: 'import.preview';
-      source: DiaryImportSource;
-    }
-  | {
-      name: 'import.conflicts';
-    }
-  | {
-      name: 'import.review';
-    }
-  | {
-      name: 'import.progress';
-    };
+  | { name: 'home' }
+  | { name: 'export.format' }
+  | { name: 'export.scope'; format: DiaryExportFormat }
+  | { name: 'export.period'; format: DiaryExportFormat }
+  | { name: 'export.selected'; format: DiaryExportFormat }
+  | { name: 'export.progress'; format: DiaryExportFormat }
+  | { name: 'saved-exports.manage' }
+  | { name: 'import.choose-file' }
+  | { name: 'saved-exports.import' }
+  | { name: 'import.preview'; source: DiaryImportSource }
+  | { name: 'import.review' }
+  | { name: 'import.confirmation' }
+  | { name: 'import.progress' };
 
 type UseDiaryTransferNavigationParams = {
   visible: boolean;
-
   transferPhase: DiaryTransferState['phase'];
-
   operationPending: boolean;
-
   onClose: () => void;
 };
 
@@ -83,10 +49,8 @@ const isTransferNavigationLocked = (
 
 export const useDiaryTransferNavigation = ({
   visible,
-
   transferPhase,
   operationPending,
-
   onClose,
 }: UseDiaryTransferNavigationParams) => {
   const [routeStack, setRouteStack] = useState<DiaryTransferRoute[]>([
@@ -105,23 +69,19 @@ export const useDiaryTransferNavigation = ({
 
   const pushRoute = useCallback(
     (route: DiaryTransferRoute): void => {
-      if (locked) {
-        return;
+      if (!locked) {
+        setRouteStack((current) => [...current, route]);
       }
-
-      setRouteStack((current) => [...current, route]);
     },
     [locked]
   );
 
   const popRoute = useCallback((): void => {
-    if (locked) {
-      return;
+    if (!locked) {
+      setRouteStack((current) =>
+        current.length > 1 ? current.slice(0, -1) : current
+      );
     }
-
-    setRouteStack((current) =>
-      current.length > 1 ? current.slice(0, -1) : current
-    );
   }, [locked]);
 
   const pushTransferRoute = useCallback((route: DiaryTransferRoute): void => {
@@ -130,13 +90,9 @@ export const useDiaryTransferNavigation = ({
 
   const replaceTransferRoute = useCallback(
     (route: DiaryTransferRoute): void => {
-      setRouteStack((current) => {
-        if (current.length === 0) {
-          return [route];
-        }
-
-        return [...current.slice(0, -1), route];
-      });
+      setRouteStack((current) =>
+        current.length === 0 ? [route] : [...current.slice(0, -1), route]
+      );
     },
     []
   );

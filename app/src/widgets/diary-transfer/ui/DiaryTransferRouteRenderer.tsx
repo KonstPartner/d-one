@@ -8,15 +8,14 @@ import { ExportProgressResultScreen } from './ExportProgressResultScreen';
 import { ExportScopeStep } from './ExportScopeStep';
 import { ExportSelectedEntriesStep } from './ExportSelectedEntriesStep';
 import { ImportChooseFileStep } from './ImportChooseFileStep';
+import { ImportConfirmationStep } from './ImportConfirmationStep';
 import { ImportConflictReviewStep } from './ImportConflictReviewStep';
-import { ImportConflictStrategyStep } from './ImportConflictStrategyStep';
 import { ImportPreviewStep } from './ImportPreviewStep';
 import { ImportProgressResultScreen } from './ImportProgressResultScreen';
 import { TransferHomeStep } from './TransferHomeStep';
 
 type DiaryTransferRouteRendererProps = {
   controller: DiaryTransferController;
-
   onClose: () => void;
 };
 
@@ -26,27 +25,21 @@ export const DiaryTransferRouteRenderer = ({
 }: DiaryTransferRouteRendererProps) => {
   const {
     transferState,
-
     exportFlow,
     importFlow,
-
     navigation,
-
     startExport,
-
     openImportPreview,
     chooseImportFromDevice,
     prepareImportPreview,
-
+    selectedImportConflictStrategy,
+    selectImportConflictStrategy,
     continueImportFromPreview,
-    resolveAllImportConflicts,
-
-    openIndividualImportReview,
     backFromIndividualImportReview,
     continueIndividualImport,
-
-    backFromImportConflicts,
-
+    importConfirmationSummary,
+    cancelImportConfirmation,
+    startConfirmedImport,
     cancelImportAndPop,
   } = controller;
 
@@ -59,14 +52,10 @@ export const DiaryTransferRouteRenderer = ({
           disabled={navigation.locked}
           onClose={onClose}
           onExport={() => {
-            navigation.pushRoute({
-              name: 'export.format',
-            });
+            navigation.pushRoute({ name: 'export.format' });
           }}
           onImport={() => {
-            navigation.pushRoute({
-              name: 'import.choose-file',
-            });
+            navigation.pushRoute({ name: 'import.choose-file' });
           }}
         />
       );
@@ -78,16 +67,13 @@ export const DiaryTransferRouteRenderer = ({
           onBack={navigation.popRoute}
           onSelectFormat={(format) => {
             exportFlow.resetExport();
-
             navigation.pushRoute({
               name: 'export.scope',
               format,
             });
           }}
           onOpenCreatedExports={() => {
-            navigation.pushRoute({
-              name: 'saved-exports.manage',
-            });
+            navigation.pushRoute({ name: 'saved-exports.manage' });
           }}
         />
       );
@@ -102,15 +88,11 @@ export const DiaryTransferRouteRenderer = ({
           onExportAll={() => {
             void startExport({
               format: currentRoute.format,
-
-              scope: {
-                type: 'all',
-              },
+              scope: { type: 'all' },
             });
           }}
           onSelectPeriod={() => {
             exportFlow.resetExport();
-
             navigation.pushRoute({
               name: 'export.period',
               format: currentRoute.format,
@@ -118,7 +100,6 @@ export const DiaryTransferRouteRenderer = ({
           }}
           onSelectEntries={() => {
             exportFlow.resetExport();
-
             navigation.pushRoute({
               name: 'export.selected',
               format: currentRoute.format,
@@ -135,7 +116,6 @@ export const DiaryTransferRouteRenderer = ({
           onExport={(scope) =>
             startExport({
               format: currentRoute.format,
-
               scope,
             })
           }
@@ -150,7 +130,6 @@ export const DiaryTransferRouteRenderer = ({
           onExport={(entryIds) =>
             startExport({
               format: currentRoute.format,
-
               scope: {
                 type: 'selected',
                 entryIds,
@@ -166,9 +145,6 @@ export const DiaryTransferRouteRenderer = ({
           format={currentRoute.format}
           transferState={transferState}
           result={exportFlow.result}
-          error={exportFlow.error}
-          empty={exportFlow.empty}
-          onBack={navigation.popRoute}
           onDone={onClose}
         />
       );
@@ -187,9 +163,7 @@ export const DiaryTransferRouteRenderer = ({
             void chooseImportFromDevice();
           }}
           onOpenCreatedBackups={() => {
-            navigation.pushRoute({
-              name: 'saved-exports.import',
-            });
+            navigation.pushRoute({ name: 'saved-exports.import' });
           }}
         />
       );
@@ -216,32 +190,16 @@ export const DiaryTransferRouteRenderer = ({
         <ImportPreviewStep
           source={currentRoute.source}
           preview={importFlow.preview}
-          error={importFlow.error}
           isPreparing={importFlow.isPreparing}
           transferPhase={transferState.phase}
           processedEntries={transferState.processedEntries}
           totalEntries={transferState.totalEntries}
+          selectedConflictStrategy={selectedImportConflictStrategy}
           onPrepare={prepareImportPreview}
+          onSelectConflictStrategy={selectImportConflictStrategy}
           onCancel={cancelImportAndPop}
-          onContinue={
-            importFlow.preview === null ? undefined : continueImportFromPreview
-          }
-        />
-      );
-
-    case 'import.conflicts':
-      return (
-        <ImportConflictStrategyStep
-          matchesCount={importFlow.preview?.matchesCount ?? 0}
-          disabled={importFlow.isImporting}
-          onBack={backFromImportConflicts}
-          onSkipAll={() => {
-            resolveAllImportConflicts('skip');
-          }}
-          onReplaceAll={() => {
-            resolveAllImportConflicts('replace');
-          }}
-          onReviewIndividually={openIndividualImportReview}
+          onPreparationFailed={cancelImportAndPop}
+          onContinue={continueImportFromPreview}
         />
       );
 
@@ -257,12 +215,24 @@ export const DiaryTransferRouteRenderer = ({
         />
       );
 
+    case 'import.confirmation':
+      if (importConfirmationSummary === null) {
+        return null;
+      }
+
+      return (
+        <ImportConfirmationStep
+          summary={importConfirmationSummary}
+          onCancel={cancelImportConfirmation}
+          onStart={startConfirmedImport}
+        />
+      );
+
     case 'import.progress':
       return (
         <ImportProgressResultScreen
           transferState={transferState}
           result={importFlow.result}
-          error={importFlow.error}
           onDone={onClose}
         />
       );

@@ -114,12 +114,15 @@ export type {
   DiaryTransferPhase,
   DiaryTransferState,
   DiaryTransferType,
+  DiaryWriteOperationLease,
 } from './model/diaryTransferCoordinator';
 export {
   acquireDiarySyncOperation,
   beginDiaryTransfer,
   isDiaryTransferLocked,
   resetDiaryTransferState,
+  runDiaryWriteOperation,
+  tryAcquireDiaryWriteOperation,
   useDiaryTransferState,
 } from './model/diaryTransferCoordinator';
 export type { MealRelation } from './model/mealRelation';

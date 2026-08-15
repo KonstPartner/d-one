@@ -5,6 +5,7 @@ import type { DiaryEntryEditableValues } from '@entities/diary';
 import {
   diaryLocalQueryKeys,
   prepareDiaryPhotoForEntry,
+  runDiaryWriteOperation,
   useReadyDiaryDatabase,
 } from '@entities/diary';
 import { db } from '@shared/api';
@@ -24,43 +25,51 @@ export const useCreateDiaryEntryMutation = () => {
     mutationFn: async ({
       photoDraftUri = null,
       ...values
-    }: CreateDiaryEntryMutationInput): Promise<string> => {
-      const entryId = doc(collection(db, 'users', userId, 'diaryEntries')).id;
+    }: CreateDiaryEntryMutationInput): Promise<string> =>
+      runDiaryWriteOperation(async () => {
+        const entryId = doc(collection(db, 'users', userId, 'diaryEntries')).id;
 
-      if (photoDraftUri === null) {
-        await repository.create({
-          ...values,
-          id: entryId,
-          localPhotoUri: null,
-          photoPath: null,
+        if (photoDraftUri === null) {
+          await repository.create({
+            ...values,
+
+            id: entryId,
+
+            localPhotoUri: null,
+
+            photoPath: null,
+          });
+
+          return entryId;
+        }
+
+        const preparedPhoto = prepareDiaryPhotoForEntry({
+          userId,
+          entryId,
+
+          draftUri: photoDraftUri,
         });
 
-        return entryId;
-      }
+        try {
+          await repository.create({
+            ...values,
 
-      const preparedPhoto = prepareDiaryPhotoForEntry({
-        userId,
-        entryId,
-        draftUri: photoDraftUri,
-      });
+            id: entryId,
 
-      try {
-        await repository.create({
-          ...values,
-          id: entryId,
-          localPhotoUri: preparedPhoto.localPhotoUri,
-          photoPath: preparedPhoto.photoPath,
-        });
+            localPhotoUri: preparedPhoto.localPhotoUri,
 
-        preparedPhoto.finalize();
+            photoPath: preparedPhoto.photoPath,
+          });
 
-        return entryId;
-      } catch (error) {
-        preparedPhoto.rollback();
+          preparedPhoto.finalize();
 
-        throw error;
-      }
-    },
+          return entryId;
+        } catch (error) {
+          preparedPhoto.rollback();
+
+          throw error;
+        }
+      }),
 
     onSuccess: () => {
       void queryClient

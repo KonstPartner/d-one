@@ -12,6 +12,8 @@ export {
   DiaryImportValidationError,
   isDiaryImportValidationError,
 } from './model/diaryBackupValidation';
+export type { DiaryImportPlanSummary } from './model/diaryImportPlanSummary';
+export { getDiaryImportPlanSummary } from './model/diaryImportPlanSummary';
 export type {
   DiaryImportConflictDecision,
   DiaryImportConflictPlan,

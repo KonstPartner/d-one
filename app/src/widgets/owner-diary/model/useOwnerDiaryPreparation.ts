@@ -2,7 +2,10 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useSyncDiary } from '@features/sync-diary';
-import { useReadyDiaryDatabase } from '@entities/diary';
+import {
+  tryAcquireDiaryWriteOperation,
+  useReadyDiaryDatabase,
+} from '@entities/diary';
 import { showNotification } from '@shared/lib/notifications';
 
 import { useOwnerDiaryAiPreparation } from './useOwnerDiaryAiPreparation';
@@ -88,114 +91,139 @@ export const useOwnerDiaryPreparation = () => {
 
   const handleEntrySaved = useCallback(
     async (savedEntry: OwnerDiarySavedEntry): Promise<void> => {
-      let entry = await repository.findById(savedEntry.entryId);
+      const preparationOperation = tryAcquireDiaryWriteOperation();
 
-      if (entry === null) {
+      if (preparationOperation === null) {
         return;
       }
 
-      let shouldSync = savedEntry.entryUpdated;
+      let preparationReleased = false;
 
-      if (savedEntry.deleteAiAnalysis && entry.aiAnalysis.length > 0) {
-        await ai.deleteAnalysis(entry.id);
-
-        shouldSync = true;
-
-        entry = {
-          ...entry,
-          aiAnalysis: '',
-        };
-      }
-
-      if (savedEntry.requestTimer) {
-        await timer.setTimerForEntry(entry);
-      }
-
-      const photoNeedsUpload = photo.needsUpload(entry);
-
-      const photoWillUpload =
-        sync.connectionState === 'online' && photoNeedsUpload;
-
-      const aiWillRun =
-        sync.connectionState === 'online' && savedEntry.requestAi;
-
-      if (!photoWillUpload && !aiWillRun) {
-        if (sync.connectionState === 'online' && shouldSync) {
-          await syncEntry(entry.id);
+      const releasePreparation = (): void => {
+        if (preparationReleased) {
+          return;
         }
 
-        return;
-      }
-
-      setPreparingEntry({
-        ...savedEntry,
-
-        photoUri: entry.localPhotoUri ?? entry.photoUrl,
-
-        photoStepVisible: photoWillUpload,
-        photoUploaded: false,
-
-        phase: photoWillUpload ? 'uploadingPhoto' : 'analyzingAi',
-
-        aiAnalysis: null,
-      });
-
-      sync.setEntryPreparing(entry.id, true);
-
-      const aiOnlyUpdate =
-        savedEntry.operation === 'update' &&
-        !savedEntry.entryUpdated &&
-        !savedEntry.deleteAiAnalysis &&
-        savedEntry.requestAi;
-
-      let uploadedForAiOnly = false;
-      let aiUpdated = false;
+        preparationReleased = true;
+        preparationOperation.release();
+      };
 
       try {
-        if (photoNeedsUpload) {
-          const preparedEntry = await photo.upload(entry);
+        let entry = await repository.findById(savedEntry.entryId);
 
-          if (preparedEntry === null) {
-            return;
-          }
-
-          entry = preparedEntry;
-
-          uploadedForAiOnly = aiOnlyUpdate;
-
-          markPhotoUploaded(savedEntry.requestAi);
+        if (entry === null) {
+          return;
         }
 
-        if (savedEntry.requestAi) {
-          if (entry.photoPath === null || entry.photoUrl === null) {
-            return;
-          }
+        let shouldSync = savedEntry.entryUpdated;
 
-          setPhase('analyzingAi');
+        if (savedEntry.deleteAiAnalysis && entry.aiAnalysis.length > 0) {
+          await ai.deleteAnalysis(entry.id);
 
-          const aiAnalysis = await ai.analyzeEntry(entry);
+          shouldSync = true;
 
-          if (aiAnalysis !== null) {
-            aiUpdated = true;
-            shouldSync = true;
-
-            setPhase('analysisReady', aiAnalysis);
-          }
+          entry = {
+            ...entry,
+            aiAnalysis: '',
+          };
         }
 
-        if (uploadedForAiOnly && !aiUpdated) {
-          await photo.restorePendingState(entry);
+        if (savedEntry.requestTimer) {
+          await timer.setTimerForEntry(entry);
+        }
+
+        const photoNeedsUpload = photo.needsUpload(entry);
+
+        const photoWillUpload =
+          sync.connectionState === 'online' && photoNeedsUpload;
+
+        const aiWillRun =
+          sync.connectionState === 'online' && savedEntry.requestAi;
+
+        if (!photoWillUpload && !aiWillRun) {
+          releasePreparation();
+
+          if (sync.connectionState === 'online' && shouldSync) {
+            await syncEntry(entry.id);
+          }
 
           return;
         }
 
-        if (shouldSync) {
-          await syncEntry(entry.id);
+        setPreparingEntry({
+          ...savedEntry,
+
+          photoUri: entry.localPhotoUri ?? entry.photoUrl,
+
+          photoStepVisible: photoWillUpload,
+          photoUploaded: false,
+
+          phase: photoWillUpload ? 'uploadingPhoto' : 'analyzingAi',
+
+          aiAnalysis: null,
+        });
+
+        sync.setEntryPreparing(entry.id, true);
+
+        const aiOnlyUpdate =
+          savedEntry.operation === 'update' &&
+          !savedEntry.entryUpdated &&
+          !savedEntry.deleteAiAnalysis &&
+          savedEntry.requestAi;
+
+        let uploadedForAiOnly = false;
+        let aiUpdated = false;
+
+        try {
+          if (photoNeedsUpload) {
+            const preparedEntry = await photo.upload(entry);
+
+            if (preparedEntry === null) {
+              return;
+            }
+
+            entry = preparedEntry;
+
+            uploadedForAiOnly = aiOnlyUpdate;
+
+            markPhotoUploaded(savedEntry.requestAi);
+          }
+
+          if (savedEntry.requestAi) {
+            if (entry.photoPath === null || entry.photoUrl === null) {
+              return;
+            }
+
+            setPhase('analyzingAi');
+
+            const aiAnalysis = await ai.analyzeEntry(entry);
+
+            if (aiAnalysis !== null) {
+              aiUpdated = true;
+              shouldSync = true;
+
+              setPhase('analysisReady', aiAnalysis);
+            }
+          }
+
+          if (uploadedForAiOnly && !aiUpdated) {
+            await photo.restorePendingState(entry);
+
+            return;
+          }
+
+          releasePreparation();
+
+          if (shouldSync) {
+            await syncEntry(entry.id);
+          }
+        } finally {
+          sync.setEntryPreparing(entry.id, false);
+
+          setPreparingEntry(null);
         }
       } finally {
-        sync.setEntryPreparing(entry.id, false);
-
-        setPreparingEntry(null);
+        releasePreparation();
       }
     },
     [

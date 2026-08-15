@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { View } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,6 +7,7 @@ import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { HeaderMenu } from '@widgets/header-menu';
+import { useDiaryTransferState } from '@entities/diary';
 import { useSession } from '@entities/session';
 import { userProfileQueryOptions, UserRole } from '@entities/user';
 import { useNetwork } from '@shared/lib/network';
@@ -16,12 +18,24 @@ import { DiaryRuntimeBoundary } from '../providers/DiaryRuntimeBoundary';
 
 import { createTabScreenOptions } from './screen-options/tabScreenOptions';
 
+const isDiaryTransferRuntimeLocked = (
+  phase: ReturnType<typeof useDiaryTransferState>['phase']
+): boolean =>
+  phase === 'waitingForSync' ||
+  phase === 'validating' ||
+  phase === 'resolvingConflicts' ||
+  phase === 'processing';
+
 export const AppTabs = () => {
   const theme = useTheme();
 
   const { t } = useTranslation();
 
   const { sessionUser } = useSession();
+
+  const transfer = useDiaryTransferState();
+
+  const transferLocked = isDiaryTransferRuntimeLocked(transfer.phase);
 
   const userId = sessionUser?.uid ?? null;
 
@@ -36,6 +50,24 @@ export const AppTabs = () => {
   const isUser = role === UserRole.User;
 
   const isFollower = role === UserRole.Follower;
+
+  const ownerRuntimeUserIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (transferLocked || !isUser || userId === null) {
+      return;
+    }
+
+    ownerRuntimeUserIdRef.current = userId;
+  }, [isUser, transferLocked, userId]);
+
+  const diaryRuntimeUserId = transferLocked
+    ? (ownerRuntimeUserIdRef.current ?? (isUser ? userId : null))
+    : userId;
+
+  const diaryRuntimeEnabled = transferLocked
+    ? diaryRuntimeUserId !== null
+    : isUser;
 
   const supportsOwnerCloud = !PlatformOS.WEB;
 
@@ -63,7 +95,10 @@ export const AppTabs = () => {
   );
 
   return (
-    <DiaryRuntimeBoundary enabled={isUser} userId={userId}>
+    <DiaryRuntimeBoundary
+      enabled={diaryRuntimeEnabled}
+      userId={diaryRuntimeUserId}
+    >
       <Tabs
         screenOptions={createTabScreenOptions({
           theme,

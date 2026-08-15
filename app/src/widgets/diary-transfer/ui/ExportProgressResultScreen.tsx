@@ -9,7 +9,6 @@ import {
   ExportFileActionsScreen,
 } from '@features/export-diary';
 import type { DiaryTransferState } from '@entities/diary';
-import { Button } from '@shared/ui';
 
 import * as layout from '../styles/DiaryTransferModal';
 import * as s from '../styles/ExportProgressResultScreen';
@@ -20,15 +19,13 @@ type ExportProgressResultScreenProps = {
   transferState: DiaryTransferState;
 
   result: DiaryExportResult | null;
-  error: Error | null;
-  empty: boolean;
 
-  onBack: () => void;
   onDone: () => void;
 };
 
 const RING_SIZE = 76;
 const RING_STROKE = 7;
+
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
 
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -43,19 +40,31 @@ const getPercent = (current: number, total: number): number => {
 
 export const ExportProgressResultScreen = ({
   format,
-
   transferState,
-
   result,
-  error,
-  empty,
-
-  onBack,
   onDone,
 }: ExportProgressResultScreenProps) => {
   const theme = useTheme();
 
   const { t } = useTranslation();
+
+  if (result !== null) {
+    const photosCount =
+      format === 'fullBackup' ? result.photosCount : undefined;
+
+    const skippedPhotosCount =
+      format === 'fullBackup' ? result.skippedPhotosCount : undefined;
+
+    return (
+      <ExportFileActionsScreen
+        file={result}
+        entriesCount={result.entriesCount}
+        photosCount={photosCount}
+        skippedPhotosCount={skippedPhotosCount}
+        onBack={onDone}
+      />
+    );
+  }
 
   const entriesPercent = getPercent(
     transferState.processedEntries,
@@ -78,9 +87,7 @@ export const ExportProgressResultScreen = ({
   const overallPercent = getPercent(processedProgressUnits, totalProgressUnits);
 
   const renderRing = () => {
-    const progress = result === null ? overallPercent : 100;
-
-    const dashOffset = RING_CIRCUMFERENCE * (1 - progress / 100);
+    const dashOffset = RING_CIRCUMFERENCE * (1 - overallPercent / 100);
 
     return (
       <s.ProgressRing>
@@ -125,62 +132,6 @@ export const ExportProgressResultScreen = ({
       <s.ProgressFill $percent={percent} />
     </s.ProgressTrack>
   );
-
-  if (result !== null) {
-    const photosCount =
-      format === 'fullBackup' ? result.photosCount : undefined;
-
-    const skippedPhotosCount =
-      format === 'fullBackup' ? result.skippedPhotosCount : undefined;
-
-    return (
-      <ExportFileActionsScreen
-        file={result}
-        entriesCount={result.entriesCount}
-        photosCount={photosCount}
-        skippedPhotosCount={skippedPhotosCount}
-        onBack={onDone}
-      />
-    );
-  }
-
-  if (error !== null || empty) {
-    return (
-      <layout.Screen>
-        <s.FailureCenteredSection>
-          <s.FailureIcon>
-            <Ionicons name="close" size={34} color={theme.colors.danger} />
-          </s.FailureIcon>
-
-          <layout.OptionTitle>
-            {empty
-              ? t('transfer.export.errors.empty')
-              : t('transfer.export.result.failedTitle')}
-          </layout.OptionTitle>
-
-          {!empty && (
-            <>
-              <layout.OptionDescription>
-                {t('transfer.export.result.failedProgress', {
-                  current: transferState.processedEntries,
-
-                  total: transferState.totalEntries,
-                })}
-              </layout.OptionDescription>
-
-              <layout.OptionDescription>
-                {t('transfer.export.result.noFileCreated')}
-              </layout.OptionDescription>
-            </>
-          )}
-        </s.FailureCenteredSection>
-
-        <Button tone="input" onPress={onBack}>
-          <layout.OptionTitle>{t('transfer.actions.back')}</layout.OptionTitle>
-        </Button>
-      </layout.Screen>
-    );
-  }
 
   const processingEntries =
     transferState.totalEntries === 0 ||

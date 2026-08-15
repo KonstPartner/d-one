@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
@@ -11,9 +11,12 @@ import {
 import { useSession } from '@entities/session';
 import { userProfileQueryOptions } from '@entities/user';
 import { normalizeAppLanguage } from '@shared/i18n';
+import { errorMapper } from '@shared/lib/errors';
+import { showNotification } from '@shared/lib/notifications';
 
 type DiaryTransferExportInput = {
   format: DiaryExportFormat;
+
   scope: DiaryExportScope;
 };
 
@@ -33,12 +36,9 @@ export const useDiaryTransferExport = () => {
 
     isExporting,
     result,
-    error,
 
     reset,
   } = useDiaryExportMutation();
-
-  const [empty, setEmpty] = useState(false);
 
   const buildCsvLocalization = useCallback(
     (): DiaryCsvLocalization => ({
@@ -80,8 +80,6 @@ export const useDiaryTransferExport = () => {
   );
 
   const resetExport = useCallback((): void => {
-    setEmpty(false);
-
     reset();
   }, [reset]);
 
@@ -93,40 +91,50 @@ export const useDiaryTransferExport = () => {
 
       resetExport();
 
-      const exportResult =
-        format === 'csv'
-          ? await exportDiary({
-              format: 'csv',
-              userName,
+      try {
+        const exportResult =
+          format === 'csv'
+            ? await exportDiary({
+                format: 'csv',
 
-              scope,
+                userName,
+                scope,
 
-              localization: buildCsvLocalization(),
-            })
-          : await exportDiary({
-              format,
-              userName,
+                localization: buildCsvLocalization(),
+              })
+            : await exportDiary({
+                format,
+                userName,
+                scope,
+              });
 
-              scope,
-            });
+        if (exportResult === null) {
+          showNotification(
+            'error',
+            errorMapper(new Error('DIARY_EXPORT_EMPTY'), 'transfer')
+          );
+        }
 
-      if (exportResult === null) {
-        setEmpty(true);
+        return exportResult;
+      } catch (error) {
+        console.error('Failed to export diary', error);
+
+        showNotification(
+          'error',
+          errorMapper(new Error('DIARY_EXPORT_FAILED'), 'transfer')
+        );
+
+        return null;
       }
-
-      return exportResult;
     },
-    [buildCsvLocalization, exportDiary, resetExport, userName]
+    [buildCsvLocalization, exportDiary, resetExport, t, userName]
   );
 
   return {
     canExport: userName.length > 0,
 
     isExporting,
-
     result,
-    error,
-    empty,
 
     startExport,
     resetExport,

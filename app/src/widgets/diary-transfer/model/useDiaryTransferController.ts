@@ -1,16 +1,20 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import type {
   DiaryExportFormat,
   DiaryExportScope,
 } from '@features/export-diary';
 import {
-  type DiaryImportConflictDecision,
   type DiaryImportSource,
+  getDiaryImportPlanSummary,
   useDiaryImportSession,
 } from '@features/import-diary';
-import { useDiaryTransferState } from '@entities/diary';
+import { isDiaryTransferLocked, useDiaryTransferState } from '@entities/diary';
 
+import type {
+  ImportConfirmationSummary,
+  ImportConflictStrategySelection,
+} from './diaryImportFlow.types';
 import { useDiaryTransferExport } from './useDiaryTransferExport';
 import { useDiaryTransferNavigation } from './useDiaryTransferNavigation';
 
@@ -29,56 +33,104 @@ export const useDiaryTransferController = ({
   onClose,
 }: UseDiaryTransferControllerParams) => {
   const transferState = useDiaryTransferState();
-
   const exportFlow = useDiaryTransferExport();
-
   const importFlow = useDiaryImportSession();
 
   const navigation = useDiaryTransferNavigation({
     visible,
-
     transferPhase: transferState.phase,
-
     operationPending:
       exportFlow.isExporting ||
       importFlow.isPicking ||
       importFlow.isPreparing ||
       importFlow.isImporting,
-
     onClose,
   });
 
   useEffect(() => {
-    if (visible) {
+    if (visible || isDiaryTransferLocked()) {
       return;
     }
 
     exportFlow.resetExport();
     importFlow.cancelSession();
-  }, [exportFlow.resetExport, importFlow.cancelSession, visible]);
+  }, [
+    exportFlow.resetExport,
+    importFlow.cancelSession,
+    transferState.phase,
+    visible,
+  ]);
 
   useEffect(() => {
     if (
       navigation.currentRoute.name !== 'import.progress' ||
       importFlow.isImporting ||
       importFlow.result !== null ||
-      importFlow.error !== null ||
       importFlow.conflicts.plan === null ||
       !importFlow.hasActiveSession
     ) {
       return;
     }
 
-    void importFlow.executeImport();
+    void importFlow.executeImport().then((status) => {
+      if (status === 'failed') {
+        onClose();
+      }
+    });
   }, [
     importFlow.conflicts.plan,
-    importFlow.error,
     importFlow.executeImport,
     importFlow.hasActiveSession,
     importFlow.isImporting,
     importFlow.result,
     navigation.currentRoute.name,
+    onClose,
   ]);
+
+  const selectedImportConflictStrategy =
+    useMemo<ImportConflictStrategySelection | null>(() => {
+      if (
+        importFlow.preview === null ||
+        importFlow.preview.matchesCount === 0
+      ) {
+        return null;
+      }
+
+      if (importFlow.conflicts.mode === 'individual') {
+        return 'review';
+      }
+
+      return importFlow.conflicts.plan?.type === 'all'
+        ? importFlow.conflicts.plan.decision
+        : null;
+    }, [
+      importFlow.conflicts.mode,
+      importFlow.conflicts.plan,
+      importFlow.preview,
+    ]);
+
+  const importConfirmationSummary =
+    useMemo<ImportConfirmationSummary | null>(() => {
+      const preview = importFlow.preview;
+
+      const plan = importFlow.conflicts.plan;
+
+      if (preview === null || plan === null) {
+        return null;
+      }
+
+      return getDiaryImportPlanSummary({
+        preview,
+
+        conflictItems: importFlow.conflictItems,
+
+        plan,
+      });
+    }, [
+      importFlow.conflictItems,
+      importFlow.conflicts.plan,
+      importFlow.preview,
+    ]);
 
   const startExport = useCallback(
     async ({ format, scope }: StartDiaryTransferExportInput): Promise<void> => {
@@ -91,16 +143,21 @@ export const useDiaryTransferController = ({
         format,
       });
 
-      try {
-        await exportFlow.startExport({
-          format,
-          scope,
-        });
-      } catch {
-        return;
+      const exportResult = await exportFlow.startExport({
+        format,
+        scope,
+      });
+
+      if (exportResult === null) {
+        navigation.popTransferRoute();
       }
     },
-    [exportFlow.canExport, exportFlow.startExport, navigation.pushRoute]
+    [
+      exportFlow.canExport,
+      exportFlow.startExport,
+      navigation.popTransferRoute,
+      navigation.pushRoute,
+    ]
   );
 
   const openImportPreview = useCallback(
@@ -114,15 +171,12 @@ export const useDiaryTransferController = ({
         return;
       }
 
-      importFlow.clearError();
-
       navigation.pushRoute({
         name: 'import.preview',
         source,
       });
     },
     [
-      importFlow.clearError,
       importFlow.hasActiveSession,
       importFlow.isImporting,
       importFlow.isPicking,
@@ -134,11 +188,9 @@ export const useDiaryTransferController = ({
   const chooseImportFromDevice = useCallback(async (): Promise<void> => {
     const source = await importFlow.chooseFromDevice();
 
-    if (source === null) {
-      return;
+    if (source !== null) {
+      openImportPreview(source);
     }
-
-    openImportPreview(source);
   }, [importFlow.chooseFromDevice, openImportPreview]);
 
   const prepareImportPreview = useCallback(
@@ -146,69 +198,51 @@ export const useDiaryTransferController = ({
     [importFlow.prepareSource]
   );
 
+  const selectImportConflictStrategy = useCallback(
+    (strategy: ImportConflictStrategySelection): void => {
+      if (strategy === 'skip' || strategy === 'replace') {
+        importFlow.conflicts.resolveAll(strategy);
+
+        return;
+      }
+
+      importFlow.conflicts.startIndividualReview();
+    },
+    [
+      importFlow.conflicts.resolveAll,
+      importFlow.conflicts.startIndividualReview,
+    ]
+  );
+
   const continueImportFromPreview = useCallback((): void => {
     if (importFlow.preview === null || !importFlow.hasActiveSession) {
       return;
     }
 
-    if (importFlow.preview.matchesCount > 0) {
-      importFlow.conflicts.reset();
-
-      navigation.pushTransferRoute({
-        name: 'import.conflicts',
-      });
-
-      return;
-    }
-
-    navigation.pushTransferRoute({
-      name: 'import.progress',
-    });
-  }, [
-    importFlow.conflicts.reset,
-    importFlow.hasActiveSession,
-    importFlow.preview,
-    navigation.pushTransferRoute,
-  ]);
-
-  const resolveAllImportConflicts = useCallback(
-    (decision: DiaryImportConflictDecision): void => {
-      if (
-        importFlow.preview === null ||
-        importFlow.preview.matchesCount === 0 ||
-        !importFlow.hasActiveSession
-      ) {
-        return;
+    if (importFlow.conflicts.mode === 'individual') {
+      if (importFlow.conflicts.plan?.type === 'individual') {
+        navigation.pushTransferRoute({
+          name: 'import.confirmation',
+        });
+      } else {
+        navigation.pushTransferRoute({
+          name: 'import.review',
+        });
       }
 
-      importFlow.conflicts.resolveAll(decision);
-
-      navigation.pushTransferRoute({
-        name: 'import.progress',
-      });
-    },
-    [
-      importFlow.conflicts.resolveAll,
-      importFlow.hasActiveSession,
-      importFlow.preview,
-      navigation.pushTransferRoute,
-    ]
-  );
-
-  const openIndividualImportReview = useCallback((): void => {
-    if (importFlow.conflictItems.length === 0 || !importFlow.hasActiveSession) {
       return;
     }
 
-    importFlow.conflicts.startIndividualReview();
-
-    navigation.pushTransferRoute({
-      name: 'import.review',
-    });
+    if (importFlow.conflicts.plan !== null) {
+      navigation.pushTransferRoute({
+        name: 'import.confirmation',
+      });
+    }
   }, [
-    importFlow.conflictItems.length,
-    importFlow.conflicts.startIndividualReview,
+    importFlow.conflicts.mode,
+    importFlow.conflicts.plan,
     importFlow.hasActiveSession,
+    importFlow.preview,
     navigation.pushTransferRoute,
   ]);
 
@@ -218,11 +252,30 @@ export const useDiaryTransferController = ({
 
   const continueIndividualImport = useCallback((): void => {
     if (
-      importFlow.conflicts.plan === null ||
-      importFlow.conflicts.plan.type !== 'individual' ||
+      importFlow.conflicts.plan?.type !== 'individual' ||
       importFlow.conflicts.resolvedCount !== importFlow.conflictItems.length ||
       !importFlow.hasActiveSession
     ) {
+      return;
+    }
+
+    navigation.replaceTransferRoute({
+      name: 'import.confirmation',
+    });
+  }, [
+    importFlow.conflictItems.length,
+    importFlow.conflicts.plan,
+    importFlow.conflicts.resolvedCount,
+    importFlow.hasActiveSession,
+    navigation.replaceTransferRoute,
+  ]);
+
+  const cancelImportConfirmation = useCallback((): void => {
+    navigation.popTransferRoute();
+  }, [navigation.popTransferRoute]);
+
+  const startConfirmedImport = useCallback((): void => {
+    if (importConfirmationSummary === null || !importFlow.hasActiveSession) {
       return;
     }
 
@@ -230,31 +283,20 @@ export const useDiaryTransferController = ({
       name: 'import.progress',
     });
   }, [
-    importFlow.conflictItems.length,
-    importFlow.conflicts.plan,
-    importFlow.conflicts.resolvedCount,
+    importConfirmationSummary,
     importFlow.hasActiveSession,
     navigation.pushTransferRoute,
   ]);
 
-  const backFromImportConflicts = useCallback((): void => {
-    importFlow.conflicts.reset();
-
-    navigation.popTransferRoute();
-  }, [importFlow.conflicts.reset, navigation.popTransferRoute]);
-
   const cancelImportAndPop = useCallback((): void => {
     importFlow.cancelSession();
-
     navigation.popTransferRoute();
   }, [importFlow.cancelSession, navigation.popTransferRoute]);
 
   return {
     transferState,
-
     exportFlow,
     importFlow,
-
     navigation,
 
     startExport,
@@ -263,14 +305,16 @@ export const useDiaryTransferController = ({
     chooseImportFromDevice,
     prepareImportPreview,
 
+    selectedImportConflictStrategy,
+    selectImportConflictStrategy,
     continueImportFromPreview,
-    resolveAllImportConflicts,
 
-    openIndividualImportReview,
     backFromIndividualImportReview,
     continueIndividualImport,
 
-    backFromImportConflicts,
+    importConfirmationSummary,
+    cancelImportConfirmation,
+    startConfirmedImport,
 
     cancelImportAndPop,
   };

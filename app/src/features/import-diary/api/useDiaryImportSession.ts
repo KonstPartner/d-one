@@ -7,6 +7,8 @@ import {
   resetDiaryTransferState,
   useReadyDiaryDatabase,
 } from '@entities/diary';
+import { errorMapper } from '@shared/lib/errors';
+import { showNotification } from '@shared/lib/notifications';
 
 import type { DiaryImportConflictReviewItem } from '../model/diaryImportConflictReview';
 import { useDiaryImportConflicts } from '../model/useDiaryImportConflicts';
@@ -26,9 +28,6 @@ const ZIP_MIME_TYPES = [
   'application/x-zip',
 ] as const;
 
-const toError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error('Unknown diary import error');
-
 export const useDiaryImportSession = () => {
   const { userId, repository } = useReadyDiaryDatabase();
 
@@ -43,8 +42,6 @@ export const useDiaryImportSession = () => {
   );
 
   const [preview, setPreview] = useState<DiaryImportPreview | null>(null);
-
-  const [error, setError] = useState<Error | null>(null);
 
   const [conflictItems, setConflictItems] = useState<
     readonly DiaryImportConflictReviewItem[]
@@ -67,6 +64,8 @@ export const useDiaryImportSession = () => {
 
   const execution = useDiaryImportExecution({
     service: executionService,
+
+    userId,
 
     sessionRef,
     leaseRef,
@@ -101,12 +100,13 @@ export const useDiaryImportSession = () => {
       }
 
       setIsPicking(true);
-      setError(null);
 
       try {
         const result = await DocumentPicker.getDocumentAsync({
           type: [...ZIP_MIME_TYPES],
+
           multiple: false,
+
           copyToCacheDirectory: true,
         });
 
@@ -122,10 +122,16 @@ export const useDiaryImportSession = () => {
 
         return {
           fileUri: asset.uri,
+
           fileName: asset.name,
         };
-      } catch (nextError) {
-        setError(toError(nextError));
+      } catch (error) {
+        console.error('Failed to choose diary backup', error);
+
+        showNotification(
+          'error',
+          errorMapper(new Error('DIARY_IMPORT_PICKER_FAILED'), 'transfer')
+        );
 
         return null;
       } finally {
@@ -144,7 +150,6 @@ export const useDiaryImportSession = () => {
       }
 
       setIsPreparing(true);
-      setError(null);
       setPreview(null);
       setConflictItems([]);
       conflicts.reset();
@@ -166,6 +171,7 @@ export const useDiaryImportSession = () => {
           onArchiveValidated: (manifest) => {
             lease?.setTotals({
               totalEntries: manifest.entriesCount,
+
               totalPhotos: manifest.photosCount,
             });
           },
@@ -186,7 +192,9 @@ export const useDiaryImportSession = () => {
         lease.setPhase('resolvingConflicts');
 
         return session.preview;
-      } catch (nextError) {
+      } catch (error) {
+        console.error('Failed to prepare diary import', error);
+
         sessionRef.current?.cleanup();
         sessionRef.current = null;
 
@@ -196,7 +204,7 @@ export const useDiaryImportSession = () => {
           leaseRef.current = null;
         }
 
-        setError(toError(nextError));
+        showNotification('error', errorMapper(error, 'transfer'));
 
         return null;
       } finally {
@@ -210,27 +218,16 @@ export const useDiaryImportSession = () => {
     disposeActiveSession();
 
     setPreview(null);
-    setError(null);
     setConflictItems([]);
+
     conflicts.reset();
     execution.reset();
 
     resetDiaryTransferState();
   }, [conflicts.reset, disposeActiveSession, execution.reset]);
 
-  const clearError = useCallback((): void => {
-    setError(null);
-    execution.clearError();
-
-    if (leaseRef.current === null) {
-      resetDiaryTransferState();
-    }
-  }, [execution.clearError]);
-
   return {
     preview,
-
-    error: error ?? execution.error,
 
     result: execution.result,
 
@@ -251,6 +248,5 @@ export const useDiaryImportSession = () => {
     executeImport: execution.execute,
 
     cancelSession,
-    clearError,
   };
 };

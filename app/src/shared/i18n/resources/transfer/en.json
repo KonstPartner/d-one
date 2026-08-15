@@ -70,9 +70,6 @@
         "shareAgain": "Save / Share again",
         "done": "Done",
         "shareFailed": "Failed to open the system save or share interface.",
-        "failedTitle": "Export could not be completed",
-        "failedProgress": "Entries processed: {{current}} of {{total}}",
-        "noFileCreated": "No file was created.",
         "saved": "Saved"
       }
     },
@@ -95,7 +92,9 @@
         "photos": "Photos",
         "matches": "Matches",
         "noMatches": "No local entries with the same IDs were found.",
-        "matchesDescription": "{{count}} local entries have the same IDs and require a conflict decision."
+        "matchesDescription": "{{count}} local entries have the same IDs and require a conflict decision.",
+        "heading": "Import preview",
+        "description": "Review the validated archive before changing the local diary."
       },
       "errors": {
         "unsupportedPlatform": "Diary backup import is not available on this platform.",
@@ -109,7 +108,15 @@
         "entryInvalid": "The backup contains an invalid diary entry or photo.",
         "duplicateEntryId": "The backup contains duplicate diary entry IDs.",
         "entryCountMismatch": "The number of diary entries does not match the backup manifest.",
-        "unknown": "The backup could not be checked."
+        "unknown": "The backup could not be checked.",
+        "pickerFailed": "The backup file could not be selected.",
+        "snapshotChanged": "The local diary changed after the preview. Open the backup again and review the conflicts.",
+        "conflictPlanInvalid": "Conflict decisions are incomplete. Open the backup again and repeat the import.",
+        "fileRollbackFailed": "The import was stopped because local photo files could not be restored safely.",
+        "photoFailed": "A photo from the backup could not be restored. The current batch was not imported.",
+        "executionFailed": "The diary import could not be completed.",
+        "partialFailed": "Import stopped after {{current}} of {{total}} entries. Previously completed batches remain in the diary.",
+        "refreshFailed": "The import finished, but the diary could not be refreshed. Reopen the diary to load the latest local data."
       },
       "conflicts": {
         "title": "Resolve matches",
@@ -127,21 +134,21 @@
         "importing": "Importing diary entries",
         "entries": "Entries processed: {{current}} of {{total}}",
         "photos": "Photos processed: {{current}} of {{total}}",
-        "locked": "Diary changes and synchronization are temporarily locked."
+        "locked": "Changes, synchronization and sign-out are temporarily unavailable.",
+        "processed": "Processed",
+        "entriesValue": "{{current}} of {{total}}",
+        "chunkDescription": "Each chunk is committed in a separate SQLite transaction."
       },
       "result": {
         "title": "Import complete",
-        "description": "The selected backup has been imported into the local diary.",
-        "partialTitle": "Import partially completed",
-        "partialDescription": "A later batch could not be imported. Previously completed batches remain in the diary.",
-        "failedTitle": "Import could not be completed",
-        "failedDescription": "No completed import result is available.",
+        "description": "All validated chunks were processed.",
         "processed": "Processed",
         "processedValue": "{{current}} of {{total}} entries",
         "added": "Added",
         "replaced": "Replaced",
         "skipped": "Skipped",
-        "done": "Done"
+        "done": "Done",
+        "cloudWarning": "Entries were imported only to this device. Cloud data was not changed."
       },
       "review": {
         "title": "Review matches",
@@ -158,6 +165,16 @@
         "ready": "All matching entries have a decision.",
         "remaining": "{{count}} matching entries still need a decision.",
         "continueImport": "Continue to import"
+      },
+      "confirmation": {
+        "header": "Ready to import",
+        "title": "Import {{count}} entries?",
+        "description": "All conflict decisions are complete. The operation cannot be cancelled after it starts.",
+        "newEntries": "New entries",
+        "replace": "Replace",
+        "skip": "Skip",
+        "photos": "Photos",
+        "start": "Start import"
       }
     },
     "files": {

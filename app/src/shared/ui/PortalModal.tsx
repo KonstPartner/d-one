@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode, useCallback, useEffect } from 'react';
 import { BackHandler } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +21,11 @@ type PortalModalProps = {
   withoutPadding?: boolean;
 };
 
-const useAndroidBackToClose = (visible: boolean, onClose: () => void): void => {
+const useAndroidBackToClose = (
+  visible: boolean,
+  disabled: boolean,
+  onClose: () => void
+): void => {
   useEffect(() => {
     if (!PlatformOS.ANDROID || !visible) {
       return;
@@ -30,7 +34,9 @@ const useAndroidBackToClose = (visible: boolean, onClose: () => void): void => {
     const subscription = BackHandler.addEventListener(
       'hardwareBackPress',
       () => {
-        onClose();
+        if (!disabled) {
+          onClose();
+        }
 
         return true;
       }
@@ -39,7 +45,7 @@ const useAndroidBackToClose = (visible: boolean, onClose: () => void): void => {
     return () => {
       subscription.remove();
     };
-  }, [visible, onClose]);
+  }, [disabled, onClose, visible]);
 };
 
 export const PortalModal = ({
@@ -52,9 +58,18 @@ export const PortalModal = ({
   withoutPadding = false,
 }: PortalModalProps) => {
   const theme = useTheme();
+
   const { t } = useTranslation();
 
-  useAndroidBackToClose(visible, onClose);
+  const handleClose = useCallback((): void => {
+    if (isDisabled) {
+      return;
+    }
+
+    onClose();
+  }, [isDisabled, onClose]);
+
+  useAndroidBackToClose(visible, isDisabled, handleClose);
 
   if (!visible) {
     return null;
@@ -62,7 +77,7 @@ export const PortalModal = ({
 
   return (
     <Portal>
-      <s.Backdrop onPress={onClose} />
+      <s.Backdrop onPress={handleClose} />
 
       <s.Container>
         <s.SafeArea edges={['top', 'bottom']}>
@@ -84,8 +99,8 @@ export const PortalModal = ({
               {!withoutCloseBtn && (
                 <s.CloseButton
                   style={s.getCloseButtonStyle(theme, withoutPadding)}
-                  loading={isDisabled}
-                  onPress={onClose}
+                  disabled={isDisabled}
+                  onPress={handleClose}
                 >
                   <s.CloseButtonText>{t('common.close')}</s.CloseButtonText>
                 </s.CloseButton>

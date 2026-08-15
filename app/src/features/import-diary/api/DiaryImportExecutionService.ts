@@ -1,9 +1,15 @@
-import type { DiaryBackupEntry, DiaryLocalRepository } from '@entities/diary';
+import type {
+  DiaryBackupEntry,
+  DiaryEntry,
+  DiaryLocalRepository,
+} from '@entities/diary';
 import {
+  DIARY_BACKUP_CHUNK_SIZE,
   prepareDiaryPhotoForEntry,
   prepareDiaryPhotoRemoval,
 } from '@entities/diary';
 
+import { DiaryImportExecutionError } from '../model/diaryImportExecutionError';
 import type { DiaryImportConflictPlan } from '../model/useDiaryImportConflicts';
 import { getDiaryImportConflictPlanDecision } from '../model/useDiaryImportConflicts';
 
@@ -93,6 +99,25 @@ const toError = (error: unknown): Error =>
     ? error
     : new Error('Unknown diary import execution error');
 
+const areDiaryEntrySnapshotsEqual = (
+  current: DiaryEntry,
+  expected: DiaryEntry
+): boolean =>
+  current.id === expected.id &&
+  current.userId === expected.userId &&
+  current.glucose === expected.glucose &&
+  current.mealRelation === expected.mealRelation &&
+  current.shortInsulin === expected.shortInsulin &&
+  current.longInsulin === expected.longInsulin &&
+  current.carbsGram === expected.carbsGram &&
+  current.comment === expected.comment &&
+  current.aiAnalysis === expected.aiAnalysis &&
+  current.localPhotoUri === expected.localPhotoUri &&
+  current.photoPath === expected.photoPath &&
+  current.photoUrl === expected.photoUrl &&
+  current.eventAt.getTime() === expected.eventAt.getTime() &&
+  current.syncStatus === expected.syncStatus;
+
 const getEntryEventAt = (entry: DiaryBackupEntry): Date => {
   const eventAt = new Date(entry.eventAt);
 
@@ -105,13 +130,32 @@ const getEntryEventAt = (entry: DiaryBackupEntry): Date => {
 
 const rollbackFileOperations = (
   operations: readonly PreparedFileOperation[]
-): void => {
+): Error | null => {
+  let firstRollbackError: Error | null = null;
+
   for (let index = operations.length - 1; index >= 0; index -= 1) {
     try {
       operations[index]?.rollback();
-    } catch {
-      continue;
+    } catch (error) {
+      if (firstRollbackError === null) {
+        firstRollbackError =
+          error instanceof Error
+            ? error
+            : new Error('Unknown diary import file rollback error');
+      }
     }
+  }
+
+  return firstRollbackError;
+};
+
+const rollbackFileOperationsOrThrow = (
+  operations: readonly PreparedFileOperation[]
+): void => {
+  const rollbackError = rollbackFileOperations(operations);
+
+  if (rollbackError !== null) {
+    throw new DiaryImportExecutionError('fileRollbackFailed');
   }
 };
 
@@ -127,17 +171,55 @@ const finalizeFileOperations = (
   }
 };
 
-const countBackupPhotos = (entries: readonly DiaryBackupEntry[]): number =>
-  entries.reduce(
-    (count, entry) => (entry.photoFileName === null ? count : count + 1),
-    0
-  );
-
 export class DiaryImportExecutionService {
   public constructor(
     private readonly repository: DiaryLocalRepository,
     private readonly userId: string
   ) {}
+
+  private async validateLocalSnapshot(
+    session: DiaryPreparedImportSession
+  ): Promise<void> {
+    const expectedConflicts = new Map(
+      session.conflictItems.map((item) => [item.entryId, item.localEntry])
+    );
+
+    const entryIds = session.archive.entryIds;
+
+    for (
+      let offset = 0;
+      offset < entryIds.length;
+      offset += DIARY_BACKUP_CHUNK_SIZE
+    ) {
+      const batchIds = entryIds.slice(offset, offset + DIARY_BACKUP_CHUNK_SIZE);
+
+      const currentEntries = await this.repository.findByIds(batchIds);
+
+      const currentById = new Map(
+        currentEntries.map((entry) => [entry.id, entry])
+      );
+
+      for (const entryId of batchIds) {
+        const expected = expectedConflicts.get(entryId);
+        const current = currentById.get(entryId);
+
+        if (expected === undefined) {
+          if (current !== undefined) {
+            throw new DiaryImportExecutionError('snapshotChanged');
+          }
+
+          continue;
+        }
+
+        if (
+          current === undefined ||
+          !areDiaryEntrySnapshotsEqual(current, expected)
+        ) {
+          throw new DiaryImportExecutionError('snapshotChanged');
+        }
+      }
+    }
+  }
 
   private prepareAppliedEntry({
     session,
@@ -219,6 +301,7 @@ export class DiaryImportExecutionService {
     let addedEntries = 0;
     let replacedEntries = 0;
     let skippedEntries = 0;
+    let processedPhotos = 0;
 
     try {
       for (const entry of entries) {
@@ -229,7 +312,7 @@ export class DiaryImportExecutionService {
           });
 
           if (decision === null) {
-            throw new Error(`Unresolved diary import conflict: ${entry.id}`);
+            throw new DiaryImportExecutionError('conflictPlanInvalid');
           }
 
           if (decision === 'skip') {
@@ -247,6 +330,11 @@ export class DiaryImportExecutionService {
           );
 
           replacedEntries += 1;
+
+          if (entry.photoFileName !== null) {
+            processedPhotos += 1;
+          }
+
           continue;
         }
 
@@ -260,6 +348,10 @@ export class DiaryImportExecutionService {
         );
 
         addedEntries += 1;
+
+        if (entry.photoFileName !== null) {
+          processedPhotos += 1;
+        }
       }
 
       return {
@@ -270,10 +362,11 @@ export class DiaryImportExecutionService {
         replacedEntries,
         skippedEntries,
 
-        processedPhotos: countBackupPhotos(entries),
+        processedPhotos,
       };
     } catch (error) {
-      rollbackFileOperations(fileOperations);
+      rollbackFileOperationsOrThrow(fileOperations);
+
       throw error;
     }
   }
@@ -301,9 +394,7 @@ export class DiaryImportExecutionService {
         return {
           status: 'failed',
           result,
-          error: new Error(
-            `Diary import conflict plan is incomplete: ${entryId}`
-          ),
+          error: new DiaryImportExecutionError('conflictPlanInvalid'),
         };
       }
     }
@@ -311,6 +402,8 @@ export class DiaryImportExecutionService {
     let processedPhotos = 0;
 
     try {
+      await this.validateLocalSnapshot(session);
+
       for (const relativeChunkPath of session.archive.manifest.chunks) {
         const entries = await readDiaryImportChunkEntries({
           archive: session.archive,
@@ -331,7 +424,8 @@ export class DiaryImportExecutionService {
             );
           }
         } catch (error) {
-          rollbackFileOperations(prepared.fileOperations);
+          rollbackFileOperationsOrThrow(prepared.fileOperations);
+
           throw error;
         }
 

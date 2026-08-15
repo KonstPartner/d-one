@@ -1,7 +1,12 @@
 import { type MutableRefObject, useCallback, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
-import type { DiaryTransferLease } from '@entities/diary';
+import { diaryLocalQueryKeys, type DiaryTransferLease } from '@entities/diary';
+import { errorMapper } from '@shared/lib/errors';
+import { showNotification } from '@shared/lib/notifications';
 
+import { isDiaryImportExecutionError } from '../model/diaryImportExecutionError';
+import { getDiaryImportPlanSummary } from '../model/diaryImportPlanSummary';
 import type { DiaryImportConflictPlan } from '../model/useDiaryImportConflicts';
 
 import {
@@ -13,6 +18,8 @@ import type { DiaryPreparedImportSession } from './DiaryImportPreparationService
 type UseDiaryImportExecutionParams = {
   service: DiaryImportExecutionService;
 
+  userId: string;
+
   sessionRef: MutableRefObject<DiaryPreparedImportSession | null>;
 
   leaseRef: MutableRefObject<DiaryTransferLease | null>;
@@ -20,30 +27,53 @@ type UseDiaryImportExecutionParams = {
   conflictPlan: DiaryImportConflictPlan | null;
 };
 
+export type DiaryImportExecutionRunStatus = 'completed' | 'failed';
+
+const hasLocalDiaryChanges = (result: DiaryImportExecutionResult): boolean =>
+  result.addedEntries > 0 || result.replacedEntries > 0;
+
 export const useDiaryImportExecution = ({
   service,
+  userId,
   sessionRef,
   leaseRef,
   conflictPlan,
 }: UseDiaryImportExecutionParams) => {
-  const [result, setResult] = useState<DiaryImportExecutionResult | null>(null);
+  const queryClient = useQueryClient();
 
-  const [error, setError] = useState<Error | null>(null);
+  const [result, setResult] = useState<DiaryImportExecutionResult | null>(null);
 
   const [isImporting, setIsImporting] = useState(false);
 
   const reset = useCallback((): void => {
     setResult(null);
-    setError(null);
     setIsImporting(false);
   }, []);
 
-  const clearError = useCallback((): void => {
-    setError(null);
-  }, []);
+  const refreshLocalDiary = useCallback(
+    async (importResult: DiaryImportExecutionResult): Promise<void> => {
+      if (!hasLocalDiaryChanges(importResult)) {
+        return;
+      }
+
+      try {
+        await queryClient.invalidateQueries({
+          queryKey: diaryLocalQueryKeys.root(userId),
+        });
+      } catch (error) {
+        console.error('Failed to refresh local diary after import', error);
+
+        showNotification(
+          'error',
+          errorMapper(new Error('DIARY_IMPORT_REFRESH_FAILED'), 'transfer')
+        );
+      }
+    },
+    [queryClient, userId]
+  );
 
   const execute =
-    useCallback(async (): Promise<DiaryImportExecutionResult | null> => {
+    useCallback(async (): Promise<DiaryImportExecutionRunStatus | null> => {
       if (
         isImporting ||
         sessionRef.current === null ||
@@ -54,62 +84,110 @@ export const useDiaryImportExecution = ({
       }
 
       const session = sessionRef.current;
+
       const lease = leaseRef.current;
 
       setIsImporting(true);
       setResult(null);
-      setError(null);
 
-      lease.setPhase('processing');
+      try {
+        const summary = getDiaryImportPlanSummary({
+          preview: session.preview,
 
-      lease.updateProgress({
-        processedEntries: 0,
-        processedPhotos: 0,
-      });
+          conflictItems: session.conflictItems,
 
-      const outcome = await service.execute({
-        session,
-        conflictPlan,
-        onProgress: ({ processedEntries, processedPhotos }) => {
-          lease.updateProgress({
-            processedEntries,
-            processedPhotos,
-          });
-        },
-      });
+          plan: conflictPlan,
+        });
 
-      session.cleanup();
+        lease.setTotals({
+          totalEntries: summary.entriesCount,
 
-      if (sessionRef.current === session) {
-        sessionRef.current = null;
-      }
+          totalPhotos: summary.photosCount,
+        });
 
-      setResult(outcome.result);
+        lease.setPhase('processing');
 
-      if (outcome.status === 'completed') {
-        lease.complete();
-      } else {
-        setError(outcome.error);
+        lease.updateProgress({
+          processedEntries: 0,
+          processedPhotos: 0,
+        });
+
+        const outcome = await service.execute({
+          session,
+          conflictPlan,
+
+          onProgress: ({ processedEntries, processedPhotos }) => {
+            lease.updateProgress({
+              processedEntries,
+              processedPhotos,
+            });
+          },
+        });
+
+        await refreshLocalDiary(outcome.result);
+
+        if (outcome.status === 'completed') {
+          setResult(outcome.result);
+
+          lease.complete();
+
+          return 'completed';
+        }
+
+        console.error('Failed to import diary backup', outcome.error);
+
+        const rollbackFailed =
+          isDiaryImportExecutionError(outcome.error) &&
+          outcome.error.code === 'fileRollbackFailed';
+
+        showNotification(
+          'error',
+          errorMapper(
+            outcome.result.processedEntries > 0 && !rollbackFailed
+              ? new Error('DIARY_IMPORT_PARTIAL_FAILED')
+              : outcome.error,
+            'transfer'
+          )
+        );
+
         lease.fail();
+
+        return 'failed';
+      } catch (error) {
+        console.error('Failed to execute diary import', error);
+
+        showNotification('error', errorMapper(error, 'transfer'));
+
+        lease.fail();
+
+        return 'failed';
+      } finally {
+        session.cleanup();
+
+        if (sessionRef.current === session) {
+          sessionRef.current = null;
+        }
+
+        if (leaseRef.current === lease) {
+          leaseRef.current = null;
+        }
+
+        setIsImporting(false);
       }
-
-      if (leaseRef.current === lease) {
-        leaseRef.current = null;
-      }
-
-      setIsImporting(false);
-
-      return outcome.result;
-    }, [conflictPlan, isImporting, leaseRef, service, sessionRef]);
+    }, [
+      conflictPlan,
+      isImporting,
+      leaseRef,
+      refreshLocalDiary,
+      service,
+      sessionRef,
+    ]);
 
   return {
     result,
-    error,
     isImporting,
 
     execute,
-
-    clearError,
     reset,
   };
 };

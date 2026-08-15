@@ -3,6 +3,8 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
+import { errorMapper } from '@shared/lib/errors';
+import { showNotification } from '@shared/lib/notifications';
 import { Button } from '@shared/ui';
 
 import {
@@ -14,7 +16,6 @@ import * as s from '../styles/ExportFileActionsScreen';
 
 type ExportFileActionsProps = {
   file: DiaryExportFileTarget;
-
   onBusyChange?: (busy: boolean) => void;
 };
 
@@ -23,17 +24,12 @@ export const ExportFileActions = ({
   onBusyChange,
 }: ExportFileActionsProps) => {
   const theme = useTheme();
-
   const { t } = useTranslation();
 
   const [fileAction, setFileAction] = useState<'save' | 'share' | null>(null);
-
-  const [fileActionError, setFileActionError] = useState(false);
-
   const [saveSucceeded, setSaveSucceeded] = useState(false);
 
   const fileActionInProgressRef = useRef(false);
-
   const saveFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
@@ -44,7 +40,6 @@ export const ExportFileActions = ({
     }
 
     clearTimeout(saveFeedbackTimerRef.current);
-
     saveFeedbackTimerRef.current = null;
   }, []);
 
@@ -59,17 +54,32 @@ export const ExportFileActions = ({
     onBusyChange?.(fileAction !== null);
   }, [fileAction, onBusyChange]);
 
+  const notifyFileActionError = useCallback(
+    (operation: 'save' | 'share'): void => {
+      showNotification(
+        'error',
+        errorMapper(
+          new Error(
+            operation === 'save'
+              ? 'DIARY_EXPORT_SAVE_FAILED'
+              : 'DIARY_EXPORT_SHARE_FAILED'
+          ),
+          'transfer'
+        )
+      );
+    },
+    []
+  );
+
   const saveFile = useCallback(async (): Promise<void> => {
     if (fileActionInProgressRef.current) {
       return;
     }
 
     fileActionInProgressRef.current = true;
-
     clearSaveFeedbackTimer();
     setSaveSucceeded(false);
     setFileAction('save');
-    setFileActionError(false);
 
     try {
       const saved = await saveDiaryExportFile(file);
@@ -79,20 +89,17 @@ export const ExportFileActions = ({
 
         saveFeedbackTimerRef.current = setTimeout(() => {
           saveFeedbackTimerRef.current = null;
-
           setSaveSucceeded(false);
         }, 2000);
       }
     } catch (error) {
       console.error('Failed to save diary export file', error);
-
-      setFileActionError(true);
+      notifyFileActionError('save');
     } finally {
       fileActionInProgressRef.current = false;
-
       setFileAction(null);
     }
-  }, [clearSaveFeedbackTimer, file]);
+  }, [clearSaveFeedbackTimer, file, notifyFileActionError]);
 
   const shareFile = useCallback(async (): Promise<void> => {
     if (fileActionInProgressRef.current) {
@@ -100,79 +107,63 @@ export const ExportFileActions = ({
     }
 
     fileActionInProgressRef.current = true;
-
     setFileAction('share');
-    setFileActionError(false);
 
     try {
       await shareDiaryExportFile(file);
     } catch (error) {
       console.error('Failed to share diary export file', error);
-
-      setFileActionError(true);
+      notifyFileActionError('share');
     } finally {
       fileActionInProgressRef.current = false;
-
       setFileAction(null);
     }
-  }, [file]);
+  }, [file, notifyFileActionError]);
 
   return (
-    <>
-      {fileActionError && (
-        <s.ErrorText>{t('common.errors.unknown')}</s.ErrorText>
-      )}
+    <s.FileActions>
+      <Button
+        tone="input"
+        spinnerColor="primary"
+        loading={fileAction === 'save'}
+        disabled={fileAction !== null || saveSucceeded}
+        style={s.fileActionButtonStyle}
+        onPress={() => {
+          void saveFile();
+        }}
+      >
+        <s.FileActionContent>
+          <Ionicons
+            name={saveSucceeded ? 'checkmark' : 'download-outline'}
+            size={20}
+            color={saveSucceeded ? theme.colors.success : theme.colors.text}
+          />
 
-      <s.FileActions>
-        <Button
-          tone="input"
-          spinnerColor="primary"
-          loading={fileAction === 'save'}
-          disabled={fileAction !== null || saveSucceeded}
-          style={s.fileActionButtonStyle}
-          onPress={() => {
-            void saveFile();
-          }}
-        >
-          <s.FileActionContent>
-            <Ionicons
-              name={saveSucceeded ? 'checkmark' : 'download-outline'}
-              size={20}
-              color={saveSucceeded ? theme.colors.success : theme.colors.text}
-            />
+          <s.FileActionText>
+            {t(
+              saveSucceeded ? 'transfer.export.result.saved' : 'diary.form.save'
+            )}
+          </s.FileActionText>
+        </s.FileActionContent>
+      </Button>
 
-            <s.FileActionText>
-              {t(
-                saveSucceeded
-                  ? 'transfer.export.result.saved'
-                  : 'diary.form.save'
-              )}
-            </s.FileActionText>
-          </s.FileActionContent>
-        </Button>
+      <Button
+        tone="input"
+        spinnerColor="primary"
+        loading={fileAction === 'share'}
+        disabled={fileAction !== null}
+        style={s.fileActionButtonStyle}
+        onPress={() => {
+          void shareFile();
+        }}
+      >
+        <s.FileActionContent>
+          <Ionicons name="share-outline" size={20} color={theme.colors.text} />
 
-        <Button
-          tone="input"
-          spinnerColor="primary"
-          loading={fileAction === 'share'}
-          disabled={fileAction !== null}
-          style={s.fileActionButtonStyle}
-          onPress={() => {
-            void shareFile();
-          }}
-        >
-          <s.FileActionContent>
-            <Ionicons
-              name="share-outline"
-              size={20}
-              color={theme.colors.text}
-            />
-
-            <s.FileActionText>{t('common.send')}</s.FileActionText>
-          </s.FileActionContent>
-        </Button>
-      </s.FileActions>
-    </>
+          <s.FileActionText>{t('common.send')}</s.FileActionText>
+        </s.FileActionContent>
+      </Button>
+    </s.FileActions>
   );
 };
 
@@ -204,15 +195,12 @@ const formatFileSize = (bytes: number): string => {
 
 export const ExportFileActionsScreen = ({
   file,
-
   entriesCount,
   photosCount,
   skippedPhotosCount,
-
   onBack,
 }: ExportFileActionsScreenProps) => {
   const theme = useTheme();
-
   const { t } = useTranslation();
 
   const [actionsBusy, setActionsBusy] = useState(false);
@@ -240,7 +228,6 @@ export const ExportFileActionsScreen = ({
           {entriesCount !== undefined && (
             <s.StatCard>
               <s.StatValue>{entriesCount}</s.StatValue>
-
               <s.StatLabel>{t('transfer.export.result.entries')}</s.StatLabel>
             </s.StatCard>
           )}
@@ -248,7 +235,6 @@ export const ExportFileActionsScreen = ({
           {photosCount !== undefined && (
             <s.StatCard>
               <s.StatValue>{photosCount}</s.StatValue>
-
               <s.StatLabel>{t('transfer.export.result.photos')}</s.StatLabel>
             </s.StatCard>
           )}
@@ -256,7 +242,6 @@ export const ExportFileActionsScreen = ({
           {skippedPhotosCount !== undefined && skippedPhotosCount > 0 && (
             <s.StatCard>
               <s.StatValue>{skippedPhotosCount}</s.StatValue>
-
               <s.StatLabel>
                 {t('transfer.export.result.photosNotAdded')}
               </s.StatLabel>
@@ -265,7 +250,6 @@ export const ExportFileActionsScreen = ({
 
           <s.StatCard>
             <s.StatValue>{formatFileSize(file.fileSize)}</s.StatValue>
-
             <s.StatLabel>{t('transfer.export.result.fileSize')}</s.StatLabel>
           </s.StatCard>
         </s.StatsGrid>

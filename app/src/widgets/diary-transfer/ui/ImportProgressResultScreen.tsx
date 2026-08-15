@@ -1,19 +1,18 @@
+import { useTheme } from '@emotion/react';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import type { DiaryImportExecutionResult } from '@features/import-diary';
 import type { DiaryTransferState } from '@entities/diary';
-import { Button, LoadingView } from '@shared/ui';
+import { Button } from '@shared/ui';
 
+import * as f from '../styles/DiaryImportStatus';
 import * as s from '../styles/DiaryTransferModal';
-
-import { TransferStepHeader } from './TransferStepPrimitives';
 
 type ImportProgressResultScreenProps = {
   transferState: DiaryTransferState;
 
   result: DiaryImportExecutionResult | null;
-
-  error: Error | null;
 
   onDone: () => void;
 };
@@ -22,178 +21,158 @@ type ImportResultSummaryProps = {
   result: DiaryImportExecutionResult;
 };
 
+const getProgress = (current: number, total: number): number => {
+  if (total <= 0) {
+    return 0;
+  }
+
+  return Math.min(100, Math.max(0, (current / total) * 100));
+};
+
 const ImportResultSummary = ({ result }: ImportResultSummaryProps) => {
   const { t } = useTranslation();
 
   return (
-    <s.Options>
-      <s.OptionContent>
-        <s.OptionDescription>
-          {t('transfer.import.result.processed')}
-        </s.OptionDescription>
+    <f.ResultGrid>
+      <f.ResultStat>
+        <f.ResultStatValue>{result.addedEntries}</f.ResultStatValue>
 
-        <s.OptionTitle>
-          {t('transfer.import.result.processedValue', {
-            current: result.processedEntries,
-            total: result.totalEntries,
-          })}
-        </s.OptionTitle>
-      </s.OptionContent>
-
-      <s.OptionContent>
-        <s.OptionDescription>
+        <f.ResultStatLabel>
           {t('transfer.import.result.added')}
-        </s.OptionDescription>
+        </f.ResultStatLabel>
+      </f.ResultStat>
 
-        <s.OptionTitle>{result.addedEntries}</s.OptionTitle>
-      </s.OptionContent>
+      <f.ResultStat>
+        <f.ResultStatValue>{result.replacedEntries}</f.ResultStatValue>
 
-      <s.OptionContent>
-        <s.OptionDescription>
+        <f.ResultStatLabel>
           {t('transfer.import.result.replaced')}
-        </s.OptionDescription>
+        </f.ResultStatLabel>
+      </f.ResultStat>
 
-        <s.OptionTitle>{result.replacedEntries}</s.OptionTitle>
-      </s.OptionContent>
+      <f.ResultStat>
+        <f.ResultStatValue>{result.skippedEntries}</f.ResultStatValue>
 
-      <s.OptionContent>
-        <s.OptionDescription>
+        <f.ResultStatLabel>
           {t('transfer.import.result.skipped')}
-        </s.OptionDescription>
+        </f.ResultStatLabel>
+      </f.ResultStat>
 
-        <s.OptionTitle>{result.skippedEntries}</s.OptionTitle>
-      </s.OptionContent>
-    </s.Options>
+      <f.ResultStat>
+        <f.ResultStatValue>{result.processedEntries}</f.ResultStatValue>
+
+        <f.ResultStatLabel>
+          {t('transfer.import.result.processed')}
+        </f.ResultStatLabel>
+      </f.ResultStat>
+    </f.ResultGrid>
   );
 };
 
 export const ImportProgressResultScreen = ({
   transferState,
-
   result,
-  error,
-
   onDone,
 }: ImportProgressResultScreenProps) => {
   const { t } = useTranslation();
 
-  const processing =
-    (transferState.phase === 'resolvingConflicts' ||
-      transferState.phase === 'processing') &&
-    result === null &&
-    error === null;
+  const theme = useTheme();
 
-  if (processing) {
+  if (result === null) {
+    if (
+      transferState.phase !== 'resolvingConflicts' &&
+      transferState.phase !== 'processing'
+    ) {
+      return null;
+    }
+
+    const progress = getProgress(
+      transferState.processedEntries,
+      transferState.totalEntries
+    );
+
     return (
       <s.Screen>
-        <TransferStepHeader
-          title={t('transfer.import.progress.title')}
-          disabled
-        />
+        <f.ProgressCard>
+          <f.ProgressIcon>
+            <Ionicons
+              name="cloud-upload-outline"
+              size={34}
+              color={theme.colors.primary}
+            />
+          </f.ProgressIcon>
 
-        <s.Options>
-          <LoadingView />
+          <f.ProgressTitle>
+            {t('transfer.import.progress.importing')}
+          </f.ProgressTitle>
 
-          <s.OptionContent>
-            <s.OptionTitle>
-              {t('transfer.import.progress.importing')}
-            </s.OptionTitle>
+          <f.ProgressDescription>
+            {t('transfer.import.progress.chunkDescription')}
+          </f.ProgressDescription>
 
-            <s.OptionDescription>
-              {t('transfer.import.progress.entries', {
-                current: transferState.processedEntries,
-                total: transferState.totalEntries,
-              })}
-            </s.OptionDescription>
+          <f.ProgressBlock>
+            <f.ProgressHead>
+              <f.ProgressText>
+                {t('transfer.import.progress.processed')}
+              </f.ProgressText>
 
-            {transferState.totalPhotos > 0 && (
-              <s.OptionDescription>
-                {t('transfer.import.progress.photos', {
-                  current: transferState.processedPhotos,
-                  total: transferState.totalPhotos,
+              <f.ProgressText>
+                {t('transfer.import.progress.entriesValue', {
+                  current: transferState.processedEntries,
+
+                  total: transferState.totalEntries,
                 })}
-              </s.OptionDescription>
-            )}
+              </f.ProgressText>
+            </f.ProgressHead>
 
-            <s.OptionDescription>
-              {t('transfer.import.progress.locked')}
-            </s.OptionDescription>
-          </s.OptionContent>
-        </s.Options>
-      </s.Screen>
-    );
-  }
+            <f.ProgressTrack>
+              <f.ProgressFill $progress={progress} />
+            </f.ProgressTrack>
+          </f.ProgressBlock>
 
-  if (error !== null && result !== null && result.processedEntries > 0) {
-    return (
-      <s.Screen>
-        <TransferStepHeader
-          title={t('transfer.import.result.partialTitle')}
-          disabled={false}
-        />
+          <f.LockNote>
+            <Ionicons
+              name="lock-closed-outline"
+              size={18}
+              color={theme.colors.muted}
+            />
 
-        <s.OptionContent>
-          <s.OptionTitle>
-            {t('transfer.import.result.partialTitle')}
-          </s.OptionTitle>
-
-          <s.OptionDescription>
-            {t('transfer.import.result.partialDescription')}
-          </s.OptionDescription>
-        </s.OptionContent>
-
-        <ImportResultSummary result={result} />
-
-        <Button tone="primary" onPress={onDone}>
-          {t('transfer.import.result.done')}
-        </Button>
-      </s.Screen>
-    );
-  }
-
-  if (result !== null) {
-    return (
-      <s.Screen>
-        <TransferStepHeader
-          title={t('transfer.import.result.title')}
-          disabled={false}
-        />
-
-        <s.OptionContent>
-          <s.OptionTitle>{t('transfer.import.result.title')}</s.OptionTitle>
-
-          <s.OptionDescription>
-            {t('transfer.import.result.description')}
-          </s.OptionDescription>
-        </s.OptionContent>
-
-        <ImportResultSummary result={result} />
-
-        <Button tone="primary" onPress={onDone}>
-          {t('transfer.import.result.done')}
-        </Button>
+            <f.LockText>{t('transfer.import.progress.locked')}</f.LockText>
+          </f.LockNote>
+        </f.ProgressCard>
       </s.Screen>
     );
   }
 
   return (
     <s.Screen>
-      <TransferStepHeader
-        title={t('transfer.import.result.failedTitle')}
-        disabled={false}
-      />
+      <f.Scroll showsVerticalScrollIndicator={false}>
+        <f.Content>
+          <f.ResultHero>
+            <f.ResultIcon $tone="success">
+              <Ionicons name="checkmark" size={36} color={theme.colors.white} />
+            </f.ResultIcon>
 
-      <s.OptionContent>
-        <s.OptionTitle>{t('transfer.import.result.failedTitle')}</s.OptionTitle>
+            <f.ResultTitle>{t('transfer.import.result.title')}</f.ResultTitle>
 
-        <s.OptionDescription>
-          {t('transfer.import.result.failedDescription')}
-        </s.OptionDescription>
-      </s.OptionContent>
+            <f.ResultDescription>
+              {t('transfer.import.result.description')}
+            </f.ResultDescription>
+          </f.ResultHero>
 
-      <Button tone="primary" onPress={onDone}>
-        {t('transfer.import.result.done')}
-      </Button>
+          <ImportResultSummary result={result} />
+
+          <f.CloudWarning>
+            <f.CloudWarningText>
+              {t('transfer.import.result.cloudWarning')}
+            </f.CloudWarningText>
+          </f.CloudWarning>
+
+          <Button tone="primary" onPress={onDone}>
+            {t('transfer.import.result.done')}
+          </Button>
+        </f.Content>
+      </f.Scroll>
     </s.Screen>
   );
 };
