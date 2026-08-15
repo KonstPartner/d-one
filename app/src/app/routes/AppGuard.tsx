@@ -3,6 +3,7 @@ import styled from '@emotion/native';
 import { useIsMutating, useQuery } from '@tanstack/react-query';
 import { type Href, router, usePathname } from 'expo-router';
 
+import { useDiaryTransferState } from '@entities/diary';
 import { sessionMutationKeys, useSession } from '@entities/session';
 import { userProfileQueryOptions } from '@entities/user';
 import { isSamePath } from '@shared/routes';
@@ -14,10 +15,22 @@ type AppGuardProps = {
   children: ReactNode;
 };
 
+const isDiaryTransferRouteLocked = (
+  phase: ReturnType<typeof useDiaryTransferState>['phase']
+): boolean =>
+  phase === 'waitingForSync' ||
+  phase === 'validating' ||
+  phase === 'resolvingConflicts' ||
+  phase === 'processing';
+
 export const AppGuard = ({ children }: AppGuardProps) => {
   const pathname = usePathname();
 
   const { sessionUser, emailVerified, isSessionReady } = useSession();
+
+  const transfer = useDiaryTransferState();
+
+  const transferLocked = isDiaryTransferRouteLocked(transfer.phase);
 
   const [isRedirecting, setIsRedirecting] = useState(false);
 
@@ -60,7 +73,9 @@ export const AppGuard = ({ children }: AppGuardProps) => {
     : null;
 
   const isRedirectRequired =
-    redirectPath !== null && !isSamePath(redirectPath, pathname);
+    !transferLocked &&
+    redirectPath !== null &&
+    !isSamePath(redirectPath, pathname);
 
   useEffect(() => {
     if (!isRedirectRequired) {

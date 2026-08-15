@@ -59,6 +59,15 @@ export {
   isDiaryEntrySearchField,
   isDiaryEntryTextSearchField,
 } from './api/local/diaryRepository.types';
+export type {
+  DiaryStoredExportFile,
+  DiaryStoredExportFileKind,
+} from './api/local/diaryStoredExportFileStorage';
+export {
+  createDiaryStoredExportTargetUri,
+  deleteDiaryStoredExportFiles,
+  listDiaryStoredExportFiles,
+} from './api/local/diaryStoredExportFileStorage';
 export type { DiaryListEntry, DiaryListItem } from './lib/buildDiaryListItems';
 export {
   buildDiaryListItems,
@@ -76,6 +85,7 @@ export {
   CLOUD_DIARY_PAGE_SIZE,
   CLOUD_DIARY_QUERY_LIMIT,
 } from './model/cloudDiaryPage';
+export * from './model/diaryBackup';
 export type { DiaryDay, DiaryDayEntry, DiaryDayKey } from './model/diaryDay';
 export type { DiaryEntry, DiarySyncStatus } from './model/diaryEntry';
 export { DIARY_SYNC_STATUSES, isDiarySyncStatus } from './model/diaryEntry';
@@ -104,12 +114,15 @@ export type {
   DiaryTransferPhase,
   DiaryTransferState,
   DiaryTransferType,
+  DiaryWriteOperationLease,
 } from './model/diaryTransferCoordinator';
 export {
   acquireDiarySyncOperation,
   beginDiaryTransfer,
   isDiaryTransferLocked,
   resetDiaryTransferState,
+  runDiaryWriteOperation,
+  tryAcquireDiaryWriteOperation,
   useDiaryTransferState,
 } from './model/diaryTransferCoordinator';
 export type { MealRelation } from './model/mealRelation';
@@ -128,4 +141,6 @@ export { DiaryEntryEditorModal } from './ui/DiaryEntryEditorModal';
 export { DiaryEntryMeta } from './ui/DiaryEntryMeta';
 export { DiaryEntryMetrics } from './ui/DiaryEntryMetrics';
 export { DiaryEntryPhotoField } from './ui/DiaryEntryPhotoField';
+export type { DiaryLocalListProps } from './ui/DiaryLocalList';
+export { DiaryLocalList } from './ui/DiaryLocalList';
 export { DiaryPhotoViewer } from './ui/DiaryPhotoViewer';

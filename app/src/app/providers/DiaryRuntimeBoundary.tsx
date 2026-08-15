@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Host } from 'react-native-portalize';
 
 import { useSyncDiaryRuntime } from '@features/sync-diary';
 import { DiaryDatabaseProvider, useDiaryDatabase } from '@entities/diary';
@@ -61,7 +62,9 @@ export const DiaryRuntimeBoundary = ({
   return (
     <DiaryDatabaseProvider userId={userId}>
       <DiaryDatabaseStatusBoundary>
-        <DiarySyncRuntime>{children}</DiarySyncRuntime>
+        <DiarySyncRuntime>
+          <Host>{children}</Host>
+        </DiarySyncRuntime>
       </DiaryDatabaseStatusBoundary>
     </DiaryDatabaseProvider>
   );

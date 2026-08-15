@@ -1,5 +1,6 @@
 import type { SQLiteBindValue, SQLiteDatabase } from 'expo-sqlite';
 
+import { DIARY_BACKUP_CHUNK_SIZE } from '../../model/diaryBackup';
 import type { DiaryEntry } from '../../model/diaryEntry';
 import type { DiaryPageResult } from '../../model/diaryPage';
 
@@ -7,7 +8,9 @@ import { buildDiaryEntryQuerySql } from './buildDiaryEntryQuerySql';
 import type { DiaryDatabaseOperationGate } from './diaryDatabaseOperationGate';
 import { type DiaryEntryRow, mapDiaryEntryRow } from './diaryEntryRow';
 import {
+  buildCountDiaryBackupEntriesSql,
   buildCountDiaryEntriesSql,
+  buildFindDiaryBackupBatchSql,
   buildFindDiaryEntriesByIdsSql,
   buildFindDiaryPageSql,
   buildMarkDiaryEntriesPendingDeleteSql,
@@ -35,6 +38,22 @@ type DiaryCountRow = {
   total_items: number;
 };
 
+type DiaryBackupCountRow = {
+  entries_count: number;
+  local_photos_count: number;
+};
+
+type DiaryBackupStats = {
+  entriesCount: number;
+  localPhotosCount: number;
+};
+
+type DiaryBackupBatchInput = {
+  offset: number;
+  limit: number;
+  query?: DiaryEntryQuery;
+};
+
 type DiaryEntryIdRow = {
   id: string;
 };
@@ -45,6 +64,17 @@ type PendingPhotoStateUpdate = Pick<
 >;
 
 type AiAnalysisUpdate = Pick<DiaryEntry, 'id' | 'aiAnalysis'>;
+
+type DiaryImportedBatchOperation = {
+  type: 'insert' | 'replace';
+  entry: DiaryRepositorySyncedEntryInput;
+};
+
+type PreparedDiaryImportedBatchOperation = {
+  type: 'insert' | 'replace';
+  entryId: string;
+  parameters: Record<string, SQLiteBindValue>;
+};
 
 const getEventAtTimestamp = (eventAt: Date): number => {
   const timestamp = eventAt.getTime();
@@ -88,6 +118,39 @@ const createSyncedEntryParameters = (
 
   $syncStatus: 'synced',
 });
+
+const prepareDiaryImportedBatch = (
+  userId: string,
+  operations: readonly DiaryImportedBatchOperation[]
+): readonly PreparedDiaryImportedBatchOperation[] | null => {
+  if (operations.length === 0 || operations.length > DIARY_BACKUP_CHUNK_SIZE) {
+    return null;
+  }
+
+  const seenEntryIds = new Set<string>();
+  const prepared: PreparedDiaryImportedBatchOperation[] = [];
+
+  for (const operation of operations) {
+    if (
+      operation.entry.id.length === 0 ||
+      seenEntryIds.has(operation.entry.id)
+    ) {
+      return null;
+    }
+
+    seenEntryIds.add(operation.entry.id);
+
+    const eventAt = getEventAtTimestamp(operation.entry.eventAt);
+
+    prepared.push({
+      type: operation.type,
+      entryId: operation.entry.id,
+      parameters: createSyncedEntryParameters(userId, operation.entry, eventAt),
+    });
+  }
+
+  return prepared;
+};
 
 export class DiaryLocalRepository {
   public constructor(
@@ -188,6 +251,69 @@ export class DiaryLocalRepository {
     });
   }
 
+  public countBackupEntries(
+    query: DiaryEntryQuery = createDefaultDiaryEntryQuery()
+  ): Promise<DiaryBackupStats> {
+    let querySql;
+
+    try {
+      querySql = buildDiaryEntryQuerySql(this.userId, query);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+
+    return this.operationGate.run(async () => {
+      const row = await this.database.getFirstAsync<DiaryBackupCountRow>(
+        buildCountDiaryBackupEntriesSql(querySql.whereSql),
+        querySql.parameters
+      );
+
+      return {
+        entriesCount: row?.entries_count ?? 0,
+        localPhotosCount: row?.local_photos_count ?? 0,
+      };
+    });
+  }
+
+  public findBackupBatch({
+    offset,
+    limit,
+    query = createDefaultDiaryEntryQuery(),
+  }: DiaryBackupBatchInput): Promise<DiaryEntry[]> {
+    if (
+      !Number.isInteger(offset) ||
+      offset < 0 ||
+      !Number.isInteger(limit) ||
+      limit < 1 ||
+      limit > DIARY_BACKUP_CHUNK_SIZE
+    ) {
+      return Promise.reject(new Error('Invalid diary backup batch'));
+    }
+
+    let querySql;
+
+    try {
+      querySql = buildDiaryEntryQuerySql(this.userId, query);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+
+    return this.operationGate.run(async () => {
+      const rows = await this.database.getAllAsync<DiaryEntryRow>(
+        buildFindDiaryBackupBatchSql(querySql.whereSql),
+        {
+          ...querySql.parameters,
+
+          $limit: limit,
+
+          $offset: offset,
+        }
+      );
+
+      return rows.map(mapDiaryEntryRow);
+    });
+  }
+
   public insertSynced(input: DiaryRepositorySyncedEntryInput): Promise<void> {
     if (input.id.length === 0) {
       return Promise.reject(new Error('Invalid diary entry id'));
@@ -239,6 +365,43 @@ export class DiaryLocalRepository {
       if (result.changes !== 1) {
         throw new Error(`Diary synced entry cannot be replaced: ${input.id}`);
       }
+    });
+  }
+
+  public applyImportedBatch(
+    operations: readonly DiaryImportedBatchOperation[]
+  ): Promise<void> {
+    let prepared: readonly PreparedDiaryImportedBatchOperation[] | null;
+
+    try {
+      prepared = prepareDiaryImportedBatch(this.userId, operations);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+
+    if (prepared === null) {
+      return Promise.reject(new Error('Invalid diary import batch'));
+    }
+
+    return this.operationGate.run(async () => {
+      await this.database.withTransactionAsync(async () => {
+        for (const operation of prepared) {
+          const result = await this.database.runAsync(
+            operation.type === 'insert'
+              ? CREATE_DIARY_ENTRY_SQL
+              : REPLACE_SYNCED_DIARY_ENTRY_SQL,
+            operation.parameters
+          );
+
+          if (result.changes !== 1) {
+            throw new Error(
+              `Diary imported entry cannot be ${
+                operation.type === 'insert' ? 'inserted' : 'replaced'
+              }: ${operation.entryId}`
+            );
+          }
+        }
+      });
     });
   }
 

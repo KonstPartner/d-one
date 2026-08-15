@@ -49,7 +49,14 @@ export default {
     },
 
     plugins: [
-      '@react-native-firebase/app',
+      [
+        '@react-native-firebase/app',
+        {
+          ios: {
+            disableSPM: true,
+          },
+        },
+      ],
       '@react-native-firebase/app-check',
       [
         'expo-router',

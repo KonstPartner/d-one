@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 
-export type ErrorType = 'none' | 'firebase' | 'api' | 'cloud';
+export type ErrorType = 'none' | 'firebase' | 'api' | 'cloud' | 'transfer';
 
 type I18nErrorKey = `common.errors.${string}`;
 
@@ -114,6 +114,71 @@ const cloudErrorDictionary: ErrorDictionary = {
   'common.errors.unknown': 'UNKNOWN_ERROR',
 };
 
+const transferErrorDictionary: ErrorDictionary = {
+  'common.errors.diaryImportUnsupportedPlatform': 'unsupportedPlatform',
+
+  'common.errors.diaryImportInvalidBackup': [
+    'invalidArchive',
+    'manifestMissing',
+    'manifestInvalid',
+    'unsafePath',
+    'chunkMissing',
+    'chunkInvalid',
+    'entryInvalid',
+    'duplicateEntryId',
+    'entryCountMismatch',
+  ],
+
+  'common.errors.diaryImportUnsupportedVersion': 'unsupportedVersion',
+
+  'common.errors.diaryImportPickerFailed': 'DIARY_IMPORT_PICKER_FAILED',
+
+  'common.errors.diaryImportSnapshotChanged': 'snapshotChanged',
+
+  'common.errors.diaryImportConflictPlanInvalid': [
+    'conflictPlanInvalid',
+    'Diary import conflict summary is inconsistent',
+    'Diary import conflict decision is missing',
+    'Diary import photo summary is invalid',
+  ],
+
+  'common.errors.diaryImportRollbackFailed': 'fileRollbackFailed',
+
+  'common.errors.diaryImportPhotoFailed': [
+    'processingFailed',
+    'invalidFile',
+    'fileTooLarge',
+    'storageFailed',
+  ],
+
+  'common.errors.diaryImportPartialFailed': 'DIARY_IMPORT_PARTIAL_FAILED',
+
+  'common.errors.diaryImportRefreshFailed': 'DIARY_IMPORT_REFRESH_FAILED',
+
+  'common.errors.diaryImportFailed': [
+    'DIARY_IMPORT_FAILED',
+    'Invalid diary import batch',
+    'Diary imported entry cannot be',
+    'UNIQUE constraint failed',
+    'database is locked',
+    'SQLITE_',
+  ],
+
+  'common.errors.diaryExportEmpty': 'DIARY_EXPORT_EMPTY',
+
+  'common.errors.diaryExportFailed': 'DIARY_EXPORT_FAILED',
+
+  'common.errors.diaryExportFilesLoadFailed': 'DIARY_EXPORT_FILES_LOAD_FAILED',
+
+  'common.errors.diaryExportResumeFailed': 'DIARY_EXPORT_RESUME_FAILED',
+
+  'common.errors.diaryExportDeleteFailed': 'DIARY_EXPORT_DELETE_FAILED',
+
+  'common.errors.diaryExportSaveFailed': 'DIARY_EXPORT_SAVE_FAILED',
+
+  'common.errors.diaryExportShareFailed': 'DIARY_EXPORT_SHARE_FAILED',
+};
+
 const getErrorDictionary = (type: ErrorType): ErrorDictionary => {
   switch (type) {
     case 'firebase':
@@ -124,6 +189,9 @@ const getErrorDictionary = (type: ErrorType): ErrorDictionary => {
 
     case 'cloud':
       return cloudErrorDictionary;
+
+    case 'transfer':
+      return transferErrorDictionary;
 
     case 'none':
       return {};

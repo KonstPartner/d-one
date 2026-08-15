@@ -277,6 +277,7 @@ export const OwnerDiary = () => {
 
       <CreateDiaryEntryModal
         visible={entryEditor.createVisible}
+        disabled={transferLocked}
         onClose={entryEditor.closeCreate}
         onCreated={entryEditor.handleCreated}
       />

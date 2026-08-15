@@ -32,6 +32,8 @@ jest.mock('@entities/diary', () => {
     ...queryKeys,
     ...photoError,
 
+    runDiaryWriteOperation: (operation: () => Promise<unknown>) => operation(),
+
     useReadyDiaryDatabase: () => ({
       userId: 'user-1',
 

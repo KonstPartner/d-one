@@ -32,11 +32,16 @@ type DiaryTransferProgress = {
   processedPhotos?: number;
 };
 
+type DiaryTransferTotals = {
+  totalEntries: number;
+  totalPhotos?: number;
+};
+
 type BeginDiaryTransferInput = {
   userId: string;
   type: DiaryTransferType;
 
-  totalEntries: number;
+  totalEntries?: number;
   totalPhotos?: number;
 };
 
@@ -45,14 +50,20 @@ type ActiveTransfer = {
   userId: string;
 };
 
-export type DiarySyncOperationLease = {
+type DiaryBlockingOperationLease = {
   release: () => void;
 };
+
+export type DiarySyncOperationLease = DiaryBlockingOperationLease;
+
+export type DiaryWriteOperationLease = DiaryBlockingOperationLease;
 
 export type DiaryTransferLease = {
   operationId: string;
 
   setPhase: (phase: ActiveDiaryTransferPhase) => void;
+
+  setTotals: (totals: DiaryTransferTotals) => void;
 
   updateProgress: (progress: DiaryTransferProgress) => void;
 
@@ -80,11 +91,11 @@ let activeTransfer: ActiveTransfer | null = null;
 
 let nextTransferId = 0;
 
-let activeSyncOperations = 0;
+let activeBlockingOperations = 0;
 
-let syncIdlePromise: Promise<void> | null = null;
+let blockingOperationsIdlePromise: Promise<void> | null = null;
 
-let resolveSyncIdle: (() => void) | null = null;
+let resolveBlockingOperationsIdle: (() => void) | null = null;
 
 let transferReleasedPromise: Promise<void> | null = null;
 
@@ -93,31 +104,51 @@ let resolveTransferReleased: (() => void) | null = null;
 const isValidCount = (value: number): boolean =>
   Number.isInteger(value) && value >= 0;
 
-const waitForSyncIdle = (): Promise<void> => {
-  if (activeSyncOperations === 0) {
+const waitForBlockingOperationsIdle = (): Promise<void> => {
+  if (activeBlockingOperations === 0) {
     return Promise.resolve();
   }
 
-  if (syncIdlePromise === null) {
-    syncIdlePromise = new Promise<void>((resolve) => {
-      resolveSyncIdle = resolve;
+  if (blockingOperationsIdlePromise === null) {
+    blockingOperationsIdlePromise = new Promise<void>((resolve) => {
+      resolveBlockingOperationsIdle = resolve;
     });
   }
 
-  return syncIdlePromise;
+  return blockingOperationsIdlePromise;
 };
 
-const notifySyncIdle = (): void => {
-  if (activeSyncOperations !== 0) {
+const notifyBlockingOperationsIdle = (): void => {
+  if (activeBlockingOperations !== 0) {
     return;
   }
 
-  const resolve = resolveSyncIdle;
+  const resolve = resolveBlockingOperationsIdle;
 
-  resolveSyncIdle = null;
-  syncIdlePromise = null;
+  resolveBlockingOperationsIdle = null;
+  blockingOperationsIdlePromise = null;
 
   resolve?.();
+};
+
+const createBlockingOperationLease = (): DiaryBlockingOperationLease => {
+  activeBlockingOperations += 1;
+
+  let released = false;
+
+  return {
+    release: () => {
+      if (released) {
+        return;
+      }
+
+      released = true;
+
+      activeBlockingOperations -= 1;
+
+      notifyBlockingOperationsIdle();
+    },
+  };
 };
 
 const reserveTransfer = (transfer: ActiveTransfer): void => {
@@ -148,7 +179,6 @@ const releaseTransfer = (operationId: string): void => {
   const resolve = resolveTransferReleased;
 
   resolveTransferReleased = null;
-
   transferReleasedPromise = null;
 
   resolve?.();
@@ -167,6 +197,33 @@ const setTransferPhase = (
 
   useDiaryTransferStore.setState({
     phase,
+  });
+};
+
+const setTransferTotals = (
+  operationId: string,
+  { totalEntries, totalPhotos = 0 }: DiaryTransferTotals
+): void => {
+  if (!isCurrentTransfer(operationId)) {
+    return;
+  }
+
+  if (!isValidCount(totalEntries) || !isValidCount(totalPhotos)) {
+    throw new Error('Invalid diary transfer totals');
+  }
+
+  const state = useDiaryTransferStore.getState();
+
+  if (
+    state.processedEntries > totalEntries ||
+    state.processedPhotos > totalPhotos
+  ) {
+    throw new Error('Diary transfer totals are below current progress');
+  }
+
+  useDiaryTransferStore.setState({
+    totalEntries,
+    totalPhotos,
   });
 };
 
@@ -215,6 +272,31 @@ export const useDiaryTransferState = (): DiaryTransferState =>
 
 export const isDiaryTransferLocked = (): boolean => activeTransfer !== null;
 
+export const tryAcquireDiaryWriteOperation =
+  (): DiaryWriteOperationLease | null => {
+    if (activeTransfer !== null) {
+      return null;
+    }
+
+    return createBlockingOperationLease();
+  };
+
+export const runDiaryWriteOperation = async <T>(
+  operation: () => Promise<T>
+): Promise<T> => {
+  const lease = tryAcquireDiaryWriteOperation();
+
+  if (lease === null) {
+    throw new Error('Diary write is unavailable during an active transfer');
+  }
+
+  try {
+    return await operation();
+  } finally {
+    lease.release();
+  }
+};
+
 export const acquireDiarySyncOperation =
   async (): Promise<DiarySyncOperationLease> => {
     while (activeTransfer !== null) {
@@ -227,30 +309,14 @@ export const acquireDiarySyncOperation =
       await releasePromise;
     }
 
-    activeSyncOperations += 1;
-
-    let released = false;
-
-    return {
-      release: () => {
-        if (released) {
-          return;
-        }
-
-        released = true;
-
-        activeSyncOperations -= 1;
-
-        notifySyncIdle();
-      },
-    };
+    return createBlockingOperationLease();
   };
 
 export const beginDiaryTransfer = async ({
   userId,
   type,
 
-  totalEntries,
+  totalEntries = 0,
   totalPhotos = 0,
 }: BeginDiaryTransferInput): Promise<DiaryTransferLease> => {
   if (
@@ -279,13 +345,17 @@ export const beginDiaryTransfer = async ({
     totalPhotos,
   });
 
-  await waitForSyncIdle();
+  await waitForBlockingOperationsIdle();
 
   return {
     operationId,
 
     setPhase: (phase) => {
       setTransferPhase(operationId, phase);
+    },
+
+    setTotals: (totals) => {
+      setTransferTotals(operationId, totals);
     },
 
     updateProgress: (progress) => {

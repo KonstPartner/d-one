@@ -1,6 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { diaryLocalQueryKeys, useReadyDiaryDatabase } from '@entities/diary';
+import {
+  diaryLocalQueryKeys,
+  runDiaryWriteOperation,
+  useReadyDiaryDatabase,
+} from '@entities/diary';
 
 export const useDeleteDiaryEntriesMutation = () => {
   const queryClient = useQueryClient();
@@ -12,13 +16,14 @@ export const useDeleteDiaryEntriesMutation = () => {
 
     mutationFn: async (
       ids: ReadonlyArray<string>
-    ): Promise<ReadonlyArray<string>> => {
-      const entryIds = Array.from(new Set(ids));
+    ): Promise<ReadonlyArray<string>> =>
+      runDiaryWriteOperation(async () => {
+        const entryIds = Array.from(new Set(ids));
 
-      await repository.markPendingDelete(entryIds);
+        await repository.markPendingDelete(entryIds);
 
-      return entryIds;
-    },
+        return entryIds;
+      }),
 
     onSuccess: () => {
       void Promise.all([

@@ -5,6 +5,7 @@ import {
   type DiaryRepositoryUpdateInput,
   prepareDiaryPhotoForEntry,
   prepareDiaryPhotoRemoval,
+  runDiaryWriteOperation,
   useReadyDiaryDatabase,
 } from '@entities/diary';
 
@@ -40,23 +41,56 @@ export const useEditDiaryEntryMutation = () => {
         type: 'keep',
       },
       ...data
-    }: EditDiaryEntryMutationInput): Promise<string> => {
-      if (photoChange.type === 'keep') {
-        await repository.update(data);
+    }: EditDiaryEntryMutationInput): Promise<string> =>
+      runDiaryWriteOperation(async () => {
+        if (photoChange.type === 'keep') {
+          await repository.update(data);
 
-        return data.id;
-      }
+          return data.id;
+        }
 
-      const currentEntry = await repository.findById(data.id);
+        const currentEntry = await repository.findById(data.id);
 
-      if (currentEntry === null) {
-        throw new Error(`Diary entry does not exist: ${data.id}`);
-      }
+        if (currentEntry === null) {
+          throw new Error(`Diary entry does not exist: ${data.id}`);
+        }
 
-      if (photoChange.type === 'delete') {
-        const preparedRemoval = prepareDiaryPhotoRemoval({
+        if (photoChange.type === 'delete') {
+          const preparedRemoval = prepareDiaryPhotoRemoval({
+            userId,
+
+            entryId: data.id,
+          });
+
+          try {
+            await repository.update({
+              ...data,
+
+              photo: {
+                localPhotoUri: null,
+
+                photoPath: currentEntry.photoPath,
+
+                photoUrl: null,
+              },
+            });
+
+            preparedRemoval.finalize();
+
+            return data.id;
+          } catch (error) {
+            preparedRemoval.rollback();
+
+            throw error;
+          }
+        }
+
+        const preparedPhoto = prepareDiaryPhotoForEntry({
           userId,
+
           entryId: data.id,
+
+          draftUri: photoChange.draftUri,
         });
 
         try {
@@ -64,52 +98,23 @@ export const useEditDiaryEntryMutation = () => {
             ...data,
 
             photo: {
-              localPhotoUri: null,
+              localPhotoUri: preparedPhoto.localPhotoUri,
 
-              photoPath: currentEntry.photoPath,
+              photoPath: preparedPhoto.photoPath,
 
               photoUrl: null,
             },
           });
 
-          preparedRemoval.finalize();
+          preparedPhoto.finalize();
 
           return data.id;
         } catch (error) {
-          preparedRemoval.rollback();
+          preparedPhoto.rollback();
 
           throw error;
         }
-      }
-
-      const preparedPhoto = prepareDiaryPhotoForEntry({
-        userId,
-        entryId: data.id,
-        draftUri: photoChange.draftUri,
-      });
-
-      try {
-        await repository.update({
-          ...data,
-
-          photo: {
-            localPhotoUri: preparedPhoto.localPhotoUri,
-
-            photoPath: preparedPhoto.photoPath,
-
-            photoUrl: null,
-          },
-        });
-
-        preparedPhoto.finalize();
-
-        return data.id;
-      } catch (error) {
-        preparedPhoto.rollback();
-
-        throw error;
-      }
-    },
+      }),
 
     onSuccess: (entryId) => {
       void Promise.all([

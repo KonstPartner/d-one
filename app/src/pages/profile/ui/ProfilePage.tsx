@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
+import { DiaryTransferModal } from '@widgets/diary-transfer';
 import { ChangePasswordForm } from '@features/change-password';
 import { LogoutButton } from '@features/logout';
 import { UpdateEmailForm } from '@features/update-email';
@@ -22,6 +23,8 @@ const ProfileContent = () => {
   const [isEmailModalVisible, setIsEmailModalVisible] = useState(false);
 
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
+
+  const [isTransferModalVisible, setIsTransferModalVisible] = useState(false);
 
   const userId = sessionUser?.uid ?? null;
 
@@ -55,6 +58,8 @@ const ProfileContent = () => {
 
   const hasGrantedRole =
     profile.role === UserRole.User || profile.role === UserRole.Follower;
+
+  const transferAvailable = profile.role === UserRole.User;
 
   return (
     <>
@@ -133,6 +138,27 @@ const ProfileContent = () => {
               </s.ActionText>
             </s.ActionContent>
           </s.ActionButton>
+
+          {transferAvailable && (
+            <s.ActionButton
+              accessibilityRole="button"
+              accessibilityLabel={t('transfer.title')}
+              onPress={() => {
+                setIsTransferModalVisible(true);
+              }}
+              style={s.getActionButtonStyle}
+            >
+              <s.ActionContent>
+                <Ionicons
+                  name="swap-horizontal-outline"
+                  size={20}
+                  color={theme.colors.text}
+                />
+
+                <s.ActionText>{t('transfer.title')}</s.ActionText>
+              </s.ActionContent>
+            </s.ActionButton>
+          )}
         </s.Actions>
 
         <LogoutButton />
@@ -155,6 +181,15 @@ const ProfileContent = () => {
       >
         <ChangePasswordForm />
       </PortalModal>
+
+      {transferAvailable && (
+        <DiaryTransferModal
+          visible={isTransferModalVisible}
+          onClose={() => {
+            setIsTransferModalVisible(false);
+          }}
+        />
+      )}
     </>
   );
 };

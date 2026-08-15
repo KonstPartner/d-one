@@ -40,6 +40,9 @@ export const Button = ({
 
   const isDisabled = disabled || loading;
 
+  const isPrimitiveChild =
+    typeof children === 'string' || typeof children === 'number';
+
   return (
     <s.Root
       {...props}
@@ -47,8 +50,7 @@ export const Button = ({
       testID={testID ?? 'button'}
       disabled={isDisabled}
       accessibilityLabel={
-        accessibilityLabel ??
-        (typeof children === 'string' ? children : undefined)
+        accessibilityLabel ?? (isPrimitiveChild ? String(children) : undefined)
       }
       accessibilityState={{
         ...accessibilityState,
@@ -63,6 +65,8 @@ export const Button = ({
           color={spinnerColor ? theme.colors[spinnerColor] : theme.colors.white}
           size={32}
         />
+      ) : isPrimitiveChild ? (
+        <s.Label $tone={tone}>{children}</s.Label>
       ) : (
         children
       )}

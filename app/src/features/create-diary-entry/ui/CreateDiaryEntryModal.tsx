@@ -13,6 +13,8 @@ import {
 type CreateDiaryEntryModalProps = {
   visible: boolean;
 
+  disabled?: boolean;
+
   onClose: () => void;
 
   onCreated: (result: CreateDiaryEntrySubmitResult) => void;
@@ -20,6 +22,9 @@ type CreateDiaryEntryModalProps = {
 
 export const CreateDiaryEntryModal = ({
   visible,
+
+  disabled = false,
+
   onClose,
   onCreated,
 }: CreateDiaryEntryModalProps) => {
@@ -70,6 +75,8 @@ export const CreateDiaryEntryModal = ({
 
   const isBusy = isSubmitting || isPhotoBusy;
 
+  const editorDisabled = disabled || isSubmitting;
+
   const handleRequestClose = () => {
     if (isBusy) {
       return;
@@ -99,7 +106,7 @@ export const CreateDiaryEntryModal = ({
   };
 
   const handleChoosePhoto = () => {
-    if (isBusy) {
+    if (disabled || isBusy) {
       return;
     }
 
@@ -128,6 +135,10 @@ export const CreateDiaryEntryModal = ({
   };
 
   const handleSave = async () => {
+    if (disabled) {
+      return;
+    }
+
     const result = await handleSubmit();
 
     if (result === null) {
@@ -146,6 +157,7 @@ export const CreateDiaryEntryModal = ({
           isSubmitting ? 'diary.form.creating' : 'diary.form.create'
         )}
         submitIcon="add"
+        disabled={disabled}
         isSubmitting={isSubmitting}
         isBusy={isBusy}
         onClose={handleRequestClose}
@@ -168,7 +180,7 @@ export const CreateDiaryEntryModal = ({
           canRequestAi={canRequestAi}
           requestTimer={requestTimer}
           canRequestTimer={canRequestTimer}
-          disabled={isSubmitting}
+          disabled={editorDisabled}
           onCurrentDateTimeChange={handleCurrentDateTimeChange}
           onEventDateChange={handleEventDateChange}
           onEventTimeChange={handleEventTimeChange}

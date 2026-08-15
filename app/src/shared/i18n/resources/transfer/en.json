@@ -1,0 +1,214 @@
+{
+  "transfer": {
+    "title": "Import and export",
+    "actions": {
+      "back": "Back",
+      "export": "Export",
+      "import": "Import",
+      "continue": "Continue",
+      "delete": "Delete",
+      "refresh": "Refresh",
+      "cancel": "Cancel"
+    },
+    "export": {
+      "title": "Export diary",
+      "fullBackup": "Full backup",
+      "fullBackupDescription": "Entries and locally stored photos in an importable ZIP backup.",
+      "lightweightBackup": "Lightweight backup",
+      "lightweightBackupDescription": "Entries without local photo files. Existing cloud photo links are preserved.",
+      "csv": "CSV",
+      "csvDescription": "A localized spreadsheet-friendly file for viewing and sharing. CSV cannot be imported.",
+      "createdExports": "Created exports",
+      "scope": {
+        "title": "What to export",
+        "all": "All entries",
+        "allDescription": "Export all diary entries available locally.",
+        "period": "Period",
+        "periodDescription": "Export entries within a selected date range.",
+        "selected": "Selected entries",
+        "selectedDescription": "Choose individual diary entries to export."
+      },
+      "status": {
+        "preparing": "Preparing export…",
+        "progress": "Exporting {{current}} of {{total}} entries"
+      },
+      "errors": {
+        "failed": "Failed to export diary entries.",
+        "empty": "There are no diary entries in this scope."
+      },
+      "csvHeaders": {
+        "eventAt": "Date and time",
+        "glucose": "Glucose",
+        "mealRelation": "Meal relation",
+        "shortInsulin": "Short insulin",
+        "longInsulin": "Long insulin",
+        "carbsGram": "Carbohydrates",
+        "comment": "Comment",
+        "aiAnalysis": "AI analysis",
+        "photoUrl": "Photo URL"
+      },
+      "progress": {
+        "waitingTitle": "Waiting for synchronization",
+        "waitingDescription": "The active diary operation must finish first.",
+        "preparingTitle": "Preparing export",
+        "preparingDescription": "Reading current SQLite rows and creating entry data.",
+        "photosTitle": "Adding photos",
+        "photosDescription": "Local photos are added sequentially.",
+        "finalizingTitle": "Creating file",
+        "finalizingDescription": "Finalizing the export file.",
+        "entriesProcessed": "Entries processed",
+        "photosAdded": "Photos added",
+        "locked": "Diary changes and synchronization are temporarily locked."
+      },
+      "result": {
+        "title": "Export complete",
+        "description": "The file is ready to save or share.",
+        "entries": "Entries",
+        "photos": "Photos",
+        "photosNotAdded": "Photos not added",
+        "fileSize": "File size",
+        "shareAgain": "Save / Share again",
+        "done": "Done",
+        "shareFailed": "Failed to open the system save or share interface.",
+        "saved": "Saved"
+      }
+    },
+    "import": {
+      "title": "Import diary",
+      "chooseFromDevice": "Choose file from device",
+      "createdBackups": "Created backups",
+      "preview": {
+        "title": "Backup preview",
+        "waitingTitle": "Waiting for synchronization",
+        "waitingDescription": "The active diary operation must finish before the backup can be checked.",
+        "validatingTitle": "Checking backup",
+        "validatingDescription": "Validating the archive and checking for matching local entries.",
+        "progress": "Checked {{current}} of {{total}} entries",
+        "file": "File",
+        "type": "Backup type",
+        "created": "Created",
+        "source": "Source",
+        "entries": "Entries",
+        "photos": "Photos",
+        "matches": "Matches",
+        "noMatches": "No local entries with the same IDs were found.",
+        "matchesDescription": "{{count}} local entries have the same IDs and require a conflict decision.",
+        "heading": "Import preview",
+        "description": "Review the validated archive before changing the local diary."
+      },
+      "errors": {
+        "unsupportedPlatform": "Diary backup import is not available on this platform.",
+        "invalidArchive": "The selected file is not a valid diary backup ZIP archive.",
+        "manifestMissing": "The backup manifest is missing.",
+        "manifestInvalid": "The backup manifest is invalid or does not match the archive contents.",
+        "unsupportedVersion": "This backup format version is not supported by this version of DOne.",
+        "unsafePath": "The backup contains an unsafe file path.",
+        "chunkMissing": "One of the backup entry files is missing.",
+        "chunkInvalid": "One of the backup entry files is invalid.",
+        "entryInvalid": "The backup contains an invalid diary entry or photo.",
+        "duplicateEntryId": "The backup contains duplicate diary entry IDs.",
+        "entryCountMismatch": "The number of diary entries does not match the backup manifest.",
+        "unknown": "The backup could not be checked.",
+        "pickerFailed": "The backup file could not be selected.",
+        "snapshotChanged": "The local diary changed after the preview. Open the backup again and review the conflicts.",
+        "conflictPlanInvalid": "Conflict decisions are incomplete. Open the backup again and repeat the import.",
+        "fileRollbackFailed": "The import was stopped because local photo files could not be restored safely.",
+        "photoFailed": "A photo from the backup could not be restored. The current batch was not imported.",
+        "executionFailed": "The diary import could not be completed.",
+        "partialFailed": "Import stopped after {{current}} of {{total}} entries. Previously completed batches remain in the diary.",
+        "refreshFailed": "The import finished, but the diary could not be refreshed. Reopen the diary to load the latest local data."
+      },
+      "conflicts": {
+        "title": "Resolve matches",
+        "matches": "{{count}} matching entries",
+        "description": "Choose what to do with diary entries whose IDs already exist on this device.",
+        "skipAll": "Skip all matches",
+        "skipAllDescription": "Keep the existing local entries and do not import the matching entries from this backup.",
+        "replaceAll": "Replace all matches",
+        "replaceAllDescription": "Replace every matching local entry with the version stored in this backup.",
+        "reviewIndividually": "Review individually",
+        "reviewIndividuallyDescription": "Choose Skip or Replace separately for each matching diary entry."
+      },
+      "progress": {
+        "title": "Import diary",
+        "importing": "Importing diary entries",
+        "entries": "Entries processed: {{current}} of {{total}}",
+        "photos": "Photos processed: {{current}} of {{total}}",
+        "locked": "Changes, synchronization and sign-out are temporarily unavailable.",
+        "processed": "Processed",
+        "entriesValue": "{{current}} of {{total}}",
+        "chunkDescription": "Each chunk is committed in a separate SQLite transaction."
+      },
+      "result": {
+        "title": "Import complete",
+        "description": "All validated chunks were processed.",
+        "processed": "Processed",
+        "processedValue": "{{current}} of {{total}} entries",
+        "added": "Added",
+        "replaced": "Replaced",
+        "skipped": "Skipped",
+        "done": "Done",
+        "cloudWarning": "Entries were imported only to this device. Cloud data was not changed."
+      },
+      "review": {
+        "title": "Review matches",
+        "counter": "Match {{current}} of {{total}}",
+        "resolved": "Decisions made: {{current}} of {{total}}",
+        "localTitle": "Current local entry",
+        "localDescription": "This is the entry currently stored on this device.",
+        "backupTitle": "Entry from backup",
+        "backupDescription": "This is the version contained in the selected backup.",
+        "skip": "Skip this entry",
+        "replace": "Replace with backup entry",
+        "previous": "Previous matching entry",
+        "next": "Next matching entry",
+        "ready": "All matching entries have a decision.",
+        "remaining": "{{count}} matching entries still need a decision.",
+        "continueImport": "Continue to import"
+      },
+      "confirmation": {
+        "header": "Ready to import",
+        "title": "Import {{count}} entries?",
+        "description": "All conflict decisions are complete. The operation cannot be cancelled after it starts.",
+        "newEntries": "New entries",
+        "replace": "Replace",
+        "skip": "Skip",
+        "photos": "Photos",
+        "start": "Start import"
+      }
+    },
+    "files": {
+      "manageTitle": "Created exports",
+      "importTitle": "Created backups",
+      "searchPlaceholder": "Search by file name",
+      "searchAccessibilityLabel": "Search created exports",
+      "unfinishedTitle": "Unfinished exports",
+      "finishedTitle": "Created exports",
+      "empty": "No exports yet",
+      "noResults": "No files match your search",
+      "formats": {
+        "fullBackup": "Full backup",
+        "lightweightBackup": "Lightweight backup",
+        "csv": "CSV"
+      },
+      "phases": {
+        "planning": "Preparing export",
+        "processing": "Exporting",
+        "readyToFinalize": "Ready to finish"
+      },
+      "progress": {
+        "entries": "{{current}} of {{total}} entries",
+        "photos": "{{current}} of {{total}} photos"
+      },
+      "deleteUnfinishedTitle": "Delete unfinished export?",
+      "deleteUnfinishedDescription": "The saved export progress will be permanently deleted.",
+      "deleteFinishedTitle": "Delete export?",
+      "deleteFinishedDescription": "The created export file will be permanently deleted from this device.",
+      "errors": {
+        "loadFailed": "Failed to load exports.",
+        "deleteFailed": "Failed to delete the export.",
+        "resumeFailed": "Failed to continue the export."
+      }
+    }
+  }
+}

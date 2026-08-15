@@ -2,7 +2,8 @@ import { useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import { useDiaryTransferState } from '@entities/diary';
+import { isDiaryTransferLocked, useDiaryTransferState } from '@entities/diary';
+import { sessionMutationKeys } from '@entities/session';
 import { errorMapper } from '@shared/lib/errors';
 import { showNotification } from '@shared/lib/notifications';
 
@@ -20,9 +21,23 @@ export const useLogout = () => {
     transfer.phase === 'processing';
 
   const mutation = useMutation({
-    mutationFn: logoutRequest,
+    mutationKey: sessionMutationKeys.operation('logout'),
 
-    onSuccess: () => {
+    mutationFn: async (): Promise<boolean> => {
+      if (isDiaryTransferLocked()) {
+        return false;
+      }
+
+      await logoutRequest();
+
+      return true;
+    },
+
+    onSuccess: (didLogout) => {
+      if (!didLogout) {
+        return;
+      }
+
       showNotification('success', t('auth.notifications.logoutSuccess'));
     },
 
@@ -32,7 +47,7 @@ export const useLogout = () => {
   });
 
   const logout = useCallback(() => {
-    if (transferLocked || mutation.isPending) {
+    if (transferLocked || isDiaryTransferLocked() || mutation.isPending) {
       return;
     }
 
