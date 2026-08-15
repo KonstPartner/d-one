@@ -99,12 +99,6 @@ export const useCloudDiaryDownloadFlow = () => {
 
       nextResolutions: CloudDiaryDownloadResolutionMap
     ): Promise<void> => {
-      /*
-       * From this point the session is no longer cancellable by UI.
-       *
-       * complete() may already be writing entries to SQLite, so an unmount
-       * must not call session.cancel() while processing is in progress.
-       */
       activeSessionRef.current = null;
 
       setFlowStep('processing');
@@ -135,11 +129,6 @@ export const useCloudDiaryDownloadFlow = () => {
 
   const start = useCallback(
     async (entries: readonly CloudDiaryEntry[]): Promise<void> => {
-      /*
-       * stepRef changes synchronously, unlike React state.
-       * This prevents two fast taps from starting two begin() calls
-       * before the component has rerendered.
-       */
       if (stepRef.current !== 'idle') {
         return;
       }
@@ -151,16 +140,6 @@ export const useCloudDiaryDownloadFlow = () => {
       try {
         const session = await mutation.begin(entries);
 
-        /*
-         * The component may have unmounted while begin() was:
-         * - waiting for active sync;
-         * - reading SQLite;
-         * - detecting conflicts.
-         *
-         * In that case begin() has already acquired the global transfer
-         * lease, therefore the returned session must be explicitly
-         * cancelled.
-         */
         if (!mountedRef.current) {
           session.cancel();
 

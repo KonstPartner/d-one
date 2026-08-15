@@ -1,5 +1,6 @@
 import type { SQLiteBindValue, SQLiteDatabase } from 'expo-sqlite';
 
+import { DIARY_BACKUP_CHUNK_SIZE } from '../../model/diaryBackup';
 import type { DiaryEntry } from '../../model/diaryEntry';
 import type { DiaryPageResult } from '../../model/diaryPage';
 
@@ -7,7 +8,9 @@ import { buildDiaryEntryQuerySql } from './buildDiaryEntryQuerySql';
 import type { DiaryDatabaseOperationGate } from './diaryDatabaseOperationGate';
 import { type DiaryEntryRow, mapDiaryEntryRow } from './diaryEntryRow';
 import {
+  buildCountDiaryBackupEntriesSql,
   buildCountDiaryEntriesSql,
+  buildFindDiaryBackupBatchSql,
   buildFindDiaryEntriesByIdsSql,
   buildFindDiaryPageSql,
   buildMarkDiaryEntriesPendingDeleteSql,
@@ -33,6 +36,22 @@ import { createDefaultDiaryEntryQuery } from './diaryRepository.types';
 
 type DiaryCountRow = {
   total_items: number;
+};
+
+type DiaryBackupCountRow = {
+  entries_count: number;
+  local_photos_count: number;
+};
+
+type DiaryBackupStats = {
+  entriesCount: number;
+  localPhotosCount: number;
+};
+
+type DiaryBackupBatchInput = {
+  offset: number;
+  limit: number;
+  query?: DiaryEntryQuery;
 };
 
 type DiaryEntryIdRow = {
@@ -182,6 +201,69 @@ export class DiaryLocalRepository {
       const rows = await this.database.getAllAsync<DiaryEntryRow>(
         sql,
         parameters
+      );
+
+      return rows.map(mapDiaryEntryRow);
+    });
+  }
+
+  public countBackupEntries(
+    query: DiaryEntryQuery = createDefaultDiaryEntryQuery()
+  ): Promise<DiaryBackupStats> {
+    let querySql;
+
+    try {
+      querySql = buildDiaryEntryQuerySql(this.userId, query);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+
+    return this.operationGate.run(async () => {
+      const row = await this.database.getFirstAsync<DiaryBackupCountRow>(
+        buildCountDiaryBackupEntriesSql(querySql.whereSql),
+        querySql.parameters
+      );
+
+      return {
+        entriesCount: row?.entries_count ?? 0,
+        localPhotosCount: row?.local_photos_count ?? 0,
+      };
+    });
+  }
+
+  public findBackupBatch({
+    offset,
+    limit,
+    query = createDefaultDiaryEntryQuery(),
+  }: DiaryBackupBatchInput): Promise<DiaryEntry[]> {
+    if (
+      !Number.isInteger(offset) ||
+      offset < 0 ||
+      !Number.isInteger(limit) ||
+      limit < 1 ||
+      limit > DIARY_BACKUP_CHUNK_SIZE
+    ) {
+      return Promise.reject(new Error('Invalid diary backup batch'));
+    }
+
+    let querySql;
+
+    try {
+      querySql = buildDiaryEntryQuerySql(this.userId, query);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+
+    return this.operationGate.run(async () => {
+      const rows = await this.database.getAllAsync<DiaryEntryRow>(
+        buildFindDiaryBackupBatchSql(querySql.whereSql),
+        {
+          ...querySql.parameters,
+
+          $limit: limit,
+
+          $offset: offset,
+        }
       );
 
       return rows.map(mapDiaryEntryRow);

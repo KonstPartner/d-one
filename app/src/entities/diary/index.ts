@@ -76,6 +76,7 @@ export {
   CLOUD_DIARY_PAGE_SIZE,
   CLOUD_DIARY_QUERY_LIMIT,
 } from './model/cloudDiaryPage';
+export * from './model/diaryBackup';
 export type { DiaryDay, DiaryDayEntry, DiaryDayKey } from './model/diaryDay';
 export type { DiaryEntry, DiarySyncStatus } from './model/diaryEntry';
 export { DIARY_SYNC_STATUSES, isDiarySyncStatus } from './model/diaryEntry';

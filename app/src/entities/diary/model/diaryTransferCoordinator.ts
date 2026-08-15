@@ -32,11 +32,16 @@ type DiaryTransferProgress = {
   processedPhotos?: number;
 };
 
+type DiaryTransferTotals = {
+  totalEntries: number;
+  totalPhotos?: number;
+};
+
 type BeginDiaryTransferInput = {
   userId: string;
   type: DiaryTransferType;
 
-  totalEntries: number;
+  totalEntries?: number;
   totalPhotos?: number;
 };
 
@@ -53,6 +58,8 @@ export type DiaryTransferLease = {
   operationId: string;
 
   setPhase: (phase: ActiveDiaryTransferPhase) => void;
+
+  setTotals: (totals: DiaryTransferTotals) => void;
 
   updateProgress: (progress: DiaryTransferProgress) => void;
 
@@ -170,6 +177,33 @@ const setTransferPhase = (
   });
 };
 
+const setTransferTotals = (
+  operationId: string,
+  { totalEntries, totalPhotos = 0 }: DiaryTransferTotals
+): void => {
+  if (!isCurrentTransfer(operationId)) {
+    return;
+  }
+
+  if (!isValidCount(totalEntries) || !isValidCount(totalPhotos)) {
+    throw new Error('Invalid diary transfer totals');
+  }
+
+  const state = useDiaryTransferStore.getState();
+
+  if (
+    state.processedEntries > totalEntries ||
+    state.processedPhotos > totalPhotos
+  ) {
+    throw new Error('Diary transfer totals are below current progress');
+  }
+
+  useDiaryTransferStore.setState({
+    totalEntries,
+    totalPhotos,
+  });
+};
+
 const updateTransferProgress = (
   operationId: string,
   { processedEntries, processedPhotos }: DiaryTransferProgress
@@ -250,7 +284,7 @@ export const beginDiaryTransfer = async ({
   userId,
   type,
 
-  totalEntries,
+  totalEntries = 0,
   totalPhotos = 0,
 }: BeginDiaryTransferInput): Promise<DiaryTransferLease> => {
   if (
@@ -286,6 +320,10 @@ export const beginDiaryTransfer = async ({
 
     setPhase: (phase) => {
       setTransferPhase(operationId, phase);
+    },
+
+    setTotals: (totals) => {
+      setTransferTotals(operationId, totals);
     },
 
     updateProgress: (progress) => {

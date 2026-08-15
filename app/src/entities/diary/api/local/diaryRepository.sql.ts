@@ -229,6 +229,30 @@ export const buildCountDiaryEntriesSql = (whereSql: string): string => `
   ${whereSql}
 `;
 
+export const buildCountDiaryBackupEntriesSql = (whereSql: string): string => `
+  SELECT
+    COUNT(*) AS entries_count,
+    COALESCE(
+      SUM(CASE WHEN local_photo_uri IS NOT NULL THEN 1 ELSE 0 END),
+      0
+    ) AS local_photos_count
+  FROM diary_entries
+  ${whereSql}
+    AND sync_status IN (
+      ${MUTABLE_SYNC_STATUSES_SQL}
+    )
+`;
+
+export const buildFindDiaryBackupBatchSql = (whereSql: string): string => `
+  ${DIARY_ENTRY_SELECT_SQL}
+  ${whereSql}
+    AND sync_status IN (
+      ${MUTABLE_SYNC_STATUSES_SQL}
+    )
+  ORDER BY event_at DESC, id DESC
+  LIMIT $limit OFFSET $offset
+`;
+
 export const buildFindDiaryPageSql = (whereSql: string): string => `
   ${DIARY_ENTRY_SELECT_SQL}
   ${whereSql}
