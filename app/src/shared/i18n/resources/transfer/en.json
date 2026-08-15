@@ -17,7 +17,35 @@
       "lightweightBackupDescription": "Entries without local photo files. Existing cloud photo links are preserved.",
       "csv": "CSV",
       "csvDescription": "A localized spreadsheet-friendly file for viewing and sharing. CSV cannot be imported.",
-      "createdExports": "Created exports"
+      "createdExports": "Created exports",
+      "scope": {
+        "title": "What to export",
+        "all": "All entries",
+        "allDescription": "Export all diary entries available locally.",
+        "period": "Period",
+        "periodDescription": "Export entries within a selected date range.",
+        "selected": "Selected entries",
+        "selectedDescription": "Choose individual diary entries to export."
+      },
+      "status": {
+        "preparing": "Preparing export…",
+        "progress": "Exporting {{current}} of {{total}} entries"
+      },
+      "errors": {
+        "failed": "Failed to export diary entries.",
+        "empty": "There are no diary entries in this scope."
+      },
+      "csvHeaders": {
+        "eventAt": "Date and time",
+        "glucose": "Glucose",
+        "mealRelation": "Meal relation",
+        "shortInsulin": "Short insulin",
+        "longInsulin": "Long insulin",
+        "carbsGram": "Carbohydrates",
+        "comment": "Comment",
+        "aiAnalysis": "AI analysis",
+        "photoUrl": "Photo URL"
+      }
     },
     "import": {
       "title": "Import diary",

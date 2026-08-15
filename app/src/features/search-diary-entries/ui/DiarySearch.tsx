@@ -71,7 +71,8 @@ type DiarySearchProps = {
   filtersApplied: boolean;
 
   onOpenFilters: () => void;
-  onCreateEntry: () => void;
+
+  onCreateEntry?: () => void;
   createDisabled?: boolean;
 };
 
@@ -80,6 +81,7 @@ export const DiarySearch = ({
   field,
 
   createDisabled = false,
+
   onTextChange,
   onApplyText,
   onFieldChange,
@@ -266,18 +268,22 @@ export const DiarySearch = ({
             />
           </s.Filter>
 
-          <s.Add>
-            <IconButton
-              icon="add"
-              accessibilityLabel={t('diary.form.openCreateAccessibilityLabel')}
-              disabled={createDisabled}
-              tone="primary"
-              variant="solid"
-              size="lg"
-              iconSize={24}
-              onPress={onCreateEntry}
-            />
-          </s.Add>
+          {onCreateEntry !== undefined && (
+            <s.Add>
+              <IconButton
+                icon="add"
+                accessibilityLabel={t(
+                  'diary.form.openCreateAccessibilityLabel'
+                )}
+                disabled={createDisabled}
+                tone="primary"
+                variant="solid"
+                size="lg"
+                iconSize={24}
+                onPress={onCreateEntry}
+              />
+            </s.Add>
+          )}
         </s.Row>
       </s.Row>
 

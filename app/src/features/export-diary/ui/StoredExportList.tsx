@@ -31,7 +31,7 @@ type StoredExportListProps = {
   mode: StoredExportListMode;
 
   onBack: () => void;
-  onSelectBackup: (file: StoredExportSelection) => void;
+  onSelectBackup?: (file: StoredExportSelection) => void;
 };
 
 type StoredExportListItem =
@@ -350,14 +350,16 @@ export const StoredExportList = ({
 
     const isBackup = file.kind === 'backup';
 
+    const backupSelectionEnabled = isBackup && onSelectBackup !== undefined;
+
     return (
       <s.Card>
         <s.FinishedFilePressable
-          accessibilityRole={isBackup ? 'button' : undefined}
+          accessibilityRole={backupSelectionEnabled ? 'button' : undefined}
           accessibilityLabel={file.fileName}
-          disabled={!isBackup || operationsDisabled}
+          disabled={!backupSelectionEnabled || operationsDisabled}
           onPress={() => {
-            if (isBackup) {
+            if (isBackup && onSelectBackup !== undefined) {
               onSelectBackup({
                 fileName: file.fileName,
                 fileUri: file.fileUri,
@@ -379,7 +381,7 @@ export const StoredExportList = ({
               <s.FileName numberOfLines={2}>{file.fileName}</s.FileName>
             </s.FileInfo>
 
-            {isBackup && (
+            {backupSelectionEnabled && (
               <Ionicons
                 name="chevron-forward"
                 size={20}
