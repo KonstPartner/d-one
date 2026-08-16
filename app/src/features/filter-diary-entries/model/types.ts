@@ -15,6 +15,7 @@ export type DiaryFilterDateRange = {
 export const DIARY_FILTER_NUMERIC_FIELDS = [
   'glucose',
   'shortInsulin',
+  'ultraShortInsulin',
   'longInsulin',
   'carbsGram',
 ] as const;
@@ -31,6 +32,7 @@ export type DiaryFilters = {
 
   glucose: DiaryFilterNumericRange;
   shortInsulin: DiaryFilterNumericRange;
+  ultraShortInsulin: DiaryFilterNumericRange;
   longInsulin: DiaryFilterNumericRange;
   carbsGram: DiaryFilterNumericRange;
 

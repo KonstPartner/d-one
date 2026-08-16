@@ -153,7 +153,8 @@ export const validateDiaryBackupArchive = async ({
       }
 
       const entries = validateDiaryBackupChunk(
-        await readJsonFile(chunkFile, 'chunkInvalid')
+        await readJsonFile(chunkFile, 'chunkInvalid'),
+        manifest.formatVersion
       );
 
       for (const entry of entries) {

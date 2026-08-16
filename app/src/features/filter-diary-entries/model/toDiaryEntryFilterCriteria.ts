@@ -68,6 +68,10 @@ export const toDiaryEntryFilterCriteria = (
       ...normalizedFilters.shortInsulin,
     },
 
+    ultraShortInsulin: {
+      ...normalizedFilters.ultraShortInsulin,
+    },
+
     longInsulin: {
       ...normalizedFilters.longInsulin,
     },

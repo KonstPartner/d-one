@@ -53,6 +53,8 @@ export const useDiaryTransferExport = () => {
 
         shortInsulin: t('transfer.export.csvHeaders.shortInsulin'),
 
+        ultraShortInsulin: t('transfer.export.csvHeaders.ultraShortInsulin'),
+
         longInsulin: t('transfer.export.csvHeaders.longInsulin'),
 
         carbsGram: t('transfer.export.csvHeaders.carbsGram'),
@@ -104,6 +106,7 @@ export const useDiaryTransferExport = () => {
               })
             : await exportDiary({
                 format,
+
                 userName,
                 scope,
               });
