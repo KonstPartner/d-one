@@ -20,6 +20,8 @@ export const Root = styled.View<MetricProps>`
   flex-basis: 47%;
   flex-grow: 1;
 
+  justify-content: space-between;
+
   gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 
   padding: ${({ theme }) => ss.px(theme.spacing.sm)};

@@ -51,6 +51,7 @@ type MockImportFlow = {
       glucose: number | null;
       mealRelation: null;
       shortInsulin: number | null;
+      ultraShortInsulin: number | null;
       longInsulin: number | null;
       carbsGram: number | null;
       comment: string;
@@ -153,6 +154,7 @@ const createLocalEntry = (): DiaryEntry => ({
   mealRelation: null,
 
   shortInsulin: null,
+  ultraShortInsulin: null,
   longInsulin: null,
   carbsGram: null,
 
@@ -318,6 +320,7 @@ describe('useDiaryTransferController integration', () => {
           mealRelation: null,
 
           shortInsulin: null,
+          ultraShortInsulin: null,
           longInsulin: null,
           carbsGram: null,
 

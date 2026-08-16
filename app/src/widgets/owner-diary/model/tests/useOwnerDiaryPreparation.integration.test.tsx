@@ -109,6 +109,8 @@ const createEntry = (overrides: Partial<DiaryEntry> = {}): DiaryEntry => ({
   syncStatus: 'pendingUpdate',
 
   ...overrides,
+
+  ultraShortInsulin: overrides.ultraShortInsulin ?? null,
 });
 
 describe('useOwnerDiaryPreparation integration', () => {

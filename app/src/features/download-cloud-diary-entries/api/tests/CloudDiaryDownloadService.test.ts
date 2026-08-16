@@ -67,6 +67,7 @@ const createCloudEntry = (id: string): CloudDiaryEntry => ({
   glucose: 6.4,
   mealRelation: null,
   shortInsulin: 2,
+  ultraShortInsulin: 1.5,
   longInsulin: null,
   carbsGram: 45,
 
@@ -90,6 +91,7 @@ const createLocalEntry = (
   glucose: 10,
   mealRelation: null,
   shortInsulin: null,
+  ultraShortInsulin: null,
   longInsulin: 5,
   carbsGram: 15,
 
@@ -203,6 +205,8 @@ describe('CloudDiaryDownloadService', () => {
       mealRelation: cloud.mealRelation,
 
       shortInsulin: cloud.shortInsulin,
+
+      ultraShortInsulin: cloud.ultraShortInsulin,
 
       longInsulin: cloud.longInsulin,
 

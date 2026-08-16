@@ -305,6 +305,8 @@ const createEntryFingerprint = (entry: DiaryEntry | null): string | null => {
 
     shortInsulin: entry.shortInsulin,
 
+    ultraShortInsulin: entry.ultraShortInsulin,
+
     longInsulin: entry.longInsulin,
 
     carbsGram: entry.carbsGram,

@@ -13,8 +13,16 @@ type MetaIconProps = {
   $borderColor: string;
 };
 
+type InsulinMetricProps = {
+  $width: number;
+};
+
 export const Root = styled.View`
   gap: ${({ theme }) => ss.px(theme.spacing.md)};
+`;
+
+export const MetricRows = styled.View`
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const Metrics = styled.View`
@@ -22,6 +30,18 @@ export const Metrics = styled.View`
   flex-wrap: wrap;
 
   gap: ${({ theme }) => ss.px(theme.spacing.sm)};
+`;
+
+export const InsulinScroll = styled.ScrollView``;
+
+export const InsulinMetrics = styled.View`
+  flex-direction: row;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
+`;
+
+export const InsulinMetric = styled.View<InsulinMetricProps>`
+  width: ${({ $width }) => ss.px($width)};
 `;
 
 export const MealPhotoRow = styled.View`

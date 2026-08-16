@@ -23,6 +23,7 @@ export type DiaryMetricKey =
   | 'glucose'
   | 'carbsGram'
   | 'shortInsulin'
+  | 'ultraShortInsulin'
   | 'longInsulin';
 
 type MetricProps = {

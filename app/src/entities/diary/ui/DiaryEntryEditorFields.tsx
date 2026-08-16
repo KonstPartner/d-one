@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -121,7 +122,9 @@ export const DiaryEntryEditorFields = ({
 
   const { t } = useTranslation();
 
-  const metricFields: MetricField[] = [
+  const [metricsViewportWidth, setMetricsViewportWidth] = useState(0);
+
+  const primaryMetricFields: MetricField[] = [
     {
       key: 'glucose',
       label: t('diary.entry.metrics.glucose'),
@@ -136,13 +139,9 @@ export const DiaryEntryEditorFields = ({
       maximum: DIARY_ENTRY_METRIC_MAXIMUM.carbsGram,
       onChange: onCarbsGramChange,
     },
-    {
-      key: 'shortInsulin',
-      label: t('diary.entry.metrics.shortInsulin'),
-      value: shortInsulin,
-      maximum: DIARY_ENTRY_METRIC_MAXIMUM.shortInsulin,
-      onChange: onShortInsulinChange,
-    },
+  ];
+
+  const insulinMetricFields: MetricField[] = [
     {
       key: 'ultraShortInsulin',
       label: t('diary.entry.metrics.ultraShortInsulin'),
@@ -157,7 +156,19 @@ export const DiaryEntryEditorFields = ({
       maximum: DIARY_ENTRY_METRIC_MAXIMUM.longInsulin,
       onChange: onLongInsulinChange,
     },
+    {
+      key: 'shortInsulin',
+      label: t('diary.entry.metrics.shortInsulin'),
+      value: shortInsulin,
+      maximum: DIARY_ENTRY_METRIC_MAXIMUM.shortInsulin,
+      onChange: onShortInsulinChange,
+    },
   ];
+
+  const insulinMetricWidth = Math.max(
+    0,
+    (metricsViewportWidth - theme.spacing.sm) / 2
+  );
 
   const hasAiAnalysis = aiAnalysis !== null && aiAnalysis.trim().length > 0;
 
@@ -177,37 +188,81 @@ export const DiaryEntryEditorFields = ({
         onTimeChange={onEventTimeChange}
       />
 
-      <s.Metrics>
-        {metricFields.map((metric) => (
-          <DiaryMetricStepper
-            key={metric.key}
-            metricKey={metric.key}
-            label={metric.label}
-            value={metric.value}
-            maximum={metric.maximum}
-            disabled={disabled}
-            inputAccessibilityLabel={t(
-              'diary.form.metric.valueAccessibilityLabel',
-              {
-                metric: metric.label,
-              }
-            )}
-            decrementAccessibilityLabel={t(
-              'diary.form.metric.decreaseAccessibilityLabel',
-              {
-                metric: metric.label,
-              }
-            )}
-            incrementAccessibilityLabel={t(
-              'diary.form.metric.increaseAccessibilityLabel',
-              {
-                metric: metric.label,
-              }
-            )}
-            onChange={metric.onChange}
-          />
-        ))}
-      </s.Metrics>
+      <s.MetricRows>
+        <s.Metrics>
+          {primaryMetricFields.map((metric) => (
+            <DiaryMetricStepper
+              key={metric.key}
+              metricKey={metric.key}
+              label={metric.label}
+              value={metric.value}
+              maximum={metric.maximum}
+              disabled={disabled}
+              inputAccessibilityLabel={t(
+                'diary.form.metric.valueAccessibilityLabel',
+                {
+                  metric: metric.label,
+                }
+              )}
+              decrementAccessibilityLabel={t(
+                'diary.form.metric.decreaseAccessibilityLabel',
+                {
+                  metric: metric.label,
+                }
+              )}
+              incrementAccessibilityLabel={t(
+                'diary.form.metric.increaseAccessibilityLabel',
+                {
+                  metric: metric.label,
+                }
+              )}
+              onChange={metric.onChange}
+            />
+          ))}
+        </s.Metrics>
+
+        <s.InsulinScroll
+          horizontal
+          nestedScrollEnabled
+          showsHorizontalScrollIndicator={false}
+          onLayout={(event) => {
+            setMetricsViewportWidth(event.nativeEvent.layout.width);
+          }}
+        >
+          <s.InsulinMetrics>
+            {insulinMetricFields.map((metric) => (
+              <s.InsulinMetric key={metric.key} $width={insulinMetricWidth}>
+                <DiaryMetricStepper
+                  metricKey={metric.key}
+                  label={metric.label}
+                  value={metric.value}
+                  maximum={metric.maximum}
+                  disabled={disabled}
+                  inputAccessibilityLabel={t(
+                    'diary.form.metric.valueAccessibilityLabel',
+                    {
+                      metric: metric.label,
+                    }
+                  )}
+                  decrementAccessibilityLabel={t(
+                    'diary.form.metric.decreaseAccessibilityLabel',
+                    {
+                      metric: metric.label,
+                    }
+                  )}
+                  incrementAccessibilityLabel={t(
+                    'diary.form.metric.increaseAccessibilityLabel',
+                    {
+                      metric: metric.label,
+                    }
+                  )}
+                  onChange={metric.onChange}
+                />
+              </s.InsulinMetric>
+            ))}
+          </s.InsulinMetrics>
+        </s.InsulinScroll>
+      </s.MetricRows>
 
       <s.MealPhotoRow>
         <s.MealRelationArea>

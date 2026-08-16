@@ -42,6 +42,10 @@ const SEARCH_FIELD_PRESENTATION: Record<
     tone: 'warning',
   },
 
+  ultraShortInsulin: {
+    tone: 'warning',
+  },
+
   longInsulin: {
     tone: 'success',
   },
@@ -192,7 +196,7 @@ export const DiarySearch = ({
 
   const getFieldColors = useCallback(
     (searchField: DiaryEntrySearchField) => {
-      if (isDiaryEntryTextSearchField(searchField)) {
+      if (searchField === 'comment') {
         return {
           background: theme.colors.shades.primary.sm,
 
@@ -200,6 +204,8 @@ export const DiarySearch = ({
 
           text: theme.colors.primary,
         };
+      } else if (searchField === 'aiAnalysis') {
+        return theme.colors.metrics.longInsulin;
       }
 
       return theme.colors.metrics[searchField];
