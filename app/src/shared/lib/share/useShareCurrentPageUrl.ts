@@ -20,7 +20,7 @@ type UseShareCurrentPageUrlParams = {
 
 const DEFAULT_EXCLUDE_SEARCH_KEYS = ['id'];
 
-const useShareCurrentPageUrl = ({
+export const useShareCurrentPageUrl = ({
   pathname: customPathname,
   searchParams: customSearchParams,
   excludeSearchKeys = DEFAULT_EXCLUDE_SEARCH_KEYS,
@@ -61,5 +61,3 @@ const useShareCurrentPageUrl = ({
     onShare,
   };
 };
-
-export default useShareCurrentPageUrl;

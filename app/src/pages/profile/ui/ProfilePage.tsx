@@ -63,6 +63,8 @@ const ProfileContent = () => {
   const hasGrantedRole =
     profile.role === UserRole.User || profile.role === UserRole.Follower;
 
+  const roleBadgeTone = hasGrantedRole ? 'primary' : 'warning';
+
   const transferAvailable = profile.role === UserRole.User && !PlatformOS.WEB;
 
   return (
@@ -100,15 +102,15 @@ const ProfileContent = () => {
                 <s.ProfileLabel>{t('auth.profile.role')}</s.ProfileLabel>
 
                 <s.RoleValue>
-                  <s.RoleBadge
-                    style={s.getRoleBadgeStyle(theme, hasGrantedRole)}
+                  <s.ProfileBadge
+                    style={s.getProfileBadgeStyle(theme, roleBadgeTone)}
                   >
-                    <s.RoleBadgeText
-                      style={s.getRoleBadgeTextStyle(theme, hasGrantedRole)}
+                    <s.ProfileBadgeText
+                      style={s.getProfileBadgeTextStyle(theme, roleBadgeTone)}
                     >
                       {t(roleKey)}
-                    </s.RoleBadgeText>
-                  </s.RoleBadge>
+                    </s.ProfileBadgeText>
+                  </s.ProfileBadge>
                 </s.RoleValue>
               </s.ProfileRow>
 

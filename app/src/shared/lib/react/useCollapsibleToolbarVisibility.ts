@@ -28,7 +28,7 @@ const getClampedOffsetY = (event: ScrollEvent): number => {
   return Math.min(Math.max(contentOffset.y, 0), maximumOffset);
 };
 
-export const useOwnerDiaryToolbarVisibility = () => {
+export const useCollapsibleToolbarVisibility = () => {
   const [toolbarHeight, setToolbarHeight] = useState(0);
 
   const toolbarTranslateY = useRef(new Animated.Value(0)).current;

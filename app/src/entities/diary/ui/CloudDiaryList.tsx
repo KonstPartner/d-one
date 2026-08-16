@@ -1,5 +1,9 @@
 import { useCallback } from 'react';
-import { FlatList, type ListRenderItem } from 'react-native';
+import {
+  FlatList,
+  type FlatListProps,
+  type ListRenderItem,
+} from 'react-native';
 
 import type { DiaryListItem } from '../lib/buildDiaryListItems';
 import type { CloudDiaryEntry } from '../model/cloudDiaryEntry';
@@ -49,6 +53,14 @@ type CloudDiaryListProps = {
   onOpenPhoto: (entry: CloudDiaryEntry) => void;
 
   selection?: CloudDiaryListSelection;
+
+  contentContainerStyle?: FlatListProps<CloudDiaryListItem>['contentContainerStyle'];
+
+  onScroll?: FlatListProps<CloudDiaryListItem>['onScroll'];
+
+  onScrollBeginDrag?: FlatListProps<CloudDiaryListItem>['onScrollBeginDrag'];
+
+  onScrollEndDrag?: FlatListProps<CloudDiaryListItem>['onScrollEndDrag'];
 };
 
 export const CloudDiaryList = ({
@@ -66,6 +78,12 @@ export const CloudDiaryList = ({
   onOpenPhoto,
 
   selection,
+
+  contentContainerStyle,
+
+  onScroll,
+  onScrollBeginDrag,
+  onScrollEndDrag,
 }: CloudDiaryListProps) => {
   const selectionActive = selection !== undefined;
 
@@ -112,6 +130,11 @@ export const CloudDiaryList = ({
       keyExtractor={list.getListItemKey}
       renderItem={renderItem}
       ItemSeparatorComponent={s.ItemSeparator}
+      contentContainerStyle={contentContainerStyle}
+      onScroll={onScroll}
+      onScrollBeginDrag={onScrollBeginDrag}
+      onScrollEndDrag={onScrollEndDrag}
+      scrollEventThrottle={16}
       ListEmptyComponent={
         <s.Empty>
           <s.EmptyTitle>{emptyTitle}</s.EmptyTitle>

@@ -7,7 +7,7 @@ import { DIARY_ENTRY_METRIC_STEP } from '../model/diaryEntryConstraints';
 import { useDiaryMetricStepper } from '../model/useDiaryMetricStepper';
 import * as s from '../styles/DiaryMetricStepper';
 
-import DiaryMetricIcon, { type DiaryMetricKey } from './DiaryMetricIcon';
+import { DiaryMetricIcon, type DiaryMetricKey } from './DiaryMetricIcon';
 
 type DiaryMetricStepperProps = {
   metricKey: DiaryMetricKey;

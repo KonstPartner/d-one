@@ -43,8 +43,15 @@ export const ProfileRelationsRow = ({ profile }: ProfileRelationsRowProps) => {
   const loading = profileQueries.some((query) => query.isPending);
   const failed = profileQueries.some((query) => query.isError);
 
-  const nicknames = profileQueries.flatMap((query) =>
-    query.data === undefined ? [] : [query.data.nickname]
+  const relatedUsers = profileQueries.flatMap((query) =>
+    query.data === undefined
+      ? []
+      : [
+          {
+            uid: query.data.uid,
+            nickname: query.data.nickname,
+          },
+        ]
   );
 
   const label =
@@ -61,11 +68,11 @@ export const ProfileRelationsRow = ({ profile }: ProfileRelationsRowProps) => {
     ? t('auth.profile.relations.loading')
     : failed
       ? t('auth.profile.relations.loadFailed')
-      : nicknames.length > 0
-        ? nicknames.join(', ')
+      : relatedUsers.length > 0
+        ? relatedUsers.map((user) => user.nickname).join(', ')
         : emptyValue;
 
-  const expandable = !loading && !failed && nicknames.length > 0;
+  const expandable = !loading && !failed && relatedUsers.length > 0;
 
   useEffect(() => {
     setExpanded(false);
@@ -105,34 +112,54 @@ export const ProfileRelationsRow = ({ profile }: ProfileRelationsRowProps) => {
           </s.RelationMeasureText>
         )}
 
-        <s.RelationVisibleRow>
-          <s.RelationText
-            numberOfLines={expanded ? undefined : 1}
-            ellipsizeMode="tail"
-          >
-            {value}
-          </s.RelationText>
-
-          {canExpand && (
-            <s.RelationToggle
-              accessibilityRole="button"
-              accessibilityLabel={t(
-                expanded
-                  ? 'auth.profile.relations.collapse'
-                  : 'auth.profile.relations.expand'
-              )}
-              onPress={() => {
-                setExpanded((current) => !current);
-              }}
+        {relatedUsers.length > 0 && !loading && !failed ? (
+          <s.RelationVisibleRow>
+            <s.RelationBadgesViewport
+              style={
+                canExpand && !expanded
+                  ? s.getRelationBadgesCollapsedStyle(theme)
+                  : undefined
+              }
             >
-              <Ionicons
-                name={expanded ? 'chevron-up' : 'chevron-down'}
-                size={theme.size.lg}
-                color={theme.colors.muted}
-              />
-            </s.RelationToggle>
-          )}
-        </s.RelationVisibleRow>
+              <s.RelationBadges>
+                {relatedUsers.map((user) => (
+                  <s.ProfileBadge
+                    key={user.uid}
+                    style={s.getProfileBadgeStyle(theme, 'primary')}
+                  >
+                    <s.ProfileBadgeText
+                      style={s.getProfileBadgeTextStyle(theme, 'primary')}
+                    >
+                      {user.nickname}
+                    </s.ProfileBadgeText>
+                  </s.ProfileBadge>
+                ))}
+              </s.RelationBadges>
+            </s.RelationBadgesViewport>
+
+            {canExpand && (
+              <s.RelationToggle
+                accessibilityRole="button"
+                accessibilityLabel={t(
+                  expanded
+                    ? 'auth.profile.relations.collapse'
+                    : 'auth.profile.relations.expand'
+                )}
+                onPress={() => {
+                  setExpanded((current) => !current);
+                }}
+              >
+                <Ionicons
+                  name={expanded ? 'chevron-up' : 'chevron-down'}
+                  size={theme.size.lg}
+                  color={theme.colors.muted}
+                />
+              </s.RelationToggle>
+            )}
+          </s.RelationVisibleRow>
+        ) : (
+          <s.RelationText>{value}</s.RelationText>
+        )}
       </s.RelationValue>
     </s.ProfileRow>
   );

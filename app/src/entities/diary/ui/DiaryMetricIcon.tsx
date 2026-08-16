@@ -25,7 +25,11 @@ const IONICON_NAMES: Record<
   carbsGram: 'leaf-outline',
 };
 
-const DiaryMetricIcon = ({ metric, size, color }: DiaryMetricIconProps) => {
+export const DiaryMetricIcon = ({
+  metric,
+  size,
+  color,
+}: DiaryMetricIconProps) => {
   if (metric === 'shortInsulin') {
     return <MaterialCommunityIcons name="needle" size={size} color={color} />;
   }
@@ -36,5 +40,3 @@ const DiaryMetricIcon = ({ metric, size, color }: DiaryMetricIconProps) => {
 
   return <Ionicons name={IONICON_NAMES[metric]} size={size} color={color} />;
 };
-
-export default DiaryMetricIcon;

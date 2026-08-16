@@ -8,7 +8,7 @@ export type FollowerDiaryUser = {
   nickname: string;
 };
 
-const useFollowerDiaryUsers = (followedUserIds: readonly string[]) => {
+export const useFollowerDiaryUsers = (followedUserIds: readonly string[]) => {
   const ownerUids = useMemo(
     () => Array.from(new Set(followedUserIds)),
     [followedUserIds]
@@ -80,5 +80,3 @@ const useFollowerDiaryUsers = (followedUserIds: readonly string[]) => {
     selectOwner,
   };
 };
-
-export default useFollowerDiaryUsers;

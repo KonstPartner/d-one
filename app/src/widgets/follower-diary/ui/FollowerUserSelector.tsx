@@ -15,7 +15,7 @@ type FollowerUserSelectorProps = {
   onSelect: (uid: string) => void;
 };
 
-const FollowerUserSelector = ({
+export const FollowerUserSelector = ({
   users,
 
   selectedOwnerUid,
@@ -57,5 +57,3 @@ const FollowerUserSelector = ({
     />
   );
 };
-
-export default FollowerUserSelector;

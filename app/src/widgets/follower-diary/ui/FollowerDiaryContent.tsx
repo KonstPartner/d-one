@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { ScrollViewProps } from 'react-native';
 
 import {
   type CloudDiaryEntry,
@@ -18,6 +19,14 @@ type FollowerDiaryContentProps = {
   refreshing: boolean;
 
   onRefresh: () => void | Promise<void>;
+
+  contentContainerStyle?: ScrollViewProps['contentContainerStyle'];
+
+  onScroll?: ScrollViewProps['onScroll'];
+
+  onScrollBeginDrag?: ScrollViewProps['onScrollBeginDrag'];
+
+  onScrollEndDrag?: ScrollViewProps['onScrollEndDrag'];
 };
 
 const FollowerDiaryContentInner = ({
@@ -26,6 +35,12 @@ const FollowerDiaryContentInner = ({
   refreshing,
 
   onRefresh,
+
+  contentContainerStyle,
+
+  onScroll,
+  onScrollBeginDrag,
+  onScrollEndDrag,
 }: FollowerDiaryContentProps) => {
   const { t } = useTranslation();
 
@@ -96,6 +111,10 @@ const FollowerDiaryContentInner = ({
         onPrevious={handlePrevious}
         onNext={handleNext}
         onOpenPhoto={handleOpenPhoto}
+        contentContainerStyle={contentContainerStyle}
+        onScroll={onScroll}
+        onScrollBeginDrag={onScrollBeginDrag}
+        onScrollEndDrag={onScrollEndDrag}
       />
 
       <CloudDiaryPhotoViewer

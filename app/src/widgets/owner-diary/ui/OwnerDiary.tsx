@@ -16,6 +16,7 @@ import {
   useDiaryTransferState,
 } from '@entities/diary';
 import { showNotification } from '@shared/lib/notifications';
+import { useCollapsibleToolbarVisibility } from '@shared/lib/react';
 import * as ss from '@shared/styles';
 import { ConfirmDialog, Spinner } from '@shared/ui';
 
@@ -25,7 +26,6 @@ import { useOwnerDiaryHeaderMenu } from '../model/useOwnerDiaryHeaderMenu';
 import { useOwnerDiaryPreparation } from '../model/useOwnerDiaryPreparation';
 import { useOwnerDiarySelection } from '../model/useOwnerDiarySelection';
 import { useOwnerDiarySync } from '../model/useOwnerDiarySync';
-import { useOwnerDiaryToolbarVisibility } from '../model/useOwnerDiaryToolbarVisibility';
 import * as s from '../styles/OwnerDiary';
 
 import { OwnerDiaryPreparationModal } from './OwnerDiaryPreparationModal';
@@ -42,7 +42,7 @@ export const OwnerDiary = () => {
 
   const diaryPreparation = useOwnerDiaryPreparation();
 
-  const toolbar = useOwnerDiaryToolbarVisibility();
+  const toolbar = useCollapsibleToolbarVisibility();
 
   const transfer = useDiaryTransferState();
 

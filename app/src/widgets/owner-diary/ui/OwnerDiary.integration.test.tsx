@@ -287,6 +287,24 @@ jest.mock('@shared/lib/notifications', () => ({
   showNotification: jest.fn(),
 }));
 
+jest.mock('@shared/lib/react', () => ({
+  useCollapsibleToolbarVisibility: () => ({
+    toolbarAnimatedStyle: {},
+
+    listContentContainerStyle: {},
+
+    handleToolbarLayout: mockHandleToolbarLayout,
+
+    handleScroll: mockHandleToolbarScroll,
+
+    handleScrollBeginDrag: mockHandleToolbarScrollBeginDrag,
+
+    handleScrollEndDrag: mockHandleToolbarScrollEndDrag,
+
+    showToolbar: mockShowToolbar,
+  }),
+}));
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
@@ -523,24 +541,6 @@ jest.mock('./OwnerDiarySelectionToolbar', () => {
 
 jest.mock('./OwnerDiaryPreparationModal', () => ({
   OwnerDiaryPreparationModal: () => null,
-}));
-
-jest.mock('../model/useOwnerDiaryToolbarVisibility', () => ({
-  useOwnerDiaryToolbarVisibility: () => ({
-    toolbarAnimatedStyle: {},
-
-    listContentContainerStyle: {},
-
-    handleToolbarLayout: mockHandleToolbarLayout,
-
-    handleScroll: mockHandleToolbarScroll,
-
-    handleScrollBeginDrag: mockHandleToolbarScrollBeginDrag,
-
-    handleScrollEndDrag: mockHandleToolbarScrollEndDrag,
-
-    showToolbar: mockShowToolbar,
-  }),
 }));
 
 jest.mock('../model/useOwnerDiary', () => ({

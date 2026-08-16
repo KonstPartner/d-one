@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import * as s from '../styles/DiaryEntryCard';
 
-import DiaryMetricIcon from './DiaryMetricIcon';
+import { DiaryMetricIcon } from './DiaryMetricIcon';
 
 type DiaryEntryMetricsProps = {
   glucose: number | null;
