@@ -26,6 +26,11 @@ export { Notification } from './Notification';
 export { PageLayout } from './PageLayout';
 export { Pagination } from './Pagination';
 export { PasswordInput } from './PasswordInput';
+export type {
+  PhotoRedactorResult,
+  PhotoRedactorSource,
+} from './photo-redactor';
+export { PhotoRedactorModal } from './photo-redactor';
 export { PhotoViewer } from './photo-viewer';
 export { PortalModal } from './PortalModal';
 export type { SearchInputProps } from './SearchInput';

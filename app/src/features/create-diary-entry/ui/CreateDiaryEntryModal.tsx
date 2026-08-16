@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { DiaryEntryEditorFields, DiaryEntryEditorModal } from '@entities/diary';
-import { ConfirmDialog } from '@shared/ui';
+import { ConfirmDialog, PhotoRedactorModal } from '@shared/ui';
 
 import {
   type CreateDiaryEntrySubmitResult,
@@ -37,6 +37,7 @@ export const CreateDiaryEntryModal = ({
     useCurrentDateTime,
 
     photoUri,
+    photoEditorSource,
     hasTemporaryPhoto,
 
     isPhotoBusy,
@@ -65,6 +66,10 @@ export const CreateDiaryEntryModal = ({
 
     selectPhoto,
     deletePhoto,
+
+    cancelPhotoEditing,
+    confirmPhotoEditing,
+    handlePhotoEditorError,
 
     discardPhoto,
 
@@ -196,6 +201,14 @@ export const CreateDiaryEntryModal = ({
           onRequestTimerChange={handleRequestTimerChange}
         />
       </DiaryEntryEditorModal>
+
+      <PhotoRedactorModal
+        visible={photoEditorSource !== null}
+        source={photoEditorSource}
+        onCancel={cancelPhotoEditing}
+        onConfirm={confirmPhotoEditing}
+        onError={handlePhotoEditorError}
+      />
 
       <ConfirmDialog
         visible={discardConfirmVisible}

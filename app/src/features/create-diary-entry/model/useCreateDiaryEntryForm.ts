@@ -110,6 +110,7 @@ export const useCreateDiaryEntryForm = ({
     useCurrentDateTime: draft.useCurrentDateTime,
 
     photoUri: photo.photoUri,
+    photoEditorSource: photo.photoEditorSource,
 
     hasTemporaryPhoto: photo.hasTemporaryPhoto,
 
@@ -147,6 +148,10 @@ export const useCreateDiaryEntryForm = ({
     selectPhoto: photo.selectPhoto,
 
     deletePhoto: handleDeletePhoto,
+
+    cancelPhotoEditing: photo.cancelPhotoEditing,
+    confirmPhotoEditing: photo.confirmPhotoEditing,
+    handlePhotoEditorError: photo.handlePhotoEditorError,
 
     discardPhoto: photo.discardPhoto,
 
