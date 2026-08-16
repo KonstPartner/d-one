@@ -5,6 +5,11 @@ export {
   saveLocalUserProfile,
 } from './api/localUserProfileStorage';
 export {
+  getRelatedUserProfile,
+  relatedUserProfileQueryKeys,
+  relatedUserProfileQueryOptions,
+} from './api/relatedUserProfileQuery';
+export {
   userProfileQueryKeys,
   userProfileQueryOptions,
 } from './api/userProfileQuery';

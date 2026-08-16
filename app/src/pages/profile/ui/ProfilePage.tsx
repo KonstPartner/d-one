@@ -15,6 +15,8 @@ import { Loader, LoadingView, PageLayout, PortalModal } from '@shared/ui';
 
 import * as s from '../styles/ProfilePage';
 
+import { ProfileRelationsRow } from './ProfileRelationsRow';
+
 const ProfileContent = () => {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -66,110 +68,127 @@ const ProfileContent = () => {
     <>
       <ProfileHelp role={profile.role} />
 
-      <s.Content>
-        <s.MainContent>
-          <s.ProfileCard>
-            <s.ProfileRow>
-              <s.ProfileLabel>{t('auth.profile.nickname')}</s.ProfileLabel>
+      <s.Scroll
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={s.scrollContentStyle}
+      >
+        <s.Content>
+          <s.MainContent>
+            <s.ProfileCard>
+              <s.ProfileRow>
+                <s.ProfileLabel>{t('auth.profile.nickname')}</s.ProfileLabel>
 
-              <s.ProfileValue numberOfLines={1}>
-                {profile.nickname}
-              </s.ProfileValue>
-            </s.ProfileRow>
+                <s.ProfileValue numberOfLines={1}>
+                  {profile.nickname}
+                </s.ProfileValue>
+              </s.ProfileRow>
 
-            <s.Separator />
+              <s.Separator />
 
-            <s.ProfileRow>
-              <s.ProfileLabel>{t('auth.profile.email.title')}</s.ProfileLabel>
+              <s.ProfileRow>
+                <s.ProfileLabel>{t('auth.profile.email.title')}</s.ProfileLabel>
 
-              <s.ProfileValue numberOfLines={1}>{currentEmail}</s.ProfileValue>
-            </s.ProfileRow>
+                <s.ProfileValue numberOfLines={1}>
+                  {currentEmail}
+                </s.ProfileValue>
+              </s.ProfileRow>
 
-            <s.Separator />
+              <s.Separator />
 
-            <s.ProfileRow>
-              <s.ProfileLabel>{t('auth.profile.role')}</s.ProfileLabel>
+              <s.ProfileRow>
+                <s.ProfileLabel>{t('auth.profile.role')}</s.ProfileLabel>
 
-              <s.RoleValue>
-                <s.RoleBadge style={s.getRoleBadgeStyle(theme, hasGrantedRole)}>
-                  <s.RoleBadgeText
-                    style={s.getRoleBadgeTextStyle(theme, hasGrantedRole)}
+                <s.RoleValue>
+                  <s.RoleBadge
+                    style={s.getRoleBadgeStyle(theme, hasGrantedRole)}
                   >
-                    {t(roleKey)}
-                  </s.RoleBadgeText>
-                </s.RoleBadge>
-              </s.RoleValue>
-            </s.ProfileRow>
-          </s.ProfileCard>
+                    <s.RoleBadgeText
+                      style={s.getRoleBadgeTextStyle(theme, hasGrantedRole)}
+                    >
+                      {t(roleKey)}
+                    </s.RoleBadgeText>
+                  </s.RoleBadge>
+                </s.RoleValue>
+              </s.ProfileRow>
 
-          <s.Actions>
-            <s.ActionButton
-              accessibilityRole="button"
-              onPress={() => {
-                setIsEmailModalVisible(true);
-              }}
-              style={s.getActionButtonStyle}
-            >
-              <s.ActionContent>
-                <Ionicons
-                  name="pencil-outline"
-                  size={20}
-                  color={theme.colors.text}
-                />
+              {hasGrantedRole && (
+                <>
+                  <s.Separator />
 
-                <s.ActionText>
-                  {t('auth.profile.buttons.changeEmail')}
-                </s.ActionText>
-              </s.ActionContent>
-            </s.ActionButton>
+                  <ProfileRelationsRow profile={profile} />
+                </>
+              )}
+            </s.ProfileCard>
 
-            <s.ActionButton
-              accessibilityRole="button"
-              onPress={() => {
-                setIsPasswordModalVisible(true);
-              }}
-              style={s.getActionButtonStyle}
-            >
-              <s.ActionContent>
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color={theme.colors.text}
-                />
-
-                <s.ActionText>
-                  {t('auth.profile.buttons.changePassword')}
-                </s.ActionText>
-              </s.ActionContent>
-            </s.ActionButton>
-
-            {transferAvailable && (
-              <s.TransferActionButton
+            <s.Actions>
+              <s.ActionButton
                 accessibilityRole="button"
-                accessibilityLabel={t('transfer.title')}
                 onPress={() => {
-                  setIsTransferModalVisible(true);
+                  setIsEmailModalVisible(true);
                 }}
                 style={s.getActionButtonStyle}
               >
                 <s.ActionContent>
                   <Ionicons
-                    name="swap-horizontal-outline"
+                    name="pencil-outline"
                     size={20}
-                    color={theme.colors.shades.warning.text}
+                    color={theme.colors.text}
                   />
 
-                  <s.TransferActionText>
-                    {t('transfer.title')}
-                  </s.TransferActionText>
+                  <s.ActionText>
+                    {t('auth.profile.buttons.changeEmail')}
+                  </s.ActionText>
                 </s.ActionContent>
-              </s.TransferActionButton>
-            )}
-          </s.Actions>
-        </s.MainContent>
+              </s.ActionButton>
 
-        <LogoutButton />
-      </s.Content>
+              <s.ActionButton
+                accessibilityRole="button"
+                onPress={() => {
+                  setIsPasswordModalVisible(true);
+                }}
+                style={s.getActionButtonStyle}
+              >
+                <s.ActionContent>
+                  <Ionicons
+                    name="lock-closed-outline"
+                    size={20}
+                    color={theme.colors.text}
+                  />
+
+                  <s.ActionText>
+                    {t('auth.profile.buttons.changePassword')}
+                  </s.ActionText>
+                </s.ActionContent>
+              </s.ActionButton>
+
+              {transferAvailable && (
+                <s.TransferActionButton
+                  accessibilityRole="button"
+                  accessibilityLabel={t('transfer.title')}
+                  onPress={() => {
+                    setIsTransferModalVisible(true);
+                  }}
+                  style={s.getActionButtonStyle}
+                >
+                  <s.ActionContent>
+                    <Ionicons
+                      name="swap-horizontal-outline"
+                      size={20}
+                      color={theme.colors.shades.warning.text}
+                    />
+
+                    <s.TransferActionText>
+                      {t('transfer.title')}
+                    </s.TransferActionText>
+                  </s.ActionContent>
+                </s.TransferActionButton>
+              )}
+            </s.Actions>
+          </s.MainContent>
+
+          <LogoutButton />
+        </s.Content>
+      </s.Scroll>
 
       <PortalModal
         visible={isEmailModalVisible}

@@ -1,3 +1,4 @@
+import { View } from 'react-native';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -35,64 +36,72 @@ export const RegisterForm = ({ prefill, footer }: RegisterFormProps) => {
 
   return (
     <s.Form>
-      <s.TextInput
-        value={nickname}
-        onChangeText={setNickname}
-        placeholder={t('auth.forms.placeholders.enterNickname')}
-        field="nickname"
-        enableInvalidMessageText
-        isActiveInvalidMessageText={validationVisible}
-        withLabel
-        labelPlaceholder={t('auth.forms.labels.nickname')}
-        maxLength={255}
-        editable={!isPending}
-        autoCapitalize="none"
-        autoCorrect={false}
-        returnKeyType="next"
-      />
+      <View>
+        <s.TextInput
+          value={nickname}
+          onChangeText={setNickname}
+          placeholder={t('auth.forms.placeholders.enterNickname')}
+          field="nickname"
+          enableInvalidMessageText
+          isActiveInvalidMessageText={validationVisible}
+          withLabel
+          labelPlaceholder={t('auth.forms.labels.nickname')}
+          maxLength={255}
+          editable={!isPending}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="next"
+        />
+      </View>
 
-      <s.TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder={t('auth.forms.placeholders.enterEmail')}
-        field="email"
-        enableInvalidMessageText
-        isActiveInvalidMessageText={validationVisible}
-        withLabel
-        labelPlaceholder={t('auth.forms.labels.email')}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-        editable={!isPending}
-        returnKeyType="next"
-      />
+      <View>
+        <s.TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder={t('auth.forms.placeholders.enterEmail')}
+          field="email"
+          enableInvalidMessageText
+          isActiveInvalidMessageText={validationVisible}
+          withLabel
+          labelPlaceholder={t('auth.forms.labels.email')}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={!isPending}
+          returnKeyType="next"
+        />
+      </View>
 
-      <s.PasswordField
-        value={password}
-        onChangeText={setPassword}
-        placeholder={t('auth.forms.placeholders.enterPassword')}
-        field="password"
-        enableInvalidMessageText
-        isActiveInvalidMessageText={validationVisible}
-        withLabel
-        labelPlaceholder={t('auth.forms.labels.password')}
-        editable={!isPending}
-        returnKeyType="next"
-      />
+      <View>
+        <s.PasswordField
+          value={password}
+          onChangeText={setPassword}
+          placeholder={t('auth.forms.placeholders.enterPassword')}
+          field="password"
+          enableInvalidMessageText
+          isActiveInvalidMessageText={validationVisible}
+          withLabel
+          labelPlaceholder={t('auth.forms.labels.password')}
+          editable={!isPending}
+          returnKeyType="next"
+        />
+      </View>
 
-      <s.PasswordField
-        value={repeatedPassword}
-        onChangeText={setRepeatedPassword}
-        placeholder={t('auth.forms.placeholders.confirmPassword')}
-        field="password"
-        enableInvalidMessageText
-        isActiveInvalidMessageText={validationVisible}
-        withLabel
-        labelPlaceholder={t('auth.forms.labels.repeatPassword')}
-        editable={!isPending}
-        returnKeyType="done"
-        onSubmitEditing={submit}
-      />
+      <View>
+        <s.PasswordField
+          value={repeatedPassword}
+          onChangeText={setRepeatedPassword}
+          placeholder={t('auth.forms.placeholders.confirmPassword')}
+          field="password"
+          enableInvalidMessageText
+          isActiveInvalidMessageText={validationVisible}
+          withLabel
+          labelPlaceholder={t('auth.forms.labels.repeatPassword')}
+          editable={!isPending}
+          returnKeyType="done"
+          onSubmitEditing={submit}
+        />
+      </View>
 
       <s.SubmitButton onPress={submit} loading={isPending}>
         <s.SubmitButtonText>

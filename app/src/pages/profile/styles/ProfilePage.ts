@@ -8,6 +8,16 @@ import type {
 
 import * as ss from '@shared/styles';
 
+export const scrollContentStyle: ViewStyle = {
+  flexGrow: 1,
+};
+
+export const Scroll = styled.ScrollView`
+  flex: 1;
+
+  width: 100%;
+`;
+
 export const Content = styled.View`
   flex: 1;
 
@@ -16,6 +26,8 @@ export const Content = styled.View`
   align-self: center;
 
   justify-content: space-between;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.xl)};
 
   padding-bottom: ${({ theme }) => ss.px(theme.spacing.xl)};
 `;
@@ -128,6 +140,51 @@ export const getRoleBadgeTextStyle = (
     ? theme.colors.shades.primary.text
     : theme.colors.shades.warning.text,
 });
+
+export const RelationValue = styled.View`
+  position: relative;
+
+  flex: 1;
+
+  min-width: 0;
+`;
+
+export const RelationVisibleRow = styled.View`
+  width: 100%;
+
+  flex-direction: row;
+  align-items: flex-start;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
+`;
+
+export const RelationText = styled.Text`
+  flex: 1;
+
+  color: ${({ theme }) => theme.colors.text};
+
+  font-size: ${({ theme }) => ss.px(theme.size.md)};
+
+  font-weight: ${({ theme }) => theme.weight.bold};
+
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.lg)};
+`;
+
+export const RelationMeasureText = styled(RelationText)`
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  opacity: 0;
+`;
+
+export const RelationToggle = styled.Pressable`
+  align-items: center;
+  justify-content: center;
+
+  padding-top: ${({ theme }) => ss.px(theme.spacing.xs)};
+`;
 
 export const Actions = styled.View`
   width: 100%;

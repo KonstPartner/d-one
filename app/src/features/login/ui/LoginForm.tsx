@@ -1,3 +1,4 @@
+import { View } from 'react-native';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -25,31 +26,35 @@ export const LoginForm = ({ passwordAction }: LoginFormProps) => {
 
   return (
     <s.Form>
-      <s.TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder={t('auth.forms.placeholders.enterEmail')}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-        field="email"
-        withLabel
-        labelPlaceholder={t('auth.forms.labels.email')}
-        editable={!isPending}
-        returnKeyType="next"
-      />
+      <View>
+        <s.TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder={t('auth.forms.placeholders.enterEmail')}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          field="email"
+          withLabel
+          labelPlaceholder={t('auth.forms.labels.email')}
+          editable={!isPending}
+          returnKeyType="next"
+        />
+      </View>
 
-      <s.PasswordField
-        value={password}
-        onChangeText={setPassword}
-        placeholder={t('auth.forms.placeholders.enterPassword')}
-        field="password"
-        withLabel
-        labelPlaceholder={t('auth.forms.labels.password')}
-        editable={!isPending}
-        returnKeyType="done"
-        onSubmitEditing={submit}
-      />
+      <View>
+        <s.PasswordField
+          value={password}
+          onChangeText={setPassword}
+          placeholder={t('auth.forms.placeholders.enterPassword')}
+          field="password"
+          withLabel
+          labelPlaceholder={t('auth.forms.labels.password')}
+          editable={!isPending}
+          returnKeyType="done"
+          onSubmitEditing={submit}
+        />
+      </View>
 
       {passwordAction && <s.PasswordAction>{passwordAction}</s.PasswordAction>}
 

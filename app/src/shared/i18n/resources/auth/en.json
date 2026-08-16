@@ -1,6 +1,6 @@
 {
   "auth": {
-    "brand": "Diabetes Diary",
+    "brand": "Project DOne",
     "forms": {
       "signInTitle": "Sign in",
       "signUpTitle": "Registration",
@@ -75,6 +75,23 @@
     "profile": {
       "title": "Profile",
       "changePasswordTitle": "Change password",
+      "nickname": "Nickname",
+      "role": "Role",
+      "roles": {
+        "user": "User",
+        "follower": "Follower",
+        "pending": "Access not granted"
+      },
+      "relations": {
+        "followers": "Followers",
+        "following": "Following",
+        "noFollowers": "No followers",
+        "notAssigned": "No user assigned",
+        "loading": "Loading…",
+        "loadFailed": "Failed to load",
+        "expand": "Show all followers",
+        "collapse": "Collapse followers"
+      },
       "email": {
         "title": "Email",
         "warningRelogin": "You will need to sign in again after changing your email",
@@ -92,13 +109,6 @@
         "confirmDone": "I verified my email",
         "changePassword": "Change password",
         "cancel": "Cancel"
-      },
-      "nickname": "Nickname",
-      "role": "Role",
-      "roles": {
-        "user": "User",
-        "follower": "Follower",
-        "pending": "Access not granted"
       }
     }
   }
