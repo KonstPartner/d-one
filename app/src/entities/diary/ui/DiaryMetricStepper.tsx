@@ -1,18 +1,16 @@
-import { type Theme, useTheme } from '@emotion/react';
+import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
-import type { ComponentProps } from 'react';
 
 import { Input } from '@shared/ui';
 
+import { DIARY_ENTRY_METRIC_STEP } from '../model/diaryEntryConstraints';
 import { useDiaryMetricStepper } from '../model/useDiaryMetricStepper';
 import * as s from '../styles/DiaryMetricStepper';
 
-type DiaryMetricKey = keyof Theme['colors']['metrics'];
+import DiaryMetricIcon, { type DiaryMetricKey } from './DiaryMetricIcon';
 
 type DiaryMetricStepperProps = {
   metricKey: DiaryMetricKey;
-
-  icon: ComponentProps<typeof Ionicons>['name'];
 
   label: string;
 
@@ -31,7 +29,6 @@ type DiaryMetricStepperProps = {
 
 export const DiaryMetricStepper = ({
   metricKey,
-  icon,
   label,
   value,
   maximum,
@@ -43,6 +40,8 @@ export const DiaryMetricStepper = ({
 }: DiaryMetricStepperProps) => {
   const theme = useTheme();
 
+  const metricStep = DIARY_ENTRY_METRIC_STEP[metricKey];
+
   const {
     inputValue,
 
@@ -53,15 +52,17 @@ export const DiaryMetricStepper = ({
     handleBlur,
 
     handleDecrementPressIn,
-    handleDecrementLongPress,
+    handleDecrementPressOut,
     handleDecrementPress,
 
     handleIncrementPressIn,
-    handleIncrementLongPress,
+    handleIncrementPressOut,
     handleIncrementPress,
   } = useDiaryMetricStepper({
     value,
     maximum,
+    step: metricStep.press,
+    longPressStep: metricStep.longPress,
     disabled,
     onChange,
   });
@@ -71,7 +72,11 @@ export const DiaryMetricStepper = ({
   return (
     <s.Root $metricKey={metricKey}>
       <s.Header>
-        <Ionicons name={icon} size={theme.size.xl} color={metricColor} />
+        <DiaryMetricIcon
+          metric={metricKey}
+          size={theme.size.xl}
+          color={metricColor}
+        />
 
         <s.Label numberOfLines={2}>{label}</s.Label>
       </s.Header>
@@ -87,7 +92,7 @@ export const DiaryMetricStepper = ({
           }}
           disabled={decrementDisabled}
           onPressIn={handleDecrementPressIn}
-          onLongPress={handleDecrementLongPress}
+          onPressOut={handleDecrementPressOut}
           onPress={handleDecrementPress}
         >
           <Ionicons
@@ -121,7 +126,7 @@ export const DiaryMetricStepper = ({
           }}
           disabled={incrementDisabled}
           onPressIn={handleIncrementPressIn}
-          onLongPress={handleIncrementLongPress}
+          onPressOut={handleIncrementPressOut}
           onPress={handleIncrementPress}
         >
           <Ionicons

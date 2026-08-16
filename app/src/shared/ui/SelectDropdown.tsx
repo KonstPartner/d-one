@@ -25,6 +25,7 @@ export const SelectDropdown = <T,>({
   onSelect,
   isSelected,
   renderOption,
+  renderSelectedIcon,
 
   empty,
   footer,
@@ -45,6 +46,20 @@ export const SelectDropdown = <T,>({
 
   const selectedOption =
     options.find((option) => isSelected?.(option) ?? false) ?? null;
+
+  const customSelectedIcon =
+    selectedOption !== null && renderSelectedIcon !== undefined
+      ? renderSelectedIcon(selectedOption)
+      : null;
+
+  const hasCustomSelectedIcon =
+    customSelectedIcon !== null &&
+    customSelectedIcon !== undefined &&
+    customSelectedIcon !== false;
+
+  const hasSelectedIcon =
+    selectedOption !== null &&
+    (hasCustomSelectedIcon || selectedOption.icon !== undefined);
 
   const handleSelect = (option: SelectDropdownOption<T>): void => {
     if (disabled) {
@@ -78,7 +93,7 @@ export const SelectDropdown = <T,>({
         }}
       >
         <s.FieldContent>
-          {selectedOption?.icon ? (
+          {hasSelectedIcon && selectedOption !== null ? (
             <s.IconBox
               $tone={selectedOption.tone ?? 'primary'}
               $selected={false}
@@ -94,14 +109,18 @@ export const SelectDropdown = <T,>({
                   : undefined
               }
             >
-              <Ionicons
-                name={selectedOption.icon}
-                size={18}
-                color={
-                  selectedOption.colors?.text ??
-                  s.getToneColor(theme, selectedOption.tone ?? 'primary')
-                }
-              />
+              {hasCustomSelectedIcon ? (
+                customSelectedIcon
+              ) : (
+                <Ionicons
+                  name={selectedOption.icon ?? 'search-outline'}
+                  size={18}
+                  color={
+                    selectedOption.colors?.text ??
+                    s.getToneColor(theme, selectedOption.tone ?? 'primary')
+                  }
+                />
+              )}
             </s.IconBox>
           ) : null}
 

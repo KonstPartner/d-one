@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import { useTheme } from '@emotion/react';
-import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import * as s from '../styles/DiaryEntryCard';
+
+import DiaryMetricIcon from './DiaryMetricIcon';
 
 type DiaryEntryMetricsProps = {
   glucose: number | null;
@@ -36,25 +37,21 @@ export const DiaryEntryMetrics = ({
       key: 'glucose',
       value: glucose,
       label: t('diary.entry.metrics.glucose'),
-      icon: 'water',
     },
     {
       key: 'carbsGram',
       value: carbsGram,
       label: t('diary.entry.metrics.carbohydrates'),
-      icon: 'leaf-outline',
     },
     {
       key: 'shortInsulin',
       value: shortInsulin,
       label: t('diary.entry.metrics.shortInsulin'),
-      icon: 'medical-outline',
     },
     {
       key: 'longInsulin',
       value: longInsulin,
       label: t('diary.entry.metrics.longInsulin'),
-      icon: 'shield-checkmark-outline',
     },
   ] as const;
 
@@ -70,6 +67,7 @@ export const DiaryEntryMetrics = ({
         }
 
         const value = numberFormatter.format(metric.value);
+        const color = theme.colors.metrics[metric.key].text;
 
         return (
           <s.Metric
@@ -79,10 +77,10 @@ export const DiaryEntryMetrics = ({
             accessibilityLabel={`${metric.label}: ${value}`}
           >
             <s.MetricIcon>
-              <Ionicons
-                name={metric.icon}
+              <DiaryMetricIcon
+                metric={metric.key}
                 size={theme.size.xl}
-                color={theme.colors.metrics[metric.key].text}
+                color={color}
               />
             </s.MetricIcon>
 

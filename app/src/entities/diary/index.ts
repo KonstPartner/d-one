@@ -143,4 +143,6 @@ export { DiaryEntryMetrics } from './ui/DiaryEntryMetrics';
 export { DiaryEntryPhotoField } from './ui/DiaryEntryPhotoField';
 export type { DiaryLocalListProps } from './ui/DiaryLocalList';
 export { DiaryLocalList } from './ui/DiaryLocalList';
+export type { DiaryMetricKey } from './ui/DiaryMetricIcon';
+export { default as DiaryMetricIcon } from './ui/DiaryMetricIcon';
 export { DiaryPhotoViewer } from './ui/DiaryPhotoViewer';

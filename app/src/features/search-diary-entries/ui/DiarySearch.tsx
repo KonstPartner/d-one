@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
+import type { ComponentProps, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
   DIARY_ENTRY_SEARCH_FIELDS,
   type DiaryEntrySearchField,
+  DiaryMetricIcon,
   isDiaryEntryTextSearchField,
 } from '@entities/diary';
 import {
@@ -22,37 +24,57 @@ const SEARCH_DEBOUNCE_MS = 400;
 
 const SEARCH_FIELD_PRESENTATION: Record<
   DiaryEntrySearchField,
-  Pick<SelectDropdownOption<DiaryEntrySearchField>, 'icon' | 'tone'>
+  Pick<SelectDropdownOption<DiaryEntrySearchField>, 'tone'>
 > = {
   comment: {
-    icon: 'chatbubble-outline',
     tone: 'primary',
   },
 
   aiAnalysis: {
-    icon: 'sparkles-outline',
     tone: 'primary',
   },
 
   glucose: {
-    icon: 'water-outline',
     tone: 'primary',
   },
 
   shortInsulin: {
-    icon: 'medical-outline',
     tone: 'warning',
   },
 
   longInsulin: {
-    icon: 'shield-checkmark-outline',
     tone: 'success',
   },
 
   carbsGram: {
-    icon: 'leaf-outline',
     tone: 'success',
   },
+};
+
+const TEXT_SEARCH_FIELD_ICONS: Record<
+  Extract<DiaryEntrySearchField, 'comment' | 'aiAnalysis'>,
+  ComponentProps<typeof Ionicons>['name']
+> = {
+  comment: 'chatbubble-outline',
+  aiAnalysis: 'sparkles-outline',
+};
+
+const renderSearchFieldIcon = (
+  field: DiaryEntrySearchField,
+  size: number,
+  color: string
+): ReactNode => {
+  if (isDiaryEntryTextSearchField(field)) {
+    return (
+      <Ionicons
+        name={TEXT_SEARCH_FIELD_ICONS[field]}
+        size={size}
+        color={color}
+      />
+    );
+  }
+
+  return <DiaryMetricIcon metric={field} size={size} color={color} />;
 };
 
 type DiarySearchProps = {
@@ -212,6 +234,11 @@ export const DiarySearch = ({
             inlineOptions
             isSelected={(option) => option.value === field}
             onSelect={handleFieldChange}
+            renderSelectedIcon={(option) => {
+              const colors = getFieldColors(option.value);
+
+              return renderSearchFieldIcon(option.value, 18, colors.text);
+            }}
             renderOption={({ option, selected, onPress }) => {
               const colors = getFieldColors(option.value);
 
@@ -231,11 +258,7 @@ export const DiarySearch = ({
                       $backgroundColor={colors.background}
                       $borderColor={colors.border}
                     >
-                      <Ionicons
-                        name={option.icon ?? 'search-outline'}
-                        size={20}
-                        color={colors.text}
-                      />
+                      {renderSearchFieldIcon(option.value, 20, colors.text)}
                     </s.SearchOptionIcon>
 
                     <s.SearchOptionText

@@ -45,6 +45,8 @@ export type SelectDropdownProps<T> = {
 
   renderOption?: (params: SelectDropdownRenderOptionParams<T>) => ReactNode;
 
+  renderSelectedIcon?: (option: SelectDropdownOption<T>) => ReactNode;
+
   empty?: ReactNode;
   footer?: ReactNode;
 };

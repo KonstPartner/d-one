@@ -3,13 +3,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 type UseDiaryMetricStepperParams = {
   value: number | null;
   maximum: number;
+  step: number;
+  longPressStep: number;
   disabled: boolean;
   onChange: (value: number | null) => void;
 };
 
-const STEP = 1;
-const LONG_PRESS_STEP = 5;
 const MINIMUM_VALUE = 0;
+const LONG_PRESS_DELAY_MS = 400;
+const LONG_PRESS_REPEAT_MS = 300;
 
 const VALID_INPUT_PATTERN = /^(?:\d+(?:[.,]\d?)?)?$/;
 
@@ -32,16 +34,26 @@ const normalizeStepResult = (value: number): number =>
 export const useDiaryMetricStepper = ({
   value,
   maximum,
+  step,
+  longPressStep,
   disabled,
   onChange,
 }: UseDiaryMetricStepperParams) => {
   const [inputValue, setInputValue] = useState(() => formatValue(value));
 
-  const decrementLongPressHandled = useRef(false);
-  const incrementLongPressHandled = useRef(false);
+  const currentValueRef = useRef<number | null>(value);
+
+  const longPressHandledRef = useRef(false);
+
+  const longPressDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressRepeatRef = useRef<ReturnType<typeof setInterval> | null>(
+    null
+  );
 
   useEffect(() => {
     const parsedInputValue = parseValue(inputValue);
+
+    currentValueRef.current = parsedInputValue ?? value;
 
     if (value === null) {
       if (inputValue.length > 0) {
@@ -56,15 +68,49 @@ export const useDiaryMetricStepper = ({
     }
   }, [inputValue, value]);
 
+  const clearLongPressTimers = useCallback(() => {
+    if (longPressDelayRef.current !== null) {
+      clearTimeout(longPressDelayRef.current);
+      longPressDelayRef.current = null;
+    }
+
+    if (longPressRepeatRef.current !== null) {
+      clearInterval(longPressRepeatRef.current);
+      longPressRepeatRef.current = null;
+    }
+  }, []);
+
+  useEffect(
+    () => () => {
+      clearLongPressTimers();
+    },
+    [clearLongPressTimers]
+  );
+
+  useEffect(() => {
+    if (disabled) {
+      clearLongPressTimers();
+    }
+  }, [clearLongPressTimers, disabled]);
+
   const applyDelta = useCallback(
     (delta: number) => {
       if (disabled) {
         return;
       }
 
-      const currentValue = parseValue(inputValue) ?? value;
+      const currentValue = currentValueRef.current;
 
-      if (delta < 0 && currentValue === MINIMUM_VALUE) {
+      if (currentValue === null && delta < 0) {
+        return;
+      }
+
+      if (currentValue !== null && delta > 0 && currentValue >= maximum) {
+        return;
+      }
+
+      if (currentValue === MINIMUM_VALUE && delta < 0) {
+        currentValueRef.current = null;
         setInputValue('');
         onChange(null);
 
@@ -78,10 +124,31 @@ export const useDiaryMetricStepper = ({
         )
       );
 
+      currentValueRef.current = nextValue;
       setInputValue(formatValue(nextValue));
       onChange(nextValue);
     },
-    [disabled, inputValue, maximum, onChange, value]
+    [disabled, maximum, onChange]
+  );
+
+  const startLongPress = useCallback(
+    (delta: number) => {
+      clearLongPressTimers();
+
+      longPressHandledRef.current = false;
+
+      longPressDelayRef.current = setTimeout(() => {
+        longPressDelayRef.current = null;
+        longPressHandledRef.current = true;
+
+        applyDelta(delta);
+
+        longPressRepeatRef.current = setInterval(() => {
+          applyDelta(delta);
+        }, LONG_PRESS_REPEAT_MS);
+      }, LONG_PRESS_DELAY_MS);
+    },
+    [applyDelta, clearLongPressTimers]
   );
 
   const handleChangeText = useCallback(
@@ -93,6 +160,7 @@ export const useDiaryMetricStepper = ({
       setInputValue(nextInputValue);
 
       if (nextInputValue.length === 0) {
+        currentValueRef.current = null;
         onChange(null);
 
         return;
@@ -100,11 +168,16 @@ export const useDiaryMetricStepper = ({
 
       const nextValue = parseValue(nextInputValue);
 
-      if (nextValue !== null && nextValue >= MINIMUM_VALUE) {
+      if (
+        nextValue !== null &&
+        nextValue >= MINIMUM_VALUE &&
+        nextValue <= maximum
+      ) {
+        currentValueRef.current = nextValue;
         onChange(nextValue);
       }
     },
-    [disabled, onChange]
+    [disabled, maximum, onChange]
   );
 
   const handleBlur = useCallback(() => {
@@ -112,42 +185,40 @@ export const useDiaryMetricStepper = ({
   }, [value]);
 
   const handleDecrementPressIn = useCallback(() => {
-    decrementLongPressHandled.current = false;
-  }, []);
+    startLongPress(-longPressStep);
+  }, [longPressStep, startLongPress]);
 
-  const handleDecrementLongPress = useCallback(() => {
-    decrementLongPressHandled.current = true;
-    applyDelta(-LONG_PRESS_STEP);
-  }, [applyDelta]);
+  const handleDecrementPressOut = useCallback(() => {
+    clearLongPressTimers();
+  }, [clearLongPressTimers]);
 
   const handleDecrementPress = useCallback(() => {
-    if (decrementLongPressHandled.current) {
-      decrementLongPressHandled.current = false;
+    if (longPressHandledRef.current) {
+      longPressHandledRef.current = false;
 
       return;
     }
 
-    applyDelta(-STEP);
-  }, [applyDelta]);
+    applyDelta(-step);
+  }, [applyDelta, step]);
 
   const handleIncrementPressIn = useCallback(() => {
-    incrementLongPressHandled.current = false;
-  }, []);
+    startLongPress(longPressStep);
+  }, [longPressStep, startLongPress]);
 
-  const handleIncrementLongPress = useCallback(() => {
-    incrementLongPressHandled.current = true;
-    applyDelta(LONG_PRESS_STEP);
-  }, [applyDelta]);
+  const handleIncrementPressOut = useCallback(() => {
+    clearLongPressTimers();
+  }, [clearLongPressTimers]);
 
   const handleIncrementPress = useCallback(() => {
-    if (incrementLongPressHandled.current) {
-      incrementLongPressHandled.current = false;
+    if (longPressHandledRef.current) {
+      longPressHandledRef.current = false;
 
       return;
     }
 
-    applyDelta(STEP);
-  }, [applyDelta]);
+    applyDelta(step);
+  }, [applyDelta, step]);
 
   const currentValue = parseValue(inputValue) ?? value;
 
@@ -163,11 +234,11 @@ export const useDiaryMetricStepper = ({
     handleBlur,
 
     handleDecrementPressIn,
-    handleDecrementLongPress,
+    handleDecrementPressOut,
     handleDecrementPress,
 
     handleIncrementPressIn,
-    handleIncrementLongPress,
+    handleIncrementPressOut,
     handleIncrementPress,
   };
 };

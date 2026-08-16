@@ -5,4 +5,23 @@ export const DIARY_ENTRY_METRIC_MAXIMUM = {
   longInsulin: 1000,
 } as const;
 
+export const DIARY_ENTRY_METRIC_STEP = {
+  glucose: {
+    press: 0.1,
+    longPress: 1,
+  },
+  carbsGram: {
+    press: 1,
+    longPress: 5,
+  },
+  shortInsulin: {
+    press: 0.5,
+    longPress: 1,
+  },
+  longInsulin: {
+    press: 0.5,
+    longPress: 1,
+  },
+} as const;
+
 export const DIARY_ENTRY_COMMENT_MAXIMUM_LENGTH = 5000;

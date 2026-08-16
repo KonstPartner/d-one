@@ -1,6 +1,5 @@
-import { type Theme, useTheme } from '@emotion/react';
+import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
-import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PlatformOS } from '@shared/lib/platform';
@@ -17,9 +16,8 @@ import { DiaryEntryAiControl } from './DiaryEntryAiControl';
 import { DiaryEntryDateTimeFields } from './DiaryEntryDateTimeFields';
 import { DiaryEntryPhotoField } from './DiaryEntryPhotoField';
 import { DiaryMealRelationSelect } from './DiaryMealRelationSelect';
+import type { DiaryMetricKey } from './DiaryMetricIcon';
 import { DiaryMetricStepper } from './DiaryMetricStepper';
-
-type DiaryMetricKey = keyof Theme['colors']['metrics'];
 
 type DiaryEntryEditorFieldsProps = {
   eventAt: Date;
@@ -74,8 +72,6 @@ type DiaryEntryEditorFieldsProps = {
 type MetricField = {
   key: DiaryMetricKey;
 
-  icon: ComponentProps<typeof Ionicons>['name'];
-
   label: string;
 
   value: number | null;
@@ -124,7 +120,6 @@ export const DiaryEntryEditorFields = ({
   const metricFields: MetricField[] = [
     {
       key: 'glucose',
-      icon: 'water',
       label: t('diary.entry.metrics.glucose'),
       value: glucose,
       maximum: DIARY_ENTRY_METRIC_MAXIMUM.glucose,
@@ -132,7 +127,6 @@ export const DiaryEntryEditorFields = ({
     },
     {
       key: 'carbsGram',
-      icon: 'leaf-outline',
       label: t('diary.entry.metrics.carbohydrates'),
       value: carbsGram,
       maximum: DIARY_ENTRY_METRIC_MAXIMUM.carbsGram,
@@ -140,7 +134,6 @@ export const DiaryEntryEditorFields = ({
     },
     {
       key: 'shortInsulin',
-      icon: 'medical-outline',
       label: t('diary.entry.metrics.shortInsulin'),
       value: shortInsulin,
       maximum: DIARY_ENTRY_METRIC_MAXIMUM.shortInsulin,
@@ -148,7 +141,6 @@ export const DiaryEntryEditorFields = ({
     },
     {
       key: 'longInsulin',
-      icon: 'shield-checkmark-outline',
       label: t('diary.entry.metrics.longInsulin'),
       value: longInsulin,
       maximum: DIARY_ENTRY_METRIC_MAXIMUM.longInsulin,
@@ -179,7 +171,6 @@ export const DiaryEntryEditorFields = ({
           <DiaryMetricStepper
             key={metric.key}
             metricKey={metric.key}
-            icon={metric.icon}
             label={metric.label}
             value={metric.value}
             maximum={metric.maximum}
