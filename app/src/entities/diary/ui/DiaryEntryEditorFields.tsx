@@ -27,6 +27,7 @@ type DiaryEntryEditorFieldsProps = {
   glucose: number | null;
   carbsGram: number | null;
   shortInsulin: number | null;
+  ultraShortInsulin: number | null;
   longInsulin: number | null;
 
   mealRelation: MealRelation | null;
@@ -54,6 +55,7 @@ type DiaryEntryEditorFieldsProps = {
   onGlucoseChange: (value: number | null) => void;
   onCarbsGramChange: (value: number | null) => void;
   onShortInsulinChange: (value: number | null) => void;
+  onUltraShortInsulinChange: (value: number | null) => void;
   onLongInsulinChange: (value: number | null) => void;
 
   onMealRelationChange: (value: MealRelation | null) => void;
@@ -87,6 +89,7 @@ export const DiaryEntryEditorFields = ({
   glucose,
   carbsGram,
   shortInsulin,
+  ultraShortInsulin,
   longInsulin,
   mealRelation,
   comment,
@@ -104,6 +107,7 @@ export const DiaryEntryEditorFields = ({
   onGlucoseChange,
   onCarbsGramChange,
   onShortInsulinChange,
+  onUltraShortInsulinChange,
   onLongInsulinChange,
   onMealRelationChange,
   onCommentChange,
@@ -138,6 +142,13 @@ export const DiaryEntryEditorFields = ({
       value: shortInsulin,
       maximum: DIARY_ENTRY_METRIC_MAXIMUM.shortInsulin,
       onChange: onShortInsulinChange,
+    },
+    {
+      key: 'ultraShortInsulin',
+      label: t('diary.entry.metrics.ultraShortInsulin'),
+      value: ultraShortInsulin,
+      maximum: DIARY_ENTRY_METRIC_MAXIMUM.ultraShortInsulin,
+      onChange: onUltraShortInsulinChange,
     },
     {
       key: 'longInsulin',

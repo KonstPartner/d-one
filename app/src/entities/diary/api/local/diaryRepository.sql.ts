@@ -9,6 +9,7 @@ export const CREATE_DIARY_ENTRY_SQL = `
     glucose,
     meal_relation,
     short_insulin,
+    ultra_short_insulin,
     long_insulin,
     carbs_gram,
     comment,
@@ -25,6 +26,7 @@ export const CREATE_DIARY_ENTRY_SQL = `
     $glucose,
     $mealRelation,
     $shortInsulin,
+    $ultraShortInsulin,
     $longInsulin,
     $carbsGram,
     $comment,
@@ -44,6 +46,7 @@ export const DIARY_ENTRY_SELECT_SQL = `
     glucose,
     meal_relation,
     short_insulin,
+    ultra_short_insulin,
     long_insulin,
     carbs_gram,
     comment,
@@ -87,6 +90,7 @@ export const UPDATE_DIARY_ENTRY_SQL = `
     glucose = $glucose,
     meal_relation = $mealRelation,
     short_insulin = $shortInsulin,
+    ultra_short_insulin = $ultraShortInsulin,
     long_insulin = $longInsulin,
     carbs_gram = $carbsGram,
     comment = $comment,
@@ -108,6 +112,7 @@ export const UPDATE_DIARY_ENTRY_WITH_PHOTO_SQL = `
     glucose = $glucose,
     meal_relation = $mealRelation,
     short_insulin = $shortInsulin,
+    ultra_short_insulin = $ultraShortInsulin,
     long_insulin = $longInsulin,
     carbs_gram = $carbsGram,
     comment = $comment,
@@ -132,6 +137,7 @@ export const REPLACE_SYNCED_DIARY_ENTRY_SQL = `
     glucose = $glucose,
     meal_relation = $mealRelation,
     short_insulin = $shortInsulin,
+    ultra_short_insulin = $ultraShortInsulin,
     long_insulin = $longInsulin,
     carbs_gram = $carbsGram,
     comment = $comment,
@@ -181,6 +187,7 @@ export const MARK_DIARY_ENTRY_SYNCED_IF_UNCHANGED_SQL = `
     AND glucose IS $glucose
     AND meal_relation IS $mealRelation
     AND short_insulin IS $shortInsulin
+    AND ultra_short_insulin IS $ultraShortInsulin
     AND long_insulin IS $longInsulin
     AND carbs_gram IS $carbsGram
 

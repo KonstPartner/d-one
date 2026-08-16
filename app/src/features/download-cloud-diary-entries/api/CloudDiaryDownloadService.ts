@@ -82,6 +82,8 @@ const createSyncedEntryInput = (entry: CloudDiaryEntry) => ({
 
   shortInsulin: entry.shortInsulin,
 
+  ultraShortInsulin: entry.ultraShortInsulin,
+
   longInsulin: entry.longInsulin,
 
   carbsGram: entry.carbsGram,

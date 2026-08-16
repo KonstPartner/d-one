@@ -109,6 +109,11 @@ export const lightTheme: Theme = {
         background: '#EFF6FF',
         border: '#BFDBFE',
       },
+      ultraShortInsulin: {
+        text: '#F97316',
+        background: '#FFF7ED',
+        border: '#FED7AA',
+      },
       longInsulin: {
         text: '#8B5CF6',
         background: '#F5F3FF',
@@ -186,6 +191,11 @@ export const darkTheme: Theme = {
         text: '#60A5FA',
         background: 'rgba(59, 130, 246, 0.12)',
         border: 'rgba(59, 130, 246, 0.3)',
+      },
+      ultraShortInsulin: {
+        text: '#FB923C',
+        background: 'rgba(249, 115, 22, 0.12)',
+        border: 'rgba(249, 115, 22, 0.3)',
       },
       longInsulin: {
         text: '#A78BFA',

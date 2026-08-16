@@ -138,6 +138,8 @@ export const useCreateDiaryEntryForm = ({
 
     handleShortInsulinChange: draft.handleShortInsulinChange,
 
+    handleUltraShortInsulinChange: draft.handleUltraShortInsulinChange,
+
     handleLongInsulinChange: draft.handleLongInsulinChange,
 
     handleMealRelationChange: draft.handleMealRelationChange,

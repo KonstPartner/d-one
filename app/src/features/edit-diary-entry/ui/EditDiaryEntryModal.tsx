@@ -57,6 +57,7 @@ export const EditDiaryEntryModal = ({
     handleGlucoseChange,
     handleCarbsGramChange,
     handleShortInsulinChange,
+    handleUltraShortInsulinChange,
     handleLongInsulinChange,
 
     handleMealRelationChange,
@@ -154,6 +155,7 @@ export const EditDiaryEntryModal = ({
           glucose={values.glucose}
           carbsGram={values.carbsGram}
           shortInsulin={values.shortInsulin}
+          ultraShortInsulin={values.ultraShortInsulin}
           longInsulin={values.longInsulin}
           mealRelation={values.mealRelation}
           comment={values.comment}
@@ -171,6 +173,7 @@ export const EditDiaryEntryModal = ({
           onGlucoseChange={handleGlucoseChange}
           onCarbsGramChange={handleCarbsGramChange}
           onShortInsulinChange={handleShortInsulinChange}
+          onUltraShortInsulinChange={handleUltraShortInsulinChange}
           onLongInsulinChange={handleLongInsulinChange}
           onMealRelationChange={handleMealRelationChange}
           onCommentChange={handleCommentChange}

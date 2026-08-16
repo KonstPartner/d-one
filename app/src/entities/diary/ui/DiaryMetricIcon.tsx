@@ -9,6 +9,7 @@ export type DiaryMetricKey =
   | 'glucose'
   | 'carbsGram'
   | 'shortInsulin'
+  | 'ultraShortInsulin'
   | 'longInsulin';
 
 type DiaryMetricIconProps = {
@@ -23,6 +24,7 @@ const IONICON_NAMES: Record<
 > = {
   glucose: 'water',
   carbsGram: 'leaf-outline',
+  ultraShortInsulin: 'flash-outline',
 };
 
 export const DiaryMetricIcon = ({

@@ -100,6 +100,8 @@ const createSyncedEntryParameters = (
 
   $shortInsulin: input.shortInsulin,
 
+  $ultraShortInsulin: input.ultraShortInsulin,
+
   $longInsulin: input.longInsulin,
 
   $carbsGram: input.carbsGram,
@@ -180,6 +182,8 @@ export class DiaryLocalRepository {
         $mealRelation: input.mealRelation,
 
         $shortInsulin: input.shortInsulin,
+
+        $ultraShortInsulin: input.ultraShortInsulin,
 
         $longInsulin: input.longInsulin,
 
@@ -483,6 +487,8 @@ export class DiaryLocalRepository {
 
           $shortInsulin: entry.shortInsulin,
 
+          $ultraShortInsulin: entry.ultraShortInsulin,
+
           $longInsulin: entry.longInsulin,
 
           $carbsGram: entry.carbsGram,
@@ -549,6 +555,8 @@ export class DiaryLocalRepository {
         $mealRelation: input.mealRelation,
 
         $shortInsulin: input.shortInsulin,
+
+        $ultraShortInsulin: input.ultraShortInsulin,
 
         $longInsulin: input.longInsulin,
 

@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-const CURRENT_DATABASE_VERSION = 1;
+const CURRENT_DATABASE_VERSION = 2;
 
 type UserVersionRow = {
   user_version: number;
@@ -33,9 +33,22 @@ const MIGRATE_TO_VERSION_ONE_SQL = `
   PRAGMA user_version = 1;
 `;
 
+const MIGRATE_TO_VERSION_TWO_SQL = `
+  ALTER TABLE diary_entries
+  ADD COLUMN ultra_short_insulin REAL;
+
+  PRAGMA user_version = 2;
+`;
+
 const migrateToVersionOne = async (database: SQLiteDatabase): Promise<void> => {
   await database.withExclusiveTransactionAsync(async (transaction) => {
     await transaction.execAsync(MIGRATE_TO_VERSION_ONE_SQL);
+  });
+};
+
+const migrateToVersionTwo = async (database: SQLiteDatabase): Promise<void> => {
+  await database.withExclusiveTransactionAsync(async (transaction) => {
+    await transaction.execAsync(MIGRATE_TO_VERSION_TWO_SQL);
   });
 };
 
@@ -54,5 +67,9 @@ export const migrateDiaryDatabase = async (
 
   if (currentVersion < 1) {
     await migrateToVersionOne(database);
+  }
+
+  if (currentVersion < 2) {
+    await migrateToVersionTwo(database);
   }
 };

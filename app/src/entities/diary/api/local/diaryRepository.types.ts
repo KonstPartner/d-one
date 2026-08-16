@@ -6,6 +6,7 @@ export const DIARY_ENTRY_SEARCH_FIELDS = [
   'aiAnalysis',
   'glucose',
   'shortInsulin',
+  'ultraShortInsulin',
   'longInsulin',
   'carbsGram',
 ] as const;
@@ -67,6 +68,7 @@ export type DiaryEntryFilterCriteria = {
 
   glucose: DiaryEntryNumericRange;
   shortInsulin: DiaryEntryNumericRange;
+  ultraShortInsulin: DiaryEntryNumericRange;
   longInsulin: DiaryEntryNumericRange;
   carbsGram: DiaryEntryNumericRange;
 
@@ -86,6 +88,7 @@ export type DiaryRepositoryCreateInput = Pick<
   | 'glucose'
   | 'mealRelation'
   | 'shortInsulin'
+  | 'ultraShortInsulin'
   | 'longInsulin'
   | 'carbsGram'
   | 'comment'
@@ -100,6 +103,7 @@ export type DiaryRepositorySyncedEntryInput = Pick<
   | 'glucose'
   | 'mealRelation'
   | 'shortInsulin'
+  | 'ultraShortInsulin'
   | 'longInsulin'
   | 'carbsGram'
   | 'comment'
@@ -121,6 +125,7 @@ export type DiaryRepositoryUpdateInput = Pick<
   | 'glucose'
   | 'mealRelation'
   | 'shortInsulin'
+  | 'ultraShortInsulin'
   | 'longInsulin'
   | 'carbsGram'
   | 'comment'
@@ -139,6 +144,8 @@ export const createDefaultDiaryEntryFilterCriteria =
     glucose: createEmptyDiaryEntryNumericRange(),
 
     shortInsulin: createEmptyDiaryEntryNumericRange(),
+
+    ultraShortInsulin: createEmptyDiaryEntryNumericRange(),
 
     longInsulin: createEmptyDiaryEntryNumericRange(),
 

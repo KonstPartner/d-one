@@ -16,6 +16,7 @@ export const createInitialCreateDiaryEntryValues =
       glucose: null,
       mealRelation: null,
       shortInsulin: null,
+      ultraShortInsulin: null,
       longInsulin: null,
       carbsGram: null,
       comment: '',

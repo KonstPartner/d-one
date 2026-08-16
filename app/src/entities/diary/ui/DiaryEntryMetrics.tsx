@@ -10,6 +10,7 @@ type DiaryEntryMetricsProps = {
   glucose: number | null;
   carbsGram: number | null;
   shortInsulin: number | null;
+  ultraShortInsulin: number | null;
   longInsulin: number | null;
 };
 
@@ -17,6 +18,7 @@ export const DiaryEntryMetrics = ({
   glucose,
   carbsGram,
   shortInsulin,
+  ultraShortInsulin,
   longInsulin,
 }: DiaryEntryMetricsProps) => {
   const theme = useTheme();
@@ -47,6 +49,11 @@ export const DiaryEntryMetrics = ({
       key: 'shortInsulin',
       value: shortInsulin,
       label: t('diary.entry.metrics.shortInsulin'),
+    },
+    {
+      key: 'ultraShortInsulin',
+      value: ultraShortInsulin,
+      label: t('diary.entry.metrics.ultraShortInsulin'),
     },
     {
       key: 'longInsulin',

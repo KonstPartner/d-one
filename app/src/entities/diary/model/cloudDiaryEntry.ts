@@ -7,6 +7,7 @@ export type CloudDiaryEntry = {
   glucose: number | null;
   mealRelation: MealRelation | null;
   shortInsulin: number | null;
+  ultraShortInsulin: number | null;
   longInsulin: number | null;
   carbsGram: number | null;
 

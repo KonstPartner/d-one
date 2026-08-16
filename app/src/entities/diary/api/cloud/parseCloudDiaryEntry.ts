@@ -25,6 +25,9 @@ const invalidEntry = (): never => {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+const hasOwn = (record: Record<string, unknown>, key: string): boolean =>
+  Object.prototype.hasOwnProperty.call(record, key);
+
 const parseNullableNumber = (value: unknown): number | null => {
   if (value === null) {
     return null;
@@ -36,6 +39,12 @@ const parseNullableNumber = (value: unknown): number | null => {
 
   return value;
 };
+
+const parseOptionalNullableNumber = (
+  record: Record<string, unknown>,
+  key: string
+): number | null =>
+  hasOwn(record, key) ? parseNullableNumber(record[key]) : null;
 
 const parseNullableString = (value: unknown): string | null => {
   if (value === null) {
@@ -102,6 +111,8 @@ export const parseCloudDiaryEntry = ({
     mealRelation: parseMealRelation(data.mealRelation),
 
     shortInsulin: parseNullableNumber(data.shortInsulin),
+
+    ultraShortInsulin: parseOptionalNullableNumber(data, 'ultraShortInsulin'),
 
     longInsulin: parseNullableNumber(data.longInsulin),
 
