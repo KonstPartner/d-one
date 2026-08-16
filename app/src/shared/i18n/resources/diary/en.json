@@ -315,12 +315,17 @@
       }
     },
     "follower": {
+      "userSelector": {
+        "label": "User",
+        "placeholder": "Select a user",
+        "loading": "Loading users…"
+      },
       "menu": {
         "refresh": "Refresh list"
       },
       "unassigned": {
-        "title": "No user assigned to follow",
-        "description": "A user must be assigned to your account before their diary can be viewed."
+        "title": "No users assigned to follow",
+        "description": "At least one user must be assigned to your account before diaries can be viewed."
       },
       "empty": {
         "title": "No entries",

@@ -84,7 +84,7 @@ const createProfile = ({
   nickname: 'User',
   role,
   followerUserIds: [],
-  followedUserId: null,
+  followedUserIds: [],
 });
 
 const mockRemoteProfile = (profile: UserProfile): void => {

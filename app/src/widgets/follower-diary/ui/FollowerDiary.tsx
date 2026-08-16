@@ -1,16 +1,17 @@
 import { useMemo } from 'react';
-import styled from '@emotion/native';
 import { useTranslation } from 'react-i18next';
 
 import { FollowerDiaryHelp } from '@features/screen-help';
 import { type HeaderMenuItem, useHeaderMenu } from '@shared/lib/navigation';
-import * as ss from '@shared/styles';
 import { Loader, LoadingView } from '@shared/ui';
 
 import { useFollowerDiaryProfile } from '../model/useFollowerDiaryProfile';
 import { useFollowerDiaryRefresh } from '../model/useFollowerDiaryRefresh';
+import useFollowerDiaryUsers from '../model/useFollowerDiaryUsers';
+import * as s from '../styles/FollowerDiary';
 
 import { FollowerDiaryContent } from './FollowerDiaryContent';
+import FollowerUserSelector from './FollowerUserSelector';
 
 type UnassignedStateProps = {
   refreshing: boolean;
@@ -47,23 +48,25 @@ const UnassignedState = ({
   useHeaderMenu(headerMenuItems);
 
   return (
-    <State>
-      <StateTitle>{t('diary.follower.unassigned.title')}</StateTitle>
+    <s.State>
+      <s.StateTitle>{t('diary.follower.unassigned.title')}</s.StateTitle>
 
-      <StateDescription>
+      <s.StateDescription>
         {t('diary.follower.unassigned.description')}
-      </StateDescription>
-    </State>
+      </s.StateDescription>
+    </s.State>
   );
 };
 
 const FollowerDiaryInner = () => {
   const followerProfile = useFollowerDiaryProfile();
 
+  const followerUsers = useFollowerDiaryUsers(followerProfile.followedUserIds);
+
   const diaryRefresh = useFollowerDiaryRefresh({
     userId: followerProfile.userId,
 
-    currentOwnerUid: followerProfile.followedUserId,
+    currentOwnerUid: followerUsers.ownerUid,
   });
 
   if (followerProfile.hasInitialError) {
@@ -74,22 +77,41 @@ const FollowerDiaryInner = () => {
     return <LoadingView />;
   }
 
+  if (followerUsers.selectorError !== null) {
+    throw followerUsers.selectorError;
+  }
+
   return (
     <>
       <FollowerDiaryHelp />
 
-      {followerProfile.followedUserId === null ? (
+      {followerUsers.ownerUid === null ? (
         <UnassignedState
           refreshing={diaryRefresh.isRefreshing}
           onRefresh={diaryRefresh.refresh}
         />
       ) : (
-        <FollowerDiaryContent
-          key={`${followerProfile.followedUserId}:${diaryRefresh.contentRevision}`}
-          ownerUid={followerProfile.followedUserId}
-          refreshing={diaryRefresh.isRefreshing}
-          onRefresh={diaryRefresh.refresh}
-        />
+        <s.Content>
+          {followerUsers.showSelector ? (
+            <s.Selector>
+              <FollowerUserSelector
+                users={followerUsers.users}
+                selectedOwnerUid={followerUsers.ownerUid}
+                loading={followerUsers.selectorLoading}
+                onSelect={followerUsers.selectOwner}
+              />
+            </s.Selector>
+          ) : null}
+
+          <s.Diary>
+            <FollowerDiaryContent
+              key={`${followerUsers.ownerUid}:${diaryRefresh.contentRevision}`}
+              ownerUid={followerUsers.ownerUid}
+              refreshing={diaryRefresh.isRefreshing}
+              onRefresh={diaryRefresh.refresh}
+            />
+          </s.Diary>
+        </s.Content>
       )}
     </>
   );
@@ -100,28 +122,3 @@ export const FollowerDiary = () => (
     <FollowerDiaryInner />
   </Loader>
 );
-
-const State = styled.View`
-  flex: 1;
-
-  align-items: center;
-  justify-content: center;
-
-  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
-
-  padding-horizontal: ${({ theme }) => ss.px(theme.spacing.lg)};
-`;
-
-const StateTitle = styled.Text`
-  ${({ theme }) => ss.Subheading(theme)};
-
-  text-align: center;
-`;
-
-const StateDescription = styled.Text`
-  ${({ theme }) => ss.Body(theme)};
-
-  color: ${({ theme }) => theme.colors.muted};
-
-  text-align: center;
-`;

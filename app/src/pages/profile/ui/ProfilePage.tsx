@@ -11,6 +11,7 @@ import { ProfileHelp } from '@features/screen-help';
 import { UpdateEmailForm } from '@features/update-email';
 import { useSession } from '@entities/session';
 import { userProfileQueryOptions, UserRole } from '@entities/user';
+import { PlatformOS } from '@shared/lib/platform';
 import { Loader, LoadingView, PageLayout, PortalModal } from '@shared/ui';
 
 import * as s from '../styles/ProfilePage';
@@ -62,7 +63,7 @@ const ProfileContent = () => {
   const hasGrantedRole =
     profile.role === UserRole.User || profile.role === UserRole.Follower;
 
-  const transferAvailable = profile.role === UserRole.User;
+  const transferAvailable = profile.role === UserRole.User && !PlatformOS.WEB;
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 
 import { getUserProfile, type UserProfile } from '@entities/user';
 import { auth } from '@shared/api';
@@ -18,5 +18,18 @@ export const loginWithEmail = async ({
     password
   );
 
-  return getUserProfile(credential.user.uid);
+  try {
+    return await getUserProfile(credential.user.uid);
+  } catch (error) {
+    try {
+      await signOut(auth);
+    } catch (signOutError) {
+      console.error(
+        'Failed to rollback Firebase session after login error:',
+        signOutError
+      );
+    }
+
+    throw error;
+  }
 };

@@ -4,6 +4,10 @@ import type { PropsWithChildren } from 'react';
 
 import { OwnerDiary } from './OwnerDiary';
 
+jest.mock('@features/screen-help', () => ({
+  OwnerDiaryHelp: () => null,
+}));
+
 type HeaderMenuItem = {
   key: string;
 

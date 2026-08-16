@@ -83,17 +83,17 @@
     },
     "followerDiary": {
       "title": "How to use the followed user's diary",
-      "intro": "This screen lets you view the diary of the user assigned to your account.",
+      "intro": "This screen lets you view the diaries of users assigned to your account.",
       "about": {
         "title": "How this diary works",
-        "description": "The follower diary is intended for viewing another user's data.",
+        "description": "The follower diary is intended for viewing data from assigned users.",
         "readOnly": "This is a read-only view: entries cannot be created, edited, or deleted here.",
-        "cloudData": "The screen shows entries available in the assigned user's cloud diary.",
+        "cloudData": "The screen shows cloud entries for the currently selected user.",
         "syncDelay": "A new or changed entry appears here after the user successfully synchronizes their diary."
       },
       "viewing": {
         "title": "Viewing entries",
-        "entries": "Entry cards can show the date and time, metrics, meal relation, comment, and AI analysis when those values are present.",
+        "entries": "If several users are assigned, choose the one you need from the selector above the diary. Entry cards can show date and time, metrics, meal relation, comment, and AI analysis when available.",
         "photo": "Tap a photo in an entry card to open it full screen.",
         "pages": "Use the navigation buttons at the bottom of the list to move between diary pages."
       },
@@ -101,12 +101,12 @@
         "title": "Refreshing the diary",
         "description": "If the user recently added or changed entries, you can refresh the list manually.",
         "action": "Choose “Refresh list” in the header menu.",
-        "latest": "The app checks the assigned user again and loads the latest entries that are available to you."
+        "latest": "The app checks the current list of assigned users again and refreshes the selected diary."
       },
       "unassigned": {
         "title": "If no user is assigned",
-        "description": "A user must be assigned to your account before their diary can be viewed.",
-        "noDiary": "Until a user is assigned, their diary is unavailable.",
+        "description": "At least one user must be assigned to your account before a diary can be viewed.",
+        "noDiary": "No diaries are available until at least one user is assigned.",
         "refresh": "After assignment, choose “Refresh list” to make the app check access again."
       }
     },

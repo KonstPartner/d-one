@@ -40,12 +40,12 @@ export const DiaryTextPreview = ({
   const theme = useTheme();
   const { t } = useTranslation();
 
-  const { previewLineCount, isTruncated, handleTextLayout, handleOpen } =
+  const { previewLineCount, canOpen, handleTextLayout, handleOpen } =
     useDiaryTextPreview({
       onOpen,
     });
 
-  const interactive = isTruncated && !disabled;
+  const interactive = canOpen && !disabled;
 
   const iconColor =
     variant === 'aiAnalysis'
@@ -107,7 +107,7 @@ export const DiaryTextPreview = ({
         </s.TextFrame>
       </s.Content>
 
-      {isTruncated && (
+      {canOpen && (
         <Ionicons
           name="chevron-forward"
           size={theme.size.md}

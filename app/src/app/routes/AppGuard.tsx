@@ -6,8 +6,9 @@ import { type Href, router, usePathname } from 'expo-router';
 import { useDiaryTransferState } from '@entities/diary';
 import { sessionMutationKeys, useSession } from '@entities/session';
 import { userProfileQueryOptions } from '@entities/user';
+import { errorMapper } from '@shared/lib/errors';
 import { isSamePath } from '@shared/routes';
-import { LoadingView } from '@shared/ui';
+import { ErrorSection, LoadingView, PageLayout } from '@shared/ui';
 
 import { getGuardRedirectPath } from './access/getGuardRedirectPath';
 
@@ -94,6 +95,23 @@ export const AppGuard = ({ children }: AppGuardProps) => {
       cancelAnimationFrame(frame);
     };
   }, [isRedirectRequired, redirectPath]);
+
+  if (isProfileError && !profileQuery.isFetching) {
+    return (
+      <PageLayout edges={['top']}>
+        <GuardContainer>
+          <HiddenContent>{children}</HiddenContent>
+
+          <ErrorSection
+            message={errorMapper(profileQuery.error, 'firebase')}
+            onRetry={() => {
+              void profileQuery.refetch();
+            }}
+          />
+        </GuardContainer>
+      </PageLayout>
+    );
+  }
 
   if (
     isProfileLoading ||

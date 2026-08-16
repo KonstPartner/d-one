@@ -29,12 +29,12 @@ export const ProfileRelationsRow = ({ profile }: ProfileRelationsRowProps) => {
       return Array.from(new Set(profile.followerUserIds));
     }
 
-    if (profile.role === UserRole.Follower && profile.followedUserId !== null) {
-      return [profile.followedUserId];
+    if (profile.role === UserRole.Follower) {
+      return Array.from(new Set(profile.followedUserIds ?? []));
     }
 
     return [];
-  }, [profile.followedUserId, profile.followerUserIds, profile.role]);
+  }, [profile.followedUserIds, profile.followerUserIds, profile.role]);
 
   const profileQueries = useQueries({
     queries: relationIds.map((uid) => relatedUserProfileQueryOptions(uid)),
@@ -65,11 +65,7 @@ export const ProfileRelationsRow = ({ profile }: ProfileRelationsRowProps) => {
         ? nicknames.join(', ')
         : emptyValue;
 
-  const expandable =
-    profile.role === UserRole.User &&
-    !loading &&
-    !failed &&
-    nicknames.length > 0;
+  const expandable = !loading && !failed && nicknames.length > 0;
 
   useEffect(() => {
     setExpanded(false);

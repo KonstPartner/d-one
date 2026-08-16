@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import {
   cloudDiaryPageQueryOptions,
-  cloudDiaryQueryKeys,
   CloudDiaryRepository,
 } from '@entities/diary';
 import { getUserProfileFromServer, userProfileQueryKeys } from '@entities/user';
@@ -80,68 +79,26 @@ export const useFollowerDiaryRefresh = ({
         return;
       }
 
-      const nextOwnerUid = nextProfile.followedUserId;
+      queryClient.setQueryData(userProfileQueryKeys.byId(userId), nextProfile);
 
-      const ownerChanged = nextOwnerUid !== currentOwnerUid;
+      const nextOwnerUids = nextProfile.followedUserIds ?? [];
 
-      if (!ownerChanged) {
-        queryClient.setQueryData(
-          userProfileQueryKeys.byId(userId),
-          nextProfile
-        );
-
-        if (nextOwnerUid === null) {
-          return;
-        }
-
-        try {
-          await fetchFirstPageFromServer(nextOwnerUid);
-        } catch (error) {
-          showNotification('error', errorMapper(error, 'cloud'));
-
-          return;
-        }
-
+      if (
+        currentOwnerUid === null ||
+        !nextOwnerUids.includes(currentOwnerUid)
+      ) {
         setContentRevision((current) => current + 1);
 
         return;
       }
-
-      if (nextOwnerUid === null) {
-        queryClient.setQueryData(
-          userProfileQueryKeys.byId(userId),
-          nextProfile
-        );
-
-        setContentRevision((current) => current + 1);
-
-        return;
-      }
-
-      queryClient.removeQueries({
-        queryKey: cloudDiaryQueryKeys.page({
-          ownerUid: nextOwnerUid,
-
-          cursor: null,
-        }),
-
-        exact: true,
-      });
 
       try {
-        await fetchFirstPageFromServer(nextOwnerUid);
-      } catch {
-        queryClient.setQueryData(
-          userProfileQueryKeys.byId(userId),
-          nextProfile
-        );
-
-        setContentRevision((current) => current + 1);
+        await fetchFirstPageFromServer(currentOwnerUid);
+      } catch (error) {
+        showNotification('error', errorMapper(error, 'cloud'));
 
         return;
       }
-
-      queryClient.setQueryData(userProfileQueryKeys.byId(userId), nextProfile);
 
       setContentRevision((current) => current + 1);
     } finally {

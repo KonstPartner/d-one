@@ -89,8 +89,8 @@
         "notAssigned": "No user assigned",
         "loading": "Loading…",
         "loadFailed": "Failed to load",
-        "expand": "Show all followers",
-        "collapse": "Collapse followers"
+        "expand": "Expand list",
+        "collapse": "Collapse list"
       },
       "email": {
         "title": "Email",

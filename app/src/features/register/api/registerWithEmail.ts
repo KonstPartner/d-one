@@ -30,7 +30,7 @@ const createUserProfile = async (
     nickname,
     role: null,
     followerUserIds: [],
-    followedUserId: null,
+    followedUserIds: [],
   };
 
   await setDoc(userRef, {
