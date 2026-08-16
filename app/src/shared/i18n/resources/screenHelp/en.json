@@ -1,0 +1,187 @@
+{
+  "screenHelp": {
+    "menuLabel": "Help",
+    "ownerDiary": {
+      "title": "How to use the diary",
+      "intro": "The diary is where you keep your glucose, insulin, carbohydrates, meal, photo, and note records.",
+      "entries": {
+        "title": "Entries",
+        "description": "The main diary actions are available directly from this screen.",
+        "create": "Tap “+” to create a new entry.",
+        "edit": "Tap an entry card to open it and change its data.",
+        "photo": "Tap a photo in a card to open it full screen."
+      },
+      "search": {
+        "title": "Search and filters",
+        "description": "Use search when you need to quickly find a specific record.",
+        "field": "Choose what to search by in the dropdown above the search field.",
+        "input": "Enter text or a numeric value in the search field.",
+        "filters": "Use the filter button to narrow entries by date, metrics, meal relation, photo, or AI analysis."
+      },
+      "organization": {
+        "title": "Organizing the list",
+        "day": "Tap a day header to collapse or expand that day.",
+        "allDays": "The header menu can collapse or expand all days on the current page.",
+        "pages": "Use pagination at the bottom of the list to move between pages."
+      },
+      "selection": {
+        "title": "Working with several entries",
+        "description": "Selection mode is useful when the same action should be applied to several records.",
+        "open": "Choose “Select entries” in the header menu, then select the records you need.",
+        "actions": "Selected entries can be synchronized or deleted together."
+      },
+      "sync": {
+        "title": "Synchronization",
+        "description": "New and changed entries are stored on this device first. Synchronization sends pending changes to the cloud when a connection is available.",
+        "status": "The status on an entry card shows whether it is synchronized, pending, synchronizing, or being deleted.",
+        "manual": "Choose “Synchronize” in the header menu to start synchronization manually."
+      },
+      "photoAi": {
+        "title": "Photos, AI, and timer",
+        "photo": "A photo can be added from the camera or photo library and replaced later.",
+        "redaction": "Before saving a photo, you can hide private areas directly in the photo editor.",
+        "ai": "AI food analysis can estimate food and nutrients from a photo. The estimate is approximate and should not be used to calculate an insulin dose.",
+        "timer": "When creating an entry, you can optionally set the built-in 2-hour glucose check timer."
+      }
+    },
+    "ownerCloudDiary": {
+      "title": "How to use the cloud",
+      "intro": "The cloud shows synchronized copies of your diary entries. You can review cloud entries here and download selected entries back to this device.",
+      "about": {
+        "title": "What is stored in the cloud",
+        "description": "The cloud and the local diary serve different purposes.",
+        "syncedOnly": "This screen shows only entries that have already been synchronized with the cloud.",
+        "editInDiary": "Create and edit entries in the Diary section.",
+        "afterSync": "Changes from the local diary appear in the cloud after successful synchronization."
+      },
+      "viewing": {
+        "title": "Viewing entries",
+        "photo": "Tap a photo in a card to open it full screen.",
+        "pages": "Use the navigation buttons at the bottom of the list to move between pages.",
+        "refresh": "Choose “Refresh list” in the header menu to load the latest entries from the cloud again."
+      },
+      "download": {
+        "title": "Downloading entries",
+        "description": "Cloud entries can be saved to the local diary on this device.",
+        "select": "Choose “Select entries” in the header menu.",
+        "choose": "Select the entries you need. You can select several entries or all entries on the current page.",
+        "start": "Tap “Download” to check and transfer the selected entries to the local diary."
+      },
+      "conflicts": {
+        "title": "If an entry already exists on the device",
+        "description": "Before downloading, the app checks the selected entries. If the same entry already exists locally, you can choose how to resolve the conflict.",
+        "skip": "“Skip all conflicts” keeps the existing local entries unchanged.",
+        "replace": "“Replace all conflicts” replaces conflicting local entries with the cloud versions.",
+        "review": "“Review individually” lets you choose an action for each conflicting entry."
+      },
+      "result": {
+        "title": "After downloading",
+        "local": "Successfully downloaded entries are stored in the local diary on this device.",
+        "noAutomaticUpload": "Entries downloaded from the cloud are not uploaded back to the cloud automatically.",
+        "summary": "When the operation finishes, the app shows how many entries were added, replaced, skipped, or failed."
+      }
+    },
+    "followerDiary": {
+      "title": "How to use the followed user's diary",
+      "intro": "This screen lets you view the diary of the user assigned to your account.",
+      "about": {
+        "title": "How this diary works",
+        "description": "The follower diary is intended for viewing another user's data.",
+        "readOnly": "This is a read-only view: entries cannot be created, edited, or deleted here.",
+        "cloudData": "The screen shows entries available in the assigned user's cloud diary.",
+        "syncDelay": "A new or changed entry appears here after the user successfully synchronizes their diary."
+      },
+      "viewing": {
+        "title": "Viewing entries",
+        "entries": "Entry cards can show the date and time, metrics, meal relation, comment, and AI analysis when those values are present.",
+        "photo": "Tap a photo in an entry card to open it full screen.",
+        "pages": "Use the navigation buttons at the bottom of the list to move between diary pages."
+      },
+      "refresh": {
+        "title": "Refreshing the diary",
+        "description": "If the user recently added or changed entries, you can refresh the list manually.",
+        "action": "Choose “Refresh list” in the header menu.",
+        "latest": "The app checks the assigned user again and loads the latest entries that are available to you."
+      },
+      "unassigned": {
+        "title": "If no user is assigned",
+        "description": "A user must be assigned to your account before their diary can be viewed.",
+        "noDiary": "Until a user is assigned, their diary is unavailable.",
+        "refresh": "After assignment, choose “Refresh list” to make the app check access again."
+      }
+    },
+    "profile": {
+      "title": "How to use your profile",
+      "intro": "The profile shows your account details and lets you change sign-in settings or sign out.",
+      "userIntro": "The profile lets you manage your account and also create diary backups or import them back to this device.",
+      "account": {
+        "title": "Profile information",
+        "description": "The upper part of the screen shows the main details of your account.",
+        "nickname": "Nickname identifies your DOne account.",
+        "email": "Email is used to sign in and can be changed with the “Change email” action.",
+        "role": "Your role determines which sections and capabilities are available to your account."
+      },
+      "security": {
+        "title": "Account and security",
+        "changeEmail": "“Change email” replaces the email address used by your account.",
+        "changePassword": "“Change password” lets you set a new sign-in password.",
+        "logout": "Sign out ends the current session on this device."
+      },
+      "transfer": {
+        "title": "Diary import and export",
+        "description": "This section lets you save local diary entries to a file or restore entries from a previously created backup.",
+        "open": "Tap “Import and export” in the profile to open the data transfer module.",
+        "localData": "The module works with the local diary on this device. Export reads locally available entries and import changes the local diary."
+      },
+      "exportFormats": {
+        "title": "Export formats",
+        "description": "After choosing Export, the app asks which file format to create.",
+        "fullBackup": "Full backup — a ZIP containing entries and locally stored photos. This file can be imported back into DOne.",
+        "lightweightBackup": "Lightweight backup — entries without local photo files. Existing cloud photo links are preserved.",
+        "csv": "CSV — a table file for viewing and working with diary data in spreadsheet apps. CSV cannot be imported back into DOne."
+      },
+      "exportScope": {
+        "title": "Which entries to export",
+        "all": "“All entries” exports every locally available diary entry.",
+        "period": "“Period” lets you choose a date range and export only entries within it.",
+        "selected": "“Selected entries” lets you manually choose individual diary entries."
+      },
+      "exportResult": {
+        "title": "After an export is created",
+        "description": "When the file is ready, the app shows the export result and basic information about the created file.",
+        "save": "“Save” stores the created file using the device system controls.",
+        "share": "“Send” opens the system share menu so the file can be passed to another app or person.",
+        "stored": "The created export remains in DOne's created exports list until you delete it."
+      },
+      "savedExports": {
+        "title": "Created and unfinished exports",
+        "description": "The module keeps a list of created export files and exports that can still be resumed.",
+        "search": "Files can be searched by name.",
+        "resume": "An unfinished export can be resumed from its saved progress or deleted.",
+        "manage": "Finished exports can be opened, saved or sent again, selected in bulk, and deleted.",
+        "importSource": "A finished backup from this list can be selected as an import source without choosing the file from the device again."
+      },
+      "import": {
+        "title": "Importing a backup",
+        "description": "Import restores entries from a compatible backup into the local diary.",
+        "source": "You can choose a backup from the device or open one of the backups previously created by DOne.",
+        "backupOnly": "DOne backup files can be imported. CSV files cannot be imported.",
+        "preview": "Before changing the diary, the app validates the file and shows a preview with backup type, entry count, photo count, and detected matches."
+      },
+      "importConflicts": {
+        "title": "If the same entries already exist",
+        "description": "If an entry ID from the backup already exists on the device, the app asks how to resolve the conflict.",
+        "skip": "“Skip all conflicts” keeps the existing local entries unchanged.",
+        "replace": "“Replace all conflicts” replaces the local versions with entries from the backup.",
+        "review": "“Review individually” lets you choose Skip or Replace for each matching entry.",
+        "confirm": "A final import plan is shown before starting. Once the confirmed import begins, it cannot be cancelled."
+      },
+      "importSafety": {
+        "title": "Important during import",
+        "localOnly": "Import changes only the local diary on this device. Import itself does not change cloud data.",
+        "locked": "While import is running, diary changes, synchronization, and signing out are temporarily unavailable.",
+        "result": "When import finishes, the app shows how many entries were added, replaced, and skipped."
+      }
+    }
+  }
+}

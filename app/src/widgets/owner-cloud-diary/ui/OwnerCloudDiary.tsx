@@ -5,6 +5,7 @@ import {
   CloudDiaryDownloadModal,
   useCloudDiaryDownloadFlow,
 } from '@features/download-cloud-diary-entries';
+import { OwnerCloudDiaryHelp } from '@features/screen-help';
 import {
   type CloudDiaryEntry,
   CloudDiaryList,
@@ -177,6 +178,8 @@ const OwnerCloudDiaryContent = ({ ownerUid }: OwnerCloudDiaryContentProps) => {
 
   return (
     <>
+      <OwnerCloudDiaryHelp menuEnabled={!diary.selection.selectionMode} />
+
       {diary.selection.selectionMode ? (
         <OwnerCloudDiarySelectionToolbar
           selectedCount={diary.selection.selectedCount}

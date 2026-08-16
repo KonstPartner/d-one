@@ -52,8 +52,8 @@ export const Content = styled.View`
 export const CloseButton = styled(Button)`
   padding-top: ${({ theme }) => ss.px(theme.spacing.md)};
   padding-bottom: ${({ theme }) => ss.px(theme.spacing.md)};
-
-  background-color: ${({ theme }) => theme.colors.muted};
+  border-color: transparent;
+  background-color: ${({ theme }) => theme.colors.input};
 `;
 
 export const CloseButtonText = styled.Text`

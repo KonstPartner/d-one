@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import styled from '@emotion/native';
 import { useTranslation } from 'react-i18next';
 
+import { FollowerDiaryHelp } from '@features/screen-help';
 import { type HeaderMenuItem, useHeaderMenu } from '@shared/lib/navigation';
 import * as ss from '@shared/styles';
 import { Loader, LoadingView } from '@shared/ui';
@@ -73,22 +74,24 @@ const FollowerDiaryInner = () => {
     return <LoadingView />;
   }
 
-  if (followerProfile.followedUserId === null) {
-    return (
-      <UnassignedState
-        refreshing={diaryRefresh.isRefreshing}
-        onRefresh={diaryRefresh.refresh}
-      />
-    );
-  }
-
   return (
-    <FollowerDiaryContent
-      key={`${followerProfile.followedUserId}:${diaryRefresh.contentRevision}`}
-      ownerUid={followerProfile.followedUserId}
-      refreshing={diaryRefresh.isRefreshing}
-      onRefresh={diaryRefresh.refresh}
-    />
+    <>
+      <FollowerDiaryHelp />
+
+      {followerProfile.followedUserId === null ? (
+        <UnassignedState
+          refreshing={diaryRefresh.isRefreshing}
+          onRefresh={diaryRefresh.refresh}
+        />
+      ) : (
+        <FollowerDiaryContent
+          key={`${followerProfile.followedUserId}:${diaryRefresh.contentRevision}`}
+          ownerUid={followerProfile.followedUserId}
+          refreshing={diaryRefresh.isRefreshing}
+          onRefresh={diaryRefresh.refresh}
+        />
+      )}
+    </>
   );
 };
 

@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { DiaryTransferModal } from '@widgets/diary-transfer';
 import { ChangePasswordForm } from '@features/change-password';
 import { LogoutButton } from '@features/logout';
+import { ProfileHelp } from '@features/screen-help';
 import { UpdateEmailForm } from '@features/update-email';
 import { useSession } from '@entities/session';
 import { userProfileQueryOptions, UserRole } from '@entities/user';
@@ -63,6 +64,8 @@ const ProfileContent = () => {
 
   return (
     <>
+      <ProfileHelp role={profile.role} />
+
       <s.Content>
         <s.MainContent>
           <s.ProfileCard>

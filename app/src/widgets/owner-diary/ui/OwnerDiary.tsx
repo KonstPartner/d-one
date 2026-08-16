@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { CreateDiaryEntryModal } from '@features/create-diary-entry';
 import { EditDiaryEntryModal } from '@features/edit-diary-entry';
 import { DiaryFiltersModal } from '@features/filter-diary-entries';
+import { OwnerDiaryHelp } from '@features/screen-help';
 import { DiarySearch } from '@features/search-diary-entries';
 import {
   type DiaryDayKey,
@@ -341,6 +342,8 @@ export const OwnerDiary = () => {
       />
 
       <OwnerDiaryPreparationModal entry={diaryPreparation.preparingEntry} />
+
+      <OwnerDiaryHelp menuEnabled={!selection.selectionMode} />
     </s.Root>
   );
 };
