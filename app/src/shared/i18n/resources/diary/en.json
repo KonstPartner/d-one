@@ -216,7 +216,10 @@
           "createFailed": "Failed to set the timer."
         },
         "enabled": "Timer set for 2 hours."
-      }
+      },
+      "camera": "Camera",
+      "gallery": "Photo library",
+      "editSelected": "Edit selected"
     },
     "filters": {
       "title": "Filters",

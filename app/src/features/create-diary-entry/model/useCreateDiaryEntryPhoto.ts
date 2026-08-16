@@ -10,7 +10,9 @@ import {
 import { useImagePicker } from '@shared/lib/media';
 import type { PhotoRedactorResult } from '@shared/ui';
 
-export type CreateDiaryPhotoSource = 'camera' | 'library';
+export type CreateDiaryPhotoSource = 'camera' | 'library' | 'selected';
+
+type PhotoEditorMode = 'new' | 'selected';
 
 type UseCreateDiaryEntryPhotoParams = {
   visible: boolean;
@@ -38,6 +40,8 @@ export const useCreateDiaryEntryPhoto = ({
   const photoDraftUriRef = useRef<string | null>(null);
 
   const photoEditorSourceRef = useRef<DiaryPhotoDraft | null>(null);
+
+  const photoEditorModeRef = useRef<PhotoEditorMode | null>(null);
 
   const operationIdRef = useRef(0);
 
@@ -74,6 +78,8 @@ export const useCreateDiaryEntryPhoto = ({
   const clearEditorSource = useCallback((): void => {
     photoEditorSourceRef.current = null;
 
+    photoEditorModeRef.current = null;
+
     setPhotoEditorSource(null);
   }, []);
 
@@ -81,15 +87,22 @@ export const useCreateDiaryEntryPhoto = ({
     (removeDrafts: boolean): boolean => {
       operationIdRef.current += 1;
 
-      if (removeDrafts && photoEditorSourceRef.current !== null) {
-        if (!deleteDraft(photoEditorSourceRef.current.uri)) {
-          return false;
-        }
+      const editorUri = photoEditorSourceRef.current?.uri ?? null;
+
+      const currentUri = photoDraftUriRef.current;
+
+      if (
+        removeDrafts &&
+        editorUri !== null &&
+        editorUri !== currentUri &&
+        !deleteDraft(editorUri)
+      ) {
+        return false;
       }
 
       clearEditorSource();
 
-      if (removeDrafts && !deleteDraft(photoDraftUriRef.current)) {
+      if (removeDrafts && !deleteDraft(currentUri)) {
         return false;
       }
 
@@ -118,9 +131,15 @@ export const useCreateDiaryEntryPhoto = ({
     () => () => {
       operationIdRef.current += 1;
 
-      deleteDraftSilently(photoEditorSourceRef.current?.uri ?? null);
+      const editorUri = photoEditorSourceRef.current?.uri ?? null;
 
-      deleteDraftSilently(photoDraftUriRef.current);
+      const currentUri = photoDraftUriRef.current;
+
+      if (editorUri !== null && editorUri !== currentUri) {
+        deleteDraftSilently(editorUri);
+      }
+
+      deleteDraftSilently(currentUri);
     },
     [deleteDraftSilently]
   );
@@ -128,6 +147,10 @@ export const useCreateDiaryEntryPhoto = ({
   const selectPhoto = useCallback(
     async (source: CreateDiaryPhotoSource): Promise<void> => {
       if (isBusyRef.current || photoEditorSourceRef.current !== null) {
+        return;
+      }
+
+      if (source === 'selected' && photoDraftUriRef.current === null) {
         return;
       }
 
@@ -144,8 +167,20 @@ export const useCreateDiaryEntryPhoto = ({
       setIsProcessing(true);
 
       try {
-        const sourceUri =
-          source === 'camera' ? await takeImage() : await pickImage();
+        let sourceUri: string | null;
+
+        let editorMode: PhotoEditorMode;
+
+        if (source === 'selected') {
+          sourceUri = photoDraftUriRef.current;
+
+          editorMode = 'selected';
+        } else {
+          sourceUri =
+            source === 'camera' ? await takeImage() : await pickImage();
+
+          editorMode = 'new';
+        }
 
         if (sourceUri === null || operationId !== operationIdRef.current) {
           return;
@@ -160,6 +195,8 @@ export const useCreateDiaryEntryPhoto = ({
         }
 
         photoEditorSourceRef.current = nextDraft;
+
+        photoEditorModeRef.current = editorMode;
 
         setPhotoEditorSource(nextDraft);
 
@@ -186,15 +223,15 @@ export const useCreateDiaryEntryPhoto = ({
       return;
     }
 
-    const source = photoEditorSourceRef.current;
+    const editorSource = photoEditorSourceRef.current;
 
-    if (source === null) {
+    if (editorSource === null) {
       return;
     }
 
     operationIdRef.current += 1;
 
-    if (!deleteDraft(source.uri)) {
+    if (!deleteDraft(editorSource.uri)) {
       return;
     }
 
@@ -205,7 +242,21 @@ export const useCreateDiaryEntryPhoto = ({
     async (result: PhotoRedactorResult): Promise<void> => {
       const editorSource = photoEditorSourceRef.current;
 
-      if (editorSource === null || isBusyRef.current) {
+      const editorMode = photoEditorModeRef.current;
+
+      if (editorSource === null || editorMode === null || isBusyRef.current) {
+        return;
+      }
+
+      if (editorMode === 'selected' && !result.edited) {
+        operationIdRef.current += 1;
+
+        if (!deleteDraft(editorSource.uri)) {
+          return;
+        }
+
+        clearEditorSource();
+
         return;
       }
 
@@ -250,10 +301,10 @@ export const useCreateDiaryEntryPhoto = ({
 
         clearEditorSource();
 
+        uncommittedDraftUri = null;
+
         if (result.edited) {
           deleteDraftSilently(editorSource.uri);
-
-          uncommittedDraftUri = null;
         }
       } catch (error) {
         if (operationId === operationIdRef.current) {

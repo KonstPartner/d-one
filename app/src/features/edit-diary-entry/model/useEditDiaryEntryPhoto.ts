@@ -3,15 +3,19 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   createDiaryPhotoDraft,
   type DiaryEntry,
+  type DiaryPhotoDraft,
   DiaryPhotoError,
   type DiaryPhotoErrorCode,
   removeDiaryPhotoDraft,
 } from '@entities/diary';
 import { useImagePicker } from '@shared/lib/media';
+import type { PhotoRedactorResult } from '@shared/ui';
 
 type EditDiaryPhotoAction = 'keep' | 'replace' | 'delete';
 
-type EditDiaryPhotoSource = 'camera' | 'library';
+type EditDiaryPhotoSource = 'camera' | 'library' | 'selected';
+
+type PhotoEditorMode = 'new' | 'selected';
 
 type UseEditDiaryEntryPhotoParams = {
   visible: boolean;
@@ -31,6 +35,9 @@ export const useEditDiaryEntryPhoto = ({
 
   const [photoAction, setPhotoAction] = useState<EditDiaryPhotoAction>('keep');
 
+  const [photoEditorSource, setPhotoEditorSource] =
+    useState<DiaryPhotoDraft | null>(null);
+
   const [photoError, setPhotoError] = useState<DiaryPhotoErrorCode | null>(
     null
   );
@@ -38,6 +45,10 @@ export const useEditDiaryEntryPhoto = ({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const photoDraftUriRef = useRef<string | null>(null);
+
+  const photoEditorSourceRef = useRef<DiaryPhotoDraft | null>(null);
+
+  const photoEditorModeRef = useRef<PhotoEditorMode | null>(null);
 
   const activeEntryIdRef = useRef<string | null>(null);
 
@@ -61,7 +72,7 @@ export const useEditDiaryEntryPhoto = ({
     }
   }, []);
 
-  const deleteUncommittedDraft = useCallback((draftUri: string | null) => {
+  const deleteDraftSilently = useCallback((draftUri: string | null): void => {
     if (draftUri === null) {
       return;
     }
@@ -73,11 +84,34 @@ export const useEditDiaryEntryPhoto = ({
     }
   }, []);
 
+  const clearEditorSource = useCallback((): void => {
+    photoEditorSourceRef.current = null;
+
+    photoEditorModeRef.current = null;
+
+    setPhotoEditorSource(null);
+  }, []);
+
   const resetPhotoState = useCallback(
-    (removeDraft: boolean): boolean => {
+    (removeDrafts: boolean): boolean => {
       operationIdRef.current += 1;
 
-      if (removeDraft && !deleteDraft(photoDraftUriRef.current)) {
+      const editorUri = photoEditorSourceRef.current?.uri ?? null;
+
+      const draftUri = photoDraftUriRef.current;
+
+      if (
+        removeDrafts &&
+        editorUri !== null &&
+        editorUri !== draftUri &&
+        !deleteDraft(editorUri)
+      ) {
+        return false;
+      }
+
+      clearEditorSource();
+
+      if (removeDrafts && !deleteDraft(draftUri)) {
         return false;
       }
 
@@ -95,7 +129,7 @@ export const useEditDiaryEntryPhoto = ({
 
       return true;
     },
-    [deleteDraft]
+    [clearEditorSource, deleteDraft]
   );
 
   useEffect(() => {
@@ -122,24 +156,31 @@ export const useEditDiaryEntryPhoto = ({
     () => () => {
       operationIdRef.current += 1;
 
+      const editorUri = photoEditorSourceRef.current?.uri ?? null;
+
       const draftUri = photoDraftUriRef.current;
 
-      if (draftUri === null) {
-        return;
+      if (editorUri !== null && editorUri !== draftUri) {
+        deleteDraftSilently(editorUri);
       }
 
-      try {
-        removeDiaryPhotoDraft(draftUri);
-      } catch {
-        return;
-      }
+      deleteDraftSilently(draftUri);
     },
-    []
+    [deleteDraftSilently]
   );
+
+  const existingPhotoUri = entry?.localPhotoUri ?? entry?.photoUrl ?? null;
+
+  const photoUri =
+    photoDraftUri ?? (photoAction === 'delete' ? null : existingPhotoUri);
 
   const selectPhoto = useCallback(
     async (source: EditDiaryPhotoSource): Promise<void> => {
-      if (isBusyRef.current) {
+      if (isBusyRef.current || photoEditorSourceRef.current !== null) {
+        return;
+      }
+
+      if (source === 'selected' && photoUri === null) {
         return;
       }
 
@@ -156,8 +197,20 @@ export const useEditDiaryEntryPhoto = ({
       setIsProcessing(true);
 
       try {
-        const sourceUri =
-          source === 'camera' ? await takeImage() : await pickImage();
+        let sourceUri: string | null;
+
+        let editorMode: PhotoEditorMode;
+
+        if (source === 'selected') {
+          sourceUri = photoUri;
+
+          editorMode = 'selected';
+        } else {
+          sourceUri =
+            source === 'camera' ? await takeImage() : await pickImage();
+
+          editorMode = 'new';
+        }
 
         if (sourceUri === null || operationId !== operationIdRef.current) {
           return;
@@ -171,7 +224,104 @@ export const useEditDiaryEntryPhoto = ({
           return;
         }
 
-        if (!deleteDraft(photoDraftUriRef.current)) {
+        photoEditorSourceRef.current = nextDraft;
+
+        photoEditorModeRef.current = editorMode;
+
+        setPhotoEditorSource(nextDraft);
+
+        uncommittedDraftUri = null;
+      } catch (error) {
+        if (operationId === operationIdRef.current) {
+          setPhotoError(getPhotoErrorCode(error));
+        }
+      } finally {
+        deleteDraftSilently(uncommittedDraftUri);
+
+        if (operationId === operationIdRef.current) {
+          isBusyRef.current = false;
+
+          setIsProcessing(false);
+        }
+      }
+    },
+    [deleteDraftSilently, photoUri, pickImage, takeImage]
+  );
+
+  const cancelPhotoEditing = useCallback((): void => {
+    if (isBusyRef.current) {
+      return;
+    }
+
+    const editorSource = photoEditorSourceRef.current;
+
+    if (editorSource === null) {
+      return;
+    }
+
+    operationIdRef.current += 1;
+
+    if (!deleteDraft(editorSource.uri)) {
+      return;
+    }
+
+    clearEditorSource();
+  }, [clearEditorSource, deleteDraft]);
+
+  const confirmPhotoEditing = useCallback(
+    async (result: PhotoRedactorResult): Promise<void> => {
+      const editorSource = photoEditorSourceRef.current;
+
+      const editorMode = photoEditorModeRef.current;
+
+      if (editorSource === null || editorMode === null || isBusyRef.current) {
+        return;
+      }
+
+      if (editorMode === 'selected' && !result.edited) {
+        operationIdRef.current += 1;
+
+        if (!deleteDraft(editorSource.uri)) {
+          return;
+        }
+
+        clearEditorSource();
+
+        return;
+      }
+
+      const operationId = operationIdRef.current + 1;
+
+      let uncommittedDraftUri: string | null = null;
+
+      operationIdRef.current = operationId;
+
+      isBusyRef.current = true;
+
+      setPhotoError(null);
+
+      setIsProcessing(true);
+
+      try {
+        const nextDraft = result.edited
+          ? await createDiaryPhotoDraft(result.uri)
+          : editorSource;
+
+        if (result.edited) {
+          uncommittedDraftUri = nextDraft.uri;
+        }
+
+        if (operationId !== operationIdRef.current) {
+          return;
+        }
+
+        const previousDraftUri = photoDraftUriRef.current;
+
+        if (
+          previousDraftUri !== null &&
+          previousDraftUri !== nextDraft.uri &&
+          !deleteDraft(previousDraftUri)
+        ) {
           return;
         }
 
@@ -181,15 +331,19 @@ export const useEditDiaryEntryPhoto = ({
 
         setPhotoAction('replace');
 
-        setPhotoError(null);
+        clearEditorSource();
 
         uncommittedDraftUri = null;
+
+        if (result.edited) {
+          deleteDraftSilently(editorSource.uri);
+        }
       } catch (error) {
         if (operationId === operationIdRef.current) {
           setPhotoError(getPhotoErrorCode(error));
         }
       } finally {
-        deleteUncommittedDraft(uncommittedDraftUri);
+        deleteDraftSilently(uncommittedDraftUri);
 
         if (operationId === operationIdRef.current) {
           isBusyRef.current = false;
@@ -198,11 +352,19 @@ export const useEditDiaryEntryPhoto = ({
         }
       }
     },
-    [deleteDraft, deleteUncommittedDraft, pickImage, takeImage]
+    [clearEditorSource, deleteDraft, deleteDraftSilently]
   );
 
-  const deletePhoto = useCallback(() => {
-    if (isBusyRef.current || !deleteDraft(photoDraftUriRef.current)) {
+  const handlePhotoEditorError = useCallback((error: unknown): void => {
+    setPhotoError(getPhotoErrorCode(error));
+  }, []);
+
+  const deletePhoto = useCallback((): void => {
+    if (isBusyRef.current || photoEditorSourceRef.current !== null) {
+      return;
+    }
+
+    if (!deleteDraft(photoDraftUriRef.current)) {
       return;
     }
 
@@ -222,10 +384,12 @@ export const useEditDiaryEntryPhoto = ({
     [resetPhotoState]
   );
 
-  const markPhotoSaved = useCallback(() => {
+  const markPhotoSaved = useCallback((): void => {
     operationIdRef.current += 1;
 
     photoDraftUriRef.current = null;
+
+    clearEditorSource();
 
     setPhotoDraftUri(null);
 
@@ -236,26 +400,23 @@ export const useEditDiaryEntryPhoto = ({
     setIsProcessing(false);
 
     isBusyRef.current = false;
-  }, []);
+  }, [clearEditorSource]);
 
-  const clearPhotoError = useCallback(() => {
+  const clearPhotoError = useCallback((): void => {
     setPhotoError(null);
   }, []);
 
-  const existingPhotoUri = entry?.localPhotoUri ?? entry?.photoUrl ?? null;
-
-  const photoUri =
-    photoDraftUri ?? (photoAction === 'delete' ? null : existingPhotoUri);
-
   return {
     photoUri,
+
     photoDraftUri,
     photoAction,
+    photoEditorSource,
     photoError,
 
     hasPhoto: photoUri !== null,
 
-    hasTemporaryPhoto: photoDraftUri !== null,
+    hasTemporaryPhoto: photoDraftUri !== null || photoEditorSource !== null,
 
     hasPhotoChanges: photoAction !== 'keep',
 
@@ -263,6 +424,10 @@ export const useEditDiaryEntryPhoto = ({
 
     selectPhoto,
     deletePhoto,
+
+    cancelPhotoEditing,
+    confirmPhotoEditing,
+    handlePhotoEditorError,
 
     discardPhotoChanges,
     markPhotoSaved,

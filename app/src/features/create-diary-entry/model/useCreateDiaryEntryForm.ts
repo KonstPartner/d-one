@@ -80,10 +80,13 @@ export const useCreateDiaryEntryForm = ({
         useCurrentDateTime: draft.useCurrentDateTime,
 
         photoDraftUri: photo.photoDraftUri,
+
         hasPhoto: photo.hasPhoto,
+
         isPhotoBusy: photo.isPhotoBusy,
 
         requestAi: postSaveOptions.requestAi,
+
         requestTimer: postSaveOptions.requestTimer,
 
         isOnline,
@@ -110,7 +113,10 @@ export const useCreateDiaryEntryForm = ({
     useCurrentDateTime: draft.useCurrentDateTime,
 
     photoUri: photo.photoUri,
+
     photoEditorSource: photo.photoEditorSource,
+
+    hasPhoto: photo.hasPhoto,
 
     hasTemporaryPhoto: photo.hasTemporaryPhoto,
 
@@ -119,9 +125,11 @@ export const useCreateDiaryEntryForm = ({
     isSubmitting: submit.isSubmitting,
 
     requestAi: postSaveOptions.requestAi,
+
     canRequestAi: postSaveOptions.canRequestAi,
 
     requestTimer: postSaveOptions.requestTimer,
+
     canRequestTimer: postSaveOptions.canRequestTimer,
 
     handleGlucoseChange: draft.handleGlucoseChange,
@@ -143,6 +151,7 @@ export const useCreateDiaryEntryForm = ({
     handleEventTimeChange: draft.handleEventTimeChange,
 
     handleRequestAiChange: postSaveOptions.handleRequestAiChange,
+
     handleRequestTimerChange: postSaveOptions.handleRequestTimerChange,
 
     selectPhoto: photo.selectPhoto,
@@ -150,7 +159,9 @@ export const useCreateDiaryEntryForm = ({
     deletePhoto: handleDeletePhoto,
 
     cancelPhotoEditing: photo.cancelPhotoEditing,
+
     confirmPhotoEditing: photo.confirmPhotoEditing,
+
     handlePhotoEditorError: photo.handlePhotoEditorError,
 
     discardPhoto: photo.discardPhoto,

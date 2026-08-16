@@ -90,12 +90,17 @@ export const useEditDiaryEntryForm = ({
         useCurrentDateTime: draft.useCurrentDateTime,
 
         photoAction: photo.photoAction,
+
         photoDraftUri: photo.photoDraftUri,
+
         hasPhoto: photo.hasPhoto,
+
         isPhotoBusy: photo.isPhotoBusy,
 
         requestAi: postSaveOptions.requestAi,
+
         requestTimer: postSaveOptions.requestTimer,
+
         deleteAiAnalysis: postSaveOptions.deleteAiAnalysis,
 
         isOnline,
@@ -127,12 +132,16 @@ export const useEditDiaryEntryForm = ({
 
     photoUri: photo.photoUri,
 
+    photoEditorSource: photo.photoEditorSource,
+
     aiAnalysis: postSaveOptions.aiAnalysis,
 
     requestAi: postSaveOptions.requestAi,
+
     canRequestAi: postSaveOptions.canRequestAi,
 
     requestTimer: postSaveOptions.requestTimer,
+
     canRequestTimer: postSaveOptions.canRequestTimer,
 
     deleteAiAnalysis: postSaveOptions.deleteAiAnalysis,
@@ -174,6 +183,12 @@ export const useEditDiaryEntryForm = ({
     selectPhoto: photo.selectPhoto,
 
     deletePhoto: handleDeletePhoto,
+
+    cancelPhotoEditing: photo.cancelPhotoEditing,
+
+    confirmPhotoEditing: photo.confirmPhotoEditing,
+
+    handlePhotoEditorError: photo.handlePhotoEditorError,
 
     discardPhotoChanges: photo.discardPhotoChanges,
 
