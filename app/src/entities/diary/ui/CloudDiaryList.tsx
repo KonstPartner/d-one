@@ -3,7 +3,9 @@ import {
   FlatList,
   type FlatListProps,
   type ListRenderItem,
+  RefreshControl,
 } from 'react-native';
+import { useTheme } from '@emotion/react';
 
 import type { DiaryListItem } from '../lib/buildDiaryListItems';
 import type { CloudDiaryEntry } from '../model/cloudDiaryEntry';
@@ -22,6 +24,7 @@ type CloudDiaryListController = Pick<
   | 'page'
   | 'listItems'
   | 'visibleEntryIds'
+  | 'hasViewabilitySnapshot'
   | 'collapsedDayKeys'
   | 'toggleDay'
   | 'getListItemKey'
@@ -52,6 +55,10 @@ type CloudDiaryListProps = {
 
   onOpenPhoto: (entry: CloudDiaryEntry) => void;
 
+  refreshing?: boolean;
+  onRefresh?: () => void;
+  refreshProgressViewOffset?: number;
+
   selection?: CloudDiaryListSelection;
 
   contentContainerStyle?: FlatListProps<CloudDiaryListItem>['contentContainerStyle'];
@@ -77,6 +84,10 @@ export const CloudDiaryList = ({
 
   onOpenPhoto,
 
+  refreshing = false,
+  onRefresh,
+  refreshProgressViewOffset = 0,
+
   selection,
 
   contentContainerStyle,
@@ -85,6 +96,8 @@ export const CloudDiaryList = ({
   onScrollBeginDrag,
   onScrollEndDrag,
 }: CloudDiaryListProps) => {
+  const theme = useTheme();
+
   const selectionActive = selection !== undefined;
 
   const renderItem = useCallback<ListRenderItem<CloudDiaryListItem>>(
@@ -105,7 +118,10 @@ export const CloudDiaryList = ({
       return (
         <CloudDiaryEntryCard
           entry={item.entry}
-          isVisible={list.visibleEntryIds.has(item.entry.id)}
+          isVisible={
+            !list.hasViewabilitySnapshot ||
+            list.visibleEntryIds.has(item.entry.id)
+          }
           selectionActive={selectionActive}
           selected={selection?.isEntrySelected(item.entry.id) ?? false}
           onToggleSelection={selection?.onToggleEntry}
@@ -115,6 +131,7 @@ export const CloudDiaryList = ({
     },
     [
       list.collapsedDayKeys,
+      list.hasViewabilitySnapshot,
       list.toggleDay,
       list.visibleEntryIds,
       onOpenPhoto,
@@ -135,6 +152,17 @@ export const CloudDiaryList = ({
       onScrollBeginDrag={onScrollBeginDrag}
       onScrollEndDrag={onScrollEndDrag}
       scrollEventThrottle={16}
+      refreshControl={
+        onRefresh === undefined ? undefined : (
+          <RefreshControl
+            refreshing={refreshing}
+            tintColor={theme.colors.primary}
+            colors={[theme.colors.primary]}
+            progressViewOffset={refreshProgressViewOffset}
+            onRefresh={onRefresh}
+          />
+        )
+      }
       ListEmptyComponent={
         <s.Empty>
           <s.EmptyTitle>{emptyTitle}</s.EmptyTitle>

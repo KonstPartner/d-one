@@ -60,6 +60,7 @@ export const useOwnerCloudDiary = ({ ownerUid }: UseOwnerCloudDiaryParams) => {
     listItems: list.listItems,
 
     visibleEntryIds: list.visibleEntryIds,
+    hasViewabilitySnapshot: list.hasViewabilitySnapshot,
 
     collapsedDayKeys: list.collapsedDayKeys,
 

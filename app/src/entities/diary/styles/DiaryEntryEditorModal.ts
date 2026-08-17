@@ -70,7 +70,7 @@ export const CancelText = styled.Text<DisabledProps>`
   color: ${({ theme, $disabled }) =>
     $disabled ? theme.colors.muted : theme.colors.text};
 
-  font-size: ${({ theme }) => ss.px(theme.size.sm)};
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
   line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
   font-weight: ${({ theme }) => theme.weight.semibold};
 `;
@@ -79,7 +79,7 @@ export const SubmitText = styled.Text<DisabledProps>`
   color: ${({ theme, $disabled }) =>
     $disabled ? theme.colors.shades.primary.text : theme.colors.white};
 
-  font-size: ${({ theme }) => ss.px(theme.size.sm)};
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
   line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
   font-weight: ${({ theme }) => theme.weight.semibold};
 `;

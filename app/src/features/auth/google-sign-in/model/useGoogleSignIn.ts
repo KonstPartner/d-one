@@ -112,6 +112,8 @@ export const useGoogleSignIn = ({ onRegister }: UseGoogleSignInParams) => {
       const response = await promptAsync();
 
       if (response.type !== 'success') {
+        returnToAuthForm();
+
         return;
       }
 
@@ -153,6 +155,8 @@ export const useGoogleSignIn = ({ onRegister }: UseGoogleSignInParams) => {
       showNotification('success', t('auth.notifications.loginSuccess'));
     } catch (error: unknown) {
       showNotification('error', getGoogleSignInErrorMessage(error, t));
+
+      returnToAuthForm();
     } finally {
       inFlightRef.current = false;
       setIsPromptPending(false);

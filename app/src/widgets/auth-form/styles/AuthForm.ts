@@ -17,8 +17,8 @@ export const Brand = styled.View`
 `;
 
 export const Logo = styled.Image`
-  width: 64px;
-  height: 64px;
+  width: 136px;
+  height: 136px;
   border-radius: 21px;
 `;
 

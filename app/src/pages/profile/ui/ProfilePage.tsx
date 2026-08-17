@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
+import { useIsMutating, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { DiaryTransferModal } from '@widgets/diary-transfer';
@@ -9,7 +9,7 @@ import { ChangePasswordForm } from '@features/auth/change-password';
 import { LogoutButton } from '@features/auth/logout';
 import { UpdateEmailForm } from '@features/auth/update-email';
 import { ProfileHelp } from '@features/screen-help';
-import { useSession } from '@entities/session';
+import { sessionMutationKeys, useSession } from '@entities/session';
 import { userProfileQueryOptions, UserRole } from '@entities/user';
 import { PlatformOS } from '@shared/lib/platform';
 import { Loader, LoadingView, PageLayout, PortalModal } from '@shared/ui';
@@ -30,14 +30,26 @@ const ProfileContent = () => {
 
   const [isTransferModalVisible, setIsTransferModalVisible] = useState(false);
 
+  const activeSessionMutations = useIsMutating({
+    mutationKey: sessionMutationKeys.root,
+  });
+
+  const isSessionMutating = activeSessionMutations > 0;
+
   const userId = sessionUser?.uid ?? null;
 
-  const profileQuery = useQuery(userProfileQueryOptions(userId));
+  const profileQuery = useQuery({
+    ...userProfileQueryOptions(userId),
+
+    enabled: isSessionReady && userId !== null && !isSessionMutating,
+  });
 
   const isLoading =
-    !isSessionReady || (sessionUser !== null && profileQuery.isPending);
+    !isSessionReady ||
+    isSessionMutating ||
+    (sessionUser !== null && profileQuery.isPending);
 
-  if (profileQuery.error) {
+  if (profileQuery.error && !isSessionMutating) {
     throw profileQuery.error;
   }
 

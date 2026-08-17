@@ -124,7 +124,7 @@ export const AppGuard = ({ children }: AppGuardProps) => {
       <GuardContainer>
         <HiddenContent>{children}</HiddenContent>
 
-        <LoadingView loading />
+        <LoadingView />
       </GuardContainer>
     );
   }

@@ -1,14 +1,15 @@
 import { useEffect, useRef } from 'react';
 import { View } from 'react-native';
+import styled from '@emotion/native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
+import { useIsMutating, useQuery } from '@tanstack/react-query';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { HeaderMenu } from '@widgets/header-menu';
 import { useDiaryTransferState } from '@entities/diary';
-import { useSession } from '@entities/session';
+import { sessionMutationKeys, useSession } from '@entities/session';
 import { userProfileQueryOptions, UserRole } from '@entities/user';
 import { useNetwork } from '@shared/lib/network';
 import { PlatformOS } from '@shared/lib/platform';
@@ -31,15 +32,25 @@ export const AppTabs = () => {
 
   const { t } = useTranslation();
 
-  const { sessionUser } = useSession();
+  const { sessionUser, isSessionReady } = useSession();
 
   const transfer = useDiaryTransferState();
 
   const transferLocked = isDiaryTransferRuntimeLocked(transfer.phase);
 
+  const activeSessionMutations = useIsMutating({
+    mutationKey: sessionMutationKeys.root,
+  });
+
+  const isSessionMutating = activeSessionMutations > 0;
+
   const userId = sessionUser?.uid ?? null;
 
-  const { data: profile } = useQuery(userProfileQueryOptions(userId));
+  const { data: profile } = useQuery({
+    ...userProfileQueryOptions(userId),
+
+    enabled: isSessionReady && userId !== null && !isSessionMutating,
+  });
 
   const { status: networkStatus } = useNetwork();
 
@@ -95,98 +106,105 @@ export const AppTabs = () => {
   );
 
   return (
-    <DiaryRuntimeBoundary
-      enabled={diaryRuntimeEnabled}
-      userId={diaryRuntimeUserId}
-    >
-      <Tabs
-        screenOptions={createTabScreenOptions({
-          theme,
-
-          headerRight: () => (
-            <View style={Row(theme, 'center', 'center', 'sm')}>
-              <Ionicons
-                name={networkIconName}
-                size={20}
-                color={theme.colors.text}
-              />
-
-              <HeaderMenu />
-            </View>
-          ),
-        })}
+    <Root>
+      <DiaryRuntimeBoundary
+        enabled={diaryRuntimeEnabled}
+        userId={diaryRuntimeUserId}
       >
-        <Tabs.Screen
-          name="diary"
-          options={{
-            title: t('layout.tabs.diary'),
+        <Tabs
+          screenOptions={createTabScreenOptions({
+            theme,
 
-            href: isUser ? undefined : null,
+            headerRight: () => (
+              <View style={Row(theme, 'center', 'center', 'sm')}>
+                <Ionicons
+                  name={networkIconName}
+                  size={20}
+                  color={theme.colors.text}
+                />
 
-            tabBarIcon: renderDiaryIcon,
-          }}
-        />
-
-        <Tabs.Screen
-          name="follower-diary"
-          options={{
-            title: t('layout.tabs.diary'),
-
-            href: isFollower ? undefined : null,
-
-            tabBarIcon: renderDiaryIcon,
-          }}
-        />
-
-        <Tabs.Screen
-          name="cloud"
-          options={{
-            title: t('layout.tabs.cloud'),
-
-            href: isUser && supportsOwnerCloud ? undefined : null,
-
-            tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons
-                name={focused ? 'cloud' : 'cloud-outline'}
-                size={size}
-                color={color}
-              />
+                <HeaderMenu />
+              </View>
             ),
-          }}
-        />
+          })}
+        >
+          <Tabs.Screen
+            name="diary"
+            options={{
+              title: t('layout.tabs.diary'),
 
-        <Tabs.Screen
-          name="pending"
-          options={{
-            title: t('layout.tabs.pending'),
+              href: isUser ? undefined : null,
 
-            href: isPending ? undefined : null,
+              tabBarIcon: renderDiaryIcon,
+            }}
+          />
 
-            tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons
-                name={focused ? 'time' : 'time-outline'}
-                size={size}
-                color={color}
-              />
-            ),
-          }}
-        />
+          <Tabs.Screen
+            name="follower-diary"
+            options={{
+              title: t('layout.tabs.diary'),
 
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: t('layout.tabs.profile'),
+              href: isFollower ? undefined : null,
 
-            tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons
-                name={focused ? 'person' : 'person-outline'}
-                size={size}
-                color={color}
-              />
-            ),
-          }}
-        />
-      </Tabs>
-    </DiaryRuntimeBoundary>
+              tabBarIcon: renderDiaryIcon,
+            }}
+          />
+
+          <Tabs.Screen
+            name="cloud"
+            options={{
+              title: t('layout.tabs.cloud'),
+
+              href: isUser && supportsOwnerCloud ? undefined : null,
+
+              tabBarIcon: ({ color, size, focused }) => (
+                <Ionicons
+                  name={focused ? 'cloud' : 'cloud-outline'}
+                  size={size}
+                  color={color}
+                />
+              ),
+            }}
+          />
+
+          <Tabs.Screen
+            name="pending"
+            options={{
+              title: t('layout.tabs.pending'),
+
+              href: isPending ? undefined : null,
+
+              tabBarIcon: ({ color, size, focused }) => (
+                <Ionicons
+                  name={focused ? 'time' : 'time-outline'}
+                  size={size}
+                  color={color}
+                />
+              ),
+            }}
+          />
+
+          <Tabs.Screen
+            name="profile"
+            options={{
+              title: t('layout.tabs.profile'),
+
+              tabBarIcon: ({ color, size, focused }) => (
+                <Ionicons
+                  name={focused ? 'person' : 'person-outline'}
+                  size={size}
+                  color={color}
+                />
+              ),
+            }}
+          />
+        </Tabs>
+      </DiaryRuntimeBoundary>
+    </Root>
   );
 };
+
+const Root = styled.View`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colors.bg};
+`;

@@ -33,9 +33,14 @@ export default {
       permissions: ['com.android.alarm.permission.SET_ALARM'],
       allowBackup: false,
 
+      icon: appIcon,
+
       adaptiveIcon: {
-        foregroundImage: appIcon,
-        backgroundColor: '#ffffff',
+        foregroundImage: './src/assets/images/adaptive-icon-foreground.png',
+
+        backgroundImage: './src/assets/images/adaptive-icon-background.png',
+
+        monochromeImage: './src/assets/images/adaptive-icon-monochrome.png',
       },
 
       userInterfaceStyle: 'automatic',
@@ -68,10 +73,15 @@ export default {
       [
         'expo-splash-screen',
         {
-          image: appIcon,
+          image: './src/assets/images/splash-icon.png',
           imageWidth: 200,
           resizeMode: 'contain',
-          backgroundColor: '#ffffff',
+          backgroundColor: '#F9FAFB',
+
+          dark: {
+            image: appIcon,
+            backgroundColor: '#050505',
+          },
         },
       ],
 

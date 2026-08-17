@@ -211,6 +211,8 @@ export const useCollapsibleToolbarVisibility = () => {
   );
 
   return {
+    toolbarHeight,
+
     toolbarAnimatedStyle,
 
     listContentContainerStyle,

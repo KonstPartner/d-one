@@ -86,6 +86,7 @@ export const useCloudDiaryList = ({ ownerUid }: UseCloudDiaryListParams) => {
     listItems,
 
     visibleEntryIds: viewability.visibleEntryIds,
+    hasViewabilitySnapshot: viewability.hasViewabilitySnapshot,
 
     collapsedDayKeys,
 

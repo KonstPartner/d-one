@@ -20,6 +20,8 @@ type FollowerDiaryContentProps = {
 
   onRefresh: () => void | Promise<void>;
 
+  refreshProgressViewOffset?: number;
+
   contentContainerStyle?: ScrollViewProps['contentContainerStyle'];
 
   onScroll?: ScrollViewProps['onScroll'];
@@ -35,6 +37,8 @@ const FollowerDiaryContentInner = ({
   refreshing,
 
   onRefresh,
+
+  refreshProgressViewOffset,
 
   contentContainerStyle,
 
@@ -70,6 +74,12 @@ const FollowerDiaryContentInner = ({
   const handleNext = useCallback(() => {
     void list.goNext().catch(showCloudError);
   }, [list.goNext, showCloudError]);
+
+  const handlePullRefresh = useCallback(() => {
+    setPhotoViewerEntry(null);
+
+    void onRefresh();
+  }, [onRefresh]);
 
   const headerMenuItems = useMemo<HeaderMenuItem[]>(
     () => [
@@ -111,6 +121,9 @@ const FollowerDiaryContentInner = ({
         onPrevious={handlePrevious}
         onNext={handleNext}
         onOpenPhoto={handleOpenPhoto}
+        refreshing={refreshing}
+        onRefresh={handlePullRefresh}
+        refreshProgressViewOffset={refreshProgressViewOffset}
         contentContainerStyle={contentContainerStyle}
         onScroll={onScroll}
         onScrollBeginDrag={onScrollBeginDrag}

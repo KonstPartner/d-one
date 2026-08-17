@@ -1,7 +1,7 @@
 import { type ComponentProps, useEffect } from 'react';
+import { Image, type StyleProp, type TextStyle } from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import type { StyleProp, TextStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,8 +9,10 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import spinner from '@assets/images/spinner-dark.png';
+
 type SpinnerProps = {
-  type?: 'Ionicons' | 'MaterialCommunityIcons' | 'Fontisto';
+  type?: 'Ionicons' | 'MaterialCommunityIcons' | 'Fontisto' | 'Image';
   name?:
     | ComponentProps<typeof Ionicons>['name']
     | ComponentProps<typeof MaterialCommunityIcons>['name']
@@ -28,7 +30,6 @@ export const Spinner = ({
   style,
 }: SpinnerProps) => {
   const theme = useTheme();
-
   const rotation = useSharedValue(0);
 
   useEffect(() => {
@@ -73,6 +74,15 @@ export const Spinner = ({
           name={name as ComponentProps<typeof Fontisto>['name']}
           size={size}
           color={color ?? theme.colors.text}
+        />
+      )}
+      {type === 'Image' && (
+        <Image
+          source={spinner}
+          style={{
+            width: size,
+            height: size,
+          }}
         />
       )}
     </Animated.View>

@@ -126,6 +126,9 @@ const FollowerDiaryInner = () => {
               ownerUid={followerUsers.ownerUid}
               refreshing={diaryRefresh.isRefreshing}
               onRefresh={diaryRefresh.refresh}
+              refreshProgressViewOffset={
+                followerUsers.showSelector ? toolbar.toolbarHeight : 0
+              }
               contentContainerStyle={
                 followerUsers.showSelector
                   ? toolbar.listContentContainerStyle
