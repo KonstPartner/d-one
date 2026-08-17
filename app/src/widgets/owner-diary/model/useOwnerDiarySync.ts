@@ -20,7 +20,7 @@ export const useOwnerDiarySync = () => {
       }
 
       try {
-        const results = await sync.syncEntries(entryIds);
+        const results = await sync.syncEntriesBatch(entryIds);
 
         return results.some((result) => result.status === 'deleted');
       } catch (error) {
@@ -31,7 +31,7 @@ export const useOwnerDiarySync = () => {
         return false;
       }
     },
-    [sync.connectionState, sync.syncEntries, t]
+    [sync.connectionState, sync.syncEntriesBatch, t]
   );
 
   const handleForcedSync = useCallback(

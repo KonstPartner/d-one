@@ -17,7 +17,7 @@ export default {
     ios: {
       scheme: 'done.app.ios',
       bundleIdentifier: 'done.app.ios',
-      googleServicesFile: './GoogleService-Info.plist',
+      googleServicesFile: process.env.GOOGLE_SERVICE_INFO_PLIST,
 
       supportsTablet: false,
 
@@ -29,7 +29,7 @@ export default {
     android: {
       scheme: 'done.android.app',
       package: 'done.android.app',
-      googleServicesFile: './google-services.json',
+      googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       permissions: ['com.android.alarm.permission.SET_ALARM'],
       allowBackup: false,
 
