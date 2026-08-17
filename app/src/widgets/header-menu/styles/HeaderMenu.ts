@@ -1,4 +1,4 @@
-import styled from '@emotion/native';
+import styled, { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
 import type { TextStyle, ViewStyle } from 'react-native';
 
@@ -42,6 +42,12 @@ export const MenuItemContent = styled.View`
 export const MenuText = styled.Text`
   font-size: ${({ theme }) => ss.px(theme.size.base)};
 `;
+
+export const getPopoverStyle = (theme: Theme) =>
+  css`
+    background-color: transparent;
+    border-radius: ${ss.px(theme.radius.md)};
+  ` as ViewStyle;
 
 export const getMenuRowStyle = (
   theme: Theme,

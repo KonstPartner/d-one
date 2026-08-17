@@ -1,10 +1,10 @@
 import { Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { GoogleSignInButton } from '@features/google-sign-in';
-import { LoginForm } from '@features/login';
-import { RegisterForm } from '@features/register';
-import { ResetPasswordModal } from '@features/reset-password';
+import { GoogleSignInButton } from '@features/auth/google-sign-in';
+import { LoginForm } from '@features/auth/login';
+import { RegisterForm } from '@features/auth/register';
+import { ResetPasswordModal } from '@features/auth/reset-password';
 import appIcon from '@assets/images/icon.png';
 
 import { useAuthFormState } from '../model/useAuthFormState';

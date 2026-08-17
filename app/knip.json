@@ -1,0 +1,5 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["steiger.config.ts"],
+  "ignoreDependencies": ["lint-staged", "expo-updates"]
+}

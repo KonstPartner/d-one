@@ -1,6 +1,6 @@
-import { KeyboardAvoidingView, type ViewStyle } from 'react-native';
 import styled, { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
+import type { ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import * as ss from '@shared/styles';
@@ -35,10 +35,6 @@ export const Sheet = styled.View`
   ${({ theme }) => ss.PageRoot(theme)};
 
   height: 100%;
-`;
-
-export const KeyboardAware = styled(KeyboardAvoidingView)`
-  flex: 1;
 `;
 
 export const Scroll = styled.ScrollView`

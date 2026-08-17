@@ -68,26 +68,6 @@ export const PhotoArea = styled.View`
   align-self: stretch;
 `;
 
-export const MetaField = styled.View<DisabledProps>`
-  min-width: 0;
-
-  flex-direction: row;
-  align-items: center;
-
-  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
-
-  padding: ${({ theme }) => ss.px(theme.spacing.sm)};
-
-  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
-  border-color: ${({ theme }) => theme.colors.border};
-
-  border-radius: ${({ theme }) => ss.px(theme.radius.lg)};
-
-  background-color: ${({ theme }) => theme.colors.card};
-
-  opacity: ${({ $disabled }) => ($disabled ? 0.55 : 1)};
-`;
-
 export const MetaIcon = styled.View<MetaIconProps>`
   width: ${ss.px(36)};
   height: ${ss.px(36)};
@@ -102,12 +82,6 @@ export const MetaIcon = styled.View<MetaIconProps>`
   border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
   background-color: ${({ $backgroundColor }) => $backgroundColor};
-`;
-
-export const MetaContent = styled.View`
-  flex: 1;
-
-  min-width: 0;
 `;
 
 export const CommentField = styled.View<DisabledProps>`

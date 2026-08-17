@@ -2,7 +2,7 @@ import { deepTrim } from '@shared/lib/data';
 
 import { getAuthToken } from '../firebase/getAuthToken';
 
-export class ApiError extends Error {
+class ApiError extends Error {
   public constructor(
     public readonly response: Response,
     public readonly data?: unknown
@@ -13,7 +13,7 @@ export class ApiError extends Error {
   }
 }
 
-export type ApiRequestInit = RequestInit & {
+type ApiRequestInit = RequestInit & {
   json?: unknown;
   stringify?: boolean;
   formData?: FormData;

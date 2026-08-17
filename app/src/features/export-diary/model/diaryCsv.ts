@@ -13,7 +13,7 @@ export const DIARY_CSV_COLUMNS = [
   'photoUrl',
 ] as const;
 
-export type DiaryCsvColumn = (typeof DIARY_CSV_COLUMNS)[number];
+type DiaryCsvColumn = (typeof DIARY_CSV_COLUMNS)[number];
 
 export type DiaryCsvLocalization = {
   language: string;

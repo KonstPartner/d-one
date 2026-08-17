@@ -2,9 +2,9 @@ import { getLocales } from 'expo-localization';
 
 import { i18n } from '@shared/i18n';
 
-export type DateInput = string | number | Date | null | undefined;
+type DateInput = string | number | Date | null | undefined;
 
-export type DateParts = {
+type DateParts = {
   year: number;
   month: number;
   day: number;
@@ -13,7 +13,7 @@ export type DateParts = {
   second: number;
 };
 
-export type FormattedDateParts = {
+type FormattedDateParts = {
   year: string;
   month: string;
   day: string;
@@ -24,8 +24,6 @@ export type FormattedDateParts = {
   formattedDate: string;
   formattedTime: string;
 };
-
-export type DateKitInstance = ReturnType<typeof createDateKit>;
 
 const isValidDate = (value: unknown): value is Date =>
   value instanceof Date && !Number.isNaN(value.getTime());

@@ -224,15 +224,3 @@ export const errorMapper = (
 
   return error.message;
 };
-
-export const handleError = (error: unknown): never => {
-  if (error instanceof Error) {
-    throw new Error(error.message);
-  }
-
-  if (typeof error === 'object' && error !== null) {
-    throw new Error(`Unknown error: ${JSON.stringify(error)}`);
-  }
-
-  throw new Error(`Unknown error: ${String(error)}`);
-};

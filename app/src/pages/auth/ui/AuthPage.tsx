@@ -1,6 +1,6 @@
 import { AuthForm } from '@widgets/auth-form';
-import { LogoutButton } from '@features/logout';
-import { VerifyEmail } from '@features/verify-email';
+import { LogoutButton } from '@features/auth/logout';
+import { VerifyEmail } from '@features/auth/verify-email';
 import { useSession } from '@entities/session';
 import { Loader, LoadingView, PageLayout } from '@shared/ui';
 

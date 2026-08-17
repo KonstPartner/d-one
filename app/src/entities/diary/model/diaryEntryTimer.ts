@@ -1,6 +1,6 @@
-export const DIARY_ENTRY_TIMER_OFFSET_MS = 2 * 60 * 60 * 1000;
+const DIARY_ENTRY_TIMER_OFFSET_MS = 2 * 60 * 60 * 1000;
 
-export const getDiaryEntryTimerTargetAt = (eventAt: Date): Date =>
+const getDiaryEntryTimerTargetAt = (eventAt: Date): Date =>
   new Date(eventAt.getTime() + DIARY_ENTRY_TIMER_OFFSET_MS);
 
 export const getDiaryEntryTimerDurationSeconds = (

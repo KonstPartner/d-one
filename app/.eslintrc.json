@@ -48,9 +48,9 @@
     "no-multiple-empty-lines": ["error", { "max": 1 }],
     "semi": ["error", "always"],
     "react-native/no-raw-text": "off",
-    "no-console": "warn",
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
     "eol-last": ["error", "always"],
-    "import/no-cycle": "error",
+    "import/no-cycle": ["error", { "ignoreExternal": true }],
     "import/no-self-import": "error",
     "padding-line-between-statements": [
       "error",
@@ -63,6 +63,7 @@
       "version": "detect"
     },
     "react-native/style-sheet-object-names": ["StyleSheet", "EStyleSheet"],
+    "import/ignore": ["node_modules/"],
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"]
     },

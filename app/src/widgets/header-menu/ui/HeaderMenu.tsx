@@ -60,11 +60,7 @@ export const HeaderMenu = ({ color }: HeaderMenuProps) => {
         onRequestClose={() => {
           setMenuVisible(false);
         }}
-        popoverStyle={{
-          backgroundColor: 'transparent',
-
-          borderRadius: theme.radius.md,
-        }}
+        popoverStyle={s.getPopoverStyle(theme)}
         from={
           <s.Trigger
             onPress={() => {

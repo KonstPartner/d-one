@@ -370,7 +370,7 @@ export const DiaryEntryEditorFields = ({
                 <Ionicons
                   name="trash-outline"
                   size={theme.size.base}
-                  color={theme.colors.danger}
+                  color={theme.colors.white}
                 />
 
                 <s.DeleteAiButtonText>

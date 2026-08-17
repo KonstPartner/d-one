@@ -5,10 +5,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { DiaryTransferModal } from '@widgets/diary-transfer';
-import { ChangePasswordForm } from '@features/change-password';
-import { LogoutButton } from '@features/logout';
+import { ChangePasswordForm } from '@features/auth/change-password';
+import { LogoutButton } from '@features/auth/logout';
+import { UpdateEmailForm } from '@features/auth/update-email';
 import { ProfileHelp } from '@features/screen-help';
-import { UpdateEmailForm } from '@features/update-email';
 import { useSession } from '@entities/session';
 import { userProfileQueryOptions, UserRole } from '@entities/user';
 import { PlatformOS } from '@shared/lib/platform';

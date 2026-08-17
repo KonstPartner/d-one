@@ -1,4 +1,4 @@
-import { GOOGLE_AUTH_REDIRECT_PATH } from '@features/google-sign-in';
+import { GOOGLE_AUTH_REDIRECT_PATH } from '@features/auth/google-sign-in';
 import { ROUTES } from '@shared/routes';
 
 const isGoogleOAuthRedirect = (path: string) => {

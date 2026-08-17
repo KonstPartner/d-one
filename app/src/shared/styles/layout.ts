@@ -23,28 +23,6 @@ export const Row = (
     gap: ${px(theme.spacing[gap])};
   ` as ViewStyle;
 
-export const Cluster = (
-  theme: Theme,
-  gap: ThemeSpacing = 'sm',
-  align: FlexAlign = 'center'
-) =>
-  css`
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: ${align};
-    gap: ${px(theme.spacing[gap])};
-  ` as ViewStyle;
-
-export const ActionsRow = (theme: Theme, gap: ThemeSpacing = 'md') =>
-  css`
-    ${Row(theme, 'center', 'space-between', gap)};
-  ` as ViewStyle;
-
-export const GapContainer = (gap = 8) =>
-  css`
-    gap: ${px(gap)};
-  ` as ViewStyle;
-
 export const FullWidth = css`
   width: 100%;
 ` as ViewStyle & TextStyle;
@@ -79,9 +57,4 @@ export const PageContainer = (theme: Theme) =>
     flex: 1;
     padding-left: ${px(theme.spacing.md)};
     padding-right: ${px(theme.spacing.md)};
-  ` as ViewStyle;
-
-export const PageContent = (theme: Theme) =>
-  css`
-    ${Stack(theme, 'lg')};
   ` as ViewStyle;

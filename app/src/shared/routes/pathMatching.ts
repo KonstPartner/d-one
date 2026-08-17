@@ -6,7 +6,7 @@ const createPathPattern = (allowedPath: string): RegExp => {
   return new RegExp(`^${escapedPath}$`);
 };
 
-export const normalizePath = (pathname: string): string => {
+const normalizePath = (pathname: string): string => {
   if (!pathname || pathname === '/') {
     return '/';
   }

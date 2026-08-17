@@ -1,6 +1,6 @@
 import type { MealRelation } from './mealRelation';
 
-export const DIARY_SYNC_STATUSES = [
+const DIARY_SYNC_STATUSES = [
   'synced',
   'pendingCreate',
   'pendingUpdate',

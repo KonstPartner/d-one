@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from 'react';
 
 export type SelectDropdownTone = 'primary' | 'success' | 'warning' | 'danger';
 
-export type SelectDropdownOptionColors = {
+type SelectDropdownOptionColors = {
   text: string;
   background: string;
   border: string;
@@ -22,7 +22,7 @@ export type SelectDropdownOption<T> = {
   colors?: SelectDropdownOptionColors;
 };
 
-export type SelectDropdownRenderOptionParams<T> = {
+type SelectDropdownRenderOptionParams<T> = {
   option: SelectDropdownOption<T>;
   selected: boolean;
   onPress: () => void;

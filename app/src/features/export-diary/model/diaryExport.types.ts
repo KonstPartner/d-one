@@ -2,12 +2,6 @@ import type { DiaryBackupExportType } from '@entities/diary';
 
 import type { DiaryCsvLocalization } from './diaryCsv';
 
-export const DIARY_EXPORT_FORMATS = [
-  'fullBackup',
-  'lightweightBackup',
-  'csv',
-] as const;
-
 export type DiaryExportFormat = DiaryBackupExportType | 'csv';
 
 export type DiaryExportScope =

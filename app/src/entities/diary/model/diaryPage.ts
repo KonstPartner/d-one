@@ -1,6 +1,6 @@
 import type { DiaryEntry } from './diaryEntry';
 
-export type DiaryPagination = {
+type DiaryPagination = {
   page: number;
   pageSize: number;
   totalItems: number;

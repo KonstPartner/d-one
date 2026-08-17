@@ -5,7 +5,6 @@ import { i18n } from '@shared/i18n';
 
 import { errorMapper } from '../errors';
 import { showNotification } from '../notifications';
-import { PlatformOS } from '../platform';
 
 type PickRoundOptions = {
   size?: number;
@@ -44,16 +43,6 @@ const IMAGE_DEFAULTS: Required<PickImageOptions> = {
   quality: 1,
 };
 
-let CropPicker: any = null;
-
-if (!PlatformOS.WEB) {
-  try {
-    CropPicker = require('react-native-image-crop-picker');
-  } catch {
-    CropPicker = null;
-  }
-}
-
 const handleError = (error: unknown) => {
   const errorMessage = errorMapper(error, 'none');
 
@@ -86,19 +75,6 @@ const ensurePermission = async (
   return true;
 };
 
-const normalizeImageUri = (uri: string): string => {
-  if (
-    uri.startsWith('file://') ||
-    uri.startsWith('content://') ||
-    uri.startsWith('http://') ||
-    uri.startsWith('https://')
-  ) {
-    return uri;
-  }
-
-  return `file://${uri}`;
-};
-
 const useImagePicker = () => {
   const [isPicking, setIsPicking] = useState(false);
   const isPickingRef = useRef(false);
@@ -108,7 +84,7 @@ const useImagePicker = () => {
       source: ImagePickerSource,
       options: PickImageOptions = {}
     ): Promise<string | null> => {
-      const { crop, aspect, size, quality } = {
+      const { crop, aspect, quality } = {
         ...IMAGE_DEFAULTS,
         ...options,
       };
@@ -127,72 +103,25 @@ const useImagePicker = () => {
           return null;
         }
 
-        const nativeMethod =
-          source === 'camera' ? CropPicker?.openCamera : CropPicker?.openPicker;
+        const pickerOptions: ImagePicker.ImagePickerOptions = {
+          mediaTypes: ['images'],
+          allowsMultipleSelection: false,
+          allowsEditing: crop !== 'none',
+          aspect,
+          quality,
+          selectionLimit: 1,
+        };
 
-        if (PlatformOS.WEB || !nativeMethod) {
-          const pickerOptions: ImagePicker.ImagePickerOptions = {
-            mediaTypes: ['images'],
-            allowsMultipleSelection: false,
-            allowsEditing: crop !== 'none',
-            aspect,
-            quality,
-            selectionLimit: 1,
-          };
-          const result =
-            source === 'camera'
-              ? await ImagePicker.launchCameraAsync(pickerOptions)
-              : await ImagePicker.launchImageLibraryAsync(pickerOptions);
+        const result =
+          source === 'camera'
+            ? await ImagePicker.launchCameraAsync(pickerOptions)
+            : await ImagePicker.launchImageLibraryAsync(pickerOptions);
 
-          if (result.canceled || !result.assets?.length) {
-            return null;
-          }
-
-          return result.assets[0].uri;
+        if (result.canceled || !result.assets?.length) {
+          return null;
         }
 
-        if (crop === 'none') {
-          const image = await nativeMethod({
-            mediaType: 'photo',
-            cropping: false,
-            compressImageQuality: quality,
-            includeBase64: false,
-          });
-
-          return image?.path ? normalizeImageUri(image.path) : null;
-        }
-
-        if (crop === 'round') {
-          const image = await nativeMethod({
-            mediaType: 'photo',
-            cropping: true,
-            cropperCircleOverlay: true,
-            width: size,
-            height: size,
-            compressImageQuality: quality,
-            includeBase64: false,
-          });
-
-          return image?.path ? normalizeImageUri(image.path) : null;
-        }
-
-        const width = size;
-        const height =
-          crop === 'square'
-            ? size
-            : Math.round(width * (aspect[1] / aspect[0]));
-        const image = await nativeMethod({
-          mediaType: 'photo',
-          cropping: true,
-          cropperCircleOverlay: false,
-          width,
-          height,
-          compressImageQuality: quality,
-          includeBase64: false,
-          forceJpg: true,
-        });
-
-        return image?.path ? normalizeImageUri(image.path) : null;
+        return result.assets[0].uri;
       } catch (error) {
         return handleError(error);
       } finally {

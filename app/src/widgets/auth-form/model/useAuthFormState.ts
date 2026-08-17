@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { RegisterPrefill } from '@features/register';
+import type { RegisterPrefill } from '@features/auth/register';
 
 type AuthFormMode = 'login' | 'register';
 

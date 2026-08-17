@@ -24,9 +24,7 @@ import * as s from '../styles/StoredExportList';
 
 import { ExportFileActionsScreen } from './ExportFileActionsScreen';
 
-export type { StoredExportListMode } from '../model/useStoredExportList';
-
-export type StoredExportSelection = {
+type StoredExportSelection = {
   fileName: string;
   fileUri: string;
 };

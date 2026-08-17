@@ -1,5 +1,2 @@
-export {
-  validateInput,
-  ValidateInputType,
-  validateMultipleInputs,
-} from './validateInput';
+export type { ValidateInputType } from './validateInput';
+export { validateInput } from './validateInput';

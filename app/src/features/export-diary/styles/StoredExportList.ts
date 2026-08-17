@@ -138,12 +138,6 @@ export const PrimaryActionText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
 `;
 
-export const ErrorText = styled.Text`
-  color: ${({ theme }) => theme.colors.danger};
-  font-size: ${({ theme }) => ss.px(theme.size.sm)};
-  line-height: ${({ theme }) => ss.px(theme.lineHeight.sm)};
-`;
-
 export const EmptyText = styled.Text`
   color: ${({ theme }) => theme.colors.muted};
   text-align: center;

@@ -1,6 +1,6 @@
 import styled, { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
-import type { TextStyle, ViewStyle } from 'react-native';
+import type { ViewStyle } from 'react-native';
 
 import * as ss from '@shared/styles';
 
@@ -64,20 +64,6 @@ const getToneSoftBackground = (
       return theme.colors.shades.primary.sm;
   }
 };
-
-export const getIconGlyphStyle = (size: number): TextStyle => ({
-  width: size,
-
-  height: size,
-
-  lineHeight: size,
-
-  textAlign: 'center',
-
-  textAlignVertical: 'center',
-
-  includeFontPadding: false,
-});
 
 const getDropdownPosition = (hasLabel: boolean, inlineOptions: boolean) => {
   if (inlineOptions) {
@@ -179,10 +165,6 @@ export const OptionContent = styled.View`
   gap: 10px;
 `;
 
-export const CustomOptionContent = styled.View`
-  width: 100%;
-`;
-
 export const IconBox = styled.View<IconBoxProps>`
   width: 34px;
   height: 34px;
@@ -199,6 +181,7 @@ export const IconBox = styled.View<IconBoxProps>`
       ? getToneColor(theme, $tone)
       : getToneSoftBackground(theme, $tone)};
 `;
+
 export const Option = styled.Pressable<SelectedProps>`
   min-height: 50px;
 
@@ -221,23 +204,6 @@ export const Option = styled.Pressable<SelectedProps>`
 
   background-color: ${({ theme, $selected }) =>
     $selected ? theme.colors.shades.primary.sm : theme.colors.card};
-`;
-
-export const IconPlaceholder = styled.View`
-  width: 34px;
-  height: 34px;
-
-  flex-shrink: 0;
-`;
-
-export const ControlIcon = styled.View`
-  width: 20px;
-  height: 20px;
-
-  flex-shrink: 0;
-
-  align-items: center;
-  justify-content: center;
 `;
 
 export const OptionText = styled.Text<SelectedProps>`

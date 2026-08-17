@@ -39,7 +39,7 @@ export const CREATE_DIARY_ENTRY_SQL = `
   )
 `;
 
-export const DIARY_ENTRY_SELECT_SQL = `
+const DIARY_ENTRY_SELECT_SQL = `
   SELECT
     id,
     user_id,

@@ -19,10 +19,7 @@ type ExportFileActionsProps = {
   onBusyChange?: (busy: boolean) => void;
 };
 
-export const ExportFileActions = ({
-  file,
-  onBusyChange,
-}: ExportFileActionsProps) => {
+const ExportFileActions = ({ file, onBusyChange }: ExportFileActionsProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
 

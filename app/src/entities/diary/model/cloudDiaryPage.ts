@@ -9,7 +9,7 @@ export type CloudDiaryCursor = {
   id: string;
 };
 
-export type CloudDiaryPageInfo = {
+type CloudDiaryPageInfo = {
   hasNextPage: boolean;
   nextCursor: CloudDiaryCursor | null;
 };

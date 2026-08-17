@@ -32,16 +32,6 @@ export const Title = styled.Text`
   text-align: center;
 `;
 
-export const HeaderPlaceholder = styled.View`
-  width: ${({ theme }) => ss.px(theme.control.height.sm)};
-  height: ${({ theme }) => ss.px(theme.control.height.sm)};
-`;
-
-export const headerActionStyle: ViewStyle = {
-  width: 40,
-  paddingHorizontal: 0,
-};
-
 export const Scroll = styled.ScrollView`
   flex: 1;
 `;

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Calendar as RNCalendar,
   CalendarProvider,
+  type DateData,
   WeekCalendar,
 } from 'react-native-calendars';
 
@@ -16,6 +17,18 @@ import { useCalendar } from './useCalendar';
 type CalendarDot = {
   key?: string;
   color: string;
+};
+
+type CalendarDayProps = {
+  date?: DateData;
+
+  marking?: {
+    selected?: boolean;
+    disableTouchEvent?: boolean;
+    dots?: CalendarDot[];
+  };
+
+  onPress?: (date?: DateData) => void;
 };
 
 export const Calendar = ({
@@ -62,10 +75,12 @@ export const Calendar = ({
 
   const weekModeAvailable = usesCustomDay;
 
-  const renderDay = (dayProps: any) => {
-    const { date, marking, onPress } = dayProps;
+  const renderDay = ({ date, marking, onPress }: CalendarDayProps) => {
+    if (date === undefined) {
+      return null;
+    }
 
-    const dateString: string = date.dateString;
+    const dateString = date.dateString;
 
     const isToday = dateString === todayString;
 

@@ -12,12 +12,7 @@ export type DiaryBackupFormatVersion =
 
 export const DIARY_BACKUP_CHUNK_SIZE = 300;
 
-export const DIARY_BACKUP_EXPORT_TYPES = [
-  'fullBackup',
-  'lightweightBackup',
-] as const;
-
-export type DiaryBackupExportType = (typeof DIARY_BACKUP_EXPORT_TYPES)[number];
+export type DiaryBackupExportType = 'fullBackup' | 'lightweightBackup';
 
 export type DiaryBackupRecordsScope =
   | {

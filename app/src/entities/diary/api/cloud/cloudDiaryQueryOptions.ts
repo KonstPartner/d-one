@@ -12,7 +12,7 @@ type CloudDiaryPageQueryOptionsParams = {
   repository: CloudDiaryRepository;
 };
 
-export const cloudDiaryQueryKeys = {
+const cloudDiaryQueryKeys = {
   all: ['cloudDiary'] as const,
 
   owner: (ownerUid: string) => [...cloudDiaryQueryKeys.all, ownerUid] as const,

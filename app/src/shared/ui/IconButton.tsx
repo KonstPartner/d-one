@@ -1,10 +1,15 @@
-import { Pressable, type PressableProps } from 'react-native';
+import {
+  Pressable,
+  type PressableProps,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 
 import { Spinner } from './Spinner';
-import { ButtonTone } from './styles/Button';
+import type { ButtonTone } from './styles/Button';
 import * as s from './styles/IconButton';
 
 export type IconButtonProps = Omit<
@@ -15,7 +20,7 @@ export type IconButtonProps = Omit<
 
   onPress: NonNullable<PressableProps['onPress']>;
 
-  style?: any;
+  style?: StyleProp<ViewStyle>;
 
   tone?: ButtonTone;
 
@@ -27,8 +32,6 @@ export type IconButtonProps = Omit<
 
   loading?: boolean;
 };
-
-export type { IconButtonSize, IconButtonVariant } from './styles/IconButton';
 
 export const IconButton = ({
   icon,

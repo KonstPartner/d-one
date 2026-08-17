@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 
 import type { DiaryLocalRepository } from './DiaryLocalRepository';
 
-export type DiaryDatabaseStatus = 'opening' | 'ready' | 'error';
+type DiaryDatabaseStatus = 'opening' | 'ready' | 'error';
 
 export type DiaryDatabaseContextValue = {
   userId: string;

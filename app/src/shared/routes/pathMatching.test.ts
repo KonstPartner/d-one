@@ -1,20 +1,6 @@
-import { isPathAllowed, isSamePath, normalizePath } from './pathMatching';
+import { isPathAllowed, isSamePath } from './pathMatching';
 
 describe('pathMatching', () => {
-  describe('normalizePath', () => {
-    it('preserves root path', () => {
-      expect(normalizePath('/')).toBe('/');
-    });
-
-    it('removes trailing slashes', () => {
-      expect(normalizePath('/diary///')).toBe('/diary');
-    });
-
-    it('removes query string', () => {
-      expect(normalizePath('/diary/?page=2')).toBe('/diary');
-    });
-  });
-
   describe('isPathAllowed', () => {
     it('matches a static allowed path', () => {
       expect(isPathAllowed('/profile', ['/diary', '/profile'])).toBe(true);
@@ -24,14 +10,30 @@ describe('pathMatching', () => {
       expect(isPathAllowed('/diary/entry-1', ['/diary/[id]'])).toBe(true);
     });
 
+    it('normalizes query strings and trailing slashes', () => {
+      expect(isPathAllowed('/diary/?page=2', ['/diary'])).toBe(true);
+    });
+
     it('rejects a path outside the allowed list', () => {
       expect(isPathAllowed('/cloud', ['/diary', '/profile'])).toBe(false);
     });
   });
 
   describe('isSamePath', () => {
+    it('preserves root path semantics', () => {
+      expect(isSamePath('/', '/')).toBe(true);
+    });
+
     it('ignores trailing slashes', () => {
-      expect(isSamePath('/diary/', '/diary')).toBe(true);
+      expect(isSamePath('/diary///', '/diary')).toBe(true);
+    });
+
+    it('ignores query strings', () => {
+      expect(isSamePath('/diary/?page=2', '/diary')).toBe(true);
+    });
+
+    it('distinguishes different paths', () => {
+      expect(isSamePath('/diary', '/cloud')).toBe(false);
     });
   });
 });

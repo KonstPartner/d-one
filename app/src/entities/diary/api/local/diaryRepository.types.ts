@@ -114,7 +114,7 @@ export type DiaryRepositorySyncedEntryInput = Pick<
   | 'eventAt'
 >;
 
-export type DiaryEntryPhotoState = Pick<
+type DiaryEntryPhotoState = Pick<
   DiaryEntry,
   'localPhotoUri' | 'photoPath' | 'photoUrl'
 >;
@@ -134,28 +134,27 @@ export type DiaryRepositoryUpdateInput = Pick<
   photo?: DiaryEntryPhotoState;
 };
 
-export const createDefaultDiaryEntryFilterCriteria =
-  (): DiaryEntryFilterCriteria => ({
-    eventAt: {
-      from: null,
-      to: null,
-    },
+const createDefaultDiaryEntryFilterCriteria = (): DiaryEntryFilterCriteria => ({
+  eventAt: {
+    from: null,
+    to: null,
+  },
 
-    glucose: createEmptyDiaryEntryNumericRange(),
+  glucose: createEmptyDiaryEntryNumericRange(),
 
-    shortInsulin: createEmptyDiaryEntryNumericRange(),
+  shortInsulin: createEmptyDiaryEntryNumericRange(),
 
-    ultraShortInsulin: createEmptyDiaryEntryNumericRange(),
+  ultraShortInsulin: createEmptyDiaryEntryNumericRange(),
 
-    longInsulin: createEmptyDiaryEntryNumericRange(),
+  longInsulin: createEmptyDiaryEntryNumericRange(),
 
-    carbsGram: createEmptyDiaryEntryNumericRange(),
+  carbsGram: createEmptyDiaryEntryNumericRange(),
 
-    mealRelations: [],
+  mealRelations: [],
 
-    photo: 'ignore',
-    aiAnalysis: 'ignore',
-  });
+  photo: 'ignore',
+  aiAnalysis: 'ignore',
+});
 
 export const createDefaultDiaryEntryQuery = (): DiaryEntryQuery => ({
   search: {

@@ -31,11 +31,6 @@ export class DiaryImportValidationError extends Error {
   }
 }
 
-export const isDiaryImportValidationError = (
-  error: unknown
-): error is DiaryImportValidationError =>
-  error instanceof DiaryImportValidationError;
-
 export type DiaryValidatedBackupArchive = {
   sourceFileName: string;
   payloadUri: string;
@@ -331,9 +326,6 @@ const parseDiaryBackupEntry = (
     eventAt,
   };
 };
-
-export const isDiaryBackupEntry = (value: unknown): value is DiaryBackupEntry =>
-  parseDiaryBackupEntry(value, DIARY_BACKUP_FORMAT_VERSION) !== null;
 
 export const validateDiaryBackupChunk = (
   value: unknown,

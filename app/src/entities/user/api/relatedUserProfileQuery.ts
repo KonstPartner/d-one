@@ -6,9 +6,7 @@ import { db } from '@shared/api';
 import { isUserProfile } from '../model/isUserProfile';
 import type { UserProfile } from '../model/types';
 
-export const getRelatedUserProfile = async (
-  uid: string
-): Promise<UserProfile> => {
+const getRelatedUserProfile = async (uid: string): Promise<UserProfile> => {
   const snapshot = await getDoc(doc(db, 'users', uid));
 
   if (!snapshot.exists()) {
@@ -26,7 +24,7 @@ export const getRelatedUserProfile = async (
 
 const RELATED_USER_PROFILE_QUERY_ROOT = ['related-user-profile'] as const;
 
-export const relatedUserProfileQueryKeys = {
+const relatedUserProfileQueryKeys = {
   root: RELATED_USER_PROFILE_QUERY_ROOT,
 
   byId: (uid: string) => [...RELATED_USER_PROFILE_QUERY_ROOT, uid] as const,
