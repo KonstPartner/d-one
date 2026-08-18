@@ -60,6 +60,7 @@ const createBackupDisplayEntry = ({
   glucose: backupEntry.glucose,
   mealRelation: backupEntry.mealRelation,
   shortInsulin: backupEntry.shortInsulin,
+  ultraShortInsulin: backupEntry.ultraShortInsulin,
   longInsulin: backupEntry.longInsulin,
   carbsGram: backupEntry.carbsGram,
 

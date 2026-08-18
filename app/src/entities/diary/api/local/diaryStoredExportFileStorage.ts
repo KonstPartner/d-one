@@ -1,4 +1,4 @@
-export type DiaryStoredExportFileKind = 'backup' | 'csv';
+type DiaryStoredExportFileKind = 'backup' | 'csv';
 
 export type DiaryStoredExportFile = {
   fileName: string;

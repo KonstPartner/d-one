@@ -42,6 +42,7 @@
         "mealRelation": "Meal relation",
         "shortInsulin": "Short insulin",
         "longInsulin": "Long insulin",
+        "ultraShortInsulin": "Ultra-short insulin",
         "carbsGram": "Carbohydrates",
         "comment": "Comment",
         "aiAnalysis": "AI analysis",

@@ -2,7 +2,9 @@ import {
   DIARY_BACKUP_APP,
   DIARY_BACKUP_CHUNK_SIZE,
   DIARY_BACKUP_FORMAT_VERSION,
+  DIARY_BACKUP_SUPPORTED_FORMAT_VERSIONS,
   type DiaryBackupEntry,
+  type DiaryBackupFormatVersion,
   type DiaryBackupManifest,
   type DiaryBackupRecordsScope,
   isMealRelation,
@@ -28,11 +30,6 @@ export class DiaryImportValidationError extends Error {
     this.name = 'DiaryImportValidationError';
   }
 }
-
-export const isDiaryImportValidationError = (
-  error: unknown
-): error is DiaryImportValidationError =>
-  error instanceof DiaryImportValidationError;
 
 export type DiaryValidatedBackupArchive = {
   sourceFileName: string;
@@ -65,6 +62,13 @@ const isNullableNumber = (value: unknown): value is number | null =>
 
 const isNonNegativeInteger = (value: unknown): value is number =>
   typeof value === 'number' && Number.isInteger(value) && value >= 0;
+
+const isSupportedFormatVersion = (
+  value: number
+): value is DiaryBackupFormatVersion =>
+  DIARY_BACKUP_SUPPORTED_FORMAT_VERSIONS.some(
+    (supportedVersion) => supportedVersion === value
+  );
 
 const parseStrictIsoDate = (value: unknown): Date | null => {
   if (typeof value !== 'string' || !STRICT_ISO_DATE_PATTERN.test(value)) {
@@ -159,7 +163,7 @@ export const parseDiaryBackupManifest = (
     throw new DiaryImportValidationError('manifestInvalid');
   }
 
-  if (formatVersion !== DIARY_BACKUP_FORMAT_VERSION) {
+  if (!isSupportedFormatVersion(formatVersion)) {
     throw new DiaryImportValidationError('unsupportedVersion');
   }
 
@@ -180,7 +184,7 @@ export const parseDiaryBackupManifest = (
   if (exportType === 'fullBackup' && withPhotos === true) {
     return {
       app: DIARY_BACKUP_APP,
-      formatVersion: DIARY_BACKUP_FORMAT_VERSION,
+      formatVersion,
       exportType: 'fullBackup',
       exportedAt,
       sourceUserName,
@@ -200,7 +204,7 @@ export const parseDiaryBackupManifest = (
   ) {
     return {
       app: DIARY_BACKUP_APP,
-      formatVersion: DIARY_BACKUP_FORMAT_VERSION,
+      formatVersion,
       exportType: 'lightweightBackup',
       exportedAt,
       sourceUserName,
@@ -216,24 +220,27 @@ export const parseDiaryBackupManifest = (
   throw new DiaryImportValidationError('manifestInvalid');
 };
 
-const isPhotoFileNameValid = (entryId: string, value: unknown): boolean => {
+const isPhotoFileNameValid = (
+  entryId: string,
+  value: string | null
+): boolean => {
   if (value === null) {
     return true;
   }
 
   return (
-    typeof value === 'string' &&
     isSafeDiaryBackupRelativePath(value) &&
     !value.includes('/') &&
     value === `${entryId}.jpg`
   );
 };
 
-export const isDiaryBackupEntry = (
-  value: unknown
-): value is DiaryBackupEntry => {
+const parseDiaryBackupEntry = (
+  value: unknown,
+  formatVersion: DiaryBackupFormatVersion
+): DiaryBackupEntry | null => {
   if (!isRecord(value)) {
-    return false;
+    return null;
   }
 
   const {
@@ -241,6 +248,7 @@ export const isDiaryBackupEntry = (
     glucose,
     mealRelation,
     shortInsulin,
+    ultraShortInsulin: sourceUltraShortInsulin,
     longInsulin,
     carbsGram,
     comment,
@@ -250,11 +258,15 @@ export const isDiaryBackupEntry = (
     eventAt,
   } = value;
 
+  const ultraShortInsulin =
+    formatVersion === 1 ? null : sourceUltraShortInsulin;
+
   if (
     !isNonEmptyString(id) ||
     !SAFE_IDENTIFIER_PATTERN.test(id) ||
     !isNullableNumber(glucose) ||
     !isNullableNumber(shortInsulin) ||
+    !isNullableNumber(ultraShortInsulin) ||
     !isNullableNumber(longInsulin) ||
     !isNullableNumber(carbsGram) ||
     !(
@@ -263,17 +275,21 @@ export const isDiaryBackupEntry = (
     ) ||
     typeof comment !== 'string' ||
     typeof aiAnalysis !== 'string' ||
+    !isNullableString(photoFileName) ||
     !isNullableString(photoUrl) ||
-    !isPhotoFileNameValid(id, photoFileName) ||
     typeof eventAt !== 'string'
   ) {
-    return false;
+    return null;
+  }
+
+  if (!isPhotoFileNameValid(id, photoFileName)) {
+    return null;
   }
 
   const parsedEventAt = parseStrictIsoDate(eventAt);
 
   if (parsedEventAt === null) {
-    return false;
+    return null;
   }
 
   const validationError = validateDiaryEntryEditableValues({
@@ -281,6 +297,7 @@ export const isDiaryBackupEntry = (
       glucose,
       mealRelation,
       shortInsulin,
+      ultraShortInsulin,
       longInsulin,
       carbsGram,
       comment,
@@ -290,19 +307,45 @@ export const isDiaryBackupEntry = (
       photoFileName !== null || (photoUrl !== null && photoUrl.length > 0),
   });
 
-  return validationError === null;
+  if (validationError !== null) {
+    return null;
+  }
+
+  return {
+    id,
+    glucose,
+    mealRelation,
+    shortInsulin,
+    ultraShortInsulin,
+    longInsulin,
+    carbsGram,
+    comment,
+    aiAnalysis,
+    photoFileName,
+    photoUrl,
+    eventAt,
+  };
 };
 
 export const validateDiaryBackupChunk = (
-  value: unknown
+  value: unknown,
+  formatVersion: DiaryBackupFormatVersion = DIARY_BACKUP_FORMAT_VERSION
 ): readonly DiaryBackupEntry[] => {
   if (!Array.isArray(value) || value.length > DIARY_BACKUP_CHUNK_SIZE) {
     throw new DiaryImportValidationError('chunkInvalid');
   }
 
-  if (value.some((entry) => !isDiaryBackupEntry(entry))) {
-    throw new DiaryImportValidationError('entryInvalid');
+  const entries: DiaryBackupEntry[] = [];
+
+  for (const valueEntry of value) {
+    const entry = parseDiaryBackupEntry(valueEntry, formatVersion);
+
+    if (entry === null) {
+      throw new DiaryImportValidationError('entryInvalid');
+    }
+
+    entries.push(entry);
   }
 
-  return value;
+  return entries;
 };

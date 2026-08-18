@@ -1,6 +1,6 @@
-import { type Theme, useTheme } from '@emotion/react';
+import { useState } from 'react';
+import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
-import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PlatformOS } from '@shared/lib/platform';
@@ -17,9 +17,8 @@ import { DiaryEntryAiControl } from './DiaryEntryAiControl';
 import { DiaryEntryDateTimeFields } from './DiaryEntryDateTimeFields';
 import { DiaryEntryPhotoField } from './DiaryEntryPhotoField';
 import { DiaryMealRelationSelect } from './DiaryMealRelationSelect';
+import type { DiaryMetricKey } from './DiaryMetricIcon';
 import { DiaryMetricStepper } from './DiaryMetricStepper';
-
-type DiaryMetricKey = keyof Theme['colors']['metrics'];
 
 type DiaryEntryEditorFieldsProps = {
   eventAt: Date;
@@ -29,6 +28,7 @@ type DiaryEntryEditorFieldsProps = {
   glucose: number | null;
   carbsGram: number | null;
   shortInsulin: number | null;
+  ultraShortInsulin: number | null;
   longInsulin: number | null;
 
   mealRelation: MealRelation | null;
@@ -56,6 +56,7 @@ type DiaryEntryEditorFieldsProps = {
   onGlucoseChange: (value: number | null) => void;
   onCarbsGramChange: (value: number | null) => void;
   onShortInsulinChange: (value: number | null) => void;
+  onUltraShortInsulinChange: (value: number | null) => void;
   onLongInsulinChange: (value: number | null) => void;
 
   onMealRelationChange: (value: MealRelation | null) => void;
@@ -74,8 +75,6 @@ type DiaryEntryEditorFieldsProps = {
 type MetricField = {
   key: DiaryMetricKey;
 
-  icon: ComponentProps<typeof Ionicons>['name'];
-
   label: string;
 
   value: number | null;
@@ -91,6 +90,7 @@ export const DiaryEntryEditorFields = ({
   glucose,
   carbsGram,
   shortInsulin,
+  ultraShortInsulin,
   longInsulin,
   mealRelation,
   comment,
@@ -108,6 +108,7 @@ export const DiaryEntryEditorFields = ({
   onGlucoseChange,
   onCarbsGramChange,
   onShortInsulinChange,
+  onUltraShortInsulinChange,
   onLongInsulinChange,
   onMealRelationChange,
   onCommentChange,
@@ -121,10 +122,11 @@ export const DiaryEntryEditorFields = ({
 
   const { t } = useTranslation();
 
-  const metricFields: MetricField[] = [
+  const [metricsViewportWidth, setMetricsViewportWidth] = useState(0);
+
+  const primaryMetricFields: MetricField[] = [
     {
       key: 'glucose',
-      icon: 'water',
       label: t('diary.entry.metrics.glucose'),
       value: glucose,
       maximum: DIARY_ENTRY_METRIC_MAXIMUM.glucose,
@@ -132,29 +134,41 @@ export const DiaryEntryEditorFields = ({
     },
     {
       key: 'carbsGram',
-      icon: 'leaf-outline',
       label: t('diary.entry.metrics.carbohydrates'),
       value: carbsGram,
       maximum: DIARY_ENTRY_METRIC_MAXIMUM.carbsGram,
       onChange: onCarbsGramChange,
     },
+  ];
+
+  const insulinMetricFields: MetricField[] = [
     {
-      key: 'shortInsulin',
-      icon: 'medical-outline',
-      label: t('diary.entry.metrics.shortInsulin'),
-      value: shortInsulin,
-      maximum: DIARY_ENTRY_METRIC_MAXIMUM.shortInsulin,
-      onChange: onShortInsulinChange,
+      key: 'ultraShortInsulin',
+      label: t('diary.entry.metrics.ultraShortInsulin'),
+      value: ultraShortInsulin,
+      maximum: DIARY_ENTRY_METRIC_MAXIMUM.ultraShortInsulin,
+      onChange: onUltraShortInsulinChange,
     },
     {
       key: 'longInsulin',
-      icon: 'shield-checkmark-outline',
       label: t('diary.entry.metrics.longInsulin'),
       value: longInsulin,
       maximum: DIARY_ENTRY_METRIC_MAXIMUM.longInsulin,
       onChange: onLongInsulinChange,
     },
+    {
+      key: 'shortInsulin',
+      label: t('diary.entry.metrics.shortInsulin'),
+      value: shortInsulin,
+      maximum: DIARY_ENTRY_METRIC_MAXIMUM.shortInsulin,
+      onChange: onShortInsulinChange,
+    },
   ];
+
+  const insulinMetricWidth = Math.max(
+    0,
+    (metricsViewportWidth - theme.spacing.sm) / 2
+  );
 
   const hasAiAnalysis = aiAnalysis !== null && aiAnalysis.trim().length > 0;
 
@@ -174,38 +188,81 @@ export const DiaryEntryEditorFields = ({
         onTimeChange={onEventTimeChange}
       />
 
-      <s.Metrics>
-        {metricFields.map((metric) => (
-          <DiaryMetricStepper
-            key={metric.key}
-            metricKey={metric.key}
-            icon={metric.icon}
-            label={metric.label}
-            value={metric.value}
-            maximum={metric.maximum}
-            disabled={disabled}
-            inputAccessibilityLabel={t(
-              'diary.form.metric.valueAccessibilityLabel',
-              {
-                metric: metric.label,
-              }
-            )}
-            decrementAccessibilityLabel={t(
-              'diary.form.metric.decreaseAccessibilityLabel',
-              {
-                metric: metric.label,
-              }
-            )}
-            incrementAccessibilityLabel={t(
-              'diary.form.metric.increaseAccessibilityLabel',
-              {
-                metric: metric.label,
-              }
-            )}
-            onChange={metric.onChange}
-          />
-        ))}
-      </s.Metrics>
+      <s.MetricRows>
+        <s.Metrics>
+          {primaryMetricFields.map((metric) => (
+            <DiaryMetricStepper
+              key={metric.key}
+              metricKey={metric.key}
+              label={metric.label}
+              value={metric.value}
+              maximum={metric.maximum}
+              disabled={disabled}
+              inputAccessibilityLabel={t(
+                'diary.form.metric.valueAccessibilityLabel',
+                {
+                  metric: metric.label,
+                }
+              )}
+              decrementAccessibilityLabel={t(
+                'diary.form.metric.decreaseAccessibilityLabel',
+                {
+                  metric: metric.label,
+                }
+              )}
+              incrementAccessibilityLabel={t(
+                'diary.form.metric.increaseAccessibilityLabel',
+                {
+                  metric: metric.label,
+                }
+              )}
+              onChange={metric.onChange}
+            />
+          ))}
+        </s.Metrics>
+
+        <s.InsulinScroll
+          horizontal
+          nestedScrollEnabled
+          showsHorizontalScrollIndicator={false}
+          onLayout={(event) => {
+            setMetricsViewportWidth(event.nativeEvent.layout.width);
+          }}
+        >
+          <s.InsulinMetrics>
+            {insulinMetricFields.map((metric) => (
+              <s.InsulinMetric key={metric.key} $width={insulinMetricWidth}>
+                <DiaryMetricStepper
+                  metricKey={metric.key}
+                  label={metric.label}
+                  value={metric.value}
+                  maximum={metric.maximum}
+                  disabled={disabled}
+                  inputAccessibilityLabel={t(
+                    'diary.form.metric.valueAccessibilityLabel',
+                    {
+                      metric: metric.label,
+                    }
+                  )}
+                  decrementAccessibilityLabel={t(
+                    'diary.form.metric.decreaseAccessibilityLabel',
+                    {
+                      metric: metric.label,
+                    }
+                  )}
+                  incrementAccessibilityLabel={t(
+                    'diary.form.metric.increaseAccessibilityLabel',
+                    {
+                      metric: metric.label,
+                    }
+                  )}
+                  onChange={metric.onChange}
+                />
+              </s.InsulinMetric>
+            ))}
+          </s.InsulinMetrics>
+        </s.InsulinScroll>
+      </s.MetricRows>
 
       <s.MealPhotoRow>
         <s.MealRelationArea>
@@ -313,7 +370,7 @@ export const DiaryEntryEditorFields = ({
                 <Ionicons
                   name="trash-outline"
                   size={theme.size.base}
-                  color={theme.colors.danger}
+                  color={theme.colors.white}
                 />
 
                 <s.DeleteAiButtonText>

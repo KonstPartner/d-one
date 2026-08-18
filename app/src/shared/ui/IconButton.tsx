@@ -1,10 +1,15 @@
+import {
+  Pressable,
+  type PressableProps,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
-import type { PressableProps } from 'react-native';
 
 import { Spinner } from './Spinner';
-import { ButtonTone } from './styles/Button';
+import type { ButtonTone } from './styles/Button';
 import * as s from './styles/IconButton';
 
 export type IconButtonProps = Omit<
@@ -14,6 +19,8 @@ export type IconButtonProps = Omit<
   icon: ComponentProps<typeof Ionicons>['name'];
 
   onPress: NonNullable<PressableProps['onPress']>;
+
+  style?: StyleProp<ViewStyle>;
 
   tone?: ButtonTone;
 
@@ -26,13 +33,11 @@ export type IconButtonProps = Omit<
   loading?: boolean;
 };
 
-export type { IconButtonSize, IconButtonVariant } from './styles/IconButton';
-
 export const IconButton = ({
   icon,
   onPress,
-
-  tone = 'primary',
+  style,
+  tone = 'muted',
   variant = 'solid',
   size = 'md',
 
@@ -55,7 +60,7 @@ export const IconButton = ({
   const foregroundColor = s.getIconButtonForegroundColor(theme, tone, variant);
 
   return (
-    <s.Root
+    <Pressable
       {...props}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
@@ -69,7 +74,7 @@ export const IconButton = ({
       disabled={isDisabled}
       onPress={onPress}
       style={({ pressed }) => [
-        s.getIconButtonStyle(theme, tone, variant, size),
+        style || s.getIconButtonStyle(theme, tone, variant, size),
 
         {
           opacity: isDisabled ? 0.45 : pressed ? 0.72 : 1,
@@ -86,6 +91,6 @@ export const IconButton = ({
           style={s.getIconStyle(resolvedIconSize)}
         />
       )}
-    </s.Root>
+    </Pressable>
   );
 };

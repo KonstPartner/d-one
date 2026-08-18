@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useSession } from '@entities/session';
 import { userProfileQueryOptions } from '@entities/user';
 
+const EMPTY_FOLLOWED_USER_IDS: readonly string[] = [];
+
 export const useFollowerDiaryProfile = () => {
   const { sessionUser, isSessionReady } = useSession();
 
@@ -16,13 +18,13 @@ export const useFollowerDiaryProfile = () => {
 
   const profile = profileQuery.data ?? null;
 
-  const followedUserId = profile?.followedUserId ?? null;
+  const followedUserIds = profile?.followedUserIds ?? EMPTY_FOLLOWED_USER_IDS;
 
   return {
     userId,
 
     profile,
-    followedUserId,
+    followedUserIds,
 
     isInitialLoading: profile === null && profileQuery.isPending,
 

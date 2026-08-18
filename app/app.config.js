@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 const appIcon = './src/assets/images/icon.png';
+const splashIcon = './src/assets/images/splash-icon.png';
 
 export default {
   expo: {
@@ -17,7 +18,7 @@ export default {
     ios: {
       scheme: 'done.app.ios',
       bundleIdentifier: 'done.app.ios',
-      googleServicesFile: './GoogleService-Info.plist',
+      googleServicesFile: process.env.GOOGLE_SERVICE_INFO_PLIST,
 
       supportsTablet: false,
 
@@ -29,13 +30,18 @@ export default {
     android: {
       scheme: 'done.android.app',
       package: 'done.android.app',
-      googleServicesFile: './google-services.json',
+      googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       permissions: ['com.android.alarm.permission.SET_ALARM'],
       allowBackup: false,
 
+      icon: appIcon,
+
       adaptiveIcon: {
-        foregroundImage: appIcon,
-        backgroundColor: '#ffffff',
+        foregroundImage: './src/assets/images/adaptive-icon-foreground.png',
+
+        backgroundImage: './src/assets/images/adaptive-icon-background.png',
+
+        monochromeImage: './src/assets/images/adaptive-icon-monochrome.png',
       },
 
       userInterfaceStyle: 'automatic',
@@ -68,10 +74,15 @@ export default {
       [
         'expo-splash-screen',
         {
-          image: appIcon,
+          image: splashIcon,
           imageWidth: 200,
           resizeMode: 'contain',
-          backgroundColor: '#ffffff',
+          backgroundColor: '#F9FAFB',
+
+          dark: {
+            image: splashIcon,
+            backgroundColor: '#050505',
+          },
         },
       ],
 
@@ -129,6 +140,24 @@ export default {
 
       eas: {
         projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID,
+      },
+
+      appCheck: {
+        androidProvider: process.env.APP_CHECK_PROVIDER,
+        androidDebugToken:
+          process.env.APP_CHECK_PROVIDER === 'debug'
+            ? process.env.ANDROID_APP_CHECK_DEBUG_TOKEN
+            : undefined,
+      },
+
+      firebase: {
+        apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+        authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+        projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+        storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+        appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+        measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
       },
     },
   },

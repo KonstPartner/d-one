@@ -13,6 +13,3 @@ export class CloudDiaryError extends Error {
     this.name = 'CloudDiaryError';
   }
 }
-
-export const isCloudDiaryError = (error: unknown): error is CloudDiaryError =>
-  error instanceof CloudDiaryError;

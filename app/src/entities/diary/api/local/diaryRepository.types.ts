@@ -6,6 +6,7 @@ export const DIARY_ENTRY_SEARCH_FIELDS = [
   'aiAnalysis',
   'glucose',
   'shortInsulin',
+  'ultraShortInsulin',
   'longInsulin',
   'carbsGram',
 ] as const;
@@ -67,6 +68,7 @@ export type DiaryEntryFilterCriteria = {
 
   glucose: DiaryEntryNumericRange;
   shortInsulin: DiaryEntryNumericRange;
+  ultraShortInsulin: DiaryEntryNumericRange;
   longInsulin: DiaryEntryNumericRange;
   carbsGram: DiaryEntryNumericRange;
 
@@ -86,6 +88,7 @@ export type DiaryRepositoryCreateInput = Pick<
   | 'glucose'
   | 'mealRelation'
   | 'shortInsulin'
+  | 'ultraShortInsulin'
   | 'longInsulin'
   | 'carbsGram'
   | 'comment'
@@ -100,6 +103,7 @@ export type DiaryRepositorySyncedEntryInput = Pick<
   | 'glucose'
   | 'mealRelation'
   | 'shortInsulin'
+  | 'ultraShortInsulin'
   | 'longInsulin'
   | 'carbsGram'
   | 'comment'
@@ -110,7 +114,7 @@ export type DiaryRepositorySyncedEntryInput = Pick<
   | 'eventAt'
 >;
 
-export type DiaryEntryPhotoState = Pick<
+type DiaryEntryPhotoState = Pick<
   DiaryEntry,
   'localPhotoUri' | 'photoPath' | 'photoUrl'
 >;
@@ -121,6 +125,7 @@ export type DiaryRepositoryUpdateInput = Pick<
   | 'glucose'
   | 'mealRelation'
   | 'shortInsulin'
+  | 'ultraShortInsulin'
   | 'longInsulin'
   | 'carbsGram'
   | 'comment'
@@ -129,26 +134,27 @@ export type DiaryRepositoryUpdateInput = Pick<
   photo?: DiaryEntryPhotoState;
 };
 
-export const createDefaultDiaryEntryFilterCriteria =
-  (): DiaryEntryFilterCriteria => ({
-    eventAt: {
-      from: null,
-      to: null,
-    },
+const createDefaultDiaryEntryFilterCriteria = (): DiaryEntryFilterCriteria => ({
+  eventAt: {
+    from: null,
+    to: null,
+  },
 
-    glucose: createEmptyDiaryEntryNumericRange(),
+  glucose: createEmptyDiaryEntryNumericRange(),
 
-    shortInsulin: createEmptyDiaryEntryNumericRange(),
+  shortInsulin: createEmptyDiaryEntryNumericRange(),
 
-    longInsulin: createEmptyDiaryEntryNumericRange(),
+  ultraShortInsulin: createEmptyDiaryEntryNumericRange(),
 
-    carbsGram: createEmptyDiaryEntryNumericRange(),
+  longInsulin: createEmptyDiaryEntryNumericRange(),
 
-    mealRelations: [],
+  carbsGram: createEmptyDiaryEntryNumericRange(),
 
-    photo: 'ignore',
-    aiAnalysis: 'ignore',
-  });
+  mealRelations: [],
+
+  photo: 'ignore',
+  aiAnalysis: 'ignore',
+});
 
 export const createDefaultDiaryEntryQuery = (): DiaryEntryQuery => ({
   search: {

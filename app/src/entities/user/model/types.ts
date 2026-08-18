@@ -9,5 +9,5 @@ export type UserProfile = {
   nickname: string;
   role: UserRole | null;
   followerUserIds: string[];
-  followedUserId: string | null;
+  followedUserIds?: string[];
 };

@@ -58,6 +58,7 @@ type ImportedBatchOperation = {
     mealRelation: DiaryBackupEntry['mealRelation'];
 
     shortInsulin: number | null;
+    ultraShortInsulin: number | null;
     longInsulin: number | null;
     carbsGram: number | null;
 
@@ -108,6 +109,7 @@ const areDiaryEntrySnapshotsEqual = (
   current.glucose === expected.glucose &&
   current.mealRelation === expected.mealRelation &&
   current.shortInsulin === expected.shortInsulin &&
+  current.ultraShortInsulin === expected.ultraShortInsulin &&
   current.longInsulin === expected.longInsulin &&
   current.carbsGram === expected.carbsGram &&
   current.comment === expected.comment &&
@@ -268,6 +270,7 @@ export class DiaryImportExecutionService {
         glucose: entry.glucose,
         mealRelation: entry.mealRelation,
         shortInsulin: entry.shortInsulin,
+        ultraShortInsulin: entry.ultraShortInsulin,
         longInsulin: entry.longInsulin,
         carbsGram: entry.carbsGram,
 

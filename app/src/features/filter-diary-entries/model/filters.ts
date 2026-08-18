@@ -17,6 +17,8 @@ export const createDefaultDiaryFilters = (): DiaryFilters => ({
 
   shortInsulin: createEmptyDiaryEntryNumericRange(),
 
+  ultraShortInsulin: createEmptyDiaryEntryNumericRange(),
+
   longInsulin: createEmptyDiaryEntryNumericRange(),
 
   carbsGram: createEmptyDiaryEntryNumericRange(),
@@ -38,6 +40,10 @@ export const cloneDiaryFilters = (filters: DiaryFilters): DiaryFilters => ({
 
   shortInsulin: {
     ...filters.shortInsulin,
+  },
+
+  ultraShortInsulin: {
+    ...filters.ultraShortInsulin,
   },
 
   longInsulin: {
@@ -87,6 +93,7 @@ export const normalizeDiaryFilters = (filters: DiaryFilters): DiaryFilters => {
 export const areDiaryFilterRangesValid = (filters: DiaryFilters): boolean =>
   isDiaryEntryNumericRangeValid(filters.glucose) &&
   isDiaryEntryNumericRangeValid(filters.shortInsulin) &&
+  isDiaryEntryNumericRangeValid(filters.ultraShortInsulin) &&
   isDiaryEntryNumericRangeValid(filters.longInsulin) &&
   isDiaryEntryNumericRangeValid(filters.carbsGram);
 
@@ -110,6 +117,10 @@ export const areDiaryFiltersEqual = (
     areNumericRangesEqual(
       normalizedFirst.shortInsulin,
       normalizedSecond.shortInsulin
+    ) &&
+    areNumericRangesEqual(
+      normalizedFirst.ultraShortInsulin,
+      normalizedSecond.ultraShortInsulin
     ) &&
     areNumericRangesEqual(
       normalizedFirst.longInsulin,

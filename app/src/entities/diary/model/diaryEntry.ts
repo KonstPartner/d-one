@@ -1,6 +1,6 @@
 import type { MealRelation } from './mealRelation';
 
-export const DIARY_SYNC_STATUSES = [
+const DIARY_SYNC_STATUSES = [
   'synced',
   'pendingCreate',
   'pendingUpdate',
@@ -19,6 +19,7 @@ export type DiaryEntry = {
   glucose: number | null;
   mealRelation: MealRelation | null;
   shortInsulin: number | null;
+  ultraShortInsulin: number | null;
   longInsulin: number | null;
   carbsGram: number | null;
 

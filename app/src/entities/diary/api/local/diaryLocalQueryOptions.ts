@@ -13,12 +13,6 @@ type LocalDiaryPageQueryOptions = {
   repository: DiaryLocalRepository;
 };
 
-type LocalDiaryEntryQueryOptions = {
-  userId: string;
-  entryId: string;
-  repository: DiaryLocalRepository;
-};
-
 const getDiaryEntryQueryKey = (query: DiaryEntryQuery) => ({
   search: {
     field: query.search.field,
@@ -73,27 +67,6 @@ export const diaryLocalPageQueryOptions = ({
     ],
 
     queryFn: () => repository.findPage(page, query),
-
-    networkMode: 'always',
-
-    ...FORCE_CACHE,
-
-    gcTime: Infinity,
-    retry: false,
-  });
-
-export const diaryLocalEntryQueryOptions = ({
-  userId,
-  entryId,
-  repository,
-}: LocalDiaryEntryQueryOptions) =>
-  queryOptions({
-    queryKey: diaryLocalQueryKeys.entry({
-      userId,
-      entryId,
-    }),
-
-    queryFn: () => repository.findById(entryId),
 
     networkMode: 'always',
 

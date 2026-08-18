@@ -71,6 +71,8 @@ const createEntry = (overrides: Partial<DiaryEntry> = {}): DiaryEntry => ({
   syncStatus: 'pendingCreate',
 
   ...overrides,
+
+  ultraShortInsulin: overrides.ultraShortInsulin ?? null,
 });
 
 describe('useSyncDiary integration', () => {

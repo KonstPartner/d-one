@@ -78,6 +78,11 @@
     "photoViewer": {
       "hint": "Pinch or double tap to zoom or reset"
     },
+    "photoRedactor": {
+      "undo": "Undo last redaction",
+      "confirm": "Done",
+      "hint": "Drag over an area of the photo to hide it"
+    },
     "relativeDate": {
       "today": "Today",
       "yesterday": "Yesterday"

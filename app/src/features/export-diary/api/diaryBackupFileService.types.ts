@@ -1,6 +1,6 @@
 import type { DiaryBackupEntry, DiaryBackupManifest } from '@entities/diary';
 
-export type DiaryBackupArchiveResult = {
+type DiaryBackupArchiveResult = {
   fileUri: string;
   fileSize: number;
 };

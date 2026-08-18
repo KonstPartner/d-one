@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { ScrollViewProps } from 'react-native';
 
 import {
   type CloudDiaryEntry,
@@ -18,6 +19,16 @@ type FollowerDiaryContentProps = {
   refreshing: boolean;
 
   onRefresh: () => void | Promise<void>;
+
+  refreshProgressViewOffset?: number;
+
+  contentContainerStyle?: ScrollViewProps['contentContainerStyle'];
+
+  onScroll?: ScrollViewProps['onScroll'];
+
+  onScrollBeginDrag?: ScrollViewProps['onScrollBeginDrag'];
+
+  onScrollEndDrag?: ScrollViewProps['onScrollEndDrag'];
 };
 
 const FollowerDiaryContentInner = ({
@@ -26,6 +37,14 @@ const FollowerDiaryContentInner = ({
   refreshing,
 
   onRefresh,
+
+  refreshProgressViewOffset,
+
+  contentContainerStyle,
+
+  onScroll,
+  onScrollBeginDrag,
+  onScrollEndDrag,
 }: FollowerDiaryContentProps) => {
   const { t } = useTranslation();
 
@@ -55,6 +74,12 @@ const FollowerDiaryContentInner = ({
   const handleNext = useCallback(() => {
     void list.goNext().catch(showCloudError);
   }, [list.goNext, showCloudError]);
+
+  const handlePullRefresh = useCallback(() => {
+    setPhotoViewerEntry(null);
+
+    void onRefresh();
+  }, [onRefresh]);
 
   const headerMenuItems = useMemo<HeaderMenuItem[]>(
     () => [
@@ -96,6 +121,13 @@ const FollowerDiaryContentInner = ({
         onPrevious={handlePrevious}
         onNext={handleNext}
         onOpenPhoto={handleOpenPhoto}
+        refreshing={refreshing}
+        onRefresh={handlePullRefresh}
+        refreshProgressViewOffset={refreshProgressViewOffset}
+        contentContainerStyle={contentContainerStyle}
+        onScroll={onScroll}
+        onScrollBeginDrag={onScrollBeginDrag}
+        onScrollEndDrag={onScrollEndDrag}
       />
 
       <CloudDiaryPhotoViewer

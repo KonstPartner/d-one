@@ -2,7 +2,7 @@ import i18n from 'i18next';
 
 import { showNotification } from '../notifications';
 
-export type ValidateInput = 'email' | 'password' | 'nickname' | 'none';
+type ValidateInput = 'email' | 'password' | 'nickname' | 'none';
 
 export type ValidateInputType =
   | ValidateInput
@@ -84,20 +84,4 @@ export const validateInput = (
   }
 
   return returnErrorMessage ? message : false;
-};
-
-export const validateMultipleInputs = (
-  data: Record<string, unknown>,
-  fields: ValidateInputType[],
-  sendErrorNotification = false
-): boolean => {
-  return fields.every((field) => {
-    const key = typeof field === 'string' ? field : field.type;
-
-    return (
-      validateInput(field, String(data[key] ?? ''), {
-        sendErrorNotification,
-      }) === true
-    );
-  });
 };

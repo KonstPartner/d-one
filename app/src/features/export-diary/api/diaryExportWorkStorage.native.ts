@@ -97,6 +97,7 @@ const cloneDiaryCsvLocalization = (
     glucose: localization.headers.glucose,
     mealRelation: localization.headers.mealRelation,
     shortInsulin: localization.headers.shortInsulin,
+    ultraShortInsulin: localization.headers.ultraShortInsulin,
     longInsulin: localization.headers.longInsulin,
     carbsGram: localization.headers.carbsGram,
     comment: localization.headers.comment,

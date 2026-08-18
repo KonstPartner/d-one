@@ -9,4 +9,5 @@ export const Center = styled.View`
 
   margin-top: ${({ theme }) => ss.px(theme.spacing['5xl'])};
   margin-bottom: ${({ theme }) => ss.px(theme.spacing['5xl'])};
+  background-color: ${({ theme }) => theme.colors.bg};
 `;

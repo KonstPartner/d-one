@@ -1,6 +1,4 @@
-import styled, { css } from '@emotion/native';
-import type { Theme } from '@emotion/react';
-import type { TextStyle } from 'react-native';
+import styled from '@emotion/native';
 
 import * as ss from '@shared/styles';
 
@@ -28,9 +26,3 @@ export const Field = styled.TextInput<{ $focused: boolean }>`
   color: ${({ theme }) => theme.colors.text};
   font-size: ${({ theme }) => ss.px(theme.size.md)};
 `;
-
-export const getFocusedFieldStyle = (theme: Theme) =>
-  css`
-    background-color: ${theme.colors.card};
-    border-color: ${theme.colors.primary};
-  ` as TextStyle;

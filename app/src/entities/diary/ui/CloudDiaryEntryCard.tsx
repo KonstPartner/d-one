@@ -77,6 +77,7 @@ const CloudDiaryEntryCardComponent = ({
           glucose={entry.glucose}
           carbsGram={entry.carbsGram}
           shortInsulin={entry.shortInsulin}
+          ultraShortInsulin={entry.ultraShortInsulin}
           longInsulin={entry.longInsulin}
         />
 

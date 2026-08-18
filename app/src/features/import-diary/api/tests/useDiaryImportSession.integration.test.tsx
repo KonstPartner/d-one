@@ -114,6 +114,8 @@ const createBackupEntry = (
   eventAt: '2026-08-15T10:00:00.000Z',
 
   ...overrides,
+
+  ultraShortInsulin: overrides.ultraShortInsulin ?? null,
 });
 
 const createLocalEntry = (
@@ -142,6 +144,8 @@ const createLocalEntry = (
   syncStatus: 'pendingDelete',
 
   ...overrides,
+
+  ultraShortInsulin: overrides.ultraShortInsulin ?? null,
 });
 
 const createArchive = ({

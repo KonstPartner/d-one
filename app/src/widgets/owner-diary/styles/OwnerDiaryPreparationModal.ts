@@ -53,10 +53,6 @@ export const SavedTitle = styled.Text`
   ${({ theme }) => ss.Text(theme, 'lg', 'bold', 'success', 'xl')};
 `;
 
-export const SavedDescription = styled.Text`
-  ${({ theme }) => ss.Text(theme, 'sm', 'semibold', 'success', 'md')};
-`;
-
 export const StatusCard = styled.View`
   width: 100%;
 
@@ -143,53 +139,6 @@ export const LoaderBox = styled.View`
   border-radius: ${({ theme }) => ss.px(theme.radius.md)};
 
   background-color: ${({ theme }) => theme.colors.shades.primary.sm};
-`;
-
-export const ResultCard = styled.View`
-  width: 100%;
-
-  gap: ${({ theme }) => ss.px(theme.spacing.md)};
-
-  padding: ${({ theme }) => ss.px(theme.spacing.md)};
-
-  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
-  border-color: ${({ theme }) => theme.colors.shades.success.lg};
-  border-radius: ${({ theme }) => ss.px(theme.radius.lg)};
-
-  background-color: ${({ theme }) => theme.colors.card};
-
-  ${({ theme }) => ss.Shadow(theme, 'soft')};
-`;
-
-export const ResultHeader = styled.View`
-  flex-direction: row;
-  align-items: center;
-
-  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
-`;
-
-export const ResultIcon = styled.View`
-  width: 36px;
-  height: 36px;
-
-  flex-shrink: 0;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
-
-  background-color: ${({ theme }) => theme.colors.shades.success.sm};
-`;
-
-export const ResultTitle = styled.Text`
-  flex: 1;
-
-  ${({ theme }) => ss.Text(theme, 'lg', 'bold', 'success', 'xl')};
-`;
-
-export const ResultText = styled.Text`
-  ${({ theme }) => ss.Text(theme, 'sm', 'medium', 'default', 'lg')};
 `;
 
 export const FooterText = styled.Text`

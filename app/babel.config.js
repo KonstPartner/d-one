@@ -27,7 +27,6 @@ module.exports = function (api) {
           extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
         },
       ],
-      'babel-plugin-macros',
       'react-native-worklets/plugin',
     ],
   };

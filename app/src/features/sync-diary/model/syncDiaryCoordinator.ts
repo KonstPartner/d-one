@@ -38,6 +38,13 @@ type QueueEntriesInput = {
   force?: boolean;
 };
 
+type QueueEntriesBatchInput = {
+  userId: string;
+  entryIds: ReadonlyArray<string>;
+  repository: DiaryLocalRepository;
+  batchType: Exclude<DiarySyncBatchType, 'forced'>;
+};
+
 type QueuePendingInput = {
   userId: string;
   repository: DiaryLocalRepository;
@@ -305,6 +312,8 @@ const createEntryFingerprint = (entry: DiaryEntry | null): string | null => {
 
     shortInsulin: entry.shortInsulin,
 
+    ultraShortInsulin: entry.ultraShortInsulin,
+
     longInsulin: entry.longInsulin,
 
     carbsGram: entry.carbsGram,
@@ -371,6 +380,68 @@ const findRecheckIds = async ({
       currentFingerprints.get(entryId) !== originalFingerprints.get(entryId)
     );
   });
+};
+
+const runEntriesBatch = async ({
+  userId,
+  entryIds,
+  repository,
+  batchType,
+}: QueueEntriesBatchInput): Promise<DiarySyncResult[]> => {
+  activateSyncDiaryUser(userId);
+
+  const availableEntryIds = uniqueEntryIds(entryIds);
+
+  if (availableEntryIds.length === 0) {
+    return [];
+  }
+
+  const operationId = `diary-sync-batch-${++nextBatchId}`;
+
+  useSyncDiaryStore.getState().startBatch({
+    userId,
+    operationId,
+    type: batchType,
+    total: availableEntryIds.length,
+  });
+
+  try {
+    const results: DiarySyncResult[] = [];
+
+    for (const [index, entryId] of availableEntryIds.entries()) {
+      const result = await enqueueEntry(
+        {
+          userId,
+          entryId,
+          repository,
+          force: false,
+        },
+        () => {
+          useSyncDiaryStore.getState().updateBatchProgress({
+            userId,
+            operationId,
+            current: index + 1,
+            total: availableEntryIds.length,
+          });
+        }
+      );
+
+      results.push(result);
+
+      if (result.status === 'failed') {
+        break;
+      }
+    }
+
+    assertSynchronizationSucceeded(results);
+
+    return results;
+  } finally {
+    useSyncDiaryStore.getState().finishBatch({
+      userId,
+      operationId,
+    });
+  }
 };
 
 const runPendingBatch = async ({
@@ -554,6 +625,10 @@ export const queueDiaryEntriesForSync = async ({
 
   return results;
 };
+
+export const queueDiaryEntriesBatchForSync = (
+  input: QueueEntriesBatchInput
+): Promise<DiarySyncResult[]> => enqueueBatch(() => runEntriesBatch(input));
 
 export const queuePendingDiaryEntriesForSync = ({
   userId,

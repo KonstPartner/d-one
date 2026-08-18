@@ -57,7 +57,7 @@ export const readDiaryImportChunkEntries = async ({
     throw new DiaryImportValidationError('chunkInvalid');
   }
 
-  return validateDiaryBackupChunk(value);
+  return validateDiaryBackupChunk(value, archive.manifest.formatVersion);
 };
 
 export const resolveDiaryImportPhotoUri = ({

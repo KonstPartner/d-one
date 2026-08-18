@@ -5,6 +5,7 @@ export const DIARY_CSV_COLUMNS = [
   'glucose',
   'mealRelation',
   'shortInsulin',
+  'ultraShortInsulin',
   'longInsulin',
   'carbsGram',
   'comment',
@@ -12,7 +13,7 @@ export const DIARY_CSV_COLUMNS = [
   'photoUrl',
 ] as const;
 
-export type DiaryCsvColumn = (typeof DIARY_CSV_COLUMNS)[number];
+type DiaryCsvColumn = (typeof DIARY_CSV_COLUMNS)[number];
 
 export type DiaryCsvLocalization = {
   language: string;
@@ -132,6 +133,8 @@ export const createDiaryCsvFormatter = ({
       formatMealRelation(mealRelations, entry.mealRelation),
 
       formatNullableNumber(numberFormatter, entry.shortInsulin),
+
+      formatNullableNumber(numberFormatter, entry.ultraShortInsulin),
 
       formatNullableNumber(numberFormatter, entry.longInsulin),
 

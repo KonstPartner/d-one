@@ -1,9 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
-export const DIARY_IMPORT_CONFLICT_DECISIONS = ['skip', 'replace'] as const;
-
-export type DiaryImportConflictDecision =
-  (typeof DIARY_IMPORT_CONFLICT_DECISIONS)[number];
+export type DiaryImportConflictDecision = 'skip' | 'replace';
 
 export type DiaryImportConflictPlan =
   | {

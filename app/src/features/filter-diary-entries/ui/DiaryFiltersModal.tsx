@@ -35,6 +35,12 @@ const NUMERIC_FILTERS = [
     step: 1,
   },
   {
+    field: 'ultraShortInsulin',
+    labelKey: 'diary.entry.metrics.ultraShortInsulin',
+    scaleMaximum: 30,
+    step: 1,
+  },
+  {
     field: 'longInsulin',
     labelKey: 'diary.entry.metrics.longInsulin',
     scaleMaximum: 60,

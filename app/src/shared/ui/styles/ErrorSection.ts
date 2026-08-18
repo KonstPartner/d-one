@@ -4,6 +4,8 @@ import * as ss from '@shared/styles';
 
 export const Root = styled.View`
   ${({ theme }) => ss.Stack(theme, 'md')};
+
+  background-color: ${({ theme }) => theme.colors.bg};
 `;
 
 export const Message = styled.Text`

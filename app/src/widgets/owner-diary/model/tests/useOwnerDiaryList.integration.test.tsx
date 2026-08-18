@@ -79,6 +79,8 @@ const createEntry = (id: string, eventAt: Date): DiaryEntry => ({
 
   shortInsulin: null,
 
+  ultraShortInsulin: null,
+
   longInsulin: null,
 
   carbsGram: null,

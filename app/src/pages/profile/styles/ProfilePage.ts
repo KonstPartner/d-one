@@ -8,14 +8,36 @@ import type {
 
 import * as ss from '@shared/styles';
 
+type ProfileBadgeTone = 'primary' | 'warning';
+
+export const scrollContentStyle: ViewStyle = {
+  flexGrow: 1,
+};
+
+export const Scroll = styled.ScrollView`
+  flex: 1;
+
+  width: 100%;
+`;
+
 export const Content = styled.View`
+  flex: 1;
+
   width: 100%;
 
   align-self: center;
 
-  gap: ${({ theme }) => ss.px(theme.spacing.lg)};
+  justify-content: space-between;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.xl)};
 
   padding-bottom: ${({ theme }) => ss.px(theme.spacing.xl)};
+`;
+
+export const MainContent = styled.View`
+  width: 100%;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.lg)};
 `;
 
 export const ProfileCard = styled.View`
@@ -87,7 +109,7 @@ export const RoleValue = styled.View`
   justify-content: center;
 `;
 
-export const RoleBadge = styled.View`
+export const ProfileBadge = styled.View`
   padding-horizontal: ${({ theme }) => ss.px(theme.spacing.md)};
 
   padding-vertical: ${({ theme }) => ss.px(theme.spacing.sm)};
@@ -95,7 +117,7 @@ export const RoleBadge = styled.View`
   border-radius: ${({ theme }) => ss.px(theme.radius.full)};
 `;
 
-export const RoleBadgeText = styled.Text`
+export const ProfileBadgeText = styled.Text`
   font-size: ${({ theme }) => ss.px(theme.size.sm)};
 
   font-weight: ${({ theme }) => theme.weight.bold};
@@ -103,26 +125,92 @@ export const RoleBadgeText = styled.Text`
   line-height: ${({ theme }) => ss.px(theme.lineHeight.sm)};
 `;
 
-export const getRoleBadgeStyle = (
+export const getProfileBadgeStyle = (
   theme: Theme,
-  hasGrantedRole: boolean
+  tone: ProfileBadgeTone
 ): ViewStyle => ({
-  backgroundColor: hasGrantedRole
-    ? theme.colors.shades.primary.md
-    : theme.colors.shades.warning.md,
+  backgroundColor:
+    tone === 'primary'
+      ? theme.colors.shades.primary.md
+      : theme.colors.shades.warning.md,
 });
 
-export const getRoleBadgeTextStyle = (
+export const getProfileBadgeTextStyle = (
   theme: Theme,
-  hasGrantedRole: boolean
+  tone: ProfileBadgeTone
 ): TextStyle => ({
-  color: hasGrantedRole
-    ? theme.colors.shades.primary.text
-    : theme.colors.shades.warning.text,
+  color:
+    tone === 'primary'
+      ? theme.colors.shades.primary.text
+      : theme.colors.shades.warning.text,
 });
+
+export const RelationValue = styled.View`
+  position: relative;
+
+  flex: 1;
+
+  min-width: 0;
+`;
+
+export const RelationVisibleRow = styled.View`
+  width: 100%;
+
+  flex-direction: row;
+  align-items: flex-start;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
+`;
+
+export const RelationText = styled.Text`
+  color: ${({ theme }) => theme.colors.text};
+
+  font-size: ${({ theme }) => ss.px(theme.size.md)};
+
+  font-weight: ${({ theme }) => theme.weight.bold};
+
+  line-height: ${({ theme }) => ss.px(theme.lineHeight.lg)};
+`;
+
+export const RelationMeasureText = styled(RelationText)`
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  opacity: 0;
+`;
+
+export const RelationBadgesViewport = styled.View`
+  flex: 1;
+  min-width: 0;
+
+  overflow: hidden;
+`;
+
+export const RelationBadges = styled.View`
+  width: 100%;
+
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
+`;
+
+export const getRelationBadgesCollapsedStyle = (theme: Theme): ViewStyle => ({
+  maxHeight: theme.lineHeight.sm + theme.spacing.sm * 2,
+});
+
+export const RelationToggle = styled.Pressable`
+  align-items: center;
+  justify-content: center;
+
+  padding-top: ${({ theme }) => ss.px(theme.spacing.xs)};
+`;
 
 export const Actions = styled.View`
   width: 100%;
+
   gap: ${({ theme }) => ss.px(theme.spacing.md)};
 `;
 
@@ -143,6 +231,12 @@ export const ActionButton = styled.Pressable`
   border-radius: ${({ theme }) => ss.px(theme.radius.lg)};
 
   background-color: ${({ theme }) => theme.colors.card};
+`;
+
+export const TransferActionButton = styled(ActionButton)`
+  border-color: ${({ theme }) => theme.colors.shades.warning.lg};
+
+  background-color: ${({ theme }) => theme.colors.shades.warning.md};
 `;
 
 export const getActionButtonStyle = ({
@@ -167,4 +261,8 @@ export const ActionText = styled.Text`
   font-weight: ${({ theme }) => theme.weight.bold};
 
   line-height: ${({ theme }) => ss.px(theme.lineHeight.lg)};
+`;
+
+export const TransferActionText = styled(ActionText)`
+  color: ${({ theme }) => theme.colors.shades.warning.text};
 `;

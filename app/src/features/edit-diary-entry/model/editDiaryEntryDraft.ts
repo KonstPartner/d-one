@@ -5,6 +5,7 @@ export type EditDiaryEntryValues = Pick<
   | 'glucose'
   | 'mealRelation'
   | 'shortInsulin'
+  | 'ultraShortInsulin'
   | 'longInsulin'
   | 'carbsGram'
   | 'comment'
@@ -17,6 +18,7 @@ export const createEditDiaryEntryValues = (
   glucose: entry.glucose,
   mealRelation: entry.mealRelation,
   shortInsulin: entry.shortInsulin,
+  ultraShortInsulin: entry.ultraShortInsulin,
   longInsulin: entry.longInsulin,
   carbsGram: entry.carbsGram,
   comment: entry.comment,

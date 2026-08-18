@@ -54,6 +54,55 @@ const formatLegacyAiAnalysis = (
     .join('\n\n');
 };
 
+const formatAiAssumptions = (text: string): string => {
+  const blocks = text.split('\n\n');
+
+  if (blocks.length < 3) {
+    return text;
+  }
+
+  const detailsIndex = blocks.length - 1;
+
+  const details = blocks[detailsIndex]
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  if (details.length < 3) {
+    return text;
+  }
+
+  const assumptionsLine = details[2];
+  const separatorIndex = assumptionsLine.indexOf(':');
+
+  if (separatorIndex < 0) {
+    return text;
+  }
+
+  const label = assumptionsLine.slice(0, separatorIndex + 1).trim();
+  const rawAssumptions = assumptionsLine.slice(separatorIndex + 1).trim();
+
+  const assumptions = rawAssumptions
+    .split(';')
+    .map((assumption) => assumption.trim())
+    .filter((assumption) => assumption.length > 0);
+
+  if (assumptions.length === 0) {
+    return text;
+  }
+
+  details.splice(
+    2,
+    1,
+    label,
+    ...assumptions.map((assumption, index) => `${index + 1}. ${assumption}`)
+  );
+
+  blocks[detailsIndex] = details.join('\n');
+
+  return blocks.join('\n\n');
+};
+
 export const DiaryTextModal = ({
   visible,
 
@@ -71,9 +120,11 @@ export const DiaryTextModal = ({
   const isAiAnalysis = title === t('diary.entry.aiAnalysis');
 
   const displayedText = isAiAnalysis
-    ? formatLegacyAiAnalysis(
-        text,
-        new Set([t('diaryAi.result.ok'), t('diaryAi.result.partial')])
+    ? formatAiAssumptions(
+        formatLegacyAiAnalysis(
+          text,
+          new Set([t('diaryAi.result.ok'), t('diaryAi.result.partial')])
+        )
       )
     : text;
 

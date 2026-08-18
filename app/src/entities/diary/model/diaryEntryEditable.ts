@@ -9,6 +9,7 @@ export type DiaryEntryEditableValues = Pick<
   | 'glucose'
   | 'mealRelation'
   | 'shortInsulin'
+  | 'ultraShortInsulin'
   | 'longInsulin'
   | 'carbsGram'
   | 'comment'
@@ -19,6 +20,7 @@ export type DiaryEntryValidationError =
   | 'invalidEventAt'
   | 'invalidGlucose'
   | 'invalidShortInsulin'
+  | 'invalidUltraShortInsulin'
   | 'invalidLongInsulin'
   | 'invalidCarbsGram'
   | 'commentTooLong'
@@ -49,6 +51,7 @@ const hasMeaningfulContent = (
   values.glucose !== null ||
   values.mealRelation !== null ||
   values.shortInsulin !== null ||
+  values.ultraShortInsulin !== null ||
   values.longInsulin !== null ||
   values.carbsGram !== null ||
   values.comment.length > 0 ||
@@ -81,6 +84,15 @@ export const validateDiaryEntryEditableValues = ({
     !isValidMetric(values.shortInsulin, DIARY_ENTRY_METRIC_MAXIMUM.shortInsulin)
   ) {
     return 'invalidShortInsulin';
+  }
+
+  if (
+    !isValidMetric(
+      values.ultraShortInsulin,
+      DIARY_ENTRY_METRIC_MAXIMUM.ultraShortInsulin
+    )
+  ) {
+    return 'invalidUltraShortInsulin';
   }
 
   if (

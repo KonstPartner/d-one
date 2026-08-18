@@ -94,22 +94,6 @@ export const DayDot = styled.View<{
   background-color: ${({ $color }) => $color};
 `;
 
-export const ListRoot = styled.View`
-  position: relative;
-  flex: 1;
-`;
-
-export const BackToToday = styled.View`
-  position: absolute;
-
-  left: 0;
-  right: 0;
-
-  bottom: ${({ theme }) => ss.px(theme.spacing.md)};
-
-  align-items: center;
-`;
-
 export const BackButton = styled(Button)`
   ${({ theme }) => ss.Rounded(theme, 'full')};
 `;

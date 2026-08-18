@@ -51,6 +51,7 @@ export const useSyncDiary = () => {
     prepareEntryPhoto: photo.prepareEntryPhoto,
 
     syncEntries: commands.syncEntries,
+    syncEntriesBatch: commands.syncEntriesBatch,
     syncForced: commands.syncForced,
     syncPending: commands.syncPending,
 

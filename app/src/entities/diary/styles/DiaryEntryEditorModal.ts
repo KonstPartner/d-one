@@ -32,16 +32,6 @@ export const Title = styled.Text`
   text-align: center;
 `;
 
-export const HeaderPlaceholder = styled.View`
-  width: ${({ theme }) => ss.px(theme.control.height.sm)};
-  height: ${({ theme }) => ss.px(theme.control.height.sm)};
-`;
-
-export const headerActionStyle: ViewStyle = {
-  width: 40,
-  paddingHorizontal: 0,
-};
-
 export const Scroll = styled.ScrollView`
   flex: 1;
 `;
@@ -80,7 +70,7 @@ export const CancelText = styled.Text<DisabledProps>`
   color: ${({ theme, $disabled }) =>
     $disabled ? theme.colors.muted : theme.colors.text};
 
-  font-size: ${({ theme }) => ss.px(theme.size.sm)};
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
   line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
   font-weight: ${({ theme }) => theme.weight.semibold};
 `;
@@ -89,7 +79,7 @@ export const SubmitText = styled.Text<DisabledProps>`
   color: ${({ theme, $disabled }) =>
     $disabled ? theme.colors.shades.primary.text : theme.colors.white};
 
-  font-size: ${({ theme }) => ss.px(theme.size.sm)};
+  font-size: ${({ theme }) => ss.px(theme.size.base)};
   line-height: ${({ theme }) => ss.px(theme.lineHeight.md)};
   font-weight: ${({ theme }) => theme.weight.semibold};
 `;

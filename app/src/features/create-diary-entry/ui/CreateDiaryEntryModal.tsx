@@ -1,9 +1,8 @@
-import { useState } from 'react';
-import { Alert } from 'react-native';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DiaryEntryEditorFields, DiaryEntryEditorModal } from '@entities/diary';
-import { ConfirmDialog } from '@shared/ui';
+import { ConfirmDialog, PhotoRedactorModal } from '@shared/ui';
 
 import {
   type CreateDiaryEntrySubmitResult,
@@ -32,11 +31,14 @@ export const CreateDiaryEntryModal = ({
 
   const [discardConfirmVisible, setDiscardConfirmVisible] = useState(false);
 
+  const [photoActionsVisible, setPhotoActionsVisible] = useState(false);
+
   const {
     values,
     useCurrentDateTime,
 
     photoUri,
+    photoEditorSource,
     hasTemporaryPhoto,
 
     isPhotoBusy,
@@ -51,6 +53,7 @@ export const CreateDiaryEntryModal = ({
     handleGlucoseChange,
     handleCarbsGramChange,
     handleShortInsulinChange,
+    handleUltraShortInsulinChange,
     handleLongInsulinChange,
 
     handleMealRelationChange,
@@ -66,12 +69,22 @@ export const CreateDiaryEntryModal = ({
     selectPhoto,
     deletePhoto,
 
+    cancelPhotoEditing,
+    confirmPhotoEditing,
+    handlePhotoEditorError,
+
     discardPhoto,
 
     handleSubmit,
   } = useCreateDiaryEntryForm({
     visible,
   });
+
+  useEffect(() => {
+    if (!visible) {
+      setPhotoActionsVisible(false);
+    }
+  }, [visible]);
 
   const isBusy = isSubmitting || isPhotoBusy;
 
@@ -81,6 +94,8 @@ export const CreateDiaryEntryModal = ({
     if (isBusy) {
       return;
     }
+
+    setPhotoActionsVisible(false);
 
     if (!hasTemporaryPhoto) {
       onClose();
@@ -110,28 +125,7 @@ export const CreateDiaryEntryModal = ({
       return;
     }
 
-    Alert.alert(
-      t('diary.form.photo.sourceTitle'),
-      t('diary.form.photo.sourceMessage'),
-      [
-        {
-          text: t('common.cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('diary.form.photo.camera'),
-          onPress: () => {
-            void selectPhoto('camera');
-          },
-        },
-        {
-          text: t('diary.form.photo.gallery'),
-          onPress: () => {
-            void selectPhoto('library');
-          },
-        },
-      ]
-    );
+    setPhotoActionsVisible(true);
   };
 
   const handleSave = async () => {
@@ -171,6 +165,7 @@ export const CreateDiaryEntryModal = ({
           glucose={values.glucose}
           carbsGram={values.carbsGram}
           shortInsulin={values.shortInsulin}
+          ultraShortInsulin={values.ultraShortInsulin}
           longInsulin={values.longInsulin}
           mealRelation={values.mealRelation}
           comment={values.comment}
@@ -187,6 +182,7 @@ export const CreateDiaryEntryModal = ({
           onGlucoseChange={handleGlucoseChange}
           onCarbsGramChange={handleCarbsGramChange}
           onShortInsulinChange={handleShortInsulinChange}
+          onUltraShortInsulinChange={handleUltraShortInsulinChange}
           onLongInsulinChange={handleLongInsulinChange}
           onMealRelationChange={handleMealRelationChange}
           onCommentChange={handleCommentChange}
@@ -196,6 +192,58 @@ export const CreateDiaryEntryModal = ({
           onRequestTimerChange={handleRequestTimerChange}
         />
       </DiaryEntryEditorModal>
+
+      <ConfirmDialog
+        visible={photoActionsVisible}
+        title={t('diary.form.photo.title')}
+        actions={[
+          ...(photoUri !== null
+            ? [
+                [
+                  {
+                    key: 'edit-selected',
+                    label: t('diary.form.editSelected'),
+                    icon: 'create-outline' as const,
+                    onPress: () => {
+                      void selectPhoto('selected');
+                    },
+                  },
+                ],
+              ]
+            : []),
+
+          [
+            {
+              key: 'camera',
+              label: t('diary.form.photo.camera'),
+              icon: 'camera-outline' as const,
+              onPress: () => {
+                void selectPhoto('camera');
+              },
+            },
+
+            {
+              key: 'gallery',
+              label: t('diary.form.photo.gallery'),
+              icon: 'images-outline' as const,
+              onPress: () => {
+                void selectPhoto('library');
+              },
+            },
+          ],
+        ]}
+        onClose={() => {
+          setPhotoActionsVisible(false);
+        }}
+      />
+
+      <PhotoRedactorModal
+        visible={photoEditorSource !== null}
+        source={photoEditorSource}
+        onCancel={cancelPhotoEditing}
+        onConfirm={confirmPhotoEditing}
+        onError={handlePhotoEditorError}
+      />
 
       <ConfirmDialog
         visible={discardConfirmVisible}

@@ -4,7 +4,7 @@ import { showNotification } from '@shared/lib/notifications';
 
 import { useOwnerDiarySync } from '../useOwnerDiarySync';
 
-const mockSyncEntries = jest.fn();
+const mockSyncEntriesBatch = jest.fn();
 const mockSyncForced = jest.fn();
 const mockSyncPending = jest.fn();
 
@@ -25,7 +25,7 @@ jest.mock('@features/sync-diary', () => ({
 
     syncingEntryIds: new Set(),
 
-    syncEntries: mockSyncEntries,
+    syncEntriesBatch: mockSyncEntriesBatch,
 
     syncForced: mockSyncForced,
 
@@ -52,11 +52,11 @@ describe('useOwnerDiarySync integration', () => {
     mockConnectionState = 'online';
     mockBatchProgress = null;
 
-    mockSyncEntries.mockReset();
+    mockSyncEntriesBatch.mockReset();
     mockSyncForced.mockReset();
     mockSyncPending.mockReset();
 
-    mockSyncEntries.mockResolvedValue([]);
+    mockSyncEntriesBatch.mockResolvedValue([]);
     mockSyncForced.mockResolvedValue([]);
     mockSyncPending.mockResolvedValue([]);
   });
@@ -126,7 +126,7 @@ describe('useOwnerDiarySync integration', () => {
   });
 
   it('reports whether deletion synchronization physically removed entries', async () => {
-    mockSyncEntries.mockResolvedValueOnce([
+    mockSyncEntriesBatch.mockResolvedValueOnce([
       {
         entryId: 'entry-1',
         status: 'deleted',
@@ -145,7 +145,7 @@ describe('useOwnerDiarySync integration', () => {
 
     expect(physicallyDeleted).toBe(true);
 
-    expect(mockSyncEntries).toHaveBeenCalledWith(['entry-1']);
+    expect(mockSyncEntriesBatch).toHaveBeenCalledWith(['entry-1']);
   });
 
   it('does not start synchronization while offline', async () => {
@@ -173,7 +173,7 @@ describe('useOwnerDiarySync integration', () => {
 
     expect(mockSyncPending).not.toHaveBeenCalled();
     expect(mockSyncForced).not.toHaveBeenCalled();
-    expect(mockSyncEntries).not.toHaveBeenCalled();
+    expect(mockSyncEntriesBatch).not.toHaveBeenCalled();
   });
 
   it('shows notification when manual synchronization fails', async () => {

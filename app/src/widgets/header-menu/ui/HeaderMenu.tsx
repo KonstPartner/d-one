@@ -31,9 +31,17 @@ export const HeaderMenu = ({ color }: HeaderMenuProps) => {
 
   const extraItems = getItems(pathname);
 
-  const items = useMemo<HeaderMenuItem[]>(
-    () => [
-      ...extraItems,
+  const items = useMemo<HeaderMenuItem[]>(() => {
+    const regularItems = extraItems.filter(
+      (item) => item.placement !== 'bottom'
+    );
+
+    const bottomItems = extraItems.filter(
+      (item) => item.placement === 'bottom'
+    );
+
+    return [
+      ...regularItems,
 
       {
         key: 'settings',
@@ -43,9 +51,10 @@ export const HeaderMenu = ({ color }: HeaderMenuProps) => {
           setSettingsVisible(true);
         },
       },
-    ],
-    [extraItems]
-  );
+
+      ...bottomItems,
+    ];
+  }, [extraItems]);
 
   const handleItemPress = (item: HeaderMenuItem): void => {
     setMenuVisible(false);
@@ -60,11 +69,7 @@ export const HeaderMenu = ({ color }: HeaderMenuProps) => {
         onRequestClose={() => {
           setMenuVisible(false);
         }}
-        popoverStyle={{
-          backgroundColor: 'transparent',
-
-          borderRadius: theme.radius.md,
-        }}
+        popoverStyle={s.getPopoverStyle(theme)}
         from={
           <s.Trigger
             onPress={() => {

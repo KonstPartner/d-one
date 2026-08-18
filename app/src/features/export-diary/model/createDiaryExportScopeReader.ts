@@ -9,7 +9,7 @@ import {
 
 import type { DiaryExportScope } from './diaryExport.types';
 
-export type DiaryExportScopeStats = {
+type DiaryExportScopeStats = {
   entriesCount: number;
   localPhotosCount: number;
 };

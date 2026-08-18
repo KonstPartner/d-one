@@ -6,22 +6,22 @@ export type CreateDiaryEntryDraft = {
   changed: boolean;
 };
 
-export const createInitialCreateDiaryEntryValues =
-  (): DiaryEntryEditableValues => {
-    const eventAt = new Date();
+const createInitialCreateDiaryEntryValues = (): DiaryEntryEditableValues => {
+  const eventAt = new Date();
 
-    eventAt.setSeconds(0, 0);
+  eventAt.setSeconds(0, 0);
 
-    return {
-      glucose: null,
-      mealRelation: null,
-      shortInsulin: null,
-      longInsulin: null,
-      carbsGram: null,
-      comment: '',
-      eventAt,
-    };
+  return {
+    glucose: null,
+    mealRelation: null,
+    shortInsulin: null,
+    ultraShortInsulin: null,
+    longInsulin: null,
+    carbsGram: null,
+    comment: '',
+    eventAt,
   };
+};
 
 export const createInitialCreateDiaryEntryDraft =
   (): CreateDiaryEntryDraft => ({

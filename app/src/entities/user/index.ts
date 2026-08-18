@@ -1,9 +1,9 @@
 export { getUserProfile, getUserProfileFromServer } from './api/getUserProfile';
 export {
-  getLocalUserProfile,
   removeLocalUserProfile,
   saveLocalUserProfile,
 } from './api/localUserProfileStorage';
+export { relatedUserProfileQueryOptions } from './api/relatedUserProfileQuery';
 export {
   userProfileQueryKeys,
   userProfileQueryOptions,

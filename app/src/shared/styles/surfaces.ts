@@ -91,12 +91,3 @@ export const Shadow = (theme: Theme, level: SurfaceShadowLevel = 'soft') => {
     elevation: ${strong ? 8 : 3};
   ` as ViewStyle;
 };
-
-export const Divider = (theme: Theme) =>
-  css`
-    height: ${px(theme.border.width.sm)};
-
-    background-color: ${theme.colors.border};
-
-    opacity: 0.7;
-  ` as ViewStyle;

@@ -61,6 +61,7 @@
         "aiAnalysis": "Search in AI analysis",
         "glucose": "Search by glucose",
         "shortInsulin": "Search by short insulin",
+        "ultraShortInsulin": "Search by ultra-short insulin",
         "longInsulin": "Search by long insulin",
         "carbsGram": "Search by carbohydrates"
       }
@@ -72,6 +73,7 @@
       "metrics": {
         "glucose": "Glucose",
         "shortInsulin": "Short insulin",
+        "ultraShortInsulin": "Ultra-short insulin",
         "longInsulin": "Long insulin",
         "carbohydrates": "Carbohydrates"
       },
@@ -179,13 +181,11 @@
         "title": "Preparing entry",
         "saved": "Entry created",
         "savedLocally": "Saved safely on this device",
-
         "creatingTimer": "Setting timer",
         "timerCreated": "Timer set",
         "timerCreatedDescription": "The glucose check timer is running.",
         "timerFailed": "Timer was not set",
         "timerFailedDescription": "The entry was saved. You can set another timer later.",
-
         "uploadingPhoto": "Uploading photo",
         "finalizingPhoto": "Finalizing the photo...",
         "photoPreparing": "The entry is already saved locally. The cloud photo is being prepared."
@@ -194,6 +194,7 @@
         "invalidEventAt": "Select a valid date and time.",
         "invalidGlucose": "Glucose must be between 0 and 100 with no more than one decimal place.",
         "invalidShortInsulin": "Short insulin must be between 0 and 1000 with no more than one decimal place.",
+        "invalidUltraShortInsulin": "Ultra-short insulin must be between 0 and 1000 with no more than one decimal place.",
         "invalidLongInsulin": "Long insulin must be between 0 and 1000 with no more than one decimal place.",
         "invalidCarbsGram": "Carbohydrates must be between 0 and 1000 with no more than one decimal place.",
         "commentTooLong": "The comment cannot exceed 5000 characters.",
@@ -216,7 +217,10 @@
           "createFailed": "Failed to set the timer."
         },
         "enabled": "Timer set for 2 hours."
-      }
+      },
+      "camera": "Camera",
+      "gallery": "Photo library",
+      "editSelected": "Edit selected"
     },
     "filters": {
       "title": "Filters",
@@ -269,36 +273,25 @@
         "action": "Download",
         "title": "Download entries",
         "checking": "Checking selected entries…",
-
         "conflictsFound_one": "{{count}} conflict found.",
         "conflictsFound_other": "{{count}} conflicts found.",
-
         "skipAll": "Skip all conflicts",
         "skipAllDescription": "Keep all existing local entries unchanged.",
-
         "replaceAll": "Replace all conflicts",
         "replaceAllDescription": "Replace every conflicting local entry with the cloud version.",
-
         "review": "Review individually",
         "reviewDescription": "Choose what to do with each conflicting entry.",
-
         "resolveConflict": "Resolve conflict",
         "conflictProgress": "Conflict {{current}} of {{total}}",
-
         "cloudEntry": "Cloud entry",
         "localEntry": "Local entry",
-
         "applyToRemaining": "Apply this decision to all remaining conflicts",
-
         "skip": "Skip",
         "replace": "Replace",
-
         "downloading": "Downloading entries",
         "progress": "{{current}} of {{total}} processed",
         "processingDescription": "Keep the app open until the operation is complete.",
-
         "complete": "Download complete",
-
         "result": {
           "added": "Added",
           "replaced": "Replaced",
@@ -306,18 +299,22 @@
           "failed": "Errors",
           "description": "Downloaded entries are stored locally and will not be uploaded back to the cloud automatically."
         },
-
         "done": "Done",
         "failed": "Failed to download the selected entries."
       }
     },
     "follower": {
+      "userSelector": {
+        "label": "User",
+        "placeholder": "Select a user",
+        "loading": "Loading users…"
+      },
       "menu": {
         "refresh": "Refresh list"
       },
       "unassigned": {
-        "title": "No user assigned to follow",
-        "description": "A user must be assigned to your account before their diary can be viewed."
+        "title": "No users assigned to follow",
+        "description": "At least one user must be assigned to your account before diaries can be viewed."
       },
       "empty": {
         "title": "No entries",

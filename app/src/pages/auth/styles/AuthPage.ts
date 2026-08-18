@@ -5,10 +5,13 @@ import * as ss from '@shared/styles';
 
 export const PageScroll = styled.ScrollView`
   flex: 1;
+  min-height: 0px;
 `;
 
 export const PageBody = styled.View`
-  flex: 1;
+  flex-grow: 1;
+  flex-shrink: 0;
+
   justify-content: center;
 
   padding-top: ${({ theme }) => ss.px(theme.spacing.lg)};

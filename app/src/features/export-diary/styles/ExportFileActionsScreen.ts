@@ -131,15 +131,6 @@ export const FileActionText = styled.Text`
   font-weight: ${({ theme }) => theme.weight.bold};
 `;
 
-export const ErrorText = styled.Text`
-  color: ${({ theme }) => theme.colors.danger};
-
-  font-size: ${({ theme }) => ss.px(theme.size.sm)};
-  line-height: ${({ theme }) => ss.px(theme.lineHeight.sm)};
-
-  text-align: center;
-`;
-
 export const Footer = styled.View`
   width: 100%;
 

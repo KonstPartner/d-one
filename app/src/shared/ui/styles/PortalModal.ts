@@ -1,6 +1,6 @@
-import { KeyboardAvoidingView, type ViewStyle } from 'react-native';
 import styled, { css } from '@emotion/native';
 import type { Theme } from '@emotion/react';
+import type { ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import * as ss from '@shared/styles';
@@ -37,10 +37,6 @@ export const Sheet = styled.View`
   height: 100%;
 `;
 
-export const KeyboardAware = styled(KeyboardAvoidingView)`
-  flex: 1;
-`;
-
 export const Scroll = styled.ScrollView`
   flex: 1;
 `;
@@ -52,7 +48,7 @@ export const Content = styled.View`
 export const CloseButton = styled(Button)`
   padding-top: ${({ theme }) => ss.px(theme.spacing.md)};
   padding-bottom: ${({ theme }) => ss.px(theme.spacing.md)};
-
+  border-color: transparent;
   background-color: ${({ theme }) => theme.colors.muted};
 `;
 

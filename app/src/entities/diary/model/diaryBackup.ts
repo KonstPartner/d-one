@@ -2,15 +2,17 @@ import type { DiaryEntry } from './diaryEntry';
 import type { MealRelation } from './mealRelation';
 
 export const DIARY_BACKUP_APP = 'd-one';
-export const DIARY_BACKUP_FORMAT_VERSION = 1;
+
+export const DIARY_BACKUP_FORMAT_VERSION = 2;
+
+export const DIARY_BACKUP_SUPPORTED_FORMAT_VERSIONS = [1, 2] as const;
+
+export type DiaryBackupFormatVersion =
+  (typeof DIARY_BACKUP_SUPPORTED_FORMAT_VERSIONS)[number];
+
 export const DIARY_BACKUP_CHUNK_SIZE = 300;
 
-export const DIARY_BACKUP_EXPORT_TYPES = [
-  'fullBackup',
-  'lightweightBackup',
-] as const;
-
-export type DiaryBackupExportType = (typeof DIARY_BACKUP_EXPORT_TYPES)[number];
+export type DiaryBackupExportType = 'fullBackup' | 'lightweightBackup';
 
 export type DiaryBackupRecordsScope =
   | {
@@ -27,7 +29,7 @@ export type DiaryBackupRecordsScope =
 
 type DiaryBackupManifestBase = {
   app: typeof DIARY_BACKUP_APP;
-  formatVersion: typeof DIARY_BACKUP_FORMAT_VERSION;
+  formatVersion: DiaryBackupFormatVersion;
   exportedAt: string;
 
   sourceUserName: string;
@@ -58,6 +60,7 @@ export type DiaryBackupEntry = {
   glucose: number | null;
   mealRelation: MealRelation | null;
   shortInsulin: number | null;
+  ultraShortInsulin: number | null;
   longInsulin: number | null;
   carbsGram: number | null;
 
@@ -89,6 +92,7 @@ export const createDiaryBackupEntry = ({
     glucose: entry.glucose,
     mealRelation: entry.mealRelation,
     shortInsulin: entry.shortInsulin,
+    ultraShortInsulin: entry.ultraShortInsulin,
     longInsulin: entry.longInsulin,
     carbsGram: entry.carbsGram,
 

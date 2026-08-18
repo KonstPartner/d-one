@@ -80,6 +80,10 @@ export const FileMain = styled.View`
   gap: ${({ theme }) => ss.px(theme.spacing.md)};
 `;
 
+export const ManageFileMain = styled(FileMain)`
+  gap: 0;
+`;
+
 export const IconBox = styled.View`
   width: ${({ theme }) => ss.px(theme.control.height.md)};
   height: ${({ theme }) => ss.px(theme.control.height.md)};
@@ -132,12 +136,6 @@ export const Actions = styled.View`
 
 export const PrimaryActionText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-`;
-
-export const ErrorText = styled.Text`
-  color: ${({ theme }) => theme.colors.danger};
-  font-size: ${({ theme }) => ss.px(theme.size.sm)};
-  line-height: ${({ theme }) => ss.px(theme.lineHeight.sm)};
 `;
 
 export const EmptyText = styled.Text`

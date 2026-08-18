@@ -4,7 +4,7 @@ import * as ss from '@shared/styles';
 
 import * as s from './styles/SegmentedSwitch';
 
-export type SegmentedSwitchOption<T extends string> = {
+type SegmentedSwitchOption<T extends string> = {
   value: T;
   label: string;
   disabled?: boolean;

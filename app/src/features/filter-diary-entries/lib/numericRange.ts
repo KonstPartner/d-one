@@ -18,13 +18,13 @@ export const clamp = (
   maximum: number
 ): number => Math.min(Math.max(value, minimum), maximum);
 
-export const roundToStep = (value: number, step: number): number => {
+const roundToStep = (value: number, step: number): number => {
   const decimalPlaces = step < 1 ? 1 : 0;
 
   return Number((Math.round(value / step) * step).toFixed(decimalPlaces));
 };
 
-export const numericValueToPosition = (
+const numericValueToPosition = (
   value: number,
   scaleMinimum: number,
   scaleMaximum: number

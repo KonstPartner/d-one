@@ -4,6 +4,10 @@ import type { CloudDiaryEntry } from '@entities/diary';
 
 import { OwnerCloudDiary } from './OwnerCloudDiary';
 
+jest.mock('@features/screen-help', () => ({
+  OwnerCloudDiaryHelp: () => null,
+}));
+
 const mockDownloadStart = jest.fn<
   Promise<void>,
   [readonly CloudDiaryEntry[]]
@@ -43,6 +47,8 @@ const createCloudEntry = (id: string): CloudDiaryEntry => ({
   mealRelation: null,
 
   shortInsulin: null,
+
+  ultraShortInsulin: null,
 
   longInsulin: null,
 

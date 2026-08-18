@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import * as ss from '@shared/styles';
 
@@ -14,12 +15,14 @@ export const ErrorSection = ({ message, onRetry }: ErrorSectionProps) => {
   const { t } = useTranslation();
 
   return (
-    <s.Root style={ss.CenterContent}>
-      <s.Message>{message}</s.Message>
+    <SafeAreaView>
+      <s.Root style={ss.CenterContent}>
+        <s.Message>{message}</s.Message>
 
-      <Button tone="primary" onPress={onRetry}>
-        <s.RetryText>{t('common.actions.tryAgain')}</s.RetryText>
-      </Button>
-    </s.Root>
+        <Button tone="primary" onPress={onRetry}>
+          <s.RetryText>{t('common.actions.tryAgain')}</s.RetryText>
+        </Button>
+      </s.Root>
+    </SafeAreaView>
   );
 };

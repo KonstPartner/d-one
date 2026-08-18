@@ -4,4 +4,3 @@ export {
   useHeaderMenu,
   useHeaderMenuContext,
 } from './headerMenu';
-export { default as useRouteModal } from './useRouteModal';

@@ -5,6 +5,7 @@ import {
   CloudDiaryDownloadModal,
   useCloudDiaryDownloadFlow,
 } from '@features/download-cloud-diary-entries';
+import { OwnerCloudDiaryHelp } from '@features/screen-help';
 import {
   type CloudDiaryEntry,
   CloudDiaryList,
@@ -47,6 +48,8 @@ const OwnerCloudDiaryContent = ({ ownerUid }: OwnerCloudDiaryContentProps) => {
   const [photoViewerEntry, setPhotoViewerEntry] =
     useState<CloudDiaryEntry | null>(null);
 
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+
   const showCloudError = useCallback((error: unknown) => {
     showNotification('error', errorMapper(error, 'cloud'));
   }, []);
@@ -88,6 +91,28 @@ const OwnerCloudDiaryContent = ({ ownerUid }: OwnerCloudDiaryContentProps) => {
 
     void diary.refreshFirstPage().catch(showCloudError);
   }, [diary.refreshFirstPage, showCloudError]);
+
+  const handlePullRefresh = useCallback(async (): Promise<void> => {
+    if (isPullRefreshing || diary.isLoading) {
+      return;
+    }
+
+    setPhotoViewerEntry(null);
+    setIsPullRefreshing(true);
+
+    try {
+      await diary.refreshFirstPage();
+    } catch (error: unknown) {
+      showCloudError(error);
+    } finally {
+      setIsPullRefreshing(false);
+    }
+  }, [
+    diary.isLoading,
+    diary.refreshFirstPage,
+    isPullRefreshing,
+    showCloudError,
+  ]);
 
   const handleDownload = useCallback(() => {
     if (
@@ -177,6 +202,8 @@ const OwnerCloudDiaryContent = ({ ownerUid }: OwnerCloudDiaryContentProps) => {
 
   return (
     <>
+      <OwnerCloudDiaryHelp menuEnabled={!diary.selection.selectionMode} />
+
       {diary.selection.selectionMode ? (
         <OwnerCloudDiarySelectionToolbar
           selectedCount={diary.selection.selectedCount}
@@ -202,6 +229,10 @@ const OwnerCloudDiaryContent = ({ ownerUid }: OwnerCloudDiaryContentProps) => {
         onPrevious={handlePrevious}
         onNext={handleNext}
         onOpenPhoto={handleOpenPhoto}
+        refreshing={isPullRefreshing}
+        onRefresh={() => {
+          void handlePullRefresh();
+        }}
         selection={
           diary.selection.selectionMode
             ? {

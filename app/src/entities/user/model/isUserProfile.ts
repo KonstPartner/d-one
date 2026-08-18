@@ -14,17 +14,22 @@ export const isUserProfile = (value: unknown): value is UserProfile => {
 
   const profile = value as Record<string, unknown>;
 
-  const followedUserIdIsValid =
-    profile.followedUserId === null ||
-    typeof profile.followedUserId === 'string';
+  if (!isUserRole(profile.role)) {
+    return false;
+  }
+
+  const followedUserIdsIsValid =
+    profile.role === UserRole.Follower
+      ? isStringArray(profile.followedUserIds)
+      : profile.followedUserIds === undefined ||
+        isStringArray(profile.followedUserIds);
 
   return (
     typeof profile.uid === 'string' &&
     profile.uid.length > 0 &&
     typeof profile.email === 'string' &&
     typeof profile.nickname === 'string' &&
-    isUserRole(profile.role) &&
     isStringArray(profile.followerUserIds) &&
-    followedUserIdIsValid
+    followedUserIdsIsValid
   );
 };

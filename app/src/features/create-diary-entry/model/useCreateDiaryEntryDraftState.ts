@@ -101,6 +101,13 @@ export const useCreateDiaryEntryDraftState = ({
     [updateValue]
   );
 
+  const handleUltraShortInsulinChange = useCallback(
+    (value: number | null) => {
+      updateValue('ultraShortInsulin', value);
+    },
+    [updateValue]
+  );
+
   const handleLongInsulinChange = useCallback(
     (value: number | null) => {
       updateValue('longInsulin', value);
@@ -201,6 +208,7 @@ export const useCreateDiaryEntryDraftState = ({
     handleGlucoseChange,
     handleCarbsGramChange,
     handleShortInsulinChange,
+    handleUltraShortInsulinChange,
     handleLongInsulinChange,
 
     handleMealRelationChange,

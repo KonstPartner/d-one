@@ -74,7 +74,7 @@ export const DiaryEntryEditorModal = ({
             <s.ButtonContent>
               <Ionicons
                 name="close"
-                size={theme.size.md}
+                size={theme.size.lg}
                 color={isBusy ? theme.colors.muted : theme.colors.text}
               />
 
@@ -96,7 +96,7 @@ export const DiaryEntryEditorModal = ({
             <s.ButtonContent>
               <Ionicons
                 name={submitIcon}
-                size={theme.size.md}
+                size={theme.size.lg}
                 color={
                   submitDisabled
                     ? theme.colors.shades.primary.text

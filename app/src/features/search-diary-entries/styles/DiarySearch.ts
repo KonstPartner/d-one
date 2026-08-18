@@ -21,71 +21,9 @@ type SearchOptionTextProps = {
 export const Root = styled.View`
   width: 100%;
 
-  gap: ${({ theme }) => ss.px(theme.spacing.xs)};
-
-  min-width: 0;
-`;
-
-export const TopRow = styled.View`
-  width: 100%;
-
-  flex-direction: row;
-  align-items: center;
-
-  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
-`;
-
-export const InputShell = styled.View`
-  min-height: ${({ theme }) => ss.px(theme.control.height.lg)};
-
-  flex: 1;
-
-  min-width: 0;
-
-  flex-direction: row;
-  align-items: center;
-
   gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 
-  padding-horizontal: ${({ theme }) => ss.px(theme.spacing.md)};
-
-  border-width: ${({ theme }) => ss.px(theme.border.width.sm)};
-
-  border-color: ${({ theme }) => theme.colors.border};
-
-  border-radius: ${({ theme }) => ss.px(theme.radius.lg)};
-
-  background-color: ${({ theme }) => theme.colors.input};
-`;
-
-export const Input = styled.TextInput`
-  min-height: ${({ theme }) => ss.px(theme.control.height.lg)};
-
-  flex: 1;
-
   min-width: 0;
-
-  padding-vertical: 0;
-
-  color: ${({ theme }) => theme.colors.text};
-
-  font-size: ${({ theme }) => ss.px(theme.size.md)};
-`;
-
-export const ClearButton = styled.Pressable`
-  width: ${({ theme }) => ss.px(theme.control.height.sm)};
-
-  height: ${({ theme }) => ss.px(theme.control.height.sm)};
-
-  align-items: center;
-  justify-content: center;
-`;
-
-export const EndActions = styled.View`
-  flex-direction: row;
-  align-items: center;
-
-  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const Row = styled.View`
@@ -94,17 +32,6 @@ export const Row = styled.View`
 
 export const SelectView = styled.View`
   flex: 1;
-`;
-
-export const Filter = styled.View`
-  border-width: 1px;
-  border-style: solid;
-
-  border-color: ${({ theme }) => theme.colors.primary};
-
-  border-radius: ${({ theme }) => ss.px(theme.radius.md)};
-
-  padding: 10px;
 `;
 
 export const Add = styled.View`

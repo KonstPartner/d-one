@@ -37,6 +37,7 @@ export const TransferStepHeader = ({
         {onBack !== undefined && (
           <IconButton
             icon="arrow-back"
+            iconSize={theme.size.lg}
             accessibilityLabel={t('transfer.actions.back')}
             disabled={disabled}
             tone="muted"
@@ -52,6 +53,7 @@ export const TransferStepHeader = ({
         {onClose !== undefined && (
           <IconButton
             icon="close"
+            iconSize={theme.size.lg}
             accessibilityLabel={t('common.close')}
             disabled={disabled}
             tone="muted"

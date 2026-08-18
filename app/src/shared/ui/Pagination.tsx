@@ -54,7 +54,7 @@ export const Pagination = ({
         icon="chevron-back"
         accessibilityLabel={previousPageAccessibilityLabel}
         disabled={previousDisabled}
-        tone="input"
+        tone="muted"
         onPress={() => {
           onChangePage(currentPage - 1);
         }}
@@ -87,7 +87,7 @@ export const Pagination = ({
         icon="chevron-forward"
         accessibilityLabel={nextPageAccessibilityLabel}
         disabled={nextDisabled}
-        tone="input"
+        tone="muted"
         onPress={() => {
           onChangePage(currentPage + 1);
         }}

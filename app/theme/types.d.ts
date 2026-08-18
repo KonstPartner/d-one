@@ -30,6 +30,7 @@ declare module '@emotion/react' {
         glucose: MetricColor;
         carbsGram: MetricColor;
         shortInsulin: MetricColor;
+        ultraShortInsulin: MetricColor;
         longInsulin: MetricColor;
       };
 

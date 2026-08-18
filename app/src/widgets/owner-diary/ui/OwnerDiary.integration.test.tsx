@@ -4,9 +4,15 @@ import type { PropsWithChildren } from 'react';
 
 import { OwnerDiary } from './OwnerDiary';
 
+jest.mock('@features/screen-help', () => ({
+  OwnerDiaryHelp: () => null,
+}));
+
 type HeaderMenuItem = {
   key: string;
+
   disabled?: boolean;
+
   onPress: () => void | Promise<void>;
 };
 
@@ -15,7 +21,9 @@ let mockHeaderMenuItems: HeaderMenuItem[] = [];
 const mockMarkPendingDelete = jest.fn<Promise<void>, [ReadonlyArray<string>]>();
 
 const mockExpandAllDays = jest.fn();
+
 const mockCollapseAllDays = jest.fn();
+
 const mockReconcileCurrentPage = jest.fn<Promise<boolean>, []>();
 
 const mockHandleForcedSync = jest.fn<
@@ -35,27 +43,47 @@ const mockOpenCreate = jest.fn();
 const mockOpenEdit = jest.fn<Promise<boolean>, [string]>();
 
 const mockCloseCreate = jest.fn();
+
 const mockCloseEdit = jest.fn();
 
 const mockHandleCreated = jest.fn();
+
 const mockHandleUpdated = jest.fn();
+
+const mockShowToolbar = jest.fn();
+
+const mockHandleToolbarLayout = jest.fn();
+
+const mockHandleToolbarScroll = jest.fn();
+
+const mockHandleToolbarScrollBeginDrag = jest.fn();
+
+const mockHandleToolbarScrollEndDrag = jest.fn();
 
 const mockEntries = [
   {
     id: 'entry-available',
+
     userId: 'user-1',
 
     glucose: 6.5,
+
     mealRelation: null,
+
     shortInsulin: null,
+
     longInsulin: null,
+
     carbsGram: null,
 
     comment: 'Available entry',
+
     aiAnalysis: '',
 
     localPhotoUri: null,
+
     photoPath: null,
+
     photoUrl: null,
 
     eventAt: new Date('2026-08-10T12:00:00.000Z'),
@@ -65,19 +93,27 @@ const mockEntries = [
 
   {
     id: 'entry-deleting',
+
     userId: 'user-1',
 
     glucose: 7.2,
+
     mealRelation: null,
+
     shortInsulin: null,
+
     longInsulin: null,
+
     carbsGram: null,
 
     comment: 'Deleting entry',
+
     aiAnalysis: '',
 
     localPhotoUri: null,
+
     photoPath: null,
+
     photoUrl: null,
 
     eventAt: new Date('2026-08-10T11:00:00.000Z'),
@@ -87,19 +123,27 @@ const mockEntries = [
 
   {
     id: 'entry-syncing',
+
     userId: 'user-1',
 
     glucose: 8.1,
+
     mealRelation: null,
+
     shortInsulin: null,
+
     longInsulin: null,
+
     carbsGram: null,
 
     comment: 'Synchronizing entry',
+
     aiAnalysis: '',
 
     localPhotoUri: null,
+
     photoPath: null,
+
     photoUrl: null,
 
     eventAt: new Date('2026-08-10T10:00:00.000Z'),
@@ -109,9 +153,64 @@ const mockEntries = [
 ] as const;
 
 jest.mock('@entities/diary', () => {
+  const React = require('react');
+
+  const { Pressable, Text, View } = require('react-native');
+
   const { diaryLocalQueryKeys } = jest.requireActual(
     '@entities/diary/api/local/diaryLocalQueryKeys'
   );
+
+  const DiaryLocalList = ({
+    page,
+
+    selectionActive = false,
+
+    onToggleSelection,
+
+    onOpenEntry,
+  }: {
+    page?: {
+      items: ReadonlyArray<{
+        id: string;
+      }>;
+    };
+
+    selectionActive?: boolean;
+
+    onToggleSelection?: (entryId: string) => void;
+
+    onOpenEntry?: (entryId: string) => void;
+  }) =>
+    React.createElement(
+      View,
+      null,
+
+      ...(page?.items ?? []).map((entry) =>
+        React.createElement(
+          Pressable,
+          {
+            key: entry.id,
+
+            accessibilityRole: selectionActive ? 'checkbox' : 'button',
+
+            accessibilityLabel: `entry:${entry.id}`,
+
+            onPress: () => {
+              if (selectionActive) {
+                onToggleSelection?.(entry.id);
+
+                return;
+              }
+
+              onOpenEntry?.(entry.id);
+            },
+          },
+
+          React.createElement(Text, null, entry.id)
+        )
+      )
+    );
 
   return {
     diaryLocalQueryKeys,
@@ -122,12 +221,15 @@ jest.mock('@entities/diary', () => {
 
     useDiaryTransferState: () => ({
       type: null,
+
       phase: 'idle',
 
       processedEntries: 0,
+
       totalEntries: 0,
 
       processedPhotos: 0,
+
       totalPhotos: 0,
     }),
 
@@ -139,6 +241,8 @@ jest.mock('@entities/diary', () => {
           mockMarkPendingDelete(entryIds),
       },
     }),
+
+    DiaryLocalList,
 
     DiaryPhotoViewer: () => null,
   };
@@ -183,6 +287,24 @@ jest.mock('@shared/lib/notifications', () => ({
   showNotification: jest.fn(),
 }));
 
+jest.mock('@shared/lib/react', () => ({
+  useCollapsibleToolbarVisibility: () => ({
+    toolbarAnimatedStyle: {},
+
+    listContentContainerStyle: {},
+
+    handleToolbarLayout: mockHandleToolbarLayout,
+
+    handleScroll: mockHandleToolbarScroll,
+
+    handleScrollBeginDrag: mockHandleToolbarScrollBeginDrag,
+
+    handleScrollEndDrag: mockHandleToolbarScrollEndDrag,
+
+    showToolbar: mockShowToolbar,
+  }),
+}));
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
@@ -196,15 +318,23 @@ jest.mock('@shared/ui', () => {
 
   const Button = ({
     accessibilityLabel,
+
     accessibilityState,
+
     disabled,
+
     onPress,
+
     children,
   }: {
     accessibilityLabel?: string;
+
     accessibilityState?: object;
+
     disabled?: boolean;
+
     onPress?: () => void;
+
     children?: unknown;
   }) =>
     React.createElement(
@@ -224,6 +354,7 @@ jest.mock('@shared/ui', () => {
 
         onPress,
       },
+
       children
     );
 
@@ -231,13 +362,19 @@ jest.mock('@shared/ui', () => {
 
   const ConfirmDialog = ({
     visible,
+
     confirmLabel,
+
     confirmDisabled,
+
     onConfirm,
   }: {
     visible: boolean;
+
     confirmLabel: string;
+
     confirmDisabled?: boolean;
+
     onConfirm: () => void;
   }) => {
     if (!visible) {
@@ -267,7 +404,9 @@ jest.mock('@shared/ui', () => {
 
   return {
     Button,
+
     IconButton,
+
     ConfirmDialog,
 
     Spinner: () => null,
@@ -280,13 +419,15 @@ jest.mock('../styles/OwnerDiary', () => {
   return {
     Root: View,
 
+    ListArea: View,
+
+    ToolbarOverlay: View,
+
     ToolbarArea: View,
 
     SyncProgress: View,
 
     SyncProgressText: Text,
-
-    ListArea: View,
   };
 });
 
@@ -298,23 +439,39 @@ jest.mock('./OwnerDiarySelectionToolbar', () => {
   return {
     OwnerDiarySelectionToolbar: ({
       selectedCount,
+
       allSelected,
+
       deleting,
+
       synchronizing,
+
       synchronizeDisabled,
+
       onToggleAll,
+
       onSynchronize,
+
       onDelete,
+
       onClose,
     }: {
       selectedCount: number;
+
       allSelected: boolean;
+
       deleting: boolean;
+
       synchronizing: boolean;
+
       synchronizeDisabled: boolean;
+
       onToggleAll: () => void;
+
       onSynchronize: () => void;
+
       onDelete: () => void;
+
       onClose: () => void;
     }) =>
       React.createElement(
@@ -323,43 +480,59 @@ jest.mock('./OwnerDiarySelectionToolbar', () => {
 
         React.createElement(Pressable, {
           accessibilityRole: 'button',
+
           accessibilityLabel: allSelected
             ? 'diary.selection.clearAll'
             : 'diary.selection.selectAll',
+
           accessibilityState: {
             disabled: deleting || synchronizing,
           },
+
           disabled: deleting || synchronizing,
+
           onPress: onToggleAll,
         }),
 
         React.createElement(Pressable, {
           accessibilityRole: 'button',
+
           accessibilityLabel: 'diary.selection.synchronize',
+
           accessibilityState: {
             disabled: synchronizeDisabled,
           },
+
           disabled: synchronizeDisabled,
+
           onPress: onSynchronize,
         }),
 
         React.createElement(Pressable, {
           accessibilityRole: 'button',
+
           accessibilityLabel: 'diary.selection.delete',
+
           accessibilityState: {
             disabled: selectedCount === 0 || synchronizing,
           },
+
           disabled: selectedCount === 0 || synchronizing,
+
           onPress: onDelete,
         }),
 
         React.createElement(Pressable, {
           accessibilityRole: 'button',
+
           accessibilityLabel: 'diary.selection.close',
+
           accessibilityState: {
             disabled: deleting || synchronizing,
           },
+
           disabled: deleting || synchronizing,
+
           onPress: onClose,
         })
       ),
@@ -369,64 +542,6 @@ jest.mock('./OwnerDiarySelectionToolbar', () => {
 jest.mock('./OwnerDiaryPreparationModal', () => ({
   OwnerDiaryPreparationModal: () => null,
 }));
-
-jest.mock('./OwnerDiaryList', () => {
-  const React = require('react');
-
-  const { Pressable, Text, View } = require('react-native');
-
-  return {
-    OwnerDiaryList: ({
-      list,
-      selectionMode,
-      onToggleSelection,
-      onOpenEntry,
-    }: {
-      list: {
-        page?: {
-          items: ReadonlyArray<{
-            id: string;
-          }>;
-        };
-      };
-
-      selectionMode: boolean;
-
-      onToggleSelection: (entryId: string) => void;
-
-      onOpenEntry: (entryId: string) => void;
-    }) =>
-      React.createElement(
-        View,
-        null,
-
-        ...(list.page?.items ?? []).map((entry) =>
-          React.createElement(
-            Pressable,
-            {
-              key: entry.id,
-
-              accessibilityRole: selectionMode ? 'checkbox' : 'button',
-
-              accessibilityLabel: `entry:${entry.id}`,
-
-              onPress: () => {
-                if (selectionMode) {
-                  onToggleSelection(entry.id);
-
-                  return;
-                }
-
-                onOpenEntry(entry.id);
-              },
-            },
-
-            React.createElement(Text, null, entry.id)
-          )
-        )
-      ),
-  };
-});
 
 jest.mock('../model/useOwnerDiary', () => ({
   useOwnerDiary: () => ({
@@ -449,7 +564,35 @@ jest.mock('../model/useOwnerDiary', () => ({
         },
       },
 
+      currentPage: 1,
+
+      listItems: [],
+
+      visibleEntryIds: new Set(mockEntries.map((entry) => entry.id)),
+
       collapsedDayKeys: new Set(),
+
+      isInitialLoading: false,
+
+      hasInitialError: false,
+
+      isRefetching: false,
+
+      isPaginationLoading: false,
+
+      listRef: {
+        current: null,
+      },
+
+      viewabilityConfig: {},
+
+      handleViewableItemsChanged: jest.fn(),
+
+      toggleDay: jest.fn(),
+
+      handleChangePage: jest.fn(),
+
+      handleRetry: jest.fn(),
 
       expandAllDays: mockExpandAllDays,
 
@@ -521,6 +664,7 @@ jest.mock('../model/useOwnerDiarySync', () => ({
 jest.mock('../model/useOwnerDiaryPreparation', () => ({
   useOwnerDiaryPreparation: () => ({
     preparingEntry: null,
+
     handleEntrySaved: jest.fn(),
   }),
 }));

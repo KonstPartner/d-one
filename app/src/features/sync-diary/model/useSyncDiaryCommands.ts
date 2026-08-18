@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { diaryLocalQueryKeys, useReadyDiaryDatabase } from '@entities/diary';
 
 import {
+  queueDiaryEntriesBatchForSync,
   queueDiaryEntriesForSync,
   queueForcedDiaryEntriesForSync,
   queuePendingDiaryEntriesForSync,
@@ -31,6 +32,22 @@ export const useSyncDiaryCommands = () => {
           userId,
           entryIds,
           repository,
+        });
+      } finally {
+        await refreshLocalDiary();
+      }
+    },
+    [refreshLocalDiary, repository, userId]
+  );
+
+  const syncEntriesBatch = useCallback(
+    async (entryIds: ReadonlyArray<string>) => {
+      try {
+        return await queueDiaryEntriesBatchForSync({
+          userId,
+          entryIds,
+          repository,
+          batchType: 'automatic',
         });
       } finally {
         await refreshLocalDiary();
@@ -70,6 +87,7 @@ export const useSyncDiaryCommands = () => {
     refreshLocalDiary,
 
     syncEntries,
+    syncEntriesBatch,
     syncForced,
     syncPending,
   };

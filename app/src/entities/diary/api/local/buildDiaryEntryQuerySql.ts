@@ -20,6 +20,7 @@ const SEARCH_COLUMNS: Record<DiaryEntrySearchField, string> = {
   aiAnalysis: 'ai_analysis',
   glucose: 'glucose',
   shortInsulin: 'short_insulin',
+  ultraShortInsulin: 'ultra_short_insulin',
   longInsulin: 'long_insulin',
   carbsGram: 'carbs_gram',
 };
@@ -28,6 +29,7 @@ const assertValidQuery = (query: DiaryEntryQuery): void => {
   if (
     !isDiaryEntryNumericRangeValid(query.glucose) ||
     !isDiaryEntryNumericRangeValid(query.shortInsulin) ||
+    !isDiaryEntryNumericRangeValid(query.ultraShortInsulin) ||
     !isDiaryEntryNumericRangeValid(query.longInsulin) ||
     !isDiaryEntryNumericRangeValid(query.carbsGram)
   ) {
@@ -159,6 +161,14 @@ export const buildDiaryEntryQuerySql = (
     'short_insulin',
     'shortInsulin',
     query.shortInsulin
+  );
+
+  appendNumericRange(
+    conditions,
+    parameters,
+    'ultra_short_insulin',
+    'ultraShortInsulin',
+    query.ultraShortInsulin
   );
 
   appendNumericRange(

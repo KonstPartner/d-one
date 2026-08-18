@@ -37,8 +37,11 @@ export const useCloudDiaryListViewability = (ownerUid: string) => {
     () => new Set()
   );
 
+  const [hasViewabilitySnapshot, setHasViewabilitySnapshot] = useState(false);
+
   const resetViewability = useCallback(() => {
     setVisibleEntryIds(new Set());
+    setHasViewabilitySnapshot(false);
 
     listRef.current?.scrollToOffset({
       offset: 0,
@@ -71,6 +74,8 @@ export const useCloudDiaryListViewability = (ownerUid: string) => {
           ? currentVisibleEntryIds
           : nextVisibleEntryIds
       );
+
+      setHasViewabilitySnapshot(true);
     }
   ).current;
 
@@ -78,6 +83,7 @@ export const useCloudDiaryListViewability = (ownerUid: string) => {
     listRef,
 
     visibleEntryIds,
+    hasViewabilitySnapshot,
 
     viewabilityConfig: VIEWABILITY_CONFIG,
 

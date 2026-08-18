@@ -63,6 +63,7 @@ const hasEditableChanges = ({
   values.glucose !== entry.glucose ||
   values.mealRelation !== entry.mealRelation ||
   values.shortInsulin !== entry.shortInsulin ||
+  values.ultraShortInsulin !== entry.ultraShortInsulin ||
   values.longInsulin !== entry.longInsulin ||
   values.carbsGram !== entry.carbsGram ||
   values.comment !== entry.comment ||

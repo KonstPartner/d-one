@@ -1,1 +1,1 @@
-export { errorMapper, type ErrorType, handleError } from './errorMapper';
+export { errorMapper, type ErrorType } from './errorMapper';

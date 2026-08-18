@@ -1,5 +1,9 @@
 import { useCallback, useState } from 'react';
-import type { NativeSyntheticEvent, TextLayoutEventData } from 'react-native';
+import {
+  type NativeSyntheticEvent,
+  Platform,
+  type TextLayoutEventData,
+} from 'react-native';
 
 type UseDiaryTextPreviewParams = {
   onOpen: () => void;
@@ -12,6 +16,8 @@ export const useDiaryTextPreview = ({ onOpen }: UseDiaryTextPreviewParams) => {
 
   const isTruncated = measuredLineCount > PREVIEW_LINE_COUNT;
 
+  const canOpen = Platform.OS === 'web' || isTruncated;
+
   const handleTextLayout = useCallback(
     (event: NativeSyntheticEvent<TextLayoutEventData>) => {
       setMeasuredLineCount(event.nativeEvent.lines.length);
@@ -20,14 +26,15 @@ export const useDiaryTextPreview = ({ onOpen }: UseDiaryTextPreviewParams) => {
   );
 
   const handleOpen = useCallback(() => {
-    if (isTruncated) {
+    if (canOpen) {
       onOpen();
     }
-  }, [isTruncated, onOpen]);
+  }, [canOpen, onOpen]);
 
   return {
     previewLineCount: PREVIEW_LINE_COUNT,
     isTruncated,
+    canOpen,
     handleTextLayout,
     handleOpen,
   };

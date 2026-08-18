@@ -1,7 +1,7 @@
 import { type ComponentProps, useEffect } from 'react';
+import { Image, type StyleProp, type TextStyle } from 'react-native';
 import { useTheme } from '@emotion/react';
-import { Ionicons } from '@expo/vector-icons';
-import type { StyleProp, TextStyle } from 'react-native';
+import { Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,23 +9,27 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import spinner from '@assets/images/spinner.png';
+
 type SpinnerProps = {
-  name?: ComponentProps<typeof Ionicons>['name'];
+  type?: 'Ionicons' | 'MaterialCommunityIcons' | 'Fontisto' | 'Image';
+  name?:
+    | ComponentProps<typeof Ionicons>['name']
+    | ComponentProps<typeof MaterialCommunityIcons>['name']
+    | ComponentProps<typeof Fontisto>['name'];
   size?: number;
   color?: string;
-  className?: string;
   style?: StyleProp<TextStyle>;
 };
 
 export const Spinner = ({
-  name = 'aperture',
+  type = 'Fontisto',
+  name = 'injection-syringe',
   size = 18,
   color,
-  className,
   style,
 }: SpinnerProps) => {
   const theme = useTheme();
-
   const rotation = useSharedValue(0);
 
   useEffect(() => {
@@ -48,13 +52,39 @@ export const Spinner = ({
 
   return (
     <Animated.View style={animation}>
-      <Ionicons
-        className={className}
-        style={style}
-        name={name}
-        size={size}
-        color={color ?? theme.colors.text}
-      />
+      {type === 'MaterialCommunityIcons' && (
+        <MaterialCommunityIcons
+          style={style}
+          name={name as ComponentProps<typeof MaterialCommunityIcons>['name']}
+          size={size}
+          color={color ?? theme.colors.text}
+        />
+      )}
+      {type === 'Ionicons' && (
+        <Ionicons
+          style={style}
+          name={name as ComponentProps<typeof Ionicons>['name']}
+          size={size}
+          color={color ?? theme.colors.text}
+        />
+      )}
+      {type === 'Fontisto' && (
+        <Fontisto
+          style={style}
+          name={name as ComponentProps<typeof Fontisto>['name']}
+          size={size}
+          color={color ?? theme.colors.text}
+        />
+      )}
+      {type === 'Image' && (
+        <Image
+          source={spinner}
+          style={{
+            width: size,
+            height: size,
+          }}
+        />
+      )}
     </Animated.View>
   );
 };

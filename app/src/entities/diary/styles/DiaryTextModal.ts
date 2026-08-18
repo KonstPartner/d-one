@@ -63,13 +63,6 @@ export const Title = styled.Text`
   ${({ theme }) => ss.Subheading(theme)};
 `;
 
-export const HeaderCloseButton = styled(Button)`
-  width: ${({ theme }) => ss.px(theme.control.height.sm)};
-
-  padding-horizontal: 0;
-  padding-vertical: 0;
-`;
-
 export const Body = styled.ScrollView`
   flex-shrink: 1;
 

@@ -1,6 +1,6 @@
 {
   "auth": {
-    "brand": "Дневник диабета",
+    "brand": "Project DOne",
     "forms": {
       "signInTitle": "Вход",
       "signUpTitle": "Регистрация",
@@ -82,6 +82,23 @@
     "profile": {
       "title": "Профиль",
       "changePasswordTitle": "Изменение пароля",
+      "nickname": "Никнейм",
+      "role": "Роль",
+      "roles": {
+        "user": "Пользователь",
+        "follower": "Подписчик",
+        "pending": "Доступ не предоставлен"
+      },
+      "relations": {
+        "followers": "Подписчики",
+        "following": "Наблюдает за",
+        "noFollowers": "Нет подписчиков",
+        "notAssigned": "Пользователь не назначен",
+        "loading": "Загрузка…",
+        "loadFailed": "Не удалось загрузить",
+        "expand": "Развернуть список",
+        "collapse": "Свернуть список"
+      },
       "email": {
         "title": "Email",
         "warningRelogin": "После изменения email потребуется повторно войти в аккаунт",

@@ -19,10 +19,11 @@ type MealRelationProps = {
   $tone: SelectDropdownTone;
 };
 
-export type DiaryMetricKey =
+type DiaryMetricKey =
   | 'glucose'
   | 'carbsGram'
   | 'shortInsulin'
+  | 'ultraShortInsulin'
   | 'longInsulin';
 
 type MetricProps = {

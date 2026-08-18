@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -6,6 +6,7 @@ import {
   DiaryEntryEditorFields,
   DiaryEntryEditorModal,
 } from '@entities/diary';
+import { ConfirmDialog, PhotoRedactorModal } from '@shared/ui';
 
 import {
   type EditDiaryEntrySubmitResult,
@@ -20,6 +21,7 @@ type EditDiaryEntryModalProps = {
   disabled?: boolean;
 
   onClose: () => void;
+
   onUpdated: (result: EditDiaryEntrySubmitResult) => void;
 };
 
@@ -32,11 +34,14 @@ export const EditDiaryEntryModal = ({
 }: EditDiaryEntryModalProps) => {
   const { t } = useTranslation();
 
+  const [photoActionsVisible, setPhotoActionsVisible] = useState(false);
+
   const {
     values,
     useCurrentDateTime,
 
     photoUri,
+    photoEditorSource,
 
     aiAnalysis,
 
@@ -52,6 +57,7 @@ export const EditDiaryEntryModal = ({
     handleGlucoseChange,
     handleCarbsGramChange,
     handleShortInsulinChange,
+    handleUltraShortInsulinChange,
     handleLongInsulinChange,
 
     handleMealRelationChange,
@@ -69,6 +75,10 @@ export const EditDiaryEntryModal = ({
     selectPhoto,
     deletePhoto,
 
+    cancelPhotoEditing,
+    confirmPhotoEditing,
+    handlePhotoEditorError,
+
     discardPhotoChanges,
 
     handleSubmit,
@@ -78,6 +88,12 @@ export const EditDiaryEntryModal = ({
     disabled,
   });
 
+  useEffect(() => {
+    if (!visible) {
+      setPhotoActionsVisible(false);
+    }
+  }, [visible]);
+
   const isBusy = isSubmitting || isPhotoBusy;
 
   const editorDisabled = disabled || isSubmitting;
@@ -86,6 +102,8 @@ export const EditDiaryEntryModal = ({
     if (isBusy) {
       return;
     }
+
+    setPhotoActionsVisible(false);
 
     if (!discardPhotoChanges()) {
       return;
@@ -99,28 +117,7 @@ export const EditDiaryEntryModal = ({
       return;
     }
 
-    Alert.alert(
-      t('diary.form.photo.sourceTitle'),
-      t('diary.form.photo.sourceMessage'),
-      [
-        {
-          text: t('common.cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('diary.form.photo.camera'),
-          onPress: () => {
-            void selectPhoto('camera');
-          },
-        },
-        {
-          text: t('diary.form.photo.gallery'),
-          onPress: () => {
-            void selectPhoto('library');
-          },
-        },
-      ]
-    );
+    setPhotoActionsVisible(true);
   };
 
   const handleSave = async () => {
@@ -138,51 +135,106 @@ export const EditDiaryEntryModal = ({
   }
 
   return (
-    <DiaryEntryEditorModal
-      visible
-      title={t('diary.form.editTitle')}
-      submitLabel={t(isSubmitting ? 'diary.form.saving' : 'diary.form.save')}
-      submitIcon="checkmark"
-      disabled={disabled}
-      isSubmitting={isSubmitting}
-      isBusy={isBusy}
-      onClose={handleRequestClose}
-      onSubmit={() => {
-        void handleSave();
-      }}
-    >
-      <DiaryEntryEditorFields
-        eventAt={values.eventAt}
-        useCurrentDateTime={useCurrentDateTime}
-        glucose={values.glucose}
-        carbsGram={values.carbsGram}
-        shortInsulin={values.shortInsulin}
-        longInsulin={values.longInsulin}
-        mealRelation={values.mealRelation}
-        comment={values.comment}
-        photoUri={photoUri}
-        isPhotoBusy={isPhotoBusy}
-        requestAi={requestAi}
-        canRequestAi={canRequestAi}
-        requestTimer={requestTimer}
-        canRequestTimer={canRequestTimer}
-        aiAnalysis={aiAnalysis}
-        disabled={editorDisabled}
-        onCurrentDateTimeChange={handleCurrentDateTimeChange}
-        onEventDateChange={handleEventDateChange}
-        onEventTimeChange={handleEventTimeChange}
-        onGlucoseChange={handleGlucoseChange}
-        onCarbsGramChange={handleCarbsGramChange}
-        onShortInsulinChange={handleShortInsulinChange}
-        onLongInsulinChange={handleLongInsulinChange}
-        onMealRelationChange={handleMealRelationChange}
-        onCommentChange={handleCommentChange}
-        onChoosePhoto={handleChoosePhoto}
-        onDeletePhoto={deletePhoto}
-        onRequestAiChange={handleRequestAiChange}
-        onRequestTimerChange={handleRequestTimerChange}
-        onDeleteAiAnalysis={handleDeleteAiAnalysis}
+    <>
+      <DiaryEntryEditorModal
+        visible
+        title={t('diary.form.editTitle')}
+        submitLabel={t(isSubmitting ? 'diary.form.saving' : 'diary.form.save')}
+        submitIcon="checkmark"
+        disabled={disabled}
+        isSubmitting={isSubmitting}
+        isBusy={isBusy}
+        onClose={handleRequestClose}
+        onSubmit={() => {
+          void handleSave();
+        }}
+      >
+        <DiaryEntryEditorFields
+          eventAt={values.eventAt}
+          useCurrentDateTime={useCurrentDateTime}
+          glucose={values.glucose}
+          carbsGram={values.carbsGram}
+          shortInsulin={values.shortInsulin}
+          ultraShortInsulin={values.ultraShortInsulin}
+          longInsulin={values.longInsulin}
+          mealRelation={values.mealRelation}
+          comment={values.comment}
+          photoUri={photoUri}
+          isPhotoBusy={isPhotoBusy}
+          requestAi={requestAi}
+          canRequestAi={canRequestAi}
+          requestTimer={requestTimer}
+          canRequestTimer={canRequestTimer}
+          aiAnalysis={aiAnalysis}
+          disabled={editorDisabled}
+          onCurrentDateTimeChange={handleCurrentDateTimeChange}
+          onEventDateChange={handleEventDateChange}
+          onEventTimeChange={handleEventTimeChange}
+          onGlucoseChange={handleGlucoseChange}
+          onCarbsGramChange={handleCarbsGramChange}
+          onShortInsulinChange={handleShortInsulinChange}
+          onUltraShortInsulinChange={handleUltraShortInsulinChange}
+          onLongInsulinChange={handleLongInsulinChange}
+          onMealRelationChange={handleMealRelationChange}
+          onCommentChange={handleCommentChange}
+          onChoosePhoto={handleChoosePhoto}
+          onDeletePhoto={deletePhoto}
+          onRequestAiChange={handleRequestAiChange}
+          onRequestTimerChange={handleRequestTimerChange}
+          onDeleteAiAnalysis={handleDeleteAiAnalysis}
+        />
+      </DiaryEntryEditorModal>
+
+      <ConfirmDialog
+        visible={photoActionsVisible}
+        title={t('diary.form.photo.title')}
+        actions={[
+          ...(photoUri !== null
+            ? [
+                [
+                  {
+                    key: 'edit-selected',
+                    label: t('diary.form.editSelected'),
+                    icon: 'create-outline' as const,
+                    onPress: () => {
+                      void selectPhoto('selected');
+                    },
+                  },
+                ],
+              ]
+            : []),
+
+          [
+            {
+              key: 'camera',
+              label: t('diary.form.photo.camera'),
+              icon: 'camera-outline' as const,
+              onPress: () => {
+                void selectPhoto('camera');
+              },
+            },
+            {
+              key: 'gallery',
+              label: t('diary.form.photo.gallery'),
+              icon: 'images-outline' as const,
+              onPress: () => {
+                void selectPhoto('library');
+              },
+            },
+          ],
+        ]}
+        onClose={() => {
+          setPhotoActionsVisible(false);
+        }}
       />
-    </DiaryEntryEditorModal>
+
+      <PhotoRedactorModal
+        visible={photoEditorSource !== null}
+        source={photoEditorSource}
+        onCancel={cancelPhotoEditing}
+        onConfirm={confirmPhotoEditing}
+        onError={handlePhotoEditorError}
+      />
+    </>
   );
 };

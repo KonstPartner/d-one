@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 
-export type DiaryTransferType = 'import' | 'export' | 'cloudDownload';
+type DiaryTransferType = 'import' | 'export' | 'cloudDownload';
 
-export type DiaryTransferPhase =
+type DiaryTransferPhase =
   | 'idle'
   | 'waitingForSync'
   | 'validating'

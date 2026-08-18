@@ -8,6 +8,7 @@ export type DiaryEntryRow = {
   glucose: number | null;
   meal_relation: string | null;
   short_insulin: number | null;
+  ultra_short_insulin: number | null;
   long_insulin: number | null;
   carbs_gram: number | null;
 
@@ -45,6 +46,7 @@ export const mapDiaryEntryRow = (row: DiaryEntryRow): DiaryEntry => {
     glucose: row.glucose,
     mealRelation: row.meal_relation,
     shortInsulin: row.short_insulin,
+    ultraShortInsulin: row.ultra_short_insulin,
     longInsulin: row.long_insulin,
     carbsGram: row.carbs_gram,
 
