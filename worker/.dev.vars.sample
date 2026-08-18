@@ -1,1 +1,23 @@
-GEMINI_API_KEY=gemini_api_key
+# Gemini API key
+GEMINI_API_KEY="Gemini API key used by the AI worker"
+
+# Gemini model
+GEMINI_MODEL="Gemini model name used for food analysis"
+
+# Daily project-wide AI request limit
+AI_PROJECT_DAILY_LIMIT="Maximum number of AI analysis requests allowed per day"
+
+# Firebase project ID
+FIREBASE_PROJECT_ID="Firebase project ID"
+
+# Firebase Storage bucket
+FIREBASE_STORAGE_BUCKET="Firebase Storage bucket name"
+
+# Firebase project number
+FIREBASE_PROJECT_NUMBER="Firebase project number used for App Check verification"
+
+# Firebase Android app ID
+FIREBASE_ANDROID_APP_ID="Firebase Android application ID allowed by App Check"
+
+# Firebase iOS app ID
+FIREBASE_IOS_APP_ID="Firebase iOS application ID allowed by App Check"
