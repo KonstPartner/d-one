@@ -145,7 +145,10 @@ export const useGoogleSignIn = ({ onRegister }: UseGoogleSignInParams) => {
 
       if (!isExists) {
         onRegister(prefill);
-        returnToAuthForm();
+
+        if (GOOGLE_AUTH_REDIRECT_URI) {
+          returnToAuthForm();
+        }
 
         return;
       }

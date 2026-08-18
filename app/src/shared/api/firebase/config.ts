@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
+import { envConfig } from '@shared/config';
 import { PlatformOS } from '@shared/lib/platform';
 
 const { getReactNativePersistence } = require('firebase/auth') as {
@@ -15,13 +16,13 @@ const { getReactNativePersistence } = require('firebase/auth') as {
 };
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDpHIqPfESGbmNaVVpK_lBYlIyNeNnrki8',
-  authDomain: 'project-d-one.firebaseapp.com',
-  projectId: 'project-d-one',
-  storageBucket: 'project-d-one.firebasestorage.app',
-  messagingSenderId: '130872563902',
-  appId: '1:130872563902:web:06363e4110681cf35a26ef',
-  measurementId: 'G-R925MN691H',
+  apiKey: envConfig.firebase.apiKey,
+  authDomain: envConfig.firebase.authDomain,
+  projectId: envConfig.firebase.projectId,
+  storageBucket: envConfig.firebase.storageBucket,
+  messagingSenderId: envConfig.firebase.messagingSenderId,
+  appId: envConfig.firebase.appId,
+  measurementId: envConfig.firebase.measurementId,
 };
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);

@@ -163,8 +163,6 @@ export const RelationVisibleRow = styled.View`
 `;
 
 export const RelationText = styled.Text`
-  flex: 1;
-
   color: ${({ theme }) => theme.colors.text};
 
   font-size: ${({ theme }) => ss.px(theme.size.md)};

@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import spinner from '@assets/images/spinner-dark.png';
+import spinner from '@assets/images/spinner.png';
 
 type SpinnerProps = {
   type?: 'Ionicons' | 'MaterialCommunityIcons' | 'Fontisto' | 'Image';

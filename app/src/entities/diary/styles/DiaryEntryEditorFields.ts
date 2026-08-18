@@ -127,7 +127,7 @@ export const DeleteAiButtonContent = styled.View`
 `;
 
 export const DeleteAiButtonText = styled.Text`
-  ${({ theme }) => ss.Text(theme, 'sm', 'semibold', 'danger', 'md')};
+  ${({ theme }) => ss.Text(theme, 'sm', 'semibold', 'inverse', 'md')};
 `;
 
 export const AiAnalysisScroll = styled.ScrollView`

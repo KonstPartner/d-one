@@ -80,7 +80,7 @@ const blackAlpha = {
 export const lightTheme: Theme = {
   mode: 'light',
   colors: {
-    bg: '#0080ff',
+    bg: '#F9FAFB',
     text: '#111827',
     card: '#FFFFFF',
     primary: '#3B82F6',

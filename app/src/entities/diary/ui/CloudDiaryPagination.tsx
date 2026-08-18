@@ -25,32 +25,37 @@ export const CloudDiaryPagination = ({
   onPrevious,
   onNext,
 }: CloudDiaryPaginationProps) => {
-  const isPreviousDisabled = loading || !hasPreviousPage;
-  const isNextDisabled = loading || !hasNextPage;
+  if (!hasPreviousPage && !hasNextPage) {
+    return null;
+  }
 
   return (
     <s.Root>
-      <s.Action
-        accessibilityLabel={previousLabel}
-        tone={isPreviousDisabled ? 'card' : 'input'}
-        disabled={isPreviousDisabled}
-        onPress={() => {
-          void onPrevious();
-        }}
-      >
-        <s.ActionText>{previousLabel}</s.ActionText>
-      </s.Action>
+      {hasPreviousPage && (
+        <s.Action
+          accessibilityLabel={previousLabel}
+          tone={loading ? 'card' : 'input'}
+          disabled={loading}
+          onPress={() => {
+            void onPrevious();
+          }}
+        >
+          <s.ActionText>{previousLabel}</s.ActionText>
+        </s.Action>
+      )}
 
-      <s.Action
-        accessibilityLabel={nextLabel}
-        tone={isNextDisabled ? 'card' : 'input'}
-        disabled={loading || !hasNextPage}
-        onPress={() => {
-          void onNext();
-        }}
-      >
-        <s.ActionText>{nextLabel}</s.ActionText>
-      </s.Action>
+      {hasNextPage && (
+        <s.Action
+          accessibilityLabel={nextLabel}
+          tone={loading ? 'card' : 'input'}
+          disabled={loading}
+          onPress={() => {
+            void onNext();
+          }}
+        >
+          <s.ActionText>{nextLabel}</s.ActionText>
+        </s.Action>
+      )}
     </s.Root>
   );
 };

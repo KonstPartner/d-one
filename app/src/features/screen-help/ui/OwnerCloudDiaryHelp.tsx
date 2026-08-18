@@ -81,6 +81,7 @@ export const OwnerCloudDiaryHelp = ({
               labelKey: 'screenHelp.menuLabel',
               icon: 'help-circle-outline',
               onPress: handleOpen,
+              placement: 'bottom',
             },
           ]
         : [],

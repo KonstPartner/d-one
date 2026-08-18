@@ -62,6 +62,7 @@ export const FollowerDiaryHelp = () => {
         labelKey: 'screenHelp.menuLabel',
         icon: 'help-circle-outline',
         onPress: handleOpen,
+        placement: 'bottom',
       },
     ],
     [handleOpen]

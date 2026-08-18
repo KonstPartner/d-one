@@ -6,15 +6,38 @@ import {
   ReactNativeFirebaseAppCheckProvider,
 } from '@react-native-firebase/app-check';
 
+import { envConfig } from '@shared/config';
+
 let appCheckPromise: Promise<AppCheck> | null = null;
+
+const getAndroidAppCheckOptions = () => {
+  if (__DEV__) {
+    return {
+      provider: 'debug' as const,
+    };
+  }
+
+  if (envConfig.appCheckAndroidProvider === 'debug') {
+    if (!envConfig.appCheckAndroidDebugToken) {
+      throw new Error('APP_CHECK_DEBUG_TOKEN_MISSING');
+    }
+
+    return {
+      provider: 'debug' as const,
+      debugToken: envConfig.appCheckAndroidDebugToken,
+    };
+  }
+
+  return {
+    provider: 'playIntegrity' as const,
+  };
+};
 
 const initializeFirebaseAppCheck = async (): Promise<AppCheck> => {
   const provider = new ReactNativeFirebaseAppCheckProvider();
 
   provider.configure({
-    android: {
-      provider: __DEV__ ? 'debug' : 'playIntegrity',
-    },
+    android: getAndroidAppCheckOptions(),
 
     apple: {
       provider: __DEV__ ? 'debug' : 'appAttestWithDeviceCheckFallback',

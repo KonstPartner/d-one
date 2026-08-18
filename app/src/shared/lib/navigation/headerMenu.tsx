@@ -16,6 +16,7 @@ export type HeaderMenuItem = {
   key: string;
   labelKey: string;
   icon?: ComponentProps<typeof Ionicons>['name'];
+  placement?: 'default' | 'bottom';
 
   onPress: () => void;
 
