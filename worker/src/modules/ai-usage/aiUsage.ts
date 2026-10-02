@@ -1,10 +1,10 @@
+import { ApiError } from '../../shared/http/apiError';
+
 import {
   AI_USAGE_POLICY,
-  AiUsageLimitError,
-  assertProjectDailyLimit,
   getPreviousUtcDay,
   getUtcDay,
-  resolveUserUsageLimitError,
+  resolveUserUsageRejectionCode,
 } from './aiUsagePolicy';
 
 import {
@@ -38,8 +38,6 @@ export const reserveAiUsage = async ({
   projectDailyLimit,
   now = new Date(),
 }: ReserveAiUsageParams): Promise<AiUsageReservation> => {
-  assertProjectDailyLimit(projectDailyLimit);
-
   const nowSeconds = Math.floor(now.getTime() / 1000);
 
   const cooldownThreshold = nowSeconds - AI_USAGE_POLICY.requestCooldownSeconds;
@@ -79,7 +77,9 @@ export const reserveAiUsage = async ({
       throw new Error('AI_USAGE_STATE_NOT_FOUND');
     }
 
-    throw resolveUserUsageLimitError(snapshot, nowSeconds, cooldownThreshold);
+    throw new ApiError(
+      resolveUserUsageRejectionCode(snapshot, nowSeconds, cooldownThreshold),
+    );
   }
 
   const reservation: AiUsageReservation = {
@@ -106,7 +106,7 @@ export const reserveAiUsage = async ({
   if (!projectReserved) {
     await compensateUserReservation(db, reservation);
 
-    throw new AiUsageLimitError('PROJECT_DAILY_LIMIT_REACHED');
+    throw new ApiError('PROJECT_DAILY_LIMIT_REACHED');
   }
 
   const finalized = await finalizeUserReservation(db, reservation);
@@ -124,5 +124,3 @@ export const releaseAiUsage = async (
 ): Promise<void> => {
   await releaseUserLease(db, reservation);
 };
-
-export { AiUsageLimitError, type AiUsageLimitErrorCode } from './aiUsagePolicy';

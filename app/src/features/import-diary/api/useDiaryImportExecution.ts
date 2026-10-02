@@ -1,11 +1,11 @@
 import { type MutableRefObject, useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 import { diaryLocalQueryKeys, type DiaryTransferLease } from '@entities/diary';
-import { errorMapper } from '@shared/lib/errors';
+import { CodedError, errorMapper } from '@shared/lib/errors';
 import { showNotification } from '@shared/lib/notifications';
 
-import { isDiaryImportExecutionError } from '../model/diaryImportExecutionError';
 import { getDiaryImportPlanSummary } from '../model/diaryImportPlanSummary';
 import type { DiaryImportConflictPlan } from '../model/useDiaryImportConflicts';
 
@@ -41,6 +41,8 @@ export const useDiaryImportExecution = ({
 }: UseDiaryImportExecutionParams) => {
   const queryClient = useQueryClient();
 
+  const { t } = useTranslation();
+
   const [result, setResult] = useState<DiaryImportExecutionResult | null>(null);
 
   const [isImporting, setIsImporting] = useState(false);
@@ -63,13 +65,10 @@ export const useDiaryImportExecution = ({
       } catch (error) {
         console.error('Failed to refresh local diary after import', error);
 
-        showNotification(
-          'error',
-          errorMapper(new Error('DIARY_IMPORT_REFRESH_FAILED'), 'transfer')
-        );
+        showNotification('error', t('common.errors.diaryImportRefreshFailed'));
       }
     },
-    [queryClient, userId]
+    [queryClient, t, userId]
   );
 
   const execute =
@@ -137,17 +136,14 @@ export const useDiaryImportExecution = ({
         console.error('Failed to import diary backup', outcome.error);
 
         const rollbackFailed =
-          isDiaryImportExecutionError(outcome.error) &&
+          outcome.error instanceof CodedError &&
           outcome.error.code === 'fileRollbackFailed';
 
         showNotification(
           'error',
-          errorMapper(
-            outcome.result.processedEntries > 0 && !rollbackFailed
-              ? new Error('DIARY_IMPORT_PARTIAL_FAILED')
-              : outcome.error,
-            'transfer'
-          )
+          outcome.result.processedEntries > 0 && !rollbackFailed
+            ? t('common.errors.diaryImportPartialFailed')
+            : errorMapper(outcome.error, 'transfer')
         );
 
         lease.fail();
@@ -181,6 +177,7 @@ export const useDiaryImportExecution = ({
       refreshLocalDiary,
       service,
       sessionRef,
+      t,
     ]);
 
   return {

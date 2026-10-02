@@ -1,20 +1,10 @@
+import { ApiError } from '../../../shared/http/apiError';
+
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 
 const ALLOWED_FIREBASE_STORAGE_HOSTS = new Set([
   'firebasestorage.googleapis.com',
 ]);
-
-export type PhotoValidationErrorCode =
-  | 'INVALID_IMAGE_URL'
-  | 'IMAGE_NOT_ANALYZABLE'
-  | 'IMAGE_TOO_LARGE';
-
-export class PhotoValidationError extends Error {
-  public constructor(public readonly code: PhotoValidationErrorCode) {
-    super(code);
-    this.name = 'PhotoValidationError';
-  }
-}
 
 type ValidateDiaryPhotoParams = {
   uid: string;
@@ -79,7 +69,7 @@ export const validateDiaryPhoto = async ({
   const expectedPhotoPath = getExpectedPhotoPath(uid, entryId);
 
   if (photoPath !== expectedPhotoPath) {
-    throw new PhotoValidationError('INVALID_IMAGE_URL');
+    throw new ApiError('INVALID_IMAGE_URL');
   }
 
   let url: URL;
@@ -87,15 +77,15 @@ export const validateDiaryPhoto = async ({
   try {
     url = new URL(photoUrl);
   } catch {
-    throw new PhotoValidationError('INVALID_IMAGE_URL');
+    throw new ApiError('INVALID_IMAGE_URL');
   }
 
   if (url.protocol !== 'https:') {
-    throw new PhotoValidationError('INVALID_IMAGE_URL');
+    throw new ApiError('INVALID_IMAGE_URL');
   }
 
   if (!ALLOWED_FIREBASE_STORAGE_HOSTS.has(url.hostname)) {
-    throw new PhotoValidationError('INVALID_IMAGE_URL');
+    throw new ApiError('INVALID_IMAGE_URL');
   }
 
   const pathSegments = url.pathname.split('/');
@@ -106,13 +96,13 @@ export const validateDiaryPhoto = async ({
     bucketIndex === -1 ? null : (pathSegments[bucketIndex + 1] ?? null);
 
   if (bucket !== storageBucket) {
-    throw new PhotoValidationError('INVALID_IMAGE_URL');
+    throw new ApiError('INVALID_IMAGE_URL');
   }
 
   const objectPath = decodeStorageObjectPath(url.pathname);
 
   if (objectPath !== expectedPhotoPath) {
-    throw new PhotoValidationError('INVALID_IMAGE_URL');
+    throw new ApiError('INVALID_IMAGE_URL');
   }
 
   let response: Response;
@@ -123,15 +113,15 @@ export const validateDiaryPhoto = async ({
       redirect: 'manual',
     });
   } catch {
-    throw new PhotoValidationError('IMAGE_NOT_ANALYZABLE');
+    throw new ApiError('IMAGE_NOT_ANALYZABLE');
   }
 
   if (response.status >= 300 && response.status < 400) {
-    throw new PhotoValidationError('INVALID_IMAGE_URL');
+    throw new ApiError('INVALID_IMAGE_URL');
   }
 
   if (!response.ok) {
-    throw new PhotoValidationError('IMAGE_NOT_ANALYZABLE');
+    throw new ApiError('IMAGE_NOT_ANALYZABLE');
   }
 
   const contentType = response.headers
@@ -141,13 +131,13 @@ export const validateDiaryPhoto = async ({
     .toLowerCase();
 
   if (contentType !== 'image/jpeg') {
-    throw new PhotoValidationError('IMAGE_NOT_ANALYZABLE');
+    throw new ApiError('IMAGE_NOT_ANALYZABLE');
   }
 
   const sizeBytes = parseContentLength(response.headers.get('content-length'));
 
   if (sizeBytes !== null && sizeBytes > MAX_IMAGE_SIZE_BYTES) {
-    throw new PhotoValidationError('IMAGE_TOO_LARGE');
+    throw new ApiError('IMAGE_TOO_LARGE');
   }
 
   return {

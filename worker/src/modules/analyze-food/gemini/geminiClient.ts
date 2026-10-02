@@ -1,11 +1,14 @@
 import { GoogleGenAI } from '@google/genai';
 
+import { ApiError } from '../../../shared/http/apiError';
+
 import type { AnalyzeFoodRequest } from '../analyzeFoodRequest';
 
 import {
   foodAnalysisResponseJsonSchema,
-  parseAnalyzeFoodResponse,
+  parseAnalyzeFoodResponseDetailed,
   type AnalyzeFoodResponse,
+  type AnalyzeFoodResponseParseFailureReason,
 } from '../foodAnalysisResult';
 
 import {
@@ -14,19 +17,30 @@ import {
 } from '../foodAnalysisPrompt';
 
 const GEMINI_TIMEOUT_MS = 120_000;
+const MAX_PROVIDER_ERROR_MESSAGE_LENGTH = 1_000;
 
-export type GeminiAnalysisErrorCode =
-  | 'IMAGE_NOT_ANALYZABLE'
-  | 'AI_PROVIDER_ERROR'
-  | 'INVALID_AI_RESPONSE'
-  | 'AI_TIMEOUT';
+type GeminiProviderError = {
+  status: number | null;
+  name: string;
+  message: string | null;
+};
 
-export class GeminiAnalysisError extends Error {
-  public constructor(public readonly code: GeminiAnalysisErrorCode) {
-    super(code);
-    this.name = 'GeminiAnalysisError';
-  }
-}
+type GeminiAnalysisFailureReason =
+  | 'invalid_photo_url'
+  | 'url_context_not_confirmed'
+  | 'missing_output_text'
+  | AnalyzeFoodResponseParseFailureReason
+  | 'timeout'
+  | 'provider_error';
+
+type GeminiInteractionDiagnostics = {
+  stepTypes: string[];
+  urlContextResultCount: number;
+  urlContextSuccessCount: number;
+  matchingPhotoUrlCount: number;
+  hasOutputText: boolean;
+  outputTextLength: number | null;
+};
 
 type AnalyzeFoodWithGeminiParams = Pick<
   AnalyzeFoodRequest,
@@ -35,6 +49,65 @@ type AnalyzeFoodWithGeminiParams = Pick<
   apiKey: string;
   model: string;
 };
+
+const normalizeProviderMessage = (value: string): string | null => {
+  const normalized = value.trim();
+
+  if (normalized.length === 0) {
+    return null;
+  }
+
+  return normalized.slice(0, MAX_PROVIDER_ERROR_MESSAGE_LENGTH);
+};
+
+const getProviderStatus = (error: unknown): number | null => {
+  if (error === null || typeof error !== 'object') {
+    return null;
+  }
+
+  const record = error as Record<string, unknown>;
+
+  if (typeof record.status === 'number') {
+    return record.status;
+  }
+
+  if (typeof record.statusCode === 'number') {
+    return record.statusCode;
+  }
+
+  return null;
+};
+
+const getGeminiProviderError = (error: unknown): GeminiProviderError => {
+  const status = getProviderStatus(error);
+
+  if (error instanceof Error) {
+    return {
+      status,
+      name: error.name || 'Error',
+      message: normalizeProviderMessage(error.message),
+    };
+  }
+
+  return {
+    status,
+    name: 'UnknownError',
+    message:
+      typeof error === 'string' ? normalizeProviderMessage(error) : null,
+  };
+};
+
+const createGeminiError = (
+  code: 'IMAGE_NOT_ANALYZABLE' | 'INVALID_AI_RESPONSE' | 'AI_TIMEOUT',
+  reason: GeminiAnalysisFailureReason,
+  interaction?: GeminiInteractionDiagnostics,
+): ApiError =>
+  new ApiError(code, {
+    details: {
+      reason,
+      ...(interaction === undefined ? {} : { interaction }),
+    },
+  });
 
 const normalizeUrl = (value: string): string | null => {
   try {
@@ -59,7 +132,7 @@ export const analyzeFoodWithGemini = async ({
   const expectedPhotoUrl = normalizeUrl(photoUrl);
 
   if (expectedPhotoUrl === null) {
-    throw new GeminiAnalysisError('IMAGE_NOT_ANALYZABLE');
+    throw createGeminiError('IMAGE_NOT_ANALYZABLE', 'invalid_photo_url');
   }
 
   const ai = new GoogleGenAI({
@@ -117,45 +190,97 @@ export const analyzeFoodWithGemini = async ({
       },
     );
 
-    const photoRetrieved = (interaction.steps ?? []).some((step) => {
+    const stepTypes = (interaction.steps ?? []).map((step) => step.type);
+
+    let urlContextResultCount = 0;
+    let urlContextSuccessCount = 0;
+    let matchingPhotoUrlCount = 0;
+
+    for (const step of interaction.steps ?? []) {
       if (step.type !== 'url_context_result') {
-        return false;
+        continue;
       }
 
-      return step.result.some((result) => {
-        if (result.status !== 'success' || typeof result.url !== 'string') {
-          return false;
+      for (const result of step.result) {
+        urlContextResultCount += 1;
+
+        if (result.status !== 'success') {
+          continue;
         }
 
-        return normalizeUrl(result.url) === expectedPhotoUrl;
-      });
-    });
+        urlContextSuccessCount += 1;
 
-    if (!photoRetrieved) {
-      throw new GeminiAnalysisError('IMAGE_NOT_ANALYZABLE');
+        if (
+          typeof result.url === 'string' &&
+          normalizeUrl(result.url) === expectedPhotoUrl
+        ) {
+          matchingPhotoUrlCount += 1;
+        }
+      }
+    }
+
+    const interactionDiagnostics: GeminiInteractionDiagnostics = {
+      stepTypes,
+      urlContextResultCount,
+      urlContextSuccessCount,
+      matchingPhotoUrlCount,
+      hasOutputText: typeof interaction.output_text === 'string',
+      outputTextLength:
+        typeof interaction.output_text === 'string'
+          ? interaction.output_text.length
+          : null,
+    };
+
+    if (matchingPhotoUrlCount === 0) {
+      throw createGeminiError(
+        'IMAGE_NOT_ANALYZABLE',
+        'url_context_not_confirmed',
+        interactionDiagnostics,
+      );
     }
 
     if (typeof interaction.output_text !== 'string') {
-      throw new GeminiAnalysisError('INVALID_AI_RESPONSE');
+      throw createGeminiError(
+        'INVALID_AI_RESPONSE',
+        'missing_output_text',
+        interactionDiagnostics,
+      );
     }
 
-    const analysis = parseAnalyzeFoodResponse(interaction.output_text);
+    const parseResult = parseAnalyzeFoodResponseDetailed(
+      interaction.output_text,
+    );
 
-    if (analysis === null) {
-      throw new GeminiAnalysisError('INVALID_AI_RESPONSE');
+    if (!parseResult.ok) {
+      throw createGeminiError(
+        'INVALID_AI_RESPONSE',
+        parseResult.reason,
+        interactionDiagnostics,
+      );
     }
 
-    return analysis;
+    return parseResult.data;
   } catch (error) {
-    if (error instanceof GeminiAnalysisError) {
+    if (error instanceof ApiError) {
       throw error;
     }
 
     if (abortController.signal.aborted) {
-      throw new GeminiAnalysisError('AI_TIMEOUT');
+      throw createGeminiError('AI_TIMEOUT', 'timeout');
     }
 
-    throw new GeminiAnalysisError('AI_PROVIDER_ERROR');
+    const providerError = getGeminiProviderError(error);
+
+    console.error('Gemini provider request failed', error);
+
+    throw new ApiError('AI_PROVIDER_ERROR', {
+      message: providerError.message,
+      details: {
+        reason: 'provider_error',
+        provider: providerError,
+      },
+      sourceError: error,
+    });
   } finally {
     clearTimeout(timeoutId);
   }

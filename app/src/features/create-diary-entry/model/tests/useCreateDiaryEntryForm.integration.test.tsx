@@ -23,14 +23,9 @@ jest.mock('@entities/diary', () => {
     '@entities/diary/api/local/diaryLocalQueryKeys'
   );
 
-  const photoError = jest.requireActual(
-    '@entities/diary/api/local/DiaryPhotoError'
-  );
-
   return {
     ...editable,
     ...queryKeys,
-    ...photoError,
 
     runDiaryWriteOperation: (operation: () => Promise<unknown>) => operation(),
 

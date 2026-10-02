@@ -1,3 +1,9 @@
+export type DiaryPhotoErrorCode =
+  | 'processingFailed'
+  | 'invalidFile'
+  | 'fileTooLarge'
+  | 'storageFailed';
+
 export type DiaryPhotoDraft = {
   uri: string;
   width: number;

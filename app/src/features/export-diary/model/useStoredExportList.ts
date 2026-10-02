@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { DiaryStoredExportFile } from '@entities/diary';
-import { errorMapper } from '@shared/lib/errors';
 import { showNotification } from '@shared/lib/notifications';
 
 import { useDiaryExportFiles } from '../api/useDiaryExportFiles';
@@ -20,6 +20,8 @@ type UseStoredExportListParams = {
 };
 
 export const useStoredExportList = ({ mode }: UseStoredExportListParams) => {
+  const { t } = useTranslation();
+
   const [search, setSearch] = useState('');
   const [deleteTarget, setDeleteTarget] =
     useState<StoredExportDeleteTarget | null>(null);
@@ -39,11 +41,8 @@ export const useStoredExportList = ({ mode }: UseStoredExportListParams) => {
     }
 
     console.error('Failed to load diary export files', files.loadError);
-    showNotification(
-      'error',
-      errorMapper(new Error('DIARY_EXPORT_FILES_LOAD_FAILED'), 'transfer')
-    );
-  }, [files.loadError]);
+    showNotification('error', t('common.errors.diaryExportFilesLoadFailed'));
+  }, [files.loadError, t]);
 
   const normalizedSearch = search.trim().toLocaleLowerCase();
 
@@ -155,10 +154,7 @@ export const useStoredExportList = ({ mode }: UseStoredExportListParams) => {
       await exportMutation.resumeDiaryExport(item.exportId);
     } catch (error) {
       console.error('Failed to resume diary export', error);
-      showNotification(
-        'error',
-        errorMapper(new Error('DIARY_EXPORT_RESUME_FAILED'), 'transfer')
-      );
+      showNotification('error', t('common.errors.diaryExportResumeFailed'));
     } finally {
       setResumingExportId(null);
     }
@@ -205,10 +201,7 @@ export const useStoredExportList = ({ mode }: UseStoredExportListParams) => {
       setDeleteTarget(null);
     } catch (error) {
       console.error('Failed to delete diary export', error);
-      showNotification(
-        'error',
-        errorMapper(new Error('DIARY_EXPORT_DELETE_FAILED'), 'transfer')
-      );
+      showNotification('error', t('common.errors.diaryExportDeleteFailed'));
     }
   };
 

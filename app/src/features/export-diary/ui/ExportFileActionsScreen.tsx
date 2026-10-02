@@ -3,7 +3,6 @@ import { useTheme } from '@emotion/react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import { errorMapper } from '@shared/lib/errors';
 import { showNotification } from '@shared/lib/notifications';
 import { Button } from '@shared/ui';
 
@@ -55,17 +54,14 @@ const ExportFileActions = ({ file, onBusyChange }: ExportFileActionsProps) => {
     (operation: 'save' | 'share'): void => {
       showNotification(
         'error',
-        errorMapper(
-          new Error(
-            operation === 'save'
-              ? 'DIARY_EXPORT_SAVE_FAILED'
-              : 'DIARY_EXPORT_SHARE_FAILED'
-          ),
-          'transfer'
+        t(
+          operation === 'save'
+            ? 'common.errors.diaryExportSaveFailed'
+            : 'common.errors.diaryExportShareFailed'
         )
       );
     },
-    []
+    [t]
   );
 
   const saveFile = useCallback(async (): Promise<void> => {

@@ -8,8 +8,8 @@ import {
   prepareDiaryPhotoForEntry,
   prepareDiaryPhotoRemoval,
 } from '@entities/diary';
+import { CodedError } from '@shared/lib/errors';
 
-import { DiaryImportExecutionError } from '../model/diaryImportExecutionError';
 import type { DiaryImportConflictPlan } from '../model/useDiaryImportConflicts';
 import { getDiaryImportConflictPlanDecision } from '../model/useDiaryImportConflicts';
 
@@ -157,7 +157,7 @@ const rollbackFileOperationsOrThrow = (
   const rollbackError = rollbackFileOperations(operations);
 
   if (rollbackError !== null) {
-    throw new DiaryImportExecutionError('fileRollbackFailed');
+    throw new CodedError('fileRollbackFailed');
   }
 };
 
@@ -207,7 +207,7 @@ export class DiaryImportExecutionService {
 
         if (expected === undefined) {
           if (current !== undefined) {
-            throw new DiaryImportExecutionError('snapshotChanged');
+            throw new CodedError('snapshotChanged');
           }
 
           continue;
@@ -217,7 +217,7 @@ export class DiaryImportExecutionService {
           current === undefined ||
           !areDiaryEntrySnapshotsEqual(current, expected)
         ) {
-          throw new DiaryImportExecutionError('snapshotChanged');
+          throw new CodedError('snapshotChanged');
         }
       }
     }
@@ -315,7 +315,7 @@ export class DiaryImportExecutionService {
           });
 
           if (decision === null) {
-            throw new DiaryImportExecutionError('conflictPlanInvalid');
+            throw new CodedError('conflictPlanInvalid');
           }
 
           if (decision === 'skip') {
@@ -397,7 +397,7 @@ export class DiaryImportExecutionService {
         return {
           status: 'failed',
           result,
-          error: new DiaryImportExecutionError('conflictPlanInvalid'),
+          error: new CodedError('conflictPlanInvalid'),
         };
       }
     }

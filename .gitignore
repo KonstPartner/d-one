@@ -4,3 +4,6 @@
 
 # workspace
 .vscode/
+
+# patches
+.git-patches/

@@ -30,6 +30,8 @@ type AnalyzeFoodLogPayload = {
   analysisStatus?: AnalyzeFoodResponse['status'];
 
   providerDurationMs?: number;
+
+  details?: Record<string, unknown>;
 };
 
 export type AnalyzeFoodTelemetry = {
@@ -48,7 +50,11 @@ export type AnalyzeFoodTelemetry = {
     providerStartedAt: number,
   ) => void;
 
-  providerError: (code: string, providerStartedAt: number) => void;
+  providerError: (
+    code: string,
+    providerStartedAt: number,
+    details?: Record<string, unknown>,
+  ) => void;
 
   usageReleased: () => void;
 
@@ -106,6 +112,12 @@ export const createAnalyzeFoodTelemetry = (
         ? {}
         : {
             providerDurationMs: payload.providerDurationMs,
+          }),
+
+      ...(payload.details === undefined
+        ? {}
+        : {
+            details: payload.details,
           }),
     };
 
@@ -175,7 +187,11 @@ export const createAnalyzeFoodTelemetry = (
     });
   };
 
-  const providerError = (code: string, providerStartedAt: number): void => {
+  const providerError = (
+    code: string,
+    providerStartedAt: number,
+    details?: Record<string, unknown>,
+  ): void => {
     writeLog({
       stage: 'provider',
 
@@ -184,6 +200,8 @@ export const createAnalyzeFoodTelemetry = (
       code,
 
       providerDurationMs: Date.now() - providerStartedAt,
+
+      details,
     });
   };
 

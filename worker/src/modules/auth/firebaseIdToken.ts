@@ -1,5 +1,7 @@
 import { decodeProtectedHeader, importX509, jwtVerify } from 'jose';
 
+import { ApiError } from '../../shared/http/apiError';
+
 const FIREBASE_CERTIFICATES_URL =
   'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com';
 
@@ -13,18 +15,6 @@ type FirebaseCertificateCache = {
 };
 
 let certificateCache: FirebaseCertificateCache | null = null;
-
-export type FirebaseIdTokenErrorCode =
-  | 'UNAUTHORIZED'
-  | 'EMAIL_NOT_VERIFIED'
-  | 'AUTH_SERVICE_UNAVAILABLE';
-
-export class FirebaseIdTokenError extends Error {
-  public constructor(public readonly code: FirebaseIdTokenErrorCode) {
-    super(code);
-    this.name = 'FirebaseIdTokenError';
-  }
-}
 
 export type VerifiedFirebaseUser = {
   uid: string;
@@ -52,7 +42,7 @@ const parseCacheMaxAgeMs = (cacheControl: string | null): number => {
 
 const parseCertificateResponse = (value: unknown): Record<string, string> => {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    throw new FirebaseIdTokenError('AUTH_SERVICE_UNAVAILABLE');
+    throw new ApiError('AUTH_SERVICE_UNAVAILABLE');
   }
 
   const certificates: Record<string, string> = {};
@@ -68,7 +58,7 @@ const parseCertificateResponse = (value: unknown): Record<string, string> => {
   }
 
   if (Object.keys(certificates).length === 0) {
-    throw new FirebaseIdTokenError('AUTH_SERVICE_UNAVAILABLE');
+    throw new ApiError('AUTH_SERVICE_UNAVAILABLE');
   }
 
   return certificates;
@@ -97,11 +87,11 @@ const loadFirebasePublicKeys = async (
       },
     });
   } catch {
-    throw new FirebaseIdTokenError('AUTH_SERVICE_UNAVAILABLE');
+    throw new ApiError('AUTH_SERVICE_UNAVAILABLE');
   }
 
   if (!response.ok) {
-    throw new FirebaseIdTokenError('AUTH_SERVICE_UNAVAILABLE');
+    throw new ApiError('AUTH_SERVICE_UNAVAILABLE');
   }
 
   let body: unknown;
@@ -109,7 +99,7 @@ const loadFirebasePublicKeys = async (
   try {
     body = await response.json();
   } catch {
-    throw new FirebaseIdTokenError('AUTH_SERVICE_UNAVAILABLE');
+    throw new ApiError('AUTH_SERVICE_UNAVAILABLE');
   }
 
   const certificates = parseCertificateResponse(body);
@@ -121,7 +111,7 @@ const loadFirebasePublicKeys = async (
 
         return [kid, key] as const;
       } catch {
-        throw new FirebaseIdTokenError('AUTH_SERVICE_UNAVAILABLE');
+        throw new ApiError('AUTH_SERVICE_UNAVAILABLE');
       }
     }),
   );
@@ -159,7 +149,7 @@ export const verifyFirebaseIdToken = async (
   try {
     protectedHeader = decodeProtectedHeader(token);
   } catch {
-    throw new FirebaseIdTokenError('UNAUTHORIZED');
+    throw new ApiError('UNAUTHORIZED');
   }
 
   if (
@@ -167,13 +157,13 @@ export const verifyFirebaseIdToken = async (
     typeof protectedHeader.kid !== 'string' ||
     protectedHeader.kid.length === 0
   ) {
-    throw new FirebaseIdTokenError('UNAUTHORIZED');
+    throw new ApiError('UNAUTHORIZED');
   }
 
   const publicKey = await getFirebasePublicKey(protectedHeader.kid);
 
   if (publicKey === null) {
-    throw new FirebaseIdTokenError('UNAUTHORIZED');
+    throw new ApiError('UNAUTHORIZED');
   }
 
   let payload;
@@ -188,7 +178,7 @@ export const verifyFirebaseIdToken = async (
 
     payload = result.payload;
   } catch {
-    throw new FirebaseIdTokenError('UNAUTHORIZED');
+    throw new ApiError('UNAUTHORIZED');
   }
 
   const nowSeconds = Date.now() / 1_000;
@@ -203,11 +193,11 @@ export const verifyFirebaseIdToken = async (
     typeof payload.sub !== 'string' ||
     payload.sub.length === 0
   ) {
-    throw new FirebaseIdTokenError('UNAUTHORIZED');
+    throw new ApiError('UNAUTHORIZED');
   }
 
   if (payload.email_verified !== true) {
-    throw new FirebaseIdTokenError('EMAIL_NOT_VERIFIED');
+    throw new ApiError('EMAIL_NOT_VERIFIED');
   }
 
   return {

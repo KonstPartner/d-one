@@ -246,35 +246,66 @@ const sanitizeAssumptions = (value: unknown): string[] => {
     .slice(0, MAX_ASSUMPTIONS);
 };
 
-export const parseAnalyzeFoodResponse = (
+export type AnalyzeFoodResponseParseFailureReason =
+  | 'invalid_json'
+  | 'invalid_root'
+  | 'invalid_status'
+  | 'no_useful_result';
+
+export type AnalyzeFoodResponseParseResult =
+  | {
+      ok: true;
+      data: AnalyzeFoodResponse;
+    }
+  | {
+      ok: false;
+      reason: AnalyzeFoodResponseParseFailureReason;
+    };
+
+export const parseAnalyzeFoodResponseDetailed = (
   rawText: string,
-): AnalyzeFoodResponse | null => {
+): AnalyzeFoodResponseParseResult => {
   let value: unknown;
 
   try {
     value = JSON.parse(rawText);
   } catch {
-    return null;
+    return {
+      ok: false,
+      reason: 'invalid_json',
+    };
   }
 
   if (!isRecord(value)) {
-    return null;
+    return {
+      ok: false,
+      reason: 'invalid_root',
+    };
   }
 
   if (value.status === 'not_food') {
     return {
-      status: 'not_food',
+      ok: true,
+      data: {
+        status: 'not_food',
+      },
     };
   }
 
   if (value.status === 'insufficient_data') {
     return {
-      status: 'insufficient_data',
+      ok: true,
+      data: {
+        status: 'insufficient_data',
+      },
     };
   }
 
   if (value.status !== 'ok' && value.status !== 'partial') {
-    return null;
+    return {
+      ok: false,
+      reason: 'invalid_status',
+    };
   }
 
   const description = sanitizeDescription(value.description);
@@ -299,7 +330,10 @@ export const parseAnalyzeFoodResponse = (
     carbsGram !== null;
 
   if (!hasUsefulResult) {
-    return null;
+    return {
+      ok: false,
+      reason: 'no_useful_result',
+    };
   }
 
   const hasAllPrimaryFields =
@@ -310,18 +344,29 @@ export const parseAnalyzeFoodResponse = (
     carbsGram !== null;
 
   return {
-    status: value.status === 'ok' && hasAllPrimaryFields ? 'ok' : 'partial',
+    ok: true,
+    data: {
+      status: value.status === 'ok' && hasAllPrimaryFields ? 'ok' : 'partial',
 
-    description,
+      description,
 
-    caloriesKcal,
+      caloriesKcal,
 
-    proteinGram,
-    fatGram,
-    carbsGram,
+      proteinGram,
+      fatGram,
+      carbsGram,
 
-    confidence,
+      confidence,
 
-    assumptions,
+      assumptions,
+    },
   };
+};
+
+export const parseAnalyzeFoodResponse = (
+  rawText: string,
+): AnalyzeFoodResponse | null => {
+  const result = parseAnalyzeFoodResponseDetailed(rawText);
+
+  return result.ok ? result.data : null;
 };

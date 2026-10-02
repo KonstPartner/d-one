@@ -1,12 +1,14 @@
-import { DiaryPhotoError } from './DiaryPhotoError';
+import { CodedError } from '@shared/lib/errors';
+
 import {
   type DiaryPhotoDraft,
+  type DiaryPhotoErrorCode,
   type PreparedDiaryPhoto,
   type PreparedDiaryPhotoRemoval,
 } from './diaryPhotoService.types';
 
-const createUnsupportedError = (): DiaryPhotoError =>
-  new DiaryPhotoError('storageFailed');
+const createUnsupportedError = (): CodedError<DiaryPhotoErrorCode> =>
+  new CodedError('storageFailed');
 
 export const createDiaryPhotoDraft = (
   _sourceUri: string

@@ -1,107 +1,63 @@
 import {
-  AuthorizeUserError,
-  authorizeUser,
-} from '../../modules/auth/authorizeUser';
-
-import {
-  AiUsageLimitError,
+  type AiUsageReservation,
   releaseAiUsage,
   reserveAiUsage,
 } from '../../modules/ai-usage/aiUsage';
-
-import { analyzeFoodRequestSchema } from '../../modules/analyze-food/analyzeFoodRequest';
+import { isAiUsageRejectionCode } from '../../modules/ai-usage/aiUsagePolicy';
 
 import {
-  GeminiAnalysisError,
-  analyzeFoodWithGemini,
-} from '../../modules/analyze-food/gemini/geminiClient';
+  analyzeFoodRequestSchema,
+  type AnalyzeFoodRequest,
+} from '../../modules/analyze-food/analyzeFoodRequest';
+
+import { analyzeFoodWithGemini } from '../../modules/analyze-food/gemini/geminiClient';
 
 import { createAnalyzeFoodTelemetry } from '../../modules/analyze-food/observability/analyzeFoodTelemetry';
 
+import { validateDiaryPhoto } from '../../modules/analyze-food/photo/validateDiaryPhoto';
+
+import { authorizeUser } from '../../modules/auth/authorizeUser';
+
 import {
-  PhotoValidationError,
-  validateDiaryPhoto,
-} from '../../modules/analyze-food/photo/validateDiaryPhoto';
+  ApiError,
+  resolveApiError,
+} from '../../shared/http/apiError';
 
-import { jsonError } from '../../shared/http/jsonResponse';
+type AnalyzeFoodStage =
+  | 'auth'
+  | 'request_validation'
+  | 'photo_validation'
+  | 'usage_reservation'
+  | 'provider';
 
-const parseProjectDailyLimit = (value: string): number | null => {
+const parseProjectDailyLimit = (value: string): number => {
   const parsed = Number(value);
 
   if (!Number.isSafeInteger(parsed) || parsed <= 0) {
-    return null;
+    throw new ApiError('INTERNAL_ERROR');
   }
 
   return parsed;
 };
 
-const createAuthorizeUserErrorResponse = (
-  error: AuthorizeUserError,
-): Response => {
-  switch (error.code) {
-    case 'UNAUTHORIZED':
-      return jsonError('UNAUTHORIZED', 401);
+const parseAnalyzeFoodRequest = async (
+  request: Request,
+): Promise<AnalyzeFoodRequest> => {
+  let rawBody: unknown;
 
-    case 'EMAIL_NOT_VERIFIED':
-      return jsonError('EMAIL_NOT_VERIFIED', 403);
-
-    case 'FORBIDDEN_ROLE':
-      return jsonError('FORBIDDEN_ROLE', 403);
-
-    case 'USER_PROFILE_NOT_FOUND':
-      return jsonError('USER_PROFILE_NOT_FOUND', 404);
-
-    case 'INVALID_USER_PROFILE':
-    case 'AUTH_SERVICE_UNAVAILABLE':
-      return jsonError('AUTH_SERVICE_UNAVAILABLE', 503);
+  try {
+    rawBody = await request.json();
+  } catch {
+    throw new ApiError('INVALID_REQUEST');
   }
-};
 
-const createPhotoValidationErrorResponse = (
-  error: PhotoValidationError,
-): Response => {
-  switch (error.code) {
-    case 'INVALID_IMAGE_URL':
-      return jsonError('INVALID_IMAGE_URL', 400);
+  const parsedRequest = analyzeFoodRequestSchema.safeParse(rawBody);
 
-    case 'IMAGE_NOT_ANALYZABLE':
-      return jsonError('IMAGE_NOT_ANALYZABLE', 400);
-
-    case 'IMAGE_TOO_LARGE':
-      return jsonError('IMAGE_TOO_LARGE', 413);
+  if (!parsedRequest.success) {
+    throw new ApiError('INVALID_REQUEST');
   }
-};
 
-const createAiUsageErrorResponse = (error: AiUsageLimitError): Response => {
-  switch (error.code) {
-    case 'AI_REQUEST_ALREADY_ACTIVE':
-      return jsonError('AI_REQUEST_ALREADY_ACTIVE', 409);
-
-    case 'USER_DAILY_LIMIT_REACHED':
-      return jsonError('USER_DAILY_LIMIT_REACHED', 429);
-
-    case 'PROJECT_DAILY_LIMIT_REACHED':
-      return jsonError('PROJECT_DAILY_LIMIT_REACHED', 429);
-
-    case 'REQUEST_TOO_FREQUENT':
-      return jsonError('REQUEST_TOO_FREQUENT', 429);
-  }
-};
-
-const createGeminiErrorResponse = (error: GeminiAnalysisError): Response => {
-  switch (error.code) {
-    case 'IMAGE_NOT_ANALYZABLE':
-      return jsonError('IMAGE_NOT_ANALYZABLE', 400);
-
-    case 'AI_PROVIDER_ERROR':
-      return jsonError('AI_PROVIDER_ERROR', 502);
-
-    case 'INVALID_AI_RESPONSE':
-      return jsonError('INVALID_AI_RESPONSE', 502);
-
-    case 'AI_TIMEOUT':
-      return jsonError('AI_TIMEOUT', 504);
-  }
+  return parsedRequest.data;
 };
 
 export const handleAnalyzeFood = async (
@@ -111,54 +67,21 @@ export const handleAnalyzeFood = async (
 ): Promise<Response> => {
   const telemetry = createAnalyzeFoodTelemetry(env.GEMINI_MODEL);
 
-  let uid: string;
+  let stage: AnalyzeFoodStage = 'auth';
+  let reservation: AiUsageReservation | null = null;
+  let providerStartedAt: number | null = null;
 
   try {
     const user = await authorizeUser(request, env.FIREBASE_PROJECT_ID);
 
-    uid = user.uid;
-  } catch (error) {
-    if (error instanceof AuthorizeUserError) {
-      telemetry.requestError(
-        'auth',
-        error.code === 'INVALID_USER_PROFILE'
-          ? 'AUTH_SERVICE_UNAVAILABLE'
-          : error.code,
-      );
+    stage = 'request_validation';
 
-      return createAuthorizeUserErrorResponse(error);
-    }
+    const input = await parseAnalyzeFoodRequest(request);
 
-    telemetry.requestError('auth', 'INTERNAL_ERROR');
+    stage = 'photo_validation';
 
-    return jsonError('INTERNAL_ERROR', 500);
-  }
-
-  let rawBody: unknown;
-
-  try {
-    rawBody = await request.json();
-  } catch {
-    telemetry.requestError('request_validation', 'INVALID_REQUEST');
-
-    return jsonError('INVALID_REQUEST', 400);
-  }
-
-  const parsedRequest = analyzeFoodRequestSchema.safeParse(rawBody);
-
-  if (!parsedRequest.success) {
-    telemetry.requestError('request_validation', 'INVALID_REQUEST');
-
-    return jsonError('INVALID_REQUEST', 400);
-  }
-
-  const input = parsedRequest.data;
-
-  let validatedPhoto;
-
-  try {
-    validatedPhoto = await validateDiaryPhoto({
-      uid,
+    const validatedPhoto = await validateDiaryPhoto({
+      uid: user.uid,
 
       entryId: input.entryId,
 
@@ -168,53 +91,22 @@ export const handleAnalyzeFood = async (
 
       storageBucket: env.FIREBASE_STORAGE_BUCKET,
     });
-  } catch (error) {
-    if (error instanceof PhotoValidationError) {
-      telemetry.requestError('photo_validation', error.code);
 
-      return createPhotoValidationErrorResponse(error);
-    }
+    stage = 'usage_reservation';
 
-    telemetry.requestError('photo_validation', 'INTERNAL_ERROR');
-
-    return jsonError('INTERNAL_ERROR', 500);
-  }
-
-  const projectDailyLimit = parseProjectDailyLimit(env.AI_PROJECT_DAILY_LIMIT);
-
-  if (projectDailyLimit === null) {
-    telemetry.requestError('usage_reservation', 'INTERNAL_ERROR');
-
-    return jsonError('INTERNAL_ERROR', 500);
-  }
-
-  let reservation;
-
-  try {
     reservation = await reserveAiUsage({
       db: env.AI_USAGE_DB,
 
-      uid,
+      uid: user.uid,
 
-      projectDailyLimit,
+      projectDailyLimit: parseProjectDailyLimit(env.AI_PROJECT_DAILY_LIMIT),
     });
 
     telemetry.usageReserved();
-  } catch (error) {
-    if (error instanceof AiUsageLimitError) {
-      telemetry.usageRejected(error.code);
 
-      return createAiUsageErrorResponse(error);
-    }
+    stage = 'provider';
+    providerStartedAt = telemetry.startProvider();
 
-    telemetry.usageFailed('INTERNAL_ERROR');
-
-    return jsonError('INTERNAL_ERROR', 500);
-  }
-
-  const providerStartedAt = telemetry.startProvider();
-
-  try {
     const analysis = await analyzeFoodWithGemini({
       apiKey: env.GEMINI_API_KEY,
 
@@ -235,24 +127,33 @@ export const handleAnalyzeFood = async (
       data: analysis,
     });
   } catch (error) {
-    if (error instanceof GeminiAnalysisError) {
-      telemetry.providerError(error.code, providerStartedAt);
+    const apiError = resolveApiError(error);
+    const code = apiError.code;
 
-      return createGeminiErrorResponse(error);
+    if (stage === 'usage_reservation') {
+      if (isAiUsageRejectionCode(code)) {
+        telemetry.usageRejected(code);
+      } else {
+        telemetry.usageFailed(code);
+      }
+    } else if (stage === 'provider' && providerStartedAt !== null) {
+      telemetry.providerError(code, providerStartedAt, apiError.details);
+    } else {
+      telemetry.requestError(stage, code);
     }
 
-    telemetry.providerError('INTERNAL_ERROR', providerStartedAt);
-
-    return jsonError('INTERNAL_ERROR', 500);
+    throw apiError;
   } finally {
-    context.waitUntil(
-      releaseAiUsage(env.AI_USAGE_DB, reservation)
-        .then(() => {
-          telemetry.usageReleased();
-        })
-        .catch(() => {
-          telemetry.usageReleaseFailed();
-        }),
-    );
+    if (reservation !== null) {
+      context.waitUntil(
+        releaseAiUsage(env.AI_USAGE_DB, reservation)
+          .then(() => {
+            telemetry.usageReleased();
+          })
+          .catch(() => {
+            telemetry.usageReleaseFailed();
+          }),
+      );
+    }
   }
 };

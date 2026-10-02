@@ -8,15 +8,16 @@ export { DiaryDatabaseProvider } from './api/local/DiaryDatabaseProvider';
 export { diaryLocalQueryKeys } from './api/local/diaryLocalQueryKeys';
 export { diaryLocalPageQueryOptions } from './api/local/diaryLocalQueryOptions';
 export { DiaryLocalRepository } from './api/local/DiaryLocalRepository';
-export type { DiaryPhotoErrorCode } from './api/local/DiaryPhotoError';
-export { DiaryPhotoError } from './api/local/DiaryPhotoError';
 export {
   createDiaryPhotoDraft,
   prepareDiaryPhotoForEntry,
   prepareDiaryPhotoRemoval,
   removeDiaryPhotoDraft,
 } from './api/local/diaryPhotoService';
-export type { DiaryPhotoDraft } from './api/local/diaryPhotoService.types';
+export type {
+  DiaryPhotoDraft,
+  DiaryPhotoErrorCode,
+} from './api/local/diaryPhotoService.types';
 export type {
   DiaryEntryFilterCriteria,
   DiaryEntryNumericRange,

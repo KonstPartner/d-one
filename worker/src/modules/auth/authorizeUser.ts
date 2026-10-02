@@ -1,24 +1,7 @@
-import { FirebaseIdTokenError, verifyFirebaseIdToken } from './firebaseIdToken';
+import { ApiError } from '../../shared/http/apiError';
 
-import {
-  getUserAuthorizationProfile,
-  UserProfileError,
-} from './userProfileRepository';
-
-export type AuthorizeUserErrorCode =
-  | 'UNAUTHORIZED'
-  | 'EMAIL_NOT_VERIFIED'
-  | 'FORBIDDEN_ROLE'
-  | 'USER_PROFILE_NOT_FOUND'
-  | 'INVALID_USER_PROFILE'
-  | 'AUTH_SERVICE_UNAVAILABLE';
-
-export class AuthorizeUserError extends Error {
-  public constructor(public readonly code: AuthorizeUserErrorCode) {
-    super(code);
-    this.name = 'AuthorizeUserError';
-  }
-}
+import { verifyFirebaseIdToken } from './firebaseIdToken';
+import { getUserAuthorizationProfile } from './userProfileRepository';
 
 export type AuthorizedUser = {
   uid: string;
@@ -39,13 +22,6 @@ const getBearerToken = (request: Request): string | null => {
   return token && token.length > 0 ? token : null;
 };
 
-const mapFirebaseIdTokenError = (
-  error: FirebaseIdTokenError,
-): AuthorizeUserError => new AuthorizeUserError(error.code);
-
-const mapUserProfileError = (error: UserProfileError): AuthorizeUserError =>
-  new AuthorizeUserError(error.code);
-
 export const authorizeUser = async (
   request: Request,
   projectId: string,
@@ -53,45 +29,23 @@ export const authorizeUser = async (
   const idToken = getBearerToken(request);
 
   if (idToken === null) {
-    throw new AuthorizeUserError('UNAUTHORIZED');
+    throw new ApiError('UNAUTHORIZED');
   }
 
-  let uid: string;
+  const verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
 
-  try {
-    const verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
-
-    uid = verifiedUser.uid;
-  } catch (error) {
-    if (error instanceof FirebaseIdTokenError) {
-      throw mapFirebaseIdTokenError(error);
-    }
-
-    throw error;
-  }
-
-  let profile;
-
-  try {
-    profile = await getUserAuthorizationProfile({
-      projectId,
-      uid,
-      idToken,
-    });
-  } catch (error) {
-    if (error instanceof UserProfileError) {
-      throw mapUserProfileError(error);
-    }
-
-    throw error;
-  }
+  const profile = await getUserAuthorizationProfile({
+    projectId,
+    uid: verifiedUser.uid,
+    idToken,
+  });
 
   if (profile.role !== 'user') {
-    throw new AuthorizeUserError('FORBIDDEN_ROLE');
+    throw new ApiError('FORBIDDEN_ROLE');
   }
 
   return {
-    uid,
+    uid: verifiedUser.uid,
     idToken,
   };
 };

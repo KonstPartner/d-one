@@ -3,6 +3,7 @@ import { act, renderHook } from '@testing-library/react-native';
 import type { PropsWithChildren } from 'react';
 
 import type { DiaryEntry } from '@entities/diary';
+import { errorMapper } from '@shared/lib/errors';
 import { showNotification } from '@shared/lib/notifications';
 
 import { useOwnerDiaryPreparation } from '../useOwnerDiaryPreparation';
@@ -68,7 +69,13 @@ jest.mock('@shared/i18n', () => ({
 }));
 
 jest.mock('@shared/lib/errors', () => ({
-  errorMapper: () => 'mapped-ai-error',
+  errorMapper: jest.fn((error: unknown, type?: string) => {
+    if (type === 'api') {
+      return 'mapped-ai-error';
+    }
+
+    return error instanceof Error ? error.message : 'mapped-local-error';
+  }),
 }));
 
 jest.mock('@shared/lib/notifications', () => ({
@@ -310,6 +317,64 @@ describe('useOwnerDiaryPreparation integration', () => {
     expect(jest.mocked(showNotification)).toHaveBeenCalledWith(
       'error',
       'mapped-ai-error'
+    );
+
+    expect(mockSetEntryPreparing).toHaveBeenNthCalledWith(1, 'entry-1', true);
+    expect(mockSetEntryPreparing).toHaveBeenLastCalledWith('entry-1', false);
+
+    expect(result.current.preparingEntry).toBeNull();
+  });
+
+  it('does not classify a local AI-analysis save failure as an API error', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    mockFindById.mockResolvedValueOnce(
+      createEntry({
+        aiAnalysis: 'old ai analysis',
+
+        photoPath: 'users/user-1/diaryPhotos/entry-1.jpg',
+        photoUrl: 'https://storage.example/photo.jpg',
+      })
+    );
+
+    mockAnalyzeFood.mockResolvedValueOnce({
+      status: 'ok',
+    });
+
+    mockUpdateAiAnalysis.mockRejectedValueOnce(new Error('database is locked'));
+
+    const { result } = renderHook(() => useOwnerDiaryPreparation(), {
+      wrapper: QueryProvider,
+    });
+
+    await act(async () => {
+      await result.current.handleEntrySaved({
+        entryId: 'entry-1',
+
+        operation: 'update',
+
+        entryUpdated: false,
+
+        requestAi: true,
+        requestTimer: false,
+
+        deleteAiAnalysis: false,
+      });
+    });
+
+    expect(mockAnalyzeFood).toHaveBeenCalledTimes(1);
+    expect(mockUpdateAiAnalysis).toHaveBeenCalledTimes(1);
+    expect(mockSyncEntries).not.toHaveBeenCalled();
+
+    expect(jest.mocked(errorMapper)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'database is locked',
+      })
+    );
+
+    expect(jest.mocked(showNotification)).toHaveBeenCalledWith(
+      'error',
+      'database is locked'
     );
 
     expect(mockSetEntryPreparing).toHaveBeenNthCalledWith(1, 'entry-1', true);
