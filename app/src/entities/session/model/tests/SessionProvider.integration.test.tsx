@@ -1,5 +1,11 @@
 import { Pressable, Text, View } from 'react-native';
-import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import { type User } from 'firebase/auth';
 
 import { SessionProvider, useSession } from '../SessionProvider';
@@ -104,21 +110,21 @@ describe('SessionProvider integration', () => {
   it('starts not ready and applies authenticated Firebase session', async () => {
     const user = createUser('user-1', true);
 
-    const { getByTestId } = renderSession();
+    renderSession();
 
-    expect(getByTestId('session-user').props.children).toBe('none');
+    expect(screen.getByTestId('session-user').props.children).toBe('none');
 
-    expect(getByTestId('email-verified').props.children).toBe('false');
+    expect(screen.getByTestId('email-verified').props.children).toBe('false');
 
-    expect(getByTestId('session-ready').props.children).toBe('false');
+    expect(screen.getByTestId('session-ready').props.children).toBe('false');
 
     await emitAuthState(user);
 
-    expect(getByTestId('session-user').props.children).toBe('user-1');
+    expect(screen.getByTestId('session-user').props.children).toBe('user-1');
 
-    expect(getByTestId('email-verified').props.children).toBe('true');
+    expect(screen.getByTestId('email-verified').props.children).toBe('true');
 
-    expect(getByTestId('session-ready').props.children).toBe('true');
+    expect(screen.getByTestId('session-ready').props.children).toBe('true');
   });
 
   it('syncs session from auth.currentUser', async () => {
@@ -126,17 +132,17 @@ describe('SessionProvider integration', () => {
 
     const secondUser = createUser('user-2', true);
 
-    const { getByTestId } = renderSession();
+    renderSession();
 
     await emitAuthState(firstUser);
 
     mockAuthState.currentUser = secondUser;
 
-    fireEvent.press(getByTestId('sync-session'));
+    fireEvent.press(screen.getByTestId('sync-session'));
 
-    expect(getByTestId('session-user').props.children).toBe('user-2');
+    expect(screen.getByTestId('session-user').props.children).toBe('user-2');
 
-    expect(getByTestId('email-verified').props.children).toBe('true');
+    expect(screen.getByTestId('email-verified').props.children).toBe('true');
   });
 
   it('waits for unauthenticated cleanup before marking session ready', async () => {
@@ -144,7 +150,7 @@ describe('SessionProvider integration', () => {
 
     const onUnauthenticated = jest.fn(() => cleanup.promise);
 
-    const { getByTestId } = renderSession({
+    renderSession({
       onUnauthenticated,
     });
 
@@ -154,7 +160,7 @@ describe('SessionProvider integration', () => {
 
     expect(onUnauthenticated).toHaveBeenCalledTimes(1);
 
-    expect(getByTestId('session-ready').props.children).toBe('false');
+    expect(screen.getByTestId('session-ready').props.children).toBe('false');
 
     await act(async () => {
       cleanup.resolve();
@@ -163,9 +169,9 @@ describe('SessionProvider integration', () => {
     });
 
     await waitFor(() => {
-      expect(getByTestId('session-user').props.children).toBe('none');
+      expect(screen.getByTestId('session-user').props.children).toBe('none');
 
-      expect(getByTestId('session-ready').props.children).toBe('true');
+      expect(screen.getByTestId('session-ready').props.children).toBe('true');
     });
   });
 
@@ -178,7 +184,7 @@ describe('SessionProvider integration', () => {
 
     const secondUser = createUser('user-2', true);
 
-    const { getByTestId } = renderSession({
+    renderSession({
       onUnauthenticated,
     });
 
@@ -193,9 +199,9 @@ describe('SessionProvider integration', () => {
 
     await emitAuthState(secondUser);
 
-    expect(getByTestId('session-user').props.children).toBe('user-2');
+    expect(screen.getByTestId('session-user').props.children).toBe('user-2');
 
-    expect(getByTestId('session-ready').props.children).toBe('true');
+    expect(screen.getByTestId('session-ready').props.children).toBe('true');
 
     await act(async () => {
       cleanup.resolve();
@@ -204,11 +210,11 @@ describe('SessionProvider integration', () => {
     });
 
     await waitFor(() => {
-      expect(getByTestId('session-user').props.children).toBe('user-2');
+      expect(screen.getByTestId('session-user').props.children).toBe('user-2');
 
-      expect(getByTestId('email-verified').props.children).toBe('true');
+      expect(screen.getByTestId('email-verified').props.children).toBe('true');
 
-      expect(getByTestId('session-ready').props.children).toBe('true');
+      expect(screen.getByTestId('session-ready').props.children).toBe('true');
     });
   });
 

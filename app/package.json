@@ -17,13 +17,17 @@
     "test": "jest --watchAll",
     "test-check": "jest --ci --bail --runInBand --passWithNoTests",
     "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
-    "lint:types": "npx tsc --noEmit",
+    "format:check": "prettier --check \"./src/**/*.{ts,tsx}\"",
     "lint": "eslint ./src/ --ext .js,.jsx,.ts,.tsx",
-    "lint-fix:imports": "npm run lint -- --fix -c ./.eslint/extenders/.eslintrc.imports.json",
-    "lint-fix": "npm run lint-fix:imports",
     "lint:errors": "npm run lint -- --quiet -c ./.eslint/extenders/.eslintrc.all.json",
+    "lint:types": "npx tsc --noEmit",
+    "lint:styled": "node ./scripts/lint-styled.mjs",
+    "lint:i18n": "node ./scripts/lint-i18n.mjs",
     "lint:unused": "knip",
     "lint:arch": "npx steiger ./src",
+    "lint-check": "node ./scripts/lint-check.mjs",
+    "lint-fix:imports": "npm run lint -- --fix -c ./.eslint/extenders/.eslintrc.imports.json",
+    "lint-fix": "npm run lint-fix:imports",
     "prepare": "cd .. && husky install .husky"
   },
   "jest": {
@@ -96,6 +100,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@feature-sliced/steiger-plugin": "^0.7.0",
+    "@styled/typescript-styled-plugin": "^1.0.1",
     "@testing-library/react-native": "^12.9.0",
     "@types/jest": "^29.5.14",
     "@types/react": "~19.1.10",
@@ -106,12 +111,16 @@
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-preset-expo": "54.0.10",
     "eas-cli": "22.0.0",
-    "eslint": "^8.17.0",
+    "eslint": "^8.57.1",
     "eslint-import-resolver-typescript": "2.7.1",
     "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-jest": "^29.16.1",
+    "eslint-plugin-no-autofix": "^2.1.0",
+    "eslint-plugin-no-comments": "^1.1.10",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-native": "^4.1.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-testing-library": "^7.16.2",
     "eslint-plugin-unused-imports": "^4.3.0",
     "husky": "^9.1.7",
     "jest": "^29.2.1",
@@ -126,8 +135,8 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "npm run lint-fix",
-      "npm run format"
+      "eslint --fix -c ./.eslint/extenders/.eslintrc.imports.json",
+      "prettier --write"
     ]
   },
   "overrides": {

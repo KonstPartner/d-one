@@ -247,10 +247,7 @@ const sanitizeAssumptions = (value: unknown): string[] => {
 };
 
 export type AnalyzeFoodResponseParseFailureReason =
-  | 'invalid_json'
-  | 'invalid_root'
-  | 'invalid_status'
-  | 'no_useful_result';
+  'invalid_json' | 'invalid_root' | 'invalid_status' | 'no_useful_result';
 
 export type AnalyzeFoodResponseParseResult =
   | {

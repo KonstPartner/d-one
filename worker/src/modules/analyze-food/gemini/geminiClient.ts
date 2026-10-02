@@ -48,6 +48,7 @@ type AnalyzeFoodWithGeminiParams = Pick<
 > & {
   apiKey: string;
   model: string;
+  beforeProviderRequest?: () => Promise<void>;
 };
 
 const normalizeProviderMessage = (value: string): string | null => {
@@ -92,8 +93,7 @@ const getGeminiProviderError = (error: unknown): GeminiProviderError => {
   return {
     status,
     name: 'UnknownError',
-    message:
-      typeof error === 'string' ? normalizeProviderMessage(error) : null,
+    message: typeof error === 'string' ? normalizeProviderMessage(error) : null,
   };
 };
 
@@ -128,6 +128,7 @@ export const analyzeFoodWithGemini = async ({
   photoUrl,
   comment,
   language,
+  beforeProviderRequest,
 }: AnalyzeFoodWithGeminiParams): Promise<AnalyzeFoodResponse> => {
   const expectedPhotoUrl = normalizeUrl(photoUrl);
 
@@ -141,12 +142,18 @@ export const analyzeFoodWithGemini = async ({
 
   const abortController = new AbortController();
 
-  const timeoutId = setTimeout(() => {
-    abortController.abort();
-  }, GEMINI_TIMEOUT_MS);
+  const input = buildFoodAnalysisInput({
+    photoUrl,
+    comment,
+    language,
+  });
+
+  await beforeProviderRequest?.();
+
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   try {
-    const interaction = await ai.interactions.create(
+    const interactionPromise = ai.interactions.create(
       {
         model,
 
@@ -156,11 +163,7 @@ export const analyzeFoodWithGemini = async ({
 
         system_instruction: FOOD_ANALYSIS_SYSTEM_INSTRUCTION,
 
-        input: buildFoodAnalysisInput({
-          photoUrl,
-          comment,
-          language,
-        }),
+        input,
 
         tools: [
           {
@@ -189,6 +192,12 @@ export const analyzeFoodWithGemini = async ({
         signal: abortController.signal,
       },
     );
+
+    timeoutId = setTimeout(() => {
+      abortController.abort();
+    }, GEMINI_TIMEOUT_MS);
+
+    const interaction = await interactionPromise;
 
     const stepTypes = (interaction.steps ?? []).map((step) => step.type);
 
@@ -282,6 +291,8 @@ export const analyzeFoodWithGemini = async ({
       sourceError: error,
     });
   } finally {
-    clearTimeout(timeoutId);
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId);
+    }
   }
 };

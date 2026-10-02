@@ -18,13 +18,47 @@
     "react-native",
     "@typescript-eslint",
     "unused-imports",
-    "import"
+    "import",
+    "no-comments",
+    "no-autofix"
   ],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
     "plugin:react-native/all"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "tests/**/*.{js,jsx,ts,tsx}",
+        "src/**/*.test.{js,jsx,ts,tsx}",
+        "src/**/*.spec.{js,jsx,ts,tsx}",
+        "src/**/__tests__/**/*.{js,jsx,ts,tsx}"
+      ],
+      "env": {
+        "jest": true,
+        "node": true
+      }
+    },
+    {
+      "files": [
+        "**/*.test.{js,jsx,ts,tsx}",
+        "**/*.spec.{js,jsx,ts,tsx}",
+        "**/__tests__/**/*.{js,jsx,ts,tsx}"
+      ],
+      "extends": ["plugin:jest/recommended", "plugin:testing-library/react"]
+    },
+    {
+      "files": [
+        "app/**/*.{js,jsx,ts,tsx}",
+        "app.config.js",
+        "*.config.{js,cjs,mjs,ts}"
+      ],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    }
   ],
   "rules": {
     "@typescript-eslint/no-unused-vars": "off",
@@ -39,7 +73,7 @@
       }
     ],
     "@typescript-eslint/no-require-imports": "off",
-    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-explicit-any": "error",
     "react-native/no-unused-styles": "error",
     "react-native/no-inline-styles": "warn",
     "react-native/no-color-literals": "warn",
@@ -50,13 +84,168 @@
     "react-native/no-raw-text": "off",
     "no-console": ["warn", { "allow": ["warn", "error"] }],
     "eol-last": ["error", "always"],
+    "import/no-default-export": "error",
     "import/no-cycle": ["error", { "ignoreExternal": true }],
     "import/no-self-import": "error",
+    "no-autofix/no-comments/disallowComments": "error",
     "padding-line-between-statements": [
       "error",
       { "blankLine": "always", "prev": "*", "next": "return" }
     ],
-    "curly": ["error", "all"]
+    "curly": ["error", "all"],
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": [
+              "@entities/*/api",
+              "@entities/*/api/**",
+              "@entities/*/model",
+              "@entities/*/model/**",
+              "@entities/*/ui",
+              "@entities/*/ui/**",
+              "@entities/*/styles",
+              "@entities/*/styles/**",
+              "@entities/*/lib",
+              "@entities/*/lib/**",
+
+              "@widgets/*/api",
+              "@widgets/*/api/**",
+              "@widgets/*/model",
+              "@widgets/*/model/**",
+              "@widgets/*/ui",
+              "@widgets/*/ui/**",
+              "@widgets/*/styles",
+              "@widgets/*/styles/**",
+              "@widgets/*/lib",
+              "@widgets/*/lib/**",
+
+              "@pages/*/api",
+              "@pages/*/api/**",
+              "@pages/*/model",
+              "@pages/*/model/**",
+              "@pages/*/ui",
+              "@pages/*/ui/**",
+              "@pages/*/styles",
+              "@pages/*/styles/**",
+              "@pages/*/lib",
+              "@pages/*/lib/**",
+
+              "@features/*/api",
+              "@features/*/api/**",
+              "@features/*/model",
+              "@features/*/model/**",
+              "@features/*/ui",
+              "@features/*/ui/**",
+              "@features/*/styles",
+              "@features/*/styles/**",
+              "@features/*/lib",
+              "@features/*/lib/**",
+
+              "@features/*/*/api",
+              "@features/*/*/api/**",
+              "@features/*/*/model",
+              "@features/*/*/model/**",
+              "@features/*/*/ui",
+              "@features/*/*/ui/**",
+              "@features/*/*/styles",
+              "@features/*/*/styles/**",
+              "@features/*/*/lib",
+              "@features/*/*/lib/**"
+            ],
+            "message": "Do not deep-import slice internals. Import from the slice public API."
+          }
+        ]
+      }
+    ],
+    "import/no-restricted-paths": [
+      "error",
+      {
+        "basePath": "./src",
+        "zones": [
+          {
+            "target": "./shared",
+            "from": "./entities",
+            "message": "shared cannot depend on entities"
+          },
+          {
+            "target": "./shared",
+            "from": "./features",
+            "message": "shared cannot depend on features"
+          },
+          {
+            "target": "./shared",
+            "from": "./widgets",
+            "message": "shared cannot depend on widgets"
+          },
+          {
+            "target": "./shared",
+            "from": "./pages",
+            "message": "shared cannot depend on pages"
+          },
+          {
+            "target": "./shared",
+            "from": "./app",
+            "message": "shared cannot depend on app"
+          },
+
+          {
+            "target": "./entities",
+            "from": "./features",
+            "message": "entities cannot depend on features"
+          },
+          {
+            "target": "./entities",
+            "from": "./widgets",
+            "message": "entities cannot depend on widgets"
+          },
+          {
+            "target": "./entities",
+            "from": "./pages",
+            "message": "entities cannot depend on pages"
+          },
+          {
+            "target": "./entities",
+            "from": "./app",
+            "message": "entities cannot depend on app"
+          },
+
+          {
+            "target": "./features",
+            "from": "./widgets",
+            "message": "features cannot depend on widgets"
+          },
+          {
+            "target": "./features",
+            "from": "./pages",
+            "message": "features cannot depend on pages"
+          },
+          {
+            "target": "./features",
+            "from": "./app",
+            "message": "features cannot depend on app"
+          },
+
+          {
+            "target": "./widgets",
+            "from": "./pages",
+            "message": "widgets cannot depend on pages"
+          },
+          {
+            "target": "./widgets",
+            "from": "./app",
+            "message": "widgets cannot depend on app"
+          },
+
+          {
+            "target": "./pages",
+            "from": "./app",
+            "message": "pages cannot depend on app"
+          }
+        ]
+      }
+    ]
   },
   "settings": {
     "react": {

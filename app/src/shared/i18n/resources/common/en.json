@@ -6,7 +6,19 @@
     "send": "Send",
     "close": "Close",
     "actions": {
-      "tryAgain": "Try again"
+      "tryAgain": "Try again",
+      "showWeek": "Show week",
+      "showMonth": "Show month",
+      "backToCurrentMonth": "Back to current month"
+    },
+    "confirmModal": {
+      "title": "Confirm",
+      "description": "Are you sure?",
+      "confirm": "Confirm"
+    },
+    "accessibility": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "validation": {
       "required": "This field is required.",

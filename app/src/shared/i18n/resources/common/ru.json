@@ -6,7 +6,19 @@
     "send": "Отправить",
     "close": "Закрыть",
     "actions": {
-      "tryAgain": "Повторить"
+      "tryAgain": "Повторить",
+      "showWeek": "Показать неделю",
+      "showMonth": "Показать месяц",
+      "backToCurrentMonth": "Вернуться к текущему месяцу"
+    },
+    "confirmModal": {
+      "title": "Подтверждение",
+      "description": "Вы уверены?",
+      "confirm": "Подтвердить"
+    },
+    "accessibility": {
+      "showPassword": "Показать пароль",
+      "hidePassword": "Скрыть пароль"
     },
     "validation": {
       "required": "Это поле обязательно.",

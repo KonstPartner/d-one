@@ -43,7 +43,9 @@ const createUrlContextStep = (url = PHOTO_URL) => ({
   ],
 });
 
-const captureApiError = async (promise: Promise<unknown>): Promise<ApiError> => {
+const captureApiError = async (
+  promise: Promise<unknown>,
+): Promise<ApiError> => {
   try {
     await promise;
 
@@ -119,9 +121,7 @@ describe('analyzeFoodWithGemini error contract', () => {
 
   it('reports URL Context failure when Gemini did not confirm the requested photo', async () => {
     createInteraction.mockResolvedValueOnce({
-      steps: [
-        createUrlContextStep('https://storage.example/other-photo.jpg'),
-      ],
+      steps: [createUrlContextStep('https://storage.example/other-photo.jpg')],
       output_text: JSON.stringify({
         status: 'not_food',
       }),
@@ -227,6 +227,53 @@ describe('analyzeFoodWithGemini error contract', () => {
       reason: 'timeout',
       code: 'AI_TIMEOUT',
     });
+  });
+
+  it('runs the usage commit immediately before the Gemini request', async () => {
+    const order: string[] = [];
+
+    const beforeProviderRequest = vi.fn(async () => {
+      order.push('usage');
+    });
+
+    createInteraction.mockImplementationOnce(async () => {
+      order.push('gemini');
+
+      return {
+        steps: [createUrlContextStep()],
+        output_text: JSON.stringify({
+          status: 'not_food',
+        }),
+      };
+    });
+
+    await expect(
+      analyzeFoodWithGemini({
+        ...params,
+        beforeProviderRequest,
+      }),
+    ).resolves.toEqual({
+      status: 'not_food',
+    });
+
+    expect(order).toEqual(['usage', 'gemini']);
+  });
+
+  it('does not call Gemini when the usage commit is rejected', async () => {
+    const beforeProviderRequest = vi
+      .fn()
+      .mockRejectedValueOnce(new ApiError('PROJECT_DAILY_LIMIT_REACHED'));
+
+    const error = await captureApiError(
+      analyzeFoodWithGemini({
+        ...params,
+        beforeProviderRequest,
+      }),
+    );
+
+    expect(beforeProviderRequest).toHaveBeenCalledTimes(1);
+    expect(createInteraction).not.toHaveBeenCalled();
+    expect(error.code).toBe('PROJECT_DAILY_LIMIT_REACHED');
   });
 
   it('rejects an invalid photo URL without calling Gemini', async () => {

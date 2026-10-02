@@ -13,6 +13,7 @@ type AnalyzeFoodStage =
 type AnalyzeFoodD1Outcome =
   | 'not_attempted'
   | 'reserved'
+  | 'committed'
   | 'rejected'
   | 'failed'
   | 'released'
@@ -38,6 +39,8 @@ export type AnalyzeFoodTelemetry = {
   requestError: (stage: AnalyzeFoodStage, code: string) => void;
 
   usageReserved: () => void;
+
+  usageCommitted: () => void;
 
   usageRejected: (code: string) => void;
 
@@ -146,6 +149,10 @@ export const createAnalyzeFoodTelemetry = (
     d1Outcome = 'reserved';
   };
 
+  const usageCommitted = (): void => {
+    d1Outcome = 'committed';
+  };
+
   const usageRejected = (code: string): void => {
     d1Outcome = 'rejected';
 
@@ -231,6 +238,7 @@ export const createAnalyzeFoodTelemetry = (
     requestError,
 
     usageReserved,
+    usageCommitted,
     usageRejected,
     usageFailed,
 

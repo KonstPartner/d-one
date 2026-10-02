@@ -8,10 +8,10 @@ import {
 } from './aiUsagePolicy';
 
 import {
-  compensateUserReservation,
+  commitUserUsage,
+  compensateProjectUsage,
   createAiUsageKeys,
   ensureUsageRows,
-  finalizeUserReservation,
   getUserUsageSnapshot,
   releaseUserLease,
   tryReserveProjectUsage,
@@ -21,13 +21,18 @@ import {
 export type AiUsageReservation = {
   userUsageKey: string;
   projectUsageKey: string;
-  reservedAt: number;
   activeUntil: number;
 };
 
 type ReserveAiUsageParams = {
   db: D1Database;
   uid: string;
+  now?: Date;
+};
+
+type CommitAiUsageParams = {
+  db: D1Database;
+  reservation: AiUsageReservation;
   projectDailyLimit: number;
   now?: Date;
 };
@@ -35,7 +40,6 @@ type ReserveAiUsageParams = {
 export const reserveAiUsage = async ({
   db,
   uid,
-  projectDailyLimit,
   now = new Date(),
 }: ReserveAiUsageParams): Promise<AiUsageReservation> => {
   const nowSeconds = Math.floor(now.getTime() / 1000);
@@ -82,40 +86,48 @@ export const reserveAiUsage = async ({
     );
   }
 
-  const reservation: AiUsageReservation = {
+  return {
     userUsageKey,
     projectUsageKey,
-    reservedAt: nowSeconds,
     activeUntil,
   };
+};
 
-  let projectReserved: boolean;
-
-  try {
-    projectReserved = await tryReserveProjectUsage(
-      db,
-      projectUsageKey,
-      projectDailyLimit,
-    );
-  } catch (error) {
-    await compensateUserReservation(db, reservation);
-
-    throw error;
-  }
+export const commitAiUsage = async ({
+  db,
+  reservation,
+  projectDailyLimit,
+  now = new Date(),
+}: CommitAiUsageParams): Promise<void> => {
+  const projectReserved = await tryReserveProjectUsage(
+    db,
+    reservation.projectUsageKey,
+    projectDailyLimit,
+  );
 
   if (!projectReserved) {
-    await compensateUserReservation(db, reservation);
-
     throw new ApiError('PROJECT_DAILY_LIMIT_REACHED');
   }
 
-  const finalized = await finalizeUserReservation(db, reservation);
+  try {
+    const committed = await commitUserUsage({
+      db,
 
-  if (!finalized) {
-    throw new Error('AI_USAGE_RESERVATION_FINALIZE_FAILED');
+      userUsageKey: reservation.userUsageKey,
+      activeUntil: reservation.activeUntil,
+
+      userDailyLimit: AI_USAGE_POLICY.userDailyLimit,
+      committedAt: Math.floor(now.getTime() / 1000),
+    });
+
+    if (!committed) {
+      throw new Error('AI_USAGE_COMMIT_FAILED');
+    }
+  } catch (error) {
+    await compensateProjectUsage(db, reservation.projectUsageKey);
+
+    throw error;
   }
-
-  return reservation;
 };
 
 export const releaseAiUsage = async (

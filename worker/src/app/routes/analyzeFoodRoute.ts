@@ -1,5 +1,6 @@
 import {
   type AiUsageReservation,
+  commitAiUsage,
   releaseAiUsage,
   reserveAiUsage,
 } from '../../modules/ai-usage/aiUsage';
@@ -18,10 +19,7 @@ import { validateDiaryPhoto } from '../../modules/analyze-food/photo/validateDia
 
 import { authorizeUser } from '../../modules/auth/authorizeUser';
 
-import {
-  ApiError,
-  resolveApiError,
-} from '../../shared/http/apiError';
+import { ApiError, resolveApiError } from '../../shared/http/apiError';
 
 type AnalyzeFoodStage =
   | 'auth'
@@ -94,18 +92,19 @@ export const handleAnalyzeFood = async (
 
     stage = 'usage_reservation';
 
-    reservation = await reserveAiUsage({
+    const projectDailyLimit = parseProjectDailyLimit(
+      env.AI_PROJECT_DAILY_LIMIT,
+    );
+
+    const usageReservation = await reserveAiUsage({
       db: env.AI_USAGE_DB,
 
       uid: user.uid,
-
-      projectDailyLimit: parseProjectDailyLimit(env.AI_PROJECT_DAILY_LIMIT),
     });
 
-    telemetry.usageReserved();
+    reservation = usageReservation;
 
-    stage = 'provider';
-    providerStartedAt = telemetry.startProvider();
+    telemetry.usageReserved();
 
     const analysis = await analyzeFoodWithGemini({
       apiKey: env.GEMINI_API_KEY,
@@ -117,9 +116,23 @@ export const handleAnalyzeFood = async (
       comment: input.comment,
 
       language: input.language,
+
+      beforeProviderRequest: async () => {
+        await commitAiUsage({
+          db: env.AI_USAGE_DB,
+
+          reservation: usageReservation,
+          projectDailyLimit,
+        });
+
+        telemetry.usageCommitted();
+
+        stage = 'provider';
+        providerStartedAt = telemetry.startProvider();
+      },
     });
 
-    telemetry.providerSuccess(analysis.status, providerStartedAt);
+    telemetry.providerSuccess(analysis.status, providerStartedAt!);
 
     return Response.json({
       ok: true,
@@ -136,7 +149,7 @@ export const handleAnalyzeFood = async (
       } else {
         telemetry.usageFailed(code);
       }
-    } else if (stage === 'provider' && providerStartedAt !== null) {
+    } else if (providerStartedAt !== null) {
       telemetry.providerError(code, providerStartedAt, apiError.details);
     } else {
       telemetry.requestError(stage, code);
