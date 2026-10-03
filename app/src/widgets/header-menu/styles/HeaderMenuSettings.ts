@@ -7,9 +7,11 @@ export const Scroll = styled.ScrollView`
 `;
 
 export const Content = styled.View`
-  gap: ${({ theme }) => ss.px(theme.spacing.md)};
+  gap: ${({ theme }) => ss.px(theme.spacing['2xl'])};
+`;
 
-  padding-top: ${({ theme }) => ss.px(theme.spacing.sm)};
+export const Block = styled.View`
+  gap: ${({ theme }) => ss.px(theme.spacing.sm)};
 `;
 
 export const Title = styled.Text`

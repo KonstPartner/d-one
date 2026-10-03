@@ -6,6 +6,7 @@ import { headerTranslations } from './resources/header';
 import { layoutTranslations } from './resources/layout';
 import { screenHelpTranslations } from './resources/screenHelp';
 import { transferTranslations } from './resources/transfer';
+import { versionHistoryTranslations } from './resources/versionHistory';
 
 const mergeTranslations = (...parts: Record<string, unknown>[]) =>
   Object.assign({}, ...parts);
@@ -20,7 +21,8 @@ export const resources = {
       diaryTranslations.en,
       diaryAiTranslations.en,
       transferTranslations.en,
-      screenHelpTranslations.en
+      screenHelpTranslations.en,
+      versionHistoryTranslations.en
     ),
   },
 
@@ -33,7 +35,8 @@ export const resources = {
       diaryTranslations.ru,
       diaryAiTranslations.ru,
       transferTranslations.ru,
-      screenHelpTranslations.ru
+      screenHelpTranslations.ru,
+      versionHistoryTranslations.ru
     ),
   },
 } as const;

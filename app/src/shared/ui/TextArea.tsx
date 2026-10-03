@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 import { TextInput } from 'react-native';
 import { useTheme } from '@emotion/react';
 
@@ -26,24 +26,38 @@ export const TextArea = forwardRef<TextInput, TextAreaProps>(
       showCharacterCount = true,
       style,
       selectionHandleColor,
+      onFocusEvent,
+      onBlurEvent,
       ...inputProps
     },
     ref
   ) => {
     const theme = useTheme();
 
+    const [isEditing, setIsEditing] = useState(false);
+
     return (
       <s.Container>
         <s.Field
           {...inputProps}
           inputRef={ref}
-          value={value}
+          value={isEditing ? undefined : value}
           onChangeText={onChangeText}
           multiline
           scrollEnabled
           maxLength={maxLength}
           selectionHandleColor={selectionHandleColor ?? theme.colors.primary}
           style={style}
+          onFocusEvent={() => {
+            setIsEditing(true);
+
+            onFocusEvent?.();
+          }}
+          onBlurEvent={() => {
+            setIsEditing(false);
+
+            onBlurEvent?.();
+          }}
         />
 
         {showCharacterCount && (

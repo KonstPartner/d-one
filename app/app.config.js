@@ -7,7 +7,7 @@ export default {
   expo: {
     name: 'DOne',
     slug: 'd-one',
-    version: '1.0.0',
+    version: '1.1.0',
     scheme: 'done',
 
     orientation: 'default',

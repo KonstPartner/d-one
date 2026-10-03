@@ -9,7 +9,9 @@
       "themeTitle": "Theme",
       "themeSubtitle": "Change the app appearance and theme.",
       "languageTitle": "Language",
-      "languageSubtitle": "Change the app language."
+      "languageSubtitle": "Change the app language.",
+      "versionTitle": "App version",
+      "versionSubtitle": "View the current version and DOne update history."
     }
   }
 }
