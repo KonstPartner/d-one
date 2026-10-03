@@ -16,6 +16,8 @@ export default {
     icon: appIcon,
 
     ios: {
+      buildNumber: '2',
+
       scheme: 'done.app.ios',
       bundleIdentifier: 'done.app.ios',
       googleServicesFile: process.env.GOOGLE_SERVICE_INFO_PLIST,
@@ -28,6 +30,8 @@ export default {
     },
 
     android: {
+      versionCode: 2,
+
       scheme: 'done.android.app',
       package: 'done.android.app',
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
