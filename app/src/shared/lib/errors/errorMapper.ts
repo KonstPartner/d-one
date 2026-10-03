@@ -76,6 +76,8 @@ const apiErrorDictionary: ErrorDictionary = {
   AI_PROVIDER_ERROR: 'common.errors.aiProviderUnavailable',
   INVALID_AI_RESPONSE: 'common.errors.aiProviderUnavailable',
   AI_TIMEOUT: 'common.errors.aiTimeout',
+
+  INTERNAL_ERROR: 'common.errors.unknown',
 };
 
 const aiErrorReasonDictionary: ErrorDictionary = {
@@ -217,26 +219,7 @@ const mapApiError = (error: ApiError): string => {
   const payload = parseApiErrorPayload(error.data);
 
   if (payload === null) {
-    return error.message;
-  }
-
-  if (
-    payload.code === 'AI_PROVIDER_ERROR' &&
-    payload.provider?.message !== null &&
-    payload.provider?.message !== undefined
-  ) {
-    return payload.provider.status === null
-      ? i18n.t('common.errors.aiProviderErrorDetails', {
-          message: payload.provider.message,
-        })
-      : i18n.t('common.errors.aiProviderErrorDetailsWithStatus', {
-          status: payload.provider.status,
-          message: payload.provider.message,
-        });
-  }
-
-  if (payload.code === 'INTERNAL_ERROR' && payload.message !== null) {
-    return payload.message;
+    return i18n.t('common.errors.network');
   }
 
   if (payload.reason !== null) {
@@ -253,7 +236,7 @@ const mapApiError = (error: ApiError): string => {
     return i18n.t(codeKey);
   }
 
-  return payload.message ?? payload.provider?.message ?? payload.code;
+  return i18n.t('common.errors.unknown');
 };
 
 export const errorMapper = (

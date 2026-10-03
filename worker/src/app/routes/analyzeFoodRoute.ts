@@ -150,7 +150,7 @@ export const handleAnalyzeFood = async (
         telemetry.usageFailed(code);
       }
     } else if (providerStartedAt !== null) {
-      telemetry.providerError(code, providerStartedAt, apiError.details);
+      telemetry.providerError(code, providerStartedAt, apiError.logDetails);
     } else {
       telemetry.requestError(stage, code);
     }

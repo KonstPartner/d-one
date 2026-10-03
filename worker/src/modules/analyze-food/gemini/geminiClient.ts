@@ -280,11 +280,11 @@ export const analyzeFoodWithGemini = async ({
 
     const providerError = getGeminiProviderError(error);
 
-    console.error('Gemini provider request failed', error);
-
     throw new ApiError('AI_PROVIDER_ERROR', {
-      message: providerError.message,
       details: {
+        reason: 'provider_error',
+      },
+      logDetails: {
         reason: 'provider_error',
         provider: providerError,
       },

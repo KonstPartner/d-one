@@ -1,13 +1,7 @@
-type ApiErrorProvider = {
-  status: number | null;
-  message: string | null;
-};
-
 export type ApiErrorPayload = {
   code: string;
   message: string | null;
   reason: string | null;
-  provider: ApiErrorProvider | null;
 };
 
 const normalizeText = (value: string): string | null => {
@@ -40,23 +34,10 @@ export const parseApiErrorPayload = (data: unknown): ApiErrorPayload | null => {
     return null;
   }
 
-  let provider: ApiErrorProvider | null = null;
-
-  if (isRecord(error.provider)) {
-    provider = {
-      status:
-        typeof error.provider.status === 'number'
-          ? error.provider.status
-          : null,
-      message: getOptionalText(error.provider, 'message'),
-    };
-  }
-
   return {
     code,
     message: getOptionalText(error, 'message'),
     reason: getOptionalText(error, 'reason'),
-    provider,
   };
 };
 
@@ -73,13 +54,6 @@ const getApiErrorMessage = (data: unknown): string | null => {
 
   if (payload?.message !== null && payload?.message !== undefined) {
     return payload.message;
-  }
-
-  if (
-    payload?.provider?.message !== null &&
-    payload?.provider?.message !== undefined
-  ) {
-    return payload.provider.message;
   }
 
   for (const key of ['message', 'description', 'detail']) {

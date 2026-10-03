@@ -50,8 +50,6 @@
       "aiProjectDailyLimitReached": "AI-анализ временно недоступен: исчерпан дневной лимит сервиса.",
       "aiRequestTooFrequent": "Подождите перед запуском следующего AI-анализа.",
       "aiProviderUnavailable": "AI-анализ временно недоступен. Повторите позже.",
-      "aiProviderErrorDetails": "Ошибка Gemini: {{message}}",
-      "aiProviderErrorDetailsWithStatus": "Ошибка Gemini ({{status}}): {{message}}",
       "aiTimeout": "AI-анализ занял слишком много времени. Повторите позже.",
       "aiInvalidPhotoUrl": "URL фотографии стал некорректным до отправки в Gemini.",
       "aiImageRetrievalNotConfirmed": "Gemini не подтвердил загрузку фотографии для анализа.",

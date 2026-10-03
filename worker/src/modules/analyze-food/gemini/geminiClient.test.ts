@@ -22,8 +22,8 @@ import { analyzeFoodWithGemini } from './geminiClient';
 const PHOTO_URL =
   'https://storage.googleapis.com/done.appspot.com/users/user-1/diaryPhotos/entry-1.jpg';
 
-const HIGH_DEMAND_MESSAGE =
-  'gemini-3.6-flash is currently experiencing high demand, spikes in demand are usually temporary. Please try again later.';
+const PROVIDER_QUOTA_MESSAGE =
+  'Your project has exceeded a quota. See https://ai.dev/rate-limit to manage your rate limits.';
 
 const params = {
   apiKey: 'test-api-key',
@@ -83,10 +83,10 @@ describe('analyzeFoodWithGemini error contract', () => {
     vi.restoreAllMocks();
   });
 
-  it('preserves Gemini 503 provider details in the public API error', async () => {
-    const providerError = Object.assign(new Error(HIGH_DEMAND_MESSAGE), {
-      name: 'ServiceUnavailableError',
-      status: 503,
+  it('keeps provider diagnostics in logs and out of the public API error', async () => {
+    const providerError = Object.assign(new Error(PROVIDER_QUOTA_MESSAGE), {
+      name: 'RateLimitError',
+      status: 429,
     });
 
     createInteraction.mockRejectedValueOnce(providerError);
@@ -96,27 +96,26 @@ describe('analyzeFoodWithGemini error contract', () => {
     expect(error).toMatchObject({
       code: 'AI_PROVIDER_ERROR',
       status: 503,
-      publicMessage: HIGH_DEMAND_MESSAGE,
+      publicMessage: null,
       details: {
         reason: 'provider_error',
+      },
+      logDetails: {
+        reason: 'provider_error',
         provider: {
-          status: 503,
-          name: 'ServiceUnavailableError',
-          message: HIGH_DEMAND_MESSAGE,
+          status: 429,
+          name: 'RateLimitError',
+          message: PROVIDER_QUOTA_MESSAGE,
         },
       },
     });
 
     await expectHttpError(error, 503, {
       reason: 'provider_error',
-      provider: {
-        status: 503,
-        name: 'ServiceUnavailableError',
-        message: HIGH_DEMAND_MESSAGE,
-      },
       code: 'AI_PROVIDER_ERROR',
-      message: HIGH_DEMAND_MESSAGE,
     });
+
+    expect(console.error).not.toHaveBeenCalled();
   });
 
   it('reports URL Context failure when Gemini did not confirm the requested photo', async () => {

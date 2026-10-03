@@ -53,6 +53,7 @@ const API_ERROR_STATUS = {
 type ApiErrorOptions = {
   message?: string | null;
   details?: Record<string, unknown>;
+  logDetails?: Record<string, unknown>;
   sourceError?: unknown;
 };
 
@@ -86,6 +87,7 @@ export class ApiError extends Error {
   public readonly status: number;
   public readonly publicMessage: string | null;
   public readonly details: Record<string, unknown>;
+  public readonly logDetails: Record<string, unknown>;
   public readonly sourceError: unknown;
 
   public constructor(
@@ -101,6 +103,7 @@ export class ApiError extends Error {
         ? null
         : normalizeMessage(options.message);
     this.details = options.details ?? {};
+    this.logDetails = options.logDetails ?? this.details;
     this.sourceError = options.sourceError;
   }
 }
@@ -111,7 +114,9 @@ export const resolveApiError = (error: unknown): ApiError => {
   }
 
   return new ApiError('INTERNAL_ERROR', {
-    message: getUnknownErrorMessage(error),
+    logDetails: {
+      message: getUnknownErrorMessage(error),
+    },
     sourceError: error,
   });
 };

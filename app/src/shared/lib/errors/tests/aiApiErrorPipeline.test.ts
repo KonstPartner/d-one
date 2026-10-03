@@ -10,9 +10,6 @@ jest.mock('@shared/api/firebase/getAuthToken', () => ({
   getAuthToken: jest.fn(),
 }));
 
-const HIGH_DEMAND_MESSAGE =
-  'gemini-3.6-flash is currently experiencing high demand, spikes in demand are usually temporary. Please try again later.';
-
 const CLOUDFLARE_MESSAGE =
   'The origin web server returned an invalid or incomplete response to Cloudflare. This typically indicates the origin is overloaded or misconfigured.';
 
@@ -74,7 +71,7 @@ describe('AI API error pipeline', () => {
     global.fetch = originalFetch;
   });
 
-  it('shows Gemini 503 status and the provider message', async () => {
+  it('localizes provider errors without exposing provider diagnostics', async () => {
     const error = await rejectWithResponse({
       status: 503,
       body: JSON.stringify({
@@ -82,20 +79,14 @@ describe('AI API error pipeline', () => {
         error: {
           code: 'AI_PROVIDER_ERROR',
           reason: 'provider_error',
-          message: HIGH_DEMAND_MESSAGE,
-          provider: {
-            status: 503,
-            name: 'ServiceUnavailableError',
-            message: HIGH_DEMAND_MESSAGE,
-          },
         },
       }),
     });
 
     expect(error.status).toBe(503);
-    expect(error.message).toBe(HIGH_DEMAND_MESSAGE);
+    expect(error.message).toBe('Request failed with status 503');
     expect(errorMapper(error, 'api')).toBe(
-      `Ошибка Gemini (503): ${HIGH_DEMAND_MESSAGE}`
+      'AI-анализ временно недоступен. Повторите позже.'
     );
   });
 
@@ -128,9 +119,7 @@ describe('AI API error pipeline', () => {
       }),
     });
 
-    expect(errorMapper(error, 'api')).toBe(
-      'A new provider failure that the app does not know yet.'
-    );
+    expect(errorMapper(error, 'api')).toBe('Произошла неизвестная ошибка');
   });
 
   it('preserves a plain-text Cloudflare response', async () => {
@@ -140,7 +129,9 @@ describe('AI API error pipeline', () => {
     });
 
     expect(error.message).toBe(CLOUDFLARE_MESSAGE);
-    expect(errorMapper(error, 'api')).toBe(CLOUDFLARE_MESSAGE);
+    expect(errorMapper(error, 'api')).toBe(
+      'Произошла ошибка сети. Проверьте подключение и повторите попытку.'
+    );
   });
 
   it('preserves an INTERNAL_ERROR message returned by the Worker', async () => {
@@ -155,9 +146,7 @@ describe('AI API error pipeline', () => {
       }),
     });
 
-    expect(errorMapper(error, 'api')).toBe(
-      'Specific unexpected server failure'
-    );
+    expect(errorMapper(error, 'api')).toBe('Произошла неизвестная ошибка');
   });
 
   it('localizes a known usage-limit code without requiring a provider call', async () => {
