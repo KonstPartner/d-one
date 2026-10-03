@@ -13,6 +13,12 @@ type DateParts = {
   second: number;
 };
 
+const getLocale = (): string =>
+  i18n.resolvedLanguage ||
+  i18n.language ||
+  getLocales()[0]?.languageTag ||
+  'en-US';
+
 type FormattedDateParts = {
   year: string;
   month: string;
@@ -83,8 +89,6 @@ const startOfDay = (date: Date): Date =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 
 export const createDateKit = (realNow?: DateInput) => {
-  const locale = getLocales()[0]?.languageTag || 'en-US';
-
   const resolvedRealNow =
     realNow == null || realNow === '' ? null : new Date(realNow);
 
@@ -158,6 +162,7 @@ export const createDateKit = (realNow?: DateInput) => {
 
     format(value: DateInput, options?: Intl.DateTimeFormatOptions): string {
       const date = toDate(value);
+      const locale = getLocale();
 
       const dateOptions = options ?? {
         year: 'numeric',
@@ -264,6 +269,7 @@ export const createDateKit = (realNow?: DateInput) => {
         return '';
       }
 
+      const locale = getLocale();
       const currentDay = startOfDay(now());
       const targetDay = startOfDay(date);
 
