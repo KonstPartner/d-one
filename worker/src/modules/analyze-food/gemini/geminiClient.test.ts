@@ -5,14 +5,17 @@ import {
   createApiErrorResponse,
 } from '../../../shared/http/apiError';
 
-const { createInteraction } = vi.hoisted(() => ({
-  createInteraction: vi.fn(),
+const { generateContent } = vi.hoisted(() => ({
+  generateContent: vi.fn(),
 }));
 
 vi.mock('@google/genai', () => ({
+  ThinkingLevel: {
+    LOW: 'LOW',
+  },
   GoogleGenAI: class GoogleGenAI {
-    public readonly interactions = {
-      create: createInteraction,
+    public readonly models = {
+      generateContent,
     };
   },
 }));
@@ -25,6 +28,25 @@ const PHOTO_URL =
 const PROVIDER_QUOTA_MESSAGE =
   'Your project has exceeded a quota. See https://ai.dev/rate-limit to manage your rate limits.';
 
+const PROVIDER_QUOTA_BODY = JSON.stringify({
+  error: {
+    code: 429,
+    message: PROVIDER_QUOTA_MESSAGE,
+    status: 'RESOURCE_EXHAUSTED',
+    details: [
+      {
+        '@type': 'type.googleapis.com/google.rpc.QuotaFailure',
+        violations: [
+          {
+            quotaMetric: 'generativelanguage.googleapis.com/example_quota',
+            quotaId: 'ExampleQuotaPerDayPerProject',
+          },
+        ],
+      },
+    ],
+  },
+});
+
 const params = {
   apiKey: 'test-api-key',
   model: 'gemini-test',
@@ -33,14 +55,23 @@ const params = {
   language: 'en' as const,
 };
 
-const createUrlContextStep = (url = PHOTO_URL) => ({
-  type: 'url_context_result',
-  result: [
+const createGenerateContentResponse = (
+  text: string | undefined,
+  url = PHOTO_URL,
+) => ({
+  candidates: [
     {
-      status: 'success',
-      url,
+      urlContextMetadata: {
+        urlMetadata: [
+          {
+            retrievedUrl: url,
+            urlRetrievalStatus: 'URL_RETRIEVAL_STATUS_SUCCESS',
+          },
+        ],
+      },
     },
   ],
+  ...(text === undefined ? {} : { text }),
 });
 
 const captureApiError = async (
@@ -73,7 +104,7 @@ const expectHttpError = async (
 
 describe('analyzeFoodWithGemini error contract', () => {
   beforeEach(() => {
-    createInteraction.mockReset();
+    generateContent.mockReset();
 
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
   });
@@ -83,13 +114,48 @@ describe('analyzeFoodWithGemini error contract', () => {
     vi.restoreAllMocks();
   });
 
+  it('uses generateContent with URL Context and structured JSON output', async () => {
+    generateContent.mockResolvedValueOnce(
+      createGenerateContentResponse(
+        JSON.stringify({
+          status: 'not_food',
+        }),
+      ),
+    );
+
+    await analyzeFoodWithGemini(params);
+
+    expect(generateContent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'gemini-test',
+        contents: expect.stringContaining(PHOTO_URL),
+        config: expect.objectContaining({
+          systemInstruction: expect.any(String),
+          tools: [{ urlContext: {} }],
+          thinkingConfig: {
+            thinkingLevel: 'LOW',
+          },
+          responseMimeType: 'application/json',
+          responseJsonSchema: expect.any(Object),
+          abortSignal: expect.any(AbortSignal),
+          httpOptions: {
+            retryOptions: {
+              attempts: 1,
+            },
+          },
+        }),
+      }),
+    );
+  });
+
   it('keeps provider diagnostics in logs and out of the public API error', async () => {
     const providerError = Object.assign(new Error(PROVIDER_QUOTA_MESSAGE), {
       name: 'RateLimitError',
       status: 429,
+      body: PROVIDER_QUOTA_BODY,
     });
 
-    createInteraction.mockRejectedValueOnce(providerError);
+    generateContent.mockRejectedValueOnce(providerError);
 
     const error = await captureApiError(analyzeFoodWithGemini(params));
 
@@ -106,6 +172,7 @@ describe('analyzeFoodWithGemini error contract', () => {
           status: 429,
           name: 'RateLimitError',
           message: PROVIDER_QUOTA_MESSAGE,
+          body: PROVIDER_QUOTA_BODY,
         },
       },
     });
@@ -119,12 +186,14 @@ describe('analyzeFoodWithGemini error contract', () => {
   });
 
   it('reports URL Context failure when Gemini did not confirm the requested photo', async () => {
-    createInteraction.mockResolvedValueOnce({
-      steps: [createUrlContextStep('https://storage.example/other-photo.jpg')],
-      output_text: JSON.stringify({
-        status: 'not_food',
-      }),
-    });
+    generateContent.mockResolvedValueOnce(
+      createGenerateContentResponse(
+        JSON.stringify({
+          status: 'not_food',
+        }),
+        'https://storage.example/other-photo.jpg',
+      ),
+    );
 
     const error = await captureApiError(analyzeFoodWithGemini(params));
 
@@ -142,9 +211,9 @@ describe('analyzeFoodWithGemini error contract', () => {
   });
 
   it('reports a missing Gemini output text', async () => {
-    createInteraction.mockResolvedValueOnce({
-      steps: [createUrlContextStep()],
-    });
+    generateContent.mockResolvedValueOnce(
+      createGenerateContentResponse(undefined),
+    );
 
     const error = await captureApiError(analyzeFoodWithGemini(params));
 
@@ -155,7 +224,7 @@ describe('analyzeFoodWithGemini error contract', () => {
     await expectHttpError(error, 502, {
       reason: 'missing_output_text',
       interaction: {
-        stepTypes: ['url_context_result'],
+        stepTypes: [],
         urlContextResultCount: 1,
         urlContextSuccessCount: 1,
         matchingPhotoUrlCount: 1,
@@ -167,10 +236,9 @@ describe('analyzeFoodWithGemini error contract', () => {
   });
 
   it('reports invalid JSON returned by Gemini', async () => {
-    createInteraction.mockResolvedValueOnce({
-      steps: [createUrlContextStep()],
-      output_text: 'not-json',
-    });
+    generateContent.mockResolvedValueOnce(
+      createGenerateContentResponse('not-json'),
+    );
 
     const error = await captureApiError(analyzeFoodWithGemini(params));
 
@@ -181,7 +249,7 @@ describe('analyzeFoodWithGemini error contract', () => {
     await expectHttpError(error, 502, {
       reason: 'invalid_json',
       interaction: {
-        stepTypes: ['url_context_result'],
+        stepTypes: [],
         urlContextResultCount: 1,
         urlContextSuccessCount: 1,
         matchingPhotoUrlCount: 1,
@@ -195,10 +263,16 @@ describe('analyzeFoodWithGemini error contract', () => {
   it('maps an aborted provider request to AI_TIMEOUT', async () => {
     vi.useFakeTimers();
 
-    createInteraction.mockImplementationOnce(
-      async (_request: unknown, options: unknown) =>
+    generateContent.mockImplementationOnce(
+      async (request: unknown) =>
         new Promise((_resolve, reject) => {
-          const signal = (options as { signal: AbortSignal }).signal;
+          const signal = (
+            request as {
+              config: {
+                abortSignal: AbortSignal;
+              };
+            }
+          ).config.abortSignal;
 
           signal.addEventListener(
             'abort',
@@ -235,15 +309,14 @@ describe('analyzeFoodWithGemini error contract', () => {
       order.push('usage');
     });
 
-    createInteraction.mockImplementationOnce(async () => {
+    generateContent.mockImplementationOnce(async () => {
       order.push('gemini');
 
-      return {
-        steps: [createUrlContextStep()],
-        output_text: JSON.stringify({
+      return createGenerateContentResponse(
+        JSON.stringify({
           status: 'not_food',
         }),
-      };
+      );
     });
 
     await expect(
@@ -271,7 +344,7 @@ describe('analyzeFoodWithGemini error contract', () => {
     );
 
     expect(beforeProviderRequest).toHaveBeenCalledTimes(1);
-    expect(createInteraction).not.toHaveBeenCalled();
+    expect(generateContent).not.toHaveBeenCalled();
     expect(error.code).toBe('PROJECT_DAILY_LIMIT_REACHED');
   });
 
@@ -283,7 +356,7 @@ describe('analyzeFoodWithGemini error contract', () => {
       }),
     );
 
-    expect(createInteraction).not.toHaveBeenCalled();
+    expect(generateContent).not.toHaveBeenCalled();
     expect(error.code).toBe('IMAGE_NOT_ANALYZABLE');
     expect(error.status).toBe(400);
     expect(error.details.reason).toBe('invalid_photo_url');

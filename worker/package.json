@@ -13,6 +13,11 @@
     "test-check": "vitest run",
     "lint-check": "node ./scripts/lint-check.mjs"
   },
+  "lint-staged": {
+    "*.ts": [
+      "./node_modules/.bin/prettier --write"
+    ]
+  },
   "devDependencies": {
     "prettier": "^3.9.9",
     "typescript": "^7.0.2",

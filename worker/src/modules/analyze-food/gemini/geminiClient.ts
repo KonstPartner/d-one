@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, ThinkingLevel } from '@google/genai';
 
 import { ApiError } from '../../../shared/http/apiError';
 
@@ -18,11 +18,13 @@ import {
 
 const GEMINI_TIMEOUT_MS = 120_000;
 const MAX_PROVIDER_ERROR_MESSAGE_LENGTH = 1_000;
+const MAX_PROVIDER_ERROR_BODY_LENGTH = 8_000;
 
 type GeminiProviderError = {
   status: number | null;
   name: string;
   message: string | null;
+  body: string | null;
 };
 
 type GeminiAnalysisFailureReason =
@@ -61,6 +63,24 @@ const normalizeProviderMessage = (value: string): string | null => {
   return normalized.slice(0, MAX_PROVIDER_ERROR_MESSAGE_LENGTH);
 };
 
+const getProviderBody = (error: unknown): string | null => {
+  if (error === null || typeof error !== 'object') {
+    return null;
+  }
+
+  const body = (error as Record<string, unknown>).body;
+
+  if (typeof body !== 'string') {
+    return null;
+  }
+
+  const normalized = body.trim();
+
+  return normalized.length === 0
+    ? null
+    : normalized.slice(0, MAX_PROVIDER_ERROR_BODY_LENGTH);
+};
+
 const getProviderStatus = (error: unknown): number | null => {
   if (error === null || typeof error !== 'object') {
     return null;
@@ -81,12 +101,14 @@ const getProviderStatus = (error: unknown): number | null => {
 
 const getGeminiProviderError = (error: unknown): GeminiProviderError => {
   const status = getProviderStatus(error);
+  const body = getProviderBody(error);
 
   if (error instanceof Error) {
     return {
       status,
       name: error.name || 'Error',
       message: normalizeProviderMessage(error.message),
+      body,
     };
   }
 
@@ -94,6 +116,7 @@ const getGeminiProviderError = (error: unknown): GeminiProviderError => {
     status,
     name: 'UnknownError',
     message: typeof error === 'string' ? normalizeProviderMessage(error) : null,
+    body,
   };
 };
 
@@ -153,91 +176,78 @@ export const analyzeFoodWithGemini = async ({
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   try {
-    const interactionPromise = ai.interactions.create(
-      {
-        model,
+    const responsePromise = ai.models.generateContent({
+      model,
 
-        stream: false,
+      contents: input,
 
-        store: false,
-
-        system_instruction: FOOD_ANALYSIS_SYSTEM_INSTRUCTION,
-
-        input,
+      config: {
+        systemInstruction: FOOD_ANALYSIS_SYSTEM_INSTRUCTION,
 
         tools: [
           {
-            type: 'url_context',
+            urlContext: {},
           },
         ],
 
-        generation_config: {
-          thinking_level: 'low',
+        thinkingConfig: {
+          thinkingLevel: ThinkingLevel.LOW,
         },
 
-        response_format: {
-          type: 'text',
+        responseMimeType: 'application/json',
 
-          mime_type: 'application/json',
+        responseJsonSchema: foodAnalysisResponseJsonSchema,
 
-          schema: foodAnalysisResponseJsonSchema,
+        abortSignal: abortController.signal,
+
+        httpOptions: {
+          retryOptions: {
+            attempts: 1,
+          },
         },
       },
-
-      {
-        retries: {
-          strategy: 'none',
-        },
-
-        signal: abortController.signal,
-      },
-    );
+    });
 
     timeoutId = setTimeout(() => {
       abortController.abort();
     }, GEMINI_TIMEOUT_MS);
 
-    const interaction = await interactionPromise;
+    const response = await responsePromise;
 
-    const stepTypes = (interaction.steps ?? []).map((step) => step.type);
+    const urlMetadata =
+      response.candidates?.[0]?.urlContextMetadata?.urlMetadata ?? [];
 
     let urlContextResultCount = 0;
     let urlContextSuccessCount = 0;
     let matchingPhotoUrlCount = 0;
 
-    for (const step of interaction.steps ?? []) {
-      if (step.type !== 'url_context_result') {
+    for (const result of urlMetadata) {
+      urlContextResultCount += 1;
+
+      if (result.urlRetrievalStatus !== 'URL_RETRIEVAL_STATUS_SUCCESS') {
         continue;
       }
 
-      for (const result of step.result) {
-        urlContextResultCount += 1;
+      urlContextSuccessCount += 1;
 
-        if (result.status !== 'success') {
-          continue;
-        }
-
-        urlContextSuccessCount += 1;
-
-        if (
-          typeof result.url === 'string' &&
-          normalizeUrl(result.url) === expectedPhotoUrl
-        ) {
-          matchingPhotoUrlCount += 1;
-        }
+      if (
+        typeof result.retrievedUrl === 'string' &&
+        normalizeUrl(result.retrievedUrl) === expectedPhotoUrl
+      ) {
+        matchingPhotoUrlCount += 1;
       }
     }
 
+    const outputText = response.text;
+
     const interactionDiagnostics: GeminiInteractionDiagnostics = {
-      stepTypes,
+      stepTypes: [],
       urlContextResultCount,
       urlContextSuccessCount,
       matchingPhotoUrlCount,
-      hasOutputText: typeof interaction.output_text === 'string',
+      hasOutputText: typeof outputText === 'string',
       outputTextLength:
-        typeof interaction.output_text === 'string'
-          ? interaction.output_text.length
-          : null,
+        typeof outputText === 'string' ? outputText.length : null,
     };
 
     if (matchingPhotoUrlCount === 0) {
@@ -248,7 +258,7 @@ export const analyzeFoodWithGemini = async ({
       );
     }
 
-    if (typeof interaction.output_text !== 'string') {
+    if (typeof outputText !== 'string') {
       throw createGeminiError(
         'INVALID_AI_RESPONSE',
         'missing_output_text',
@@ -256,9 +266,7 @@ export const analyzeFoodWithGemini = async ({
       );
     }
 
-    const parseResult = parseAnalyzeFoodResponseDetailed(
-      interaction.output_text,
-    );
+    const parseResult = parseAnalyzeFoodResponseDetailed(outputText);
 
     if (!parseResult.ok) {
       throw createGeminiError(
