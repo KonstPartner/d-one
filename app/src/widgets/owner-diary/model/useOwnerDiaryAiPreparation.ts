@@ -55,12 +55,14 @@ export const useOwnerDiaryAiPreparation = () => {
         return null;
       }
 
-      try {
-        const language = normalizeAppLanguage(
-          i18n.resolvedLanguage ?? i18n.language
-        );
+      const language = normalizeAppLanguage(
+        i18n.resolvedLanguage ?? i18n.language
+      );
 
-        const result = await analyzeFood.mutateAsync({
+      let result;
+
+      try {
+        result = await analyzeFood.mutateAsync({
           entryId: entry.id,
 
           photoPath: entry.photoPath,
@@ -70,28 +72,39 @@ export const useOwnerDiaryAiPreparation = () => {
 
           language,
         });
+      } catch (error) {
+        console.error(`Failed to analyze diary photo: ${entry.id}`, error);
 
-        if (result.status === 'not_food') {
-          showNotification('warn', t('diaryAi.notFood'));
+        showNotification('error', errorMapper(error, 'api'));
 
-          return null;
-        }
+        return null;
+      }
 
-        if (result.status === 'insufficient_data') {
-          showNotification('warn', t('diaryAi.insufficientData'));
+      if (result.status === 'not_food') {
+        showNotification('warn', t('diaryAi.notFood'));
 
-          return null;
-        }
+        return null;
+      }
 
+      if (result.status === 'insufficient_data') {
+        showNotification('warn', t('diaryAi.insufficientData'));
+
+        return null;
+      }
+
+      try {
         const aiAnalysis = formatAnalyzeFoodResult(result, language);
 
         await saveAnalysis(entry.id, aiAnalysis);
 
         return aiAnalysis;
       } catch (error) {
-        console.error(`Failed to analyze diary photo: ${entry.id}`, error);
+        console.error(
+          `Failed to process or save AI analysis: ${entry.id}`,
+          error
+        );
 
-        showNotification('error', errorMapper(error, 'api'));
+        showNotification('error', errorMapper(error));
 
         return null;
       }

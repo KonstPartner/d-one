@@ -1,7 +1,8 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
-import { DiaryPhotoError } from './DiaryPhotoError';
+import { CodedError } from '@shared/lib/errors';
+
 import {
   type DiaryPhotoDraft,
   type PreparedDiaryPhoto,
@@ -33,17 +34,17 @@ const safelyDeleteFile = (file: File | null): void => {
 
 const validateIdentifier = (value: string): void => {
   if (!SAFE_IDENTIFIER_PATTERN.test(value)) {
-    throw new DiaryPhotoError('storageFailed');
+    throw new CodedError('storageFailed');
   }
 };
 
 const validatePhotoFile = (file: File): void => {
   if (!file.exists || file.size <= 0) {
-    throw new DiaryPhotoError('invalidFile');
+    throw new CodedError('invalidFile');
   }
 
   if (file.size > MAXIMUM_FILE_SIZE) {
-    throw new DiaryPhotoError('fileTooLarge');
+    throw new CodedError('fileTooLarge');
   }
 };
 
@@ -81,7 +82,7 @@ export const createDiaryPhotoDraft = async (
   sourceUri: string
 ): Promise<DiaryPhotoDraft> => {
   if (sourceUri.length === 0) {
-    throw new DiaryPhotoError('invalidFile');
+    throw new CodedError('invalidFile');
   }
 
   let draftFile: File | null = null;
@@ -131,11 +132,11 @@ export const createDiaryPhotoDraft = async (
   } catch (error) {
     safelyDeleteFile(draftFile);
 
-    if (error instanceof DiaryPhotoError) {
+    if (error instanceof CodedError) {
       throw error;
     }
 
-    throw new DiaryPhotoError('processingFailed');
+    throw new CodedError('processingFailed');
   }
 };
 
@@ -147,7 +148,7 @@ export const removeDiaryPhotoDraft = (draftUri: string | null): void => {
   try {
     deleteFileIfExists(new File(draftUri));
   } catch {
-    throw new DiaryPhotoError('storageFailed');
+    throw new CodedError('storageFailed');
   }
 };
 
@@ -191,7 +192,7 @@ export const prepareDiaryPhotoForEntry = ({
     });
 
     if (draftFile.uri === destinationFile.uri) {
-      throw new DiaryPhotoError('storageFailed');
+      throw new CodedError('storageFailed');
     }
 
     if (hadExistingDestination) {
@@ -223,14 +224,14 @@ export const prepareDiaryPhotoForEntry = ({
 
       safelyDeleteFile(backupFile);
     } catch {
-      throw new DiaryPhotoError('storageFailed');
+      throw new CodedError('storageFailed');
     }
 
-    if (error instanceof DiaryPhotoError) {
+    if (error instanceof CodedError) {
       throw error;
     }
 
-    throw new DiaryPhotoError('storageFailed');
+    throw new CodedError('storageFailed');
   }
 
   let active = true;
@@ -262,7 +263,7 @@ export const prepareDiaryPhotoForEntry = ({
 
       active = false;
     } catch {
-      throw new DiaryPhotoError('storageFailed');
+      throw new CodedError('storageFailed');
     }
   };
 
@@ -311,7 +312,7 @@ export const prepareDiaryPhotoRemoval = ({
   } catch {
     safelyDeleteFile(backupFile);
 
-    throw new DiaryPhotoError('storageFailed');
+    throw new CodedError('storageFailed');
   }
 
   let active = true;
@@ -342,7 +343,7 @@ export const prepareDiaryPhotoRemoval = ({
 
       active = false;
     } catch {
-      throw new DiaryPhotoError('storageFailed');
+      throw new CodedError('storageFailed');
     }
   };
 

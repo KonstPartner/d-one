@@ -3,10 +3,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   createDiaryPhotoDraft,
   type DiaryPhotoDraft,
-  DiaryPhotoError,
   type DiaryPhotoErrorCode,
   removeDiaryPhotoDraft,
 } from '@entities/diary';
+import { CodedError } from '@shared/lib/errors';
 import { useImagePicker } from '@shared/lib/media';
 import type { PhotoRedactorResult } from '@shared/ui';
 
@@ -18,8 +18,22 @@ type UseCreateDiaryEntryPhotoParams = {
   visible: boolean;
 };
 
-const getPhotoErrorCode = (error: unknown): DiaryPhotoErrorCode =>
-  error instanceof DiaryPhotoError ? error.code : 'processingFailed';
+const getPhotoErrorCode = (error: unknown): DiaryPhotoErrorCode => {
+  if (!(error instanceof CodedError)) {
+    return 'processingFailed';
+  }
+
+  switch (error.code) {
+    case 'processingFailed':
+    case 'invalidFile':
+    case 'fileTooLarge':
+    case 'storageFailed':
+      return error.code;
+
+    default:
+      return 'processingFailed';
+  }
+};
 
 export const useCreateDiaryEntryPhoto = ({
   visible,

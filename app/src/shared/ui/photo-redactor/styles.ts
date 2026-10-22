@@ -44,6 +44,9 @@ export const PortraitActions = styled.View`
 export const Viewport = styled.View`
   flex: 1;
 
+  align-items: center;
+  justify-content: center;
+
   overflow: hidden;
 `;
 

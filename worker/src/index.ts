@@ -1,3 +1,4 @@
+import { withApiErrorBoundary } from './app/middleware/withApiErrorBoundary';
 import { withAppCheck } from './app/middleware/withAppCheck';
 
 import { handleRequest } from './app/router';
@@ -5,7 +6,7 @@ import { handleRequest } from './app/router';
 import { cleanupExpiredAiUsage } from './modules/ai-usage/cleanupAiUsage';
 
 export default {
-  fetch: withAppCheck(handleRequest),
+  fetch: withApiErrorBoundary(withAppCheck(handleRequest)),
 
   async scheduled(
     _controller: ScheduledController,

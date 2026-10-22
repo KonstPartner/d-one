@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as DocumentPicker from 'expo-document-picker';
+import { useTranslation } from 'react-i18next';
 
 import {
   beginDiaryTransfer,
@@ -29,6 +30,8 @@ const ZIP_MIME_TYPES = [
 ] as const;
 
 export const useDiaryImportSession = () => {
+  const { t } = useTranslation();
+
   const { userId, repository } = useReadyDiaryDatabase();
 
   const preparationService = useMemo(
@@ -130,16 +133,13 @@ export const useDiaryImportSession = () => {
       } catch (error) {
         console.error('Failed to choose diary backup', error);
 
-        showNotification(
-          'error',
-          errorMapper(new Error('DIARY_IMPORT_PICKER_FAILED'), 'transfer')
-        );
+        showNotification('error', t('common.errors.diaryImportPickerFailed'));
 
         return null;
       } finally {
         setIsPicking(false);
       }
-    }, [execution.isImporting, isPicking, isPreparing]);
+    }, [execution.isImporting, isPicking, isPreparing, t]);
 
   const prepareSource = useCallback(
     async (source: DiaryImportSource): Promise<DiaryImportPreview | null> => {

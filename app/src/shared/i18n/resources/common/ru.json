@@ -6,7 +6,19 @@
     "send": "Отправить",
     "close": "Закрыть",
     "actions": {
-      "tryAgain": "Повторить"
+      "tryAgain": "Повторить",
+      "showWeek": "Показать неделю",
+      "showMonth": "Показать месяц",
+      "backToCurrentMonth": "Вернуться к текущему месяцу"
+    },
+    "confirmModal": {
+      "title": "Подтверждение",
+      "description": "Вы уверены?",
+      "confirm": "Подтвердить"
+    },
+    "accessibility": {
+      "showPassword": "Показать пароль",
+      "hidePassword": "Скрыть пароль"
     },
     "validation": {
       "required": "Это поле обязательно.",
@@ -39,6 +51,13 @@
       "aiRequestTooFrequent": "Подождите перед запуском следующего AI-анализа.",
       "aiProviderUnavailable": "AI-анализ временно недоступен. Повторите позже.",
       "aiTimeout": "AI-анализ занял слишком много времени. Повторите позже.",
+      "aiInvalidPhotoUrl": "URL фотографии стал некорректным до отправки в Gemini.",
+      "aiImageRetrievalNotConfirmed": "Gemini не подтвердил загрузку фотографии для анализа.",
+      "aiMissingOutputText": "Gemini вернул ответ без текста анализа.",
+      "aiInvalidJsonResponse": "Gemini вернул ответ анализа в некорректном формате JSON.",
+      "aiInvalidResponseStructure": "Gemini вернул ответ анализа с некорректной структурой.",
+      "aiInvalidResponseStatus": "Gemini вернул неподдерживаемый статус анализа.",
+      "aiNoUsefulResult": "Gemini вернул ответ анализа без пригодных данных о еде.",
       "network": "Произошла ошибка сети. Проверьте подключение и повторите попытку.",
       "accessDenied": "Доступ запрещён.",
       "userProfileNotFound": "Профиль пользователя не найден.",

@@ -13,6 +13,7 @@ type AnalyzeFoodStage =
 type AnalyzeFoodD1Outcome =
   | 'not_attempted'
   | 'reserved'
+  | 'committed'
   | 'rejected'
   | 'failed'
   | 'released'
@@ -30,12 +31,16 @@ type AnalyzeFoodLogPayload = {
   analysisStatus?: AnalyzeFoodResponse['status'];
 
   providerDurationMs?: number;
+
+  details?: Record<string, unknown>;
 };
 
 export type AnalyzeFoodTelemetry = {
   requestError: (stage: AnalyzeFoodStage, code: string) => void;
 
   usageReserved: () => void;
+
+  usageCommitted: () => void;
 
   usageRejected: (code: string) => void;
 
@@ -48,7 +53,11 @@ export type AnalyzeFoodTelemetry = {
     providerStartedAt: number,
   ) => void;
 
-  providerError: (code: string, providerStartedAt: number) => void;
+  providerError: (
+    code: string,
+    providerStartedAt: number,
+    details?: Record<string, unknown>,
+  ) => void;
 
   usageReleased: () => void;
 
@@ -107,6 +116,12 @@ export const createAnalyzeFoodTelemetry = (
         : {
             providerDurationMs: payload.providerDurationMs,
           }),
+
+      ...(payload.details === undefined
+        ? {}
+        : {
+            details: payload.details,
+          }),
     };
 
     if (
@@ -132,6 +147,10 @@ export const createAnalyzeFoodTelemetry = (
 
   const usageReserved = (): void => {
     d1Outcome = 'reserved';
+  };
+
+  const usageCommitted = (): void => {
+    d1Outcome = 'committed';
   };
 
   const usageRejected = (code: string): void => {
@@ -175,7 +194,11 @@ export const createAnalyzeFoodTelemetry = (
     });
   };
 
-  const providerError = (code: string, providerStartedAt: number): void => {
+  const providerError = (
+    code: string,
+    providerStartedAt: number,
+    details?: Record<string, unknown>,
+  ): void => {
     writeLog({
       stage: 'provider',
 
@@ -184,6 +207,8 @@ export const createAnalyzeFoodTelemetry = (
       code,
 
       providerDurationMs: Date.now() - providerStartedAt,
+
+      details,
     });
   };
 
@@ -213,6 +238,7 @@ export const createAnalyzeFoodTelemetry = (
     requestError,
 
     usageReserved,
+    usageCommitted,
     usageRejected,
     usageFailed,
 

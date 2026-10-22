@@ -1,1 +1,1 @@
-export { default as useImagePicker } from './useImagePicker';
+export { useImagePicker } from './useImagePicker';

@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import type { PropsWithChildren } from 'react';
 
 import { OwnerDiary } from './OwnerDiary';
@@ -753,7 +759,7 @@ describe('OwnerDiary integration', () => {
   });
 
   it('enters selection mode from header and force-syncs only available entries', async () => {
-    const screen = render(<OwnerDiary />, {
+    render(<OwnerDiary />, {
       wrapper: QueryProvider,
     });
 
@@ -787,7 +793,7 @@ describe('OwnerDiary integration', () => {
   });
 
   it('does not allow pendingDelete or synchronizing entries into selection', async () => {
-    const screen = render(<OwnerDiary />, {
+    render(<OwnerDiary />, {
       wrapper: QueryProvider,
     });
 
@@ -824,7 +830,7 @@ describe('OwnerDiary integration', () => {
   });
 
   it('marks selected entries for deletion and continues through targeted deletion sync', async () => {
-    const screen = render(<OwnerDiary />, {
+    render(<OwnerDiary />, {
       wrapper: QueryProvider,
     });
 

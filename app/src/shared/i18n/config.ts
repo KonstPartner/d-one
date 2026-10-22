@@ -60,4 +60,4 @@ export const setAppLanguage = async (language: AppLanguage): Promise<void> => {
   await i18n.changeLanguage(language);
 };
 
-export default i18n;
+export { i18n };

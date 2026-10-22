@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { LanguageSelect } from '@features/change-language';
 import { ThemeSwitcher } from '@features/theme-switcher';
+import { AppVersionHistory } from '@features/view-app-version-history';
 import { PortalModal } from '@shared/ui';
 
 import * as s from '../styles/HeaderMenuSettings';
@@ -23,17 +24,31 @@ export const HeaderMenuSettings = ({
         <s.Content>
           <s.Title>{t('header.settings.title')}</s.Title>
 
-          <s.SectionTitle>{t('header.settings.themeTitle')}</s.SectionTitle>
+          <s.Block>
+            <s.SectionTitle>{t('header.settings.themeTitle')}</s.SectionTitle>
 
-          <s.Subtitle>{t('header.settings.themeSubtitle')}</s.Subtitle>
+            <s.Subtitle>{t('header.settings.themeSubtitle')}</s.Subtitle>
 
-          <ThemeSwitcher />
+            <ThemeSwitcher />
+          </s.Block>
 
-          <s.SectionTitle>{t('header.settings.languageTitle')}</s.SectionTitle>
+          <s.Block>
+            <s.SectionTitle>
+              {t('header.settings.languageTitle')}
+            </s.SectionTitle>
 
-          <s.Subtitle>{t('header.settings.languageSubtitle')}</s.Subtitle>
+            <s.Subtitle>{t('header.settings.languageSubtitle')}</s.Subtitle>
 
-          <LanguageSelect />
+            <LanguageSelect />
+          </s.Block>
+
+          <s.Block>
+            <s.SectionTitle>{t('header.settings.versionTitle')}</s.SectionTitle>
+
+            <s.Subtitle>{t('header.settings.versionSubtitle')}</s.Subtitle>
+
+            <AppVersionHistory />
+          </s.Block>
         </s.Content>
       </s.Scroll>
     </PortalModal>

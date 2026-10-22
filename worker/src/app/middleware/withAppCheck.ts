@@ -1,10 +1,7 @@
 import {
-  FirebaseAppCheckError,
   getAppCheckToken,
   verifyFirebaseAppCheckToken,
 } from '../../shared/security/firebaseAppCheck';
-
-import { jsonError } from '../../shared/http/jsonResponse';
 
 type AppRequestHandler = (
   request: Request,
@@ -37,22 +34,6 @@ export const isLocalDiagnosticsRequest = (
   );
 };
 
-const createAppCheckErrorResponse = (
-  error: FirebaseAppCheckError,
-): Response => {
-  switch (error.code) {
-    case 'APP_CHECK_REQUIRED':
-    case 'INVALID_APP_CHECK_TOKEN':
-      return jsonError(error.code, 401);
-
-    case 'APP_NOT_ALLOWED':
-      return jsonError(error.code, 403);
-
-    case 'APP_CHECK_SERVICE_UNAVAILABLE':
-      return jsonError(error.code, 503);
-  }
-};
-
 export const withAppCheck =
   (handler: AppRequestHandler) =>
   async (
@@ -60,11 +41,7 @@ export const withAppCheck =
     env: Env,
     context: ExecutionContext,
   ): Promise<Response> => {
-    if (isLocalDiagnosticsRequest(request, env)) {
-      return handler(request, env, context);
-    }
-
-    try {
+    if (!isLocalDiagnosticsRequest(request, env)) {
       const token = getAppCheckToken(request);
 
       await verifyFirebaseAppCheckToken({
@@ -74,13 +51,7 @@ export const withAppCheck =
 
         allowedAppIds: [env.FIREBASE_ANDROID_APP_ID, env.FIREBASE_IOS_APP_ID],
       });
-
-      return await handler(request, env, context);
-    } catch (error) {
-      if (error instanceof FirebaseAppCheckError) {
-        return createAppCheckErrorResponse(error);
-      }
-
-      return jsonError('INTERNAL_ERROR', 500);
     }
+
+    return handler(request, env, context);
   };

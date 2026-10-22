@@ -11,7 +11,6 @@ import {
 import { useSession } from '@entities/session';
 import { userProfileQueryOptions } from '@entities/user';
 import { normalizeAppLanguage } from '@shared/i18n';
-import { errorMapper } from '@shared/lib/errors';
 import { showNotification } from '@shared/lib/notifications';
 
 type DiaryTransferExportInput = {
@@ -112,20 +111,14 @@ export const useDiaryTransferExport = () => {
               });
 
         if (exportResult === null) {
-          showNotification(
-            'error',
-            errorMapper(new Error('DIARY_EXPORT_EMPTY'), 'transfer')
-          );
+          showNotification('error', t('common.errors.diaryExportEmpty'));
         }
 
         return exportResult;
       } catch (error) {
         console.error('Failed to export diary', error);
 
-        showNotification(
-          'error',
-          errorMapper(new Error('DIARY_EXPORT_FAILED'), 'transfer')
-        );
+        showNotification('error', t('common.errors.diaryExportFailed'));
 
         return null;
       }

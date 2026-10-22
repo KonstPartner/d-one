@@ -19,6 +19,16 @@ type TryReserveUserUsageParams = {
   activeUntil: number;
 };
 
+type CommitUserUsageParams = {
+  db: D1Database;
+
+  userUsageKey: string;
+  activeUntil: number;
+
+  userDailyLimit: number;
+  committedAt: number;
+};
+
 type ReservationReference = {
   userUsageKey: string;
   activeUntil: number;
@@ -89,11 +99,7 @@ export const tryReserveUserUsage = async ({
       `
           UPDATE ai_usage
 
-          SET
-            request_count =
-              request_count + 1,
-
-            active_until = ?
+          SET active_until = ?
 
           WHERE usage_key = ?
 
@@ -181,33 +187,6 @@ export const getUserUsageSnapshot = async (
     .bind(userUsageKey, userUsageKey, previousUserUsageKey)
     .first<UserUsageSnapshot>();
 
-export const compensateUserReservation = async (
-  db: D1Database,
-  reservation: ReservationReference,
-): Promise<void> => {
-  await db
-    .prepare(
-      `
-          UPDATE ai_usage
-
-          SET
-            request_count =
-              CASE
-                WHEN request_count > 0
-                THEN request_count - 1
-                ELSE 0
-              END,
-
-            active_until = NULL
-
-          WHERE usage_key = ?
-            AND active_until = ?
-        `,
-    )
-    .bind(reservation.userUsageKey, reservation.activeUntil)
-    .run();
-};
-
 export const tryReserveProjectUsage = async (
   db: D1Database,
   projectUsageKey: string,
@@ -232,31 +211,59 @@ export const tryReserveProjectUsage = async (
   return result.meta.changes === 1;
 };
 
-export const finalizeUserReservation = async (
-  db: D1Database,
-  reservation: ReservationReference & {
-    reservedAt: number;
-  },
-): Promise<boolean> => {
+export const commitUserUsage = async ({
+  db,
+
+  userUsageKey,
+  activeUntil,
+
+  userDailyLimit,
+  committedAt,
+}: CommitUserUsageParams): Promise<boolean> => {
   const result = await db
     .prepare(
       `
           UPDATE ai_usage
 
-          SET last_request_at = ?
+          SET
+            request_count =
+              request_count + 1,
+
+            last_request_at = ?
 
           WHERE usage_key = ?
             AND active_until = ?
+            AND request_count < ?
         `,
     )
-    .bind(
-      reservation.reservedAt,
-      reservation.userUsageKey,
-      reservation.activeUntil,
-    )
+    .bind(committedAt, userUsageKey, activeUntil, userDailyLimit)
     .run();
 
   return result.meta.changes === 1;
+};
+
+export const compensateProjectUsage = async (
+  db: D1Database,
+  projectUsageKey: string,
+): Promise<void> => {
+  await db
+    .prepare(
+      `
+          UPDATE ai_usage
+
+          SET
+            request_count =
+              CASE
+                WHEN request_count > 0
+                THEN request_count - 1
+                ELSE 0
+              END
+
+          WHERE usage_key = ?
+        `,
+    )
+    .bind(projectUsageKey)
+    .run();
 };
 
 export const releaseUserLease = async (

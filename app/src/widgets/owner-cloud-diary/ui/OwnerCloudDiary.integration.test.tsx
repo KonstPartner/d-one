@@ -1,4 +1,9 @@
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 
 import type { CloudDiaryEntry } from '@entities/diary';
 
@@ -266,7 +271,7 @@ describe('OwnerCloudDiary integration', () => {
   it('downloads exactly the selected entries from the current cloud page', async () => {
     mockSelectedEntries = [mockEntryOne, mockEntryTwo];
 
-    const screen = render(<OwnerCloudDiary />);
+    render(<OwnerCloudDiary />);
 
     fireEvent.press(screen.getByLabelText('download-selected'));
 
@@ -287,7 +292,7 @@ describe('OwnerCloudDiary integration', () => {
   it('does not allow download when no entries are selected', () => {
     mockSelectedEntries = [];
 
-    const screen = render(<OwnerCloudDiary />);
+    render(<OwnerCloudDiary />);
 
     const downloadButton = screen.getByLabelText('download-selected');
 
@@ -319,7 +324,7 @@ describe('OwnerCloudDiary integration', () => {
 
     mockDownloadStep = 'processing';
 
-    const screen = render(<OwnerCloudDiary />);
+    render(<OwnerCloudDiary />);
 
     const downloadButton = screen.getByLabelText('download-selected');
 

@@ -9,7 +9,9 @@
       "themeTitle": "Тема",
       "themeSubtitle": "Измените оформление и тему приложения.",
       "languageTitle": "Язык",
-      "languageSubtitle": "Измените язык приложения."
+      "languageSubtitle": "Измените язык приложения.",
+      "versionTitle": "Версия приложения",
+      "versionSubtitle": "Посмотрите текущую версию и историю изменений DOne."
     }
   }
 }

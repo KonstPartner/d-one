@@ -84,8 +84,19 @@ jest.mock('../diaryImportArchiveReader', () => ({
     mockResolveDiaryImportPhotoUri(...args),
 }));
 
-jest.mock('@shared/lib/errors', () => ({
-  errorMapper: jest.fn(() => 'mapped-transfer-error'),
+jest.mock('@shared/lib/errors', () => {
+  const { CodedError } = jest.requireActual('@shared/lib/errors/codedError');
+
+  return {
+    CodedError,
+    errorMapper: jest.fn(() => 'mapped-transfer-error'),
+  };
+});
+
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
 }));
 
 jest.mock('@shared/lib/notifications', () => ({
@@ -458,16 +469,11 @@ describe('useDiaryImportSession integration', () => {
       queryKey: ['diary', 'local', 'current-user'],
     });
 
-    expect(errorMapper).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: 'DIARY_IMPORT_PARTIAL_FAILED',
-      }),
-      'transfer'
-    );
+    expect(errorMapper).not.toHaveBeenCalled();
 
     expect(showNotification).toHaveBeenCalledWith(
       'error',
-      'mapped-transfer-error'
+      'common.errors.diaryImportPartialFailed'
     );
 
     expect(result.current.hasActiveSession).toBe(false);

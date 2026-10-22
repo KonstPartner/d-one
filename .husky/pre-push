@@ -1,4 +1,7 @@
 #!/usr/bin/env sh
-cd app
-npm run lint:errors
-npm run test-check
+set -e
+
+npm --prefix app run lint-check
+npm --prefix app run test-check
+npm --prefix worker run lint-check
+npm --prefix worker run test-check

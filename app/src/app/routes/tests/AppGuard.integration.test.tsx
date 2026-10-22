@@ -122,7 +122,7 @@ const createQueryClient = (): QueryClient =>
 const renderGuard = () => {
   const queryClient = createQueryClient();
 
-  const result = render(
+  const view = render(
     <ThemeProvider theme={lightTheme}>
       <QueryClientProvider client={queryClient}>
         <SessionProvider>
@@ -135,7 +135,7 @@ const renderGuard = () => {
   );
 
   return {
-    ...result,
+    ...view,
     queryClient,
   };
 };
@@ -184,9 +184,9 @@ describe('AppGuard integration', () => {
   it('redirects a guest from a protected route to auth without loading a profile', async () => {
     mockPathname = '/diary';
 
-    const rendered = renderGuard();
+    const view = renderGuard();
 
-    queryClient = rendered.queryClient;
+    queryClient = view.queryClient;
 
     await emitAuthState(null);
 
@@ -210,9 +210,9 @@ describe('AppGuard integration', () => {
 
     mockRemoteProfile(profile);
 
-    const rendered = renderGuard();
+    const view = renderGuard();
 
-    queryClient = rendered.queryClient;
+    queryClient = view.queryClient;
 
     await emitAuthState(user);
 
@@ -234,9 +234,9 @@ describe('AppGuard integration', () => {
 
     mockRemoteProfile(profile);
 
-    const rendered = renderGuard();
+    const view = renderGuard();
 
-    queryClient = rendered.queryClient;
+    queryClient = view.queryClient;
 
     await emitAuthState(user);
 
@@ -256,9 +256,9 @@ describe('AppGuard integration', () => {
 
     mockRemoteProfile(profile);
 
-    const rendered = renderGuard();
+    const view = renderGuard();
 
-    queryClient = rendered.queryClient;
+    queryClient = view.queryClient;
 
     await emitAuthState(user);
 
@@ -282,9 +282,9 @@ describe('AppGuard integration', () => {
 
     mockRemoteProfile(profile);
 
-    const rendered = renderGuard();
+    const view = renderGuard();
 
-    queryClient = rendered.queryClient;
+    queryClient = view.queryClient;
 
     await emitAuthState(user);
 
@@ -308,9 +308,9 @@ describe('AppGuard integration', () => {
 
     mockRemoteProfile(profile);
 
-    const rendered = renderGuard();
+    const view = renderGuard();
 
-    queryClient = rendered.queryClient;
+    queryClient = view.queryClient;
 
     await emitAuthState(user);
 
@@ -330,9 +330,9 @@ describe('AppGuard integration', () => {
 
     mockRemoteProfile(profile);
 
-    const rendered = renderGuard();
+    const view = renderGuard();
 
-    queryClient = rendered.queryClient;
+    queryClient = view.queryClient;
 
     await emitAuthState(user);
 

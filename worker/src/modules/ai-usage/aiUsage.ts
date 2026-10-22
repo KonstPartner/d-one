@@ -1,17 +1,17 @@
+import { ApiError } from '../../shared/http/apiError';
+
 import {
   AI_USAGE_POLICY,
-  AiUsageLimitError,
-  assertProjectDailyLimit,
   getPreviousUtcDay,
   getUtcDay,
-  resolveUserUsageLimitError,
+  resolveUserUsageRejectionCode,
 } from './aiUsagePolicy';
 
 import {
-  compensateUserReservation,
+  commitUserUsage,
+  compensateProjectUsage,
   createAiUsageKeys,
   ensureUsageRows,
-  finalizeUserReservation,
   getUserUsageSnapshot,
   releaseUserLease,
   tryReserveProjectUsage,
@@ -21,13 +21,18 @@ import {
 export type AiUsageReservation = {
   userUsageKey: string;
   projectUsageKey: string;
-  reservedAt: number;
   activeUntil: number;
 };
 
 type ReserveAiUsageParams = {
   db: D1Database;
   uid: string;
+  now?: Date;
+};
+
+type CommitAiUsageParams = {
+  db: D1Database;
+  reservation: AiUsageReservation;
   projectDailyLimit: number;
   now?: Date;
 };
@@ -35,11 +40,8 @@ type ReserveAiUsageParams = {
 export const reserveAiUsage = async ({
   db,
   uid,
-  projectDailyLimit,
   now = new Date(),
 }: ReserveAiUsageParams): Promise<AiUsageReservation> => {
-  assertProjectDailyLimit(projectDailyLimit);
-
   const nowSeconds = Math.floor(now.getTime() / 1000);
 
   const cooldownThreshold = nowSeconds - AI_USAGE_POLICY.requestCooldownSeconds;
@@ -79,43 +81,53 @@ export const reserveAiUsage = async ({
       throw new Error('AI_USAGE_STATE_NOT_FOUND');
     }
 
-    throw resolveUserUsageLimitError(snapshot, nowSeconds, cooldownThreshold);
+    throw new ApiError(
+      resolveUserUsageRejectionCode(snapshot, nowSeconds, cooldownThreshold),
+    );
   }
 
-  const reservation: AiUsageReservation = {
+  return {
     userUsageKey,
     projectUsageKey,
-    reservedAt: nowSeconds,
     activeUntil,
   };
+};
 
-  let projectReserved: boolean;
+export const commitAiUsage = async ({
+  db,
+  reservation,
+  projectDailyLimit,
+  now = new Date(),
+}: CommitAiUsageParams): Promise<void> => {
+  const projectReserved = await tryReserveProjectUsage(
+    db,
+    reservation.projectUsageKey,
+    projectDailyLimit,
+  );
+
+  if (!projectReserved) {
+    throw new ApiError('PROJECT_DAILY_LIMIT_REACHED');
+  }
 
   try {
-    projectReserved = await tryReserveProjectUsage(
+    const committed = await commitUserUsage({
       db,
-      projectUsageKey,
-      projectDailyLimit,
-    );
+
+      userUsageKey: reservation.userUsageKey,
+      activeUntil: reservation.activeUntil,
+
+      userDailyLimit: AI_USAGE_POLICY.userDailyLimit,
+      committedAt: Math.floor(now.getTime() / 1000),
+    });
+
+    if (!committed) {
+      throw new Error('AI_USAGE_COMMIT_FAILED');
+    }
   } catch (error) {
-    await compensateUserReservation(db, reservation);
+    await compensateProjectUsage(db, reservation.projectUsageKey);
 
     throw error;
   }
-
-  if (!projectReserved) {
-    await compensateUserReservation(db, reservation);
-
-    throw new AiUsageLimitError('PROJECT_DAILY_LIMIT_REACHED');
-  }
-
-  const finalized = await finalizeUserReservation(db, reservation);
-
-  if (!finalized) {
-    throw new Error('AI_USAGE_RESERVATION_FINALIZE_FAILED');
-  }
-
-  return reservation;
 };
 
 export const releaseAiUsage = async (
@@ -124,5 +136,3 @@ export const releaseAiUsage = async (
 ): Promise<void> => {
   await releaseUserLease(db, reservation);
 };
-
-export { AiUsageLimitError, type AiUsageLimitErrorCode } from './aiUsagePolicy';

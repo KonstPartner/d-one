@@ -1,3 +1,12 @@
 #!/usr/bin/env sh
-cd app
-npx lint-staged
+set -e
+
+(
+  cd app
+  npx lint-staged
+)
+
+(
+  cd worker
+  ../app/node_modules/.bin/lint-staged
+)

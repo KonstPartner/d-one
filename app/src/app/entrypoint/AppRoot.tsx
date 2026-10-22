@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Fontisto } from '@expo/vector-icons';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { useFonts } from 'expo-font';
 import * as WebBrowser from 'expo-web-browser';
 
 import { validateEnvConfig } from '@shared/config';
@@ -15,6 +17,8 @@ export const AppRoot = () => {
 
   const [ready, setReady] = useState(false);
 
+  const [spinnerFontLoaded, spinnerFontError] = useFonts(Fontisto.font);
+
   useEffect(() => {
     initI18n().finally(() => {
       setReady(true);
@@ -27,7 +31,9 @@ export const AppRoot = () => {
 
   validateEnvConfig();
 
-  if (!ready) {
+  const spinnerFontReady = spinnerFontLoaded || spinnerFontError !== null;
+
+  if (!ready || !spinnerFontReady) {
     return null;
   }
 

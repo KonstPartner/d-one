@@ -75,7 +75,7 @@ const ensurePermission = async (
   return true;
 };
 
-const useImagePicker = () => {
+export const useImagePicker = () => {
   const [isPicking, setIsPicking] = useState(false);
   const isPickingRef = useRef(false);
 
@@ -198,5 +198,3 @@ const useImagePicker = () => {
     isPicking,
   };
 };
-
-export default useImagePicker;

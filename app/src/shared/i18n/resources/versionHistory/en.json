@@ -1,0 +1,66 @@
+{
+  "versionHistory": {
+    "button": "Version {{version}}",
+    "openAccessibilityLabel": "Open version history. Current version {{version}}",
+    "title": "Version history",
+    "graphSubtitle": "Tap a version to see what changed.",
+    "detailsSubtitle": "Release date and user-facing changes.",
+    "back": "Back to version graph",
+    "releaseDate": "Release date",
+    "changes": "What changed",
+    "current": "Current version",
+    "versionAccessibilityLabel": "Version {{version}}, released {{date}}",
+    "releases": {
+      "1_1_0": {
+        "summary": "Fixes and improvements to AI analysis, text input, photo editing, and error messages.",
+        "changes": {
+          "aiAnalysis": {
+            "title": "More reliable AI analysis",
+            "description": "Improved handling of AI-analysis failures and invalid responses so results are more predictable and useful."
+          },
+          "inputs": {
+            "title": "Fixed text input editing",
+            "description": "The cursor now stays where you place it when editing or deleting text in the middle of comments and other text fields."
+          },
+          "photoEditor": {
+            "title": "Photo editor positioning fixed",
+            "description": "Photos smaller than the editing area are now centered correctly instead of shifting to the side."
+          },
+          "errorMessages": {
+            "title": "Clearer error messages",
+            "description": "Problems with AI analysis, cloud operations, import, and export are now reported more clearly."
+          }
+        }
+      },
+      "1_0_0": {
+        "summary": "The first stable DOne release with the core diary experience.",
+        "changes": {
+          "diary": {
+            "title": "Offline diary",
+            "description": "Create and edit diary entries on the device with glucose, insulin, carbohydrates, comments, and photos."
+          },
+          "aiAnalysis": {
+            "title": "AI meal analysis",
+            "description": "Analyze meal photos with AI and save the result with a diary entry."
+          },
+          "subscriptions": {
+            "title": "Diary subscriptions",
+            "description": "Follow another user's diary with read-only access when permission is granted."
+          },
+          "sync": {
+            "title": "Cloud synchronization",
+            "description": "Synchronize diary entries and photos with the cloud and access cloud diary data."
+          },
+          "backup": {
+            "title": "Import and export",
+            "description": "Export diary data for backup or viewing and restore supported DOne backups."
+          },
+          "timer": {
+            "title": "Two-hour timer",
+            "description": "Start a two-hour timer from a diary entry when you need a reminder after a meal."
+          }
+        }
+      }
+    }
+  }
+}

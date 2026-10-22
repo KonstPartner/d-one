@@ -1,23 +1,13 @@
 import { z } from 'zod';
 
+import { ApiError } from '../../shared/http/apiError';
+
 export type UserRole = 'user' | 'follower' | null;
 
 export type UserAuthorizationProfile = {
   uid: string;
   role: UserRole;
 };
-
-export type UserProfileErrorCode =
-  | 'USER_PROFILE_NOT_FOUND'
-  | 'INVALID_USER_PROFILE'
-  | 'AUTH_SERVICE_UNAVAILABLE';
-
-export class UserProfileError extends Error {
-  public constructor(public readonly code: UserProfileErrorCode) {
-    super(code);
-    this.name = 'UserProfileError';
-  }
-}
 
 const firestoreStringValueSchema = z.object({
   stringValue: z.string(),
@@ -76,15 +66,15 @@ export const getUserAuthorizationProfile = async ({
       redirect: 'manual',
     });
   } catch {
-    throw new UserProfileError('AUTH_SERVICE_UNAVAILABLE');
+    throw new ApiError('AUTH_SERVICE_UNAVAILABLE');
   }
 
   if (response.status === 404) {
-    throw new UserProfileError('USER_PROFILE_NOT_FOUND');
+    throw new ApiError('USER_PROFILE_NOT_FOUND');
   }
 
   if (!response.ok) {
-    throw new UserProfileError('AUTH_SERVICE_UNAVAILABLE');
+    throw new ApiError('AUTH_SERVICE_UNAVAILABLE');
   }
 
   let rawDocument: unknown;
@@ -92,19 +82,19 @@ export const getUserAuthorizationProfile = async ({
   try {
     rawDocument = await response.json();
   } catch {
-    throw new UserProfileError('INVALID_USER_PROFILE');
+    throw new ApiError('AUTH_SERVICE_UNAVAILABLE');
   }
 
   const parsedDocument = userAuthorizationDocumentSchema.safeParse(rawDocument);
 
   if (!parsedDocument.success) {
-    throw new UserProfileError('INVALID_USER_PROFILE');
+    throw new ApiError('AUTH_SERVICE_UNAVAILABLE');
   }
 
   const profileUid = parsedDocument.data.fields.uid.stringValue;
 
   if (profileUid !== uid) {
-    throw new UserProfileError('INVALID_USER_PROFILE');
+    throw new ApiError('AUTH_SERVICE_UNAVAILABLE');
   }
 
   return {

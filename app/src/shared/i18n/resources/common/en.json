@@ -6,7 +6,19 @@
     "send": "Send",
     "close": "Close",
     "actions": {
-      "tryAgain": "Try again"
+      "tryAgain": "Try again",
+      "showWeek": "Show week",
+      "showMonth": "Show month",
+      "backToCurrentMonth": "Back to current month"
+    },
+    "confirmModal": {
+      "title": "Confirm",
+      "description": "Are you sure?",
+      "confirm": "Confirm"
+    },
+    "accessibility": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "validation": {
       "required": "This field is required.",
@@ -39,6 +51,13 @@
       "aiRequestTooFrequent": "Please wait before starting another AI analysis.",
       "aiProviderUnavailable": "AI analysis is temporarily unavailable. Try again later.",
       "aiTimeout": "AI analysis took too long. Try again later.",
+      "aiInvalidPhotoUrl": "The photo URL became invalid before it could be sent to Gemini.",
+      "aiImageRetrievalNotConfirmed": "Gemini did not confirm that it loaded the photo for analysis.",
+      "aiMissingOutputText": "Gemini returned a response without analysis text.",
+      "aiInvalidJsonResponse": "Gemini returned an analysis response in invalid JSON format.",
+      "aiInvalidResponseStructure": "Gemini returned an analysis response with an invalid structure.",
+      "aiInvalidResponseStatus": "Gemini returned an unsupported analysis status.",
+      "aiNoUsefulResult": "Gemini returned an analysis response without usable food data.",
       "network": "A network error occurred. Check your connection and try again.",
       "accessDenied": "Access denied.",
       "userProfileNotFound": "The user profile was not found.",

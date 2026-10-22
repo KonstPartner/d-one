@@ -11,15 +11,8 @@ type ParseCloudDiaryEntryParams = {
   data: unknown;
 };
 
-export class InvalidCloudDiaryEntryError extends Error {
-  public constructor() {
-    super('Invalid cloud diary entry');
-    this.name = 'InvalidCloudDiaryEntryError';
-  }
-}
-
 const invalidEntry = (): never => {
-  throw new InvalidCloudDiaryEntryError();
+  throw new Error('INVALID_CLOUD_DATA');
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

@@ -1,17 +1,7 @@
 import { deepTrim } from '@shared/lib/data';
 
+import { ApiError } from '../../lib/errors/apiError';
 import { getAuthToken } from '../firebase/getAuthToken';
-
-class ApiError extends Error {
-  public constructor(
-    public readonly response: Response,
-    public readonly data?: unknown
-  ) {
-    super(getResponseErrorMessage(response, data));
-
-    this.name = 'ApiError';
-  }
-}
 
 type ApiRequestInit = RequestInit & {
   json?: unknown;
@@ -25,31 +15,6 @@ type CreateApiClientOptions = {
   baseUrl: string;
   baseEndpoint?: string;
   defaultAuth?: boolean;
-};
-
-const getErrorMessageFromData = (data: unknown): string | null => {
-  if (data === null || typeof data !== 'object') {
-    return null;
-  }
-
-  const record = data as Record<string, unknown>;
-
-  for (const key of ['message', 'error', 'description', 'detail']) {
-    const value = record[key];
-
-    if (value) {
-      return String(value);
-    }
-  }
-
-  return null;
-};
-
-const getResponseErrorMessage = (response: Response, data: unknown): string => {
-  return (
-    getErrorMessageFromData(data) ??
-    `Request failed with status ${response.status}`
-  );
 };
 
 const parseResponseBody = async (response: Response): Promise<unknown> => {
@@ -132,7 +97,7 @@ export const createApiClient = ({
     const data = await parseResponseBody(response);
 
     if (!response.ok) {
-      throw new ApiError(response, data);
+      throw new ApiError(response.status, data);
     }
 
     return data as T;

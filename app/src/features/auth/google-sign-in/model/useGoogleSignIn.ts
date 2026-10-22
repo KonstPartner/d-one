@@ -1,10 +1,10 @@
 import { useCallback, useRef, useState } from 'react';
 import * as Google from 'expo-auth-session/providers/google';
 import { router } from 'expo-router';
-import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
 import { useSession } from '@entities/session';
+import { errorMapper } from '@shared/lib/errors';
 import { showNotification } from '@shared/lib/notifications';
 import { ROUTES } from '@shared/routes';
 
@@ -26,34 +26,6 @@ import {
 
 type UseGoogleSignInParams = {
   onRegister: (prefill: GoogleRegisterPrefill) => void;
-};
-
-const GOOGLE_ERROR_KEYS = [
-  ['custom/already-logged-in', 'common.errors.alreadyLoggedIn'],
-  ['custom/no-google-auth', 'common.errors.googleAuthorizationFailed'],
-  ['custom/no-google-id-token', 'common.errors.googleIdTokenMissing'],
-  ['custom/no-google-email', 'common.errors.googleEmailMissing'],
-  ['custom/no-google-redirect-uri', 'common.errors.googleRedirectUriMissing'],
-  ['custom/invalid-google-id-token', 'common.errors.invalidGoogleIdToken'],
-  ['auth/too-many-requests', 'common.errors.tooManyRequests'],
-] as const;
-
-const getGoogleSignInErrorMessage = (error: unknown, t: TFunction): string => {
-  if (!(error instanceof Error)) {
-    return t('common.errors.unknown');
-  }
-
-  const mappedError = GOOGLE_ERROR_KEYS.find(([matcher]) =>
-    error.message.includes(matcher)
-  );
-
-  if (mappedError) {
-    return t(mappedError[1]);
-  }
-
-  console.error('Google sign-in failed:', error);
-
-  return error.message;
 };
 
 export const useGoogleSignIn = ({ onRegister }: UseGoogleSignInParams) => {
@@ -157,7 +129,7 @@ export const useGoogleSignIn = ({ onRegister }: UseGoogleSignInParams) => {
 
       showNotification('success', t('auth.notifications.loginSuccess'));
     } catch (error: unknown) {
-      showNotification('error', getGoogleSignInErrorMessage(error, t));
+      showNotification('error', errorMapper(error, 'firebase'));
 
       returnToAuthForm();
     } finally {
